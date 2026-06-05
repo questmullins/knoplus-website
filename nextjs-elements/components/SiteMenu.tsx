@@ -12,17 +12,24 @@ type SiteMenuProps = {
 };
 
 const menuItems = [
-  { label: "Home", href: "/" },
-  { label: "Website Templates", href: "/website-templates" },
-  { label: "Custom Websites", href: "/custom-websites" },
   { label: "About Us", href: "/about" },
+  { label: "Custom Websites", href: "/custom-websites" },
+  { label: "Home", href: "/" },
   { label: "Our Process", href: "/process" },
-  { label: "Pricing", href: "/pricing" }
+  { label: "Pricing", href: "/pricing" },
+  { label: "Website Templates", href: "/website-templates" }
 ];
 
 export function SiteMenu({ className = "", hideIcon = false, onContact, onNavigate, showLabel = false }: SiteMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const visibleMenuItems = onContact
+    ? [
+        menuItems[0],
+        { label: "Contact Us", href: "#contact" },
+        ...menuItems.slice(1)
+      ]
+    : menuItems;
 
   function handleInternalNavigation(destination: string) {
     setIsMenuOpen(false);
@@ -54,13 +61,13 @@ export function SiteMenu({ className = "", hideIcon = false, onContact, onNaviga
 
       <div className={`menu-panel ${isMenuOpen ? "open" : ""}`}>
         <nav>
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const isActive = item.href === pathname;
 
             return (
               <button
                 className={isActive ? "active" : ""}
-                onClick={() => handleInternalNavigation(item.href)}
+                onClick={() => (item.href === "#contact" ? handleContactClick() : handleInternalNavigation(item.href))}
                 type="button"
                 key={item.href}
                 aria-current={isActive ? "page" : undefined}
@@ -69,11 +76,6 @@ export function SiteMenu({ className = "", hideIcon = false, onContact, onNaviga
               </button>
             );
           })}
-          {onContact ? (
-            <button onClick={handleContactClick} type="button">
-              Contact Us
-            </button>
-          ) : null}
         </nav>
 
         <div className="menu-divider" />

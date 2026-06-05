@@ -2,48 +2,82 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  name: "Knoplus",
-  url: "https://kno.plus",
-  email: "quest@kno.plus",
-  description:
-    "Knoplus builds website templates and custom websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
-  areaServed: "United States",
-  offers: [
-    {
-      "@type": "Offer",
-      name: "Template Website",
-      price: "500",
-      priceCurrency: "USD",
-      description: "Professional template websites customized for small businesses, local companies, and independent brands."
-    },
-    {
-      "@type": "Offer",
-      name: "Custom Website",
-      price: "1500",
-      priceCurrency: "USD",
-      description: "Custom website design with original layouts, user experience, visual direction, and launch support."
-    },
-    {
-      "@type": "Offer",
-      name: "Website Care Plan",
-      price: "29",
-      priceCurrency: "USD",
-      description: "Optional monthly website care for hosting management, SSL monitoring, domain support, and content updates."
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: "Knoplus",
+    url: "https://kno.plus",
+    email: "quest@kno.plus",
+    description:
+      "Knoplus builds website templates and custom websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
+    areaServed: "United States",
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Template Website",
+        price: "500",
+        priceCurrency: "USD",
+        description: "Professional template websites customized for small businesses, local companies, and independent brands."
+      },
+      {
+        "@type": "Offer",
+        name: "Custom Website",
+        price: "1500",
+        priceCurrency: "USD",
+        description: "Custom website design with original layouts, user experience, visual direction, and launch support."
+      },
+      {
+        "@type": "Offer",
+        name: "Website Care Plan",
+        price: "29",
+        priceCurrency: "USD",
+        description: "Optional monthly website care for hosting management, SSL monitoring, domain support, and content updates."
+      }
+    ],
+    serviceType: [
+      "Website design",
+      "Website templates",
+      "Custom websites",
+      "Small business website design",
+      "Local business websites",
+      "SEO setup",
+      "Cloudflare deployment"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Knoplus",
+    url: "https://kno.plus",
+    potentialAction: {
+      "@type": "ContactAction",
+      target: "mailto:quest@kno.plus"
     }
-  ],
-  serviceType: [
-    "Website design",
-    "Website templates",
-    "Custom websites",
-    "Small business website design",
-    "Local business websites",
-    "SEO setup",
-    "Cloudflare deployment"
-  ]
-};
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    name: [
+      "About Us",
+      "Custom Websites",
+      "Home",
+      "Our Process",
+      "Pricing",
+      "Website Templates",
+      "Sitemap"
+    ],
+    url: [
+      "https://kno.plus/about",
+      "https://kno.plus/custom-websites",
+      "https://kno.plus",
+      "https://kno.plus/process",
+      "https://kno.plus/pricing",
+      "https://kno.plus/website-templates",
+      "https://kno.plus/sitemap"
+    ]
+  }
+];
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://kno.plus"),

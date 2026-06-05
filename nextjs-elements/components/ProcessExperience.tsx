@@ -1,48 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { processIntro, processSteps } from "@/data/process";
 import { BrandLogo } from "./BrandLogo";
 import { ContactModal } from "./ContactModal";
-import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 
 export function ProcessExperience() {
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   function navigateWithinKnoplus(destination: string) {
     window.location.href = destination;
   }
-
-  useEffect(() => {
-    let isWheelLocked = false;
-
-    const advanceFromWheel = (event: WheelEvent) => {
-      if (window.matchMedia("(max-width: 760px)").matches || Math.abs(event.deltaY) < 24 || isWheelLocked) {
-        return;
-      }
-
-      const nextIndex = Math.max(0, Math.min(processSteps.length - 1, activeIndex + (event.deltaY > 0 ? 1 : -1)));
-
-      if (nextIndex === activeIndex) {
-        return;
-      }
-
-      event.preventDefault();
-      isWheelLocked = true;
-      setActiveIndex(nextIndex);
-      window.setTimeout(() => {
-        isWheelLocked = false;
-      }, 360);
-    };
-
-    window.addEventListener("wheel", advanceFromWheel, { passive: false });
-
-    return () => {
-      window.removeEventListener("wheel", advanceFromWheel);
-    };
-  }, [activeIndex]);
 
   return (
     <>
@@ -55,15 +24,10 @@ export function ProcessExperience() {
           <div className="about-nav">
             <div className="nav-label">Process</div>
             {processSteps.map((step, index) => (
-              <button
-                className={`about-nav-item ${index === activeIndex ? "active" : ""}`}
-                key={step.label}
-                onClick={() => setActiveIndex(index)}
-                type="button"
-              >
+              <div className="about-nav-item about-nav-static" key={step.label}>
                 <span>{step.label}</span>
-                <span className="plus" />
-              </button>
+                <small>{String(index + 1).padStart(2, "0")}</small>
+              </div>
             ))}
           </div>
 
@@ -102,7 +66,7 @@ export function ProcessExperience() {
 
           <div className="about-principles" aria-label="Knoplus process">
             {processSteps.map((step, index) => (
-              <article className={`about-principle ${index === activeIndex ? "active" : ""}`} key={step.label}>
+              <article className="about-principle active" key={step.label}>
                 <span>{step.label}</span>
                 <p>{step.text}</p>
               </article>
@@ -110,7 +74,6 @@ export function ProcessExperience() {
           </div>
 
           <blockquote className="about-pitch">{processIntro.pitch}</blockquote>
-          <ScreenCounter current={activeIndex + 1} total={processSteps.length} />
         </section>
       </main>
 

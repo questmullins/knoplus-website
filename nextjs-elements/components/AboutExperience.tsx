@@ -1,48 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BrandLogo } from "./BrandLogo";
 import { ContactModal } from "./ContactModal";
 import { SiteMenu } from "./SiteMenu";
-import { ScreenCounter } from "./ScreenCounter";
 import { aboutIntro, aboutPrinciples } from "@/data/about";
 
 export function AboutExperience() {
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   function navigateWithinKnoplus(destination: string) {
     window.location.href = destination;
   }
-
-  useEffect(() => {
-    let isWheelLocked = false;
-
-    const advanceFromWheel = (event: WheelEvent) => {
-      if (window.matchMedia("(max-width: 760px)").matches || Math.abs(event.deltaY) < 24 || isWheelLocked) {
-        return;
-      }
-
-      const nextIndex = Math.max(0, Math.min(aboutPrinciples.length - 1, activeIndex + (event.deltaY > 0 ? 1 : -1)));
-
-      if (nextIndex === activeIndex) {
-        return;
-      }
-
-      event.preventDefault();
-      isWheelLocked = true;
-      setActiveIndex(nextIndex);
-      window.setTimeout(() => {
-        isWheelLocked = false;
-      }, 360);
-    };
-
-    window.addEventListener("wheel", advanceFromWheel, { passive: false });
-
-    return () => {
-      window.removeEventListener("wheel", advanceFromWheel);
-    };
-  }, [activeIndex]);
 
   return (
     <>
@@ -55,15 +24,10 @@ export function AboutExperience() {
           <div className="about-nav">
             <div className="nav-label">About</div>
             {aboutPrinciples.map((principle, index) => (
-              <button
-                className={`about-nav-item ${index === activeIndex ? "active" : ""}`}
-                key={principle.label}
-                onClick={() => setActiveIndex(index)}
-                type="button"
-              >
+              <div className="about-nav-item about-nav-static" key={principle.label}>
                 <span>{principle.label}</span>
-                <span className="plus" />
-              </button>
+                <small>{String(index + 1).padStart(2, "0")}</small>
+              </div>
             ))}
           </div>
 
@@ -102,7 +66,7 @@ export function AboutExperience() {
 
           <div className="about-principles" aria-label="Knoplus principles">
             {aboutPrinciples.map((principle, index) => (
-              <article className={`about-principle ${index === activeIndex ? "active" : ""}`} key={principle.label}>
+              <article className="about-principle active" key={principle.label}>
                 <span>{principle.label}</span>
                 <p>{principle.text}</p>
               </article>
@@ -112,7 +76,6 @@ export function AboutExperience() {
           <blockquote className="about-pitch">
             {aboutIntro.pitch}
           </blockquote>
-          <ScreenCounter current={activeIndex + 1} total={aboutPrinciples.length} />
         </section>
       </main>
 

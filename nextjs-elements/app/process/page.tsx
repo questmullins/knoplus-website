@@ -4,7 +4,10 @@ import { ProcessExperience } from "@/components/ProcessExperience";
 export const metadata: Metadata = {
   title: "Website Design Process",
   description:
-    "See the Knoplus website design process for template websites, custom websites, content planning, mobile-friendly builds, Cloudflare deployment, and launch support."
+    "See the Knoplus website design process for template websites, custom websites, content planning, mobile-friendly builds, Cloudflare deployment, and launch support.",
+  alternates: {
+    canonical: "/process"
+  }
 };
 
 export default function ProcessPage() {

@@ -131,6 +131,16 @@ export function TemplateShowcase() {
         return;
       }
 
+      if (direction < 0 && currentVisibleIndex === 0) {
+        event.preventDefault();
+        isWheelLocked = true;
+        setIsIntroActive(true);
+        window.setTimeout(() => {
+          isWheelLocked = false;
+        }, 420);
+        return;
+      }
+
       const nextVisible = Math.max(0, Math.min(visibleTemplates.length - 1, currentVisibleIndex + direction));
       const nextTemplate = visibleTemplates[nextVisible];
 

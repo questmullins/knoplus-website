@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { templates } from "@/data/templates";
 
 type ContactModalProps = {
@@ -19,18 +19,39 @@ const initialStatus: FormStatus = {
 };
 
 export function ContactModal({ isOpen, onClose }: ContactModalProps) {
+  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [isVisible, setIsVisible] = useState(false);
   const [projectKind, setProjectKind] = useState("Template");
   const [status, setStatus] = useState<FormStatus>(initialStatus);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const requestClose = useCallback(() => {
+    setIsVisible(false);
+    window.setTimeout(onClose, 180);
+  }, [onClose]);
+
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setShouldRender(true);
+      const frame = window.requestAnimationFrame(() => setIsVisible(true));
+
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    setIsVisible(false);
+    const timeout = window.setTimeout(() => setShouldRender(false), 360);
+
+    return () => window.clearTimeout(timeout);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!shouldRender) {
       return;
     }
 
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        requestClose();
       }
     };
 
@@ -41,7 +62,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
       document.body.classList.remove("modal-open");
       window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen, onClose]);
+  }, [requestClose, shouldRender]);
 
   async function submitContact(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -93,13 +114,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     }
   }
 
-  if (!isOpen) {
+  if (!shouldRender) {
     return null;
   }
 
   return (
-    <div className="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
-      <button className="contact-modal-backdrop" onClick={onClose} type="button" aria-label="Close contact form" />
+    <div className={`contact-modal ${isVisible ? "open" : ""}`} role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+      <button className="contact-modal-backdrop" onClick={requestClose} type="button" aria-label="Close contact form" />
 
       <div className="contact-modal-panel">
         <div className="contact-modal-head">
@@ -107,7 +128,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
             <div className="eyebrow">Contact</div>
             <h2 id="contact-modal-title">Start the conversation.</h2>
           </div>
-          <button className="modal-close" onClick={onClose} type="button" aria-label="Close contact form">
+          <button className="modal-close" onClick={requestClose} type="button" aria-label="Close contact form">
             <span className="plus" />
           </button>
         </div>

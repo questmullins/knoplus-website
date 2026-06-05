@@ -588,9 +588,25 @@ h1 {
   color: var(--white);
 }
 
+.about-nav-static {
+  cursor: default;
+}
+
+.about-nav-static small {
+  color: rgba(246, 243, 236, 0.42);
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.28em;
+}
+
 .about-nav-item:hover {
   color: rgba(246, 243, 236, 0.9);
   transform: translateX(4px);
+}
+
+.about-nav-static:hover {
+  color: rgba(246, 243, 236, 0.68);
+  transform: none;
 }
 
 .about-nav-item.active .plus {
@@ -671,15 +687,17 @@ h1 {
 
 .seo-bg {
   position: absolute;
-  inset: 0;
+  inset: -8%;
   background:
     linear-gradient(90deg, rgba(5, 5, 6, 0.95), rgba(5, 5, 6, 0.54) 58%, rgba(5, 5, 6, 0.9)),
     radial-gradient(circle at 72% 24%, rgba(246, 243, 236, 0.15), transparent 25%),
     url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
+  transform: translateY(var(--parallax-y, 0)) scale(1.06);
   opacity: 0.9;
   z-index: -3;
+  will-change: transform;
 }
 
 .contact-bg {
@@ -884,6 +902,14 @@ h1 {
   display: grid;
   place-items: center;
   padding: 28px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.34s ease;
+}
+
+.contact-modal.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .contact-modal-backdrop {
@@ -895,6 +921,8 @@ h1 {
     rgba(0, 0, 0, 0.74);
   cursor: pointer;
   backdrop-filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.34s ease;
 }
 
 .contact-modal-panel {
@@ -907,6 +935,20 @@ h1 {
   border: 1px solid rgba(246, 243, 236, 0.16);
   background: rgba(7, 7, 8, 0.94);
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.54);
+  opacity: 0;
+  transform: translateY(38px) scale(0.985);
+  transition:
+    opacity 0.38s ease,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.contact-modal.open .contact-modal-backdrop,
+.contact-modal.open .contact-modal-panel {
+  opacity: 1;
+}
+
+.contact-modal.open .contact-modal-panel {
+  transform: translateY(0) scale(1);
 }
 
 .contact-modal-panel::-webkit-scrollbar {
@@ -1042,6 +1084,74 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.sitemap-page {
+  position: relative;
+  min-height: 100vh;
+  padding: clamp(44px, 8vw, 92px);
+  background:
+    radial-gradient(circle at 72% 18%, rgba(246, 243, 236, 0.08), transparent 28%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 40%),
+    var(--black);
+}
+
+.sitemap-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 30;
+}
+
+.sitemap-hero {
+  max-width: 820px;
+}
+
+.sitemap-hero h1 {
+  max-width: 800px;
+}
+
+.sitemap-hero p {
+  max-width: 620px;
+}
+
+.sitemap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 30px;
+  margin-top: 72px;
+}
+
+.sitemap-group {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(246, 243, 236, 0.16);
+}
+
+.sitemap-group h2 {
+  margin-bottom: 8px;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+}
+
+.sitemap-group a {
+  color: rgba(246, 243, 236, 0.68);
+  font-size: 14px;
+  line-height: 1.35;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sitemap-group a:hover,
+.sitemap-group a:focus-visible {
+  color: var(--white);
+  transform: translateX(4px);
 }
 
 .about-principle.active span {
@@ -2395,15 +2505,18 @@ p {
     min-height: calc(120svh - 67.2px);
     padding: 68px 28px 64px;
     display: block;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .seo-bg {
+    position: fixed;
+    inset: -10%;
     background:
       linear-gradient(180deg, rgba(5, 5, 6, 0.48), rgba(5, 5, 6, 0.96) 72%),
       url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
+    transform: translateY(var(--parallax-y, 0)) scale(1.08);
   }
 
   .seo-copy,
@@ -2438,6 +2551,16 @@ p {
   .seo-links {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .sitemap-page {
+    padding: 92px 28px 56px;
+  }
+
+  .sitemap-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    margin-top: 54px;
   }
 
   .contact-modal {
