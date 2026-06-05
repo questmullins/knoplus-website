@@ -3,16 +3,37 @@
    - Network:      http://0.0.0.0:3220
 
  ✓ Starting...
- ✓ Ready in 1799ms
- ○ Compiling /pricing ...
- ✓ Compiled /pricing in 2.4s (612 modules)
- GET /pricing 200 in 2893ms
- GET /pricing 200 in 53ms
- GET /pricing 200 in 56ms
- GET /pricing 200 in 54ms
- ✓ Compiled / in 260ms (608 modules)
- GET / 200 in 464ms
- GET / 200 in 50ms
- GET /pricing 200 in 56ms
- ✓ Compiled /process in 200ms (618 modules)
- GET /process 200 in 346ms
+ ✓ Ready in 1609ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.1s (610 modules)
+ GET / 200 in 2443ms
+ GET / 200 in 54ms
+ GET / 200 in 48ms
+ ✓ Compiled /_not-found in 323ms (540 modules)
+ GET /about.txt 404 in 498ms
+ GET /index.txt 404 in 477ms
+ GET /index.txt 404 in 8ms
+ GET /about.txt 404 in 35ms
+ GET /about.txt 404 in 11ms
+ GET /index.txt 404 in 36ms
+ GET /templates/cleaning-services/_next/image?url=%2Fimages%2Fhero-mold.jpg&w=640&q=75 404 in 146ms
+ GET /templates/cleaning-services/_next/image?url=%2Fimages%2Flogo.png&w=384&q=75 404 in 155ms
+ GET /images/disaster-remediation.jpg 404 in 29ms
+ GET /templates/cleaning-services/_next/image?url=.%2Fimages%2Flogo.png&w=384&q=75 404 in 53ms
+ GET /templates/cleaning-services/_next/image?url=.%2Fimages%2Fhero-mold.jpg&w=640&q=75 404 in 27ms
+ GET /about.txt 404 in 16ms
+ GET /services.txt 404 in 14ms
+ GET /index.txt 404 in 13ms
+ ✓ Compiled /process in 221ms (606 modules)
+ GET /process 200 in 449ms
+ ✓ Compiled /about in 251ms (616 modules)
+ GET /about 200 in 363ms
+ ✓ Compiled / in 72ms (383 modules)
+ GET / 200 in 165ms
+ ✓ Compiled /_not-found in 119ms (623 modules)
+ GET /index.txt 404 in 168ms
+ GET /about.txt 404 in 168ms
+ GET /about.txt 404 in 11ms
+ GET /index.txt 404 in 11ms
+ GET /about.txt 404 in 6ms
+ GET /index.txt 404 in 5ms

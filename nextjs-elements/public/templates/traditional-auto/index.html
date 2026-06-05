@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>M5X Mechanix | Fullerton, CA</title>
+<meta
+  name="description"
+  content="M5X Mechanix is a BMW-focused automotive repair business in Fullerton, California offering diagnostics, inspections, major service, performance work, and general repair."
+>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --cream:#f2eadf;
+  --cream-2:#eee5d8;
+  --black:#071014;
+  --ink:#10171c;
+  --dark:#071014;
+  --red:#c93223;
+  --red-dark:#9f2219;
+  --muted:#5f5f5a;
+  --line:rgba(8,15,18,.18);
+  --white:#fffaf2;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Outfit",Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.page{width:100%;overflow:hidden}
+
+.header{
+  height:118px;
+  padding:0 36px;
+  background:linear-gradient(180deg,#0b151a,#071014);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:34px;
+}
+
+.logo{
+  line-height:.82;
+  font-size:38px;
+  font-weight:950;
+  font-style:italic;
+  letter-spacing:-2px;
+  color:white;
+}
+
+.logo .x{color:var(--red)}
+.logo small{
+  display:block;
+  margin-top:9px;
+  font-size:12px;
+  letter-spacing:8px;
+  font-style:normal;
+  color:white;
+}
+
+.nav{display:flex;align-items:center;gap:38px;font-size:14px;font-weight:800;text-transform:uppercase}
+.nav a{display:inline-flex;align-items:center;gap:8px;opacity:.92;color:white}
+.nav a:hover,.nav a:focus-visible{opacity:1;color:white}
+.nav svg{width:16px;height:16px;fill:currentColor}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  height:54px;
+  padding:0 25px;
+  border-radius:3px;
+  font-size:14px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+  transition:.2s ease;
+  cursor:pointer;
+}
+
+.btn:hover{transform:translateY(-2px)}
+.btn-dark{background:#101820;color:white;border:1px solid rgba(255,255,255,.55)}
+.btn-red{background:linear-gradient(180deg,var(--red),var(--red-dark));color:white;border:1px solid rgba(255,255,255,.2)}
+.icon{font-size:20px;line-height:1}
+
+.hero{
+  min-height:610px;
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(320px,48%) 1fr;
+  background:url("Photos/generated/bmw_a_hero.jpg");
+  background-size:cover;
+  background-position:center calc(72% + var(--hero-shift,0%));
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+  padding:70px 8vw;
+  max-width:560px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+
+.kicker{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--red);
+  font-size:14px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  margin-bottom:24px;
+}
+
+.slashes{
+  display:inline-block;
+  width:24px;
+  height:12px;
+  background:
+    linear-gradient(115deg,transparent 0 18%,var(--red) 18% 32%,transparent 32% 40%,var(--red) 40% 54%,transparent 54% 62%,var(--red) 62% 76%,transparent 76%);
+}
+
+.hero h1{
+  color:white;
+  font-size:clamp(56px,7vw,96px);
+  line-height:.92;
+  letter-spacing:-3px;
+  text-transform:uppercase;
+  font-weight:950;
+  margin-top:48px;
+  margin-bottom:28px;
+}
+
+.script{
+  display:inline;
+  margin-top:0;
+  color:var(--red);
+  font-size:inherit;
+  line-height:inherit;
+  font-weight:900;
+  font-style:normal;
+  letter-spacing:inherit;
+  transform:none;
+  text-transform:uppercase;
+}
+
+.script::after{
+  content:none;
+}
+
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:0;order:2}
+.hero h1{order:3}
+.hero-actions .btn{
+  width:auto;
+  min-width:188px;
+  height:54px;
+  padding-inline:25px;
+}
+
+.socials{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:28px;
+  font-size:13px;
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+.socials a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:220px;
+  min-height:42px;
+  height:54px;
+  padding:0 15px;
+  border:1px solid rgba(8,15,18,.26);
+  border-radius:3px;
+  background:rgba(255,250,242,.64);
+  color:#10171c;
+}
+.socials svg{width:18px;height:18px;fill:currentColor}
+.social-divider{display:none}
+
+.hero-button-strip{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  padding:28px 8vw;
+  background:var(--cream);
+}
+
+.services{
+  padding:70px 8vw 74px;
+  background:
+    radial-gradient(circle at center,rgba(255,255,255,.7),rgba(255,255,255,0) 60%),
+    var(--cream-2);
+  border-top:1px solid rgba(0,0,0,.08);
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.section-head{text-align:center;margin-bottom:32px}
+.section-kicker{color:var(--red);text-transform:uppercase;font-size:13px;font-weight:900;margin-bottom:12px}
+.section-head h2{font-size:38px;line-height:1;text-transform:uppercase;letter-spacing:-1.5px}
+.red-rule{width:62px;height:2px;background:var(--red);margin:17px auto 0}
+
+.service-grid{
+  max-width:1200px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+}
+
+.service-card{
+  min-height:205px;
+  padding:12px 26px 0;
+  text-align:center;
+  border-right:1px solid var(--line);
+}
+.service-card:last-child{border-right:0}
+.service-icon{display:none}
+.service-card h3{font-size:18px;line-height:1.05;text-transform:uppercase;margin-bottom:16px;color:var(--red)}
+.service-card p{color:#1a1d1f;font-size:15px;line-height:1.45}
+
+.about{
+  min-height:380px;
+  display:grid;
+  grid-template-columns:52% 48%;
+  background:#071014;
+  color:white;
+}
+
+.about-image{
+  background:
+    linear-gradient(90deg,rgba(7,16,20,.01) 0%,rgba(7,16,20,.18) 23%,rgba(7,16,20,0) 25%),
+    url("Photos/generated/bmw_h_hero.jpg");
+  background-size:cover;
+  background-position:center calc(50% + var(--about-shift,0%));
+  min-height:380px;
+}
+
+.about-copy{
+  padding:62px 54px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.about-copy h2{
+  max-width:480px;
+  font-size:42px;
+  line-height:1.02;
+  text-transform:uppercase;
+  letter-spacing:-1.4px;
+  margin-bottom:24px;
+}
+
+.about-copy p{
+  max-width:520px;
+  color:#d6d6cf;
+  font-size:17px;
+  line-height:1.58;
+  margin-bottom:28px;
+}
+
+.about-rule{width:58px;height:3px;background:var(--red);margin:0 0 24px}
+
+.cta-strip{
+  padding:54px 9vw;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:start;
+  gap:42px;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.86),rgba(255,255,255,.96)),
+    var(--cream);
+  border-top:1px solid rgba(0,0,0,.08);
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.cta-icon{
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:white;
+  font-size:34px;
+}
+
+.cta-strip h3{font-size:25px;text-transform:uppercase;letter-spacing:.2px;margin-bottom:4px}
+.cta-strip p{font-size:17px;color:#222}
+.schedule-copy{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:22px;
+  align-items:center;
+  max-width:980px;
+  margin:0 auto 4px;
+}
+.schedule-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  align-self:start;
+}
+.schedule-form label{
+  display:grid;
+  gap:8px;
+  color:#15191b;
+  font-size:13px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.schedule-form label:last-of-type{
+  grid-column:1 / -1;
+}
+.schedule-form input,
+.schedule-form textarea{
+  width:100%;
+  padding:14px 15px;
+  border:1px solid rgba(8,15,18,.24);
+  border-radius:3px;
+  background:#fffaf2;
+  color:#101214;
+  font:inherit;
+}
+.schedule-form textarea{
+  min-height:118px;
+  resize:vertical;
+}
+.schedule-form input:focus,
+.schedule-form textarea:focus{
+  outline:none;
+  border-color:rgba(201,50,35,.6);
+  box-shadow:0 0 0 3px rgba(201,50,35,.16);
+}
+.schedule-form .btn{
+  grid-column:1 / -1;
+  justify-self:start;
+}
+.map-embed{
+  position:relative;
+  aspect-ratio:1 / 1;
+  min-height:0;
+  border:1px solid rgba(8,15,18,.14);
+  border-radius:3px;
+  overflow:hidden;
+  background:#fffaf2;
+}
+.map-embed iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
+.map-address{
+  position:absolute;
+  left:18px;
+  bottom:18px;
+  max-width:calc(100% - 36px);
+  padding:13px 15px;
+  background:rgba(255,250,242,.94);
+  border:1px solid rgba(8,15,18,.16);
+  border-radius:3px;
+  box-shadow:0 14px 32px rgba(0,0,0,.18);
+}
+.map-address strong{
+  display:block;
+  margin-bottom:4px;
+  color:#10171c;
+  font-size:15px;
+  text-transform:uppercase;
+}
+.map-address span{
+  display:block;
+  color:#42423d;
+  font-size:14px;
+  line-height:1.35;
+}
+.recent-video{
+  padding:54px 9vw;
+  display:grid;
+  grid-template-columns:minmax(260px,440px) 1fr;
+  gap:36px;
+  align-items:center;
+  background:#071014;
+  color:white;
+}
+.video-thumb{
+  position:relative;
+  display:block;
+  aspect-ratio:16 / 9;
+  overflow:hidden;
+  border-radius:3px;
+  background:#101820;
+}
+.video-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.play-button{
+  position:absolute;
+  inset:50% auto auto 50%;
+  width:54px;
+  height:54px;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:white;
+  border-radius:3px;
+  transform:translate(-50%,-50%);
+}
+.video-copy h2{
+  max-width:620px;
+  font-size:42px;
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:-1.5px;
+  margin-bottom:14px;
+}
+.video-copy p{
+  max-width:520px;
+  color:#d6d6cf;
+  font-size:17px;
+  line-height:1.55;
+  margin-bottom:20px;
+}
+
+.footer{
+  position:relative;
+  min-height:185px;
+  padding:34px 36px 22px;
+  background:#071014;
+  color:white;
+  overflow:hidden;
+}
+
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.14;
+  background:
+    linear-gradient(30deg, transparent 24%, rgba(255,255,255,.16) 25%, rgba(255,255,255,.16) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.16) 75%, rgba(255,255,255,.16) 76%, transparent 77%),
+    linear-gradient(150deg, transparent 24%, rgba(255,255,255,.16) 25%, rgba(255,255,255,.16) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.16) 75%, rgba(255,255,255,.16) 76%, transparent 77%),
+    linear-gradient(90deg, transparent 24%, rgba(255,255,255,.12) 25%, rgba(255,255,255,.12) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.12) 75%, rgba(255,255,255,.12) 76%, transparent 77%);
+  background-size:54px 94px;
+  pointer-events:none;
+}
+
+.footer-inner{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1.15fr 1.2fr 1fr 1.1fr;
+  gap:26px;
+  align-items:start;
+}
+
+.footer .logo{font-size:42px}
+.footer-desc{color:#c7c7c0;margin-top:16px;max-width:220px;font-size:14px;line-height:1.45}
+.footer-col{border-left:1px solid rgba(255,255,255,.22);padding-left:32px;min-height:96px}
+.footer-col h4{color:var(--red);font-size:13px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.footer-link{display:flex;align-items:center;gap:10px;color:#ddd;font-size:14px;margin-bottom:11px}
+.map-pin{align-self:center;justify-self:end;display:flex;align-items:center;gap:12px;text-transform:uppercase;font-size:18px;font-weight:900;line-height:1.05}
+.pin{font-size:42px;color:var(--red)}
+.copyright{position:relative;z-index:2;text-align:center;margin-top:18px;color:rgba(255,255,255,.42);font-size:12px}
+
+@media(max-width:1050px){
+  .header{height:auto;padding:28px;flex-wrap:wrap}
+  .nav{order:3;width:100%;justify-content:center}
+  .hero{grid-template-columns:1fr;min-height:560px;background-position:center calc(72% + var(--hero-shift,0%))}
+  .hero-content{padding:70px 8vw}
+  .service-grid{grid-template-columns:repeat(5,1fr)}
+  .service-card{padding:12px 16px 0}
+  .service-card h3{font-size:16px}
+  .service-card p{font-size:13px}
+  .about{grid-template-columns:1fr 1fr}
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .map-pin{justify-self:start}
+}
+
+@media(max-width:760px){
+  .header{align-items:flex-start;gap:22px;padding:26px 28px}
+  .logo{font-size:34px}
+  .nav{gap:18px;justify-content:flex-start;overflow-x:auto;padding-bottom:4px}
+  .hero{
+    min-height:620px;
+    background-image:url("Photos/generated/bmw_a_small.jpg");
+    background-size:cover;
+    background-position:47% calc(100% + var(--hero-shift,0%));
+  }
+  .hero-content{padding:64px 28px}
+  .kicker{align-items:flex-start;letter-spacing:.08em;margin-bottom:22px}
+  .slashes{display:none}
+  .hero h1{font-size:54px;letter-spacing:-2px;margin-bottom:0}
+  .script{font-size:inherit}
+  .btn{width:100%}
+  .hero-actions{display:grid;gap:14px;width:100%}
+  .hero-button-strip{display:grid;gap:14px;padding:24px 28px 30px}
+  .services{padding:58px 8vw}
+  .service-grid{grid-template-columns:1fr;gap:0}
+  .service-card{border-right:0;border-bottom:1px solid var(--line);min-height:auto;padding:22px 8px}
+  .service-card:last-child{border-bottom:0}
+  .about{grid-template-columns:1fr}
+  .about-image{min-height:250px;background-image:linear-gradient(90deg,rgba(7,16,20,.01) 0%,rgba(7,16,20,.18) 23%,rgba(7,16,20,0) 25%),url("Photos/generated/bmw_h_small.jpg")}
+  .about-copy{padding:46px 28px}
+  .about-copy h2{font-size:36px}
+  .cta-strip{grid-template-columns:1fr;text-align:left;padding:34px 28px}
+  .schedule-copy{grid-template-columns:1fr;text-align:center}
+  .cta-icon{margin:auto}
+  .schedule-form{grid-template-columns:1fr}
+  .schedule-form .btn{justify-self:stretch}
+  .recent-video{grid-template-columns:1fr;padding:42px 28px}
+  .video-copy h2{font-size:34px}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-col{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.18);padding-top:22px}
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="header">
+    <a class="logo" href="#">
+      M5<span class="x">X</span>
+      <small>MECHANIX</small>
+    </a>
+
+    <nav class="nav">
+      <a href="mailto:quest.mullins@gmail.com">Email</a>
+      <a href="about-kole.html">About</a>
+      <a href="https://www.instagram.com/m5x_mechanix/" target="_blank" rel="noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5Zm8.95 1.35a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2ZM12 6.9A5.1 5.1 0 1 1 6.9 12 5.1 5.1 0 0 1 12 6.9Zm0 1.8A3.3 3.3 0 1 0 15.3 12 3.3 3.3 0 0 0 12 8.7Z"/></svg>
+        Instagram
+      </a>
+      <a href="https://m.youtube.com/channel/UCm0v-xv1uiD0EIrK2ZOx06w" target="_blank" rel="noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 7.1a2.96 2.96 0 0 0-2.08-2.09C17.48 4.5 12 4.5 12 4.5s-5.48 0-7.32.51A2.96 2.96 0 0 0 2.6 7.1 30.7 30.7 0 0 0 2.1 12a30.7 30.7 0 0 0 .5 4.9 2.96 2.96 0 0 0 2.08 2.09c1.84.51 7.32.51 7.32.51s5.48 0 7.32-.51a2.96 2.96 0 0 0 2.08-2.09 30.7 30.7 0 0 0 .5-4.9 30.7 30.7 0 0 0-.5-4.9ZM10.2 15.34V8.66L15.96 12Z"/></svg>
+        YouTube
+      </a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <div class="kicker">
+          <span class="slashes"></span>
+          BMW Specialist | Fullerton, CA
+        </div>
+
+        <h1>
+          Better care.<br>
+          Real results.<br>
+          <span class="script">Any car.<br>Always.</span>
+        </h1>
+
+      </div>
+    </section>
+
+    <div class="hero-button-strip" aria-label="Hero actions">
+      <a class="btn btn-red" href="mailto:quest.mullins@gmail.com">Email Us</a>
+      <a class="btn btn-dark" href="#schedule">Schedule Service</a>
+    </div>
+
+    <section id="services" class="services">
+      <div class="section-head">
+        <div class="section-kicker">What We Do</div>
+        <h2>Expert Service. Any Make.</h2>
+        <div class="red-rule"></div>
+      </div>
+
+      <div class="service-grid">
+        <article class="service-card">
+          <div class="service-icon"></div>
+          <h3>Repair &amp; Maintenance</h3>
+          <p>From oil leaks to cooling systems, we handle the details that keep your car performing.</p>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon"></div>
+          <h3>Diagnostics</h3>
+          <p>Advanced diagnostics to find the root cause, not just the symptoms.</p>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon"></div>
+          <h3>Performance</h3>
+          <p>Upgrades, tuning, and performance parts installed the right way.</p>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon"></div>
+          <h3>Pre-Purchase Inspections</h3>
+          <p>Know what you're buying with a thorough, honest inspection.</p>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon"></div>
+          <h3>Any Car Welcome</h3>
+          <p>BMW is our specialty, but we service and repair a wide range of vehicles.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <div class="about-image"></div>
+
+      <div class="about-copy">
+        <div class="section-kicker">About M5X</div>
+
+        <h2>
+          Enthusiast driven.<br>
+          Quality focused.
+        </h2>
+
+        <div class="about-rule"></div>
+
+        <p>
+          M5X Mechanix is an enthusiast-run service built on honest work,
+          clear communication, and a passion for doing things right.
+          Whether it's a BMW or something else, your car gets the same
+          attention we'd give our own.
+        </p>
+
+        <a class="btn btn-dark" href="about-kole.html">Learn More</a>
+      </div>
+    </section>
+
+    <section id="schedule" class="cta-strip">
+      <div class="schedule-copy">
+        <div class="cta-icon">M5X</div>
+
+        <div>
+          <h3>Ready to get started?</h3>
+          <p>Send the year, make, model, and what needs attention. We will follow up with next steps.</p>
+        </div>
+      </div>
+
+      <form action="https://formspree.io/f/xaqkabzl" method="POST" class="schedule-form">
+        <label>First Name<input type="text" name="first_name" required></label>
+        <label>Last Name<input type="text" name="last_name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>Car Make<input type="text" name="car_make" required></label>
+        <label>Model<input type="text" name="model" required></label>
+        <label>Year<input type="text" name="year" required></label>
+        <label>Concern<textarea name="concern" rows="8" required></textarea></label>
+        <input type="hidden" name="_subject" value="New M5X Mechanix Service Request">
+        <button type="submit" class="btn btn-red">Send Service Request</button>
+      </form>
+      <div class="map-embed">
+        <iframe
+          src="https://www.google.com/maps?q=227%20N%20Yale%20Ave%2C%20Fullerton%2C%20CA%2092831&output=embed"
+          title="Map to M5X Mechanix at 227 N Yale Ave., Fullerton, CA 92831"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+        <div class="map-address">
+          <strong>M5X Mechanix</strong>
+          <span>227 N Yale Ave.</span>
+          <span>Fullerton, CA 92831</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="recent-video" aria-label="Recent M5X Mechanix YouTube upload">
+      <a
+        class="video-thumb"
+        href="https://www.youtube.com/shorts/j3bNRM63DcQ"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Watch recent M5X Mechanix video on YouTube"
+      >
+        <img src="https://i3.ytimg.com/vi/j3bNRM63DcQ/hqdefault.jpg" alt="BMW E46 Rear Subframe Refresh" loading="lazy">
+        <span class="play-button" aria-hidden="true">Play</span>
+      </a>
+      <div class="video-copy">
+        <div class="section-kicker">Recent Upload</div>
+        <h2>BMW E46 Rear Subframe Refresh</h2>
+        <p>Watch the latest shop upload from M5X Mechanix.</p>
+        <a class="btn btn-red" href="https://www.youtube.com/shorts/j3bNRM63DcQ" target="_blank" rel="noreferrer">Watch on YouTube</a>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact" class="footer">
+    <div class="footer-inner">
+      <div>
+        <a class="logo" href="#">
+          M5<span class="x">X</span>
+          <small>MECHANIX</small>
+        </a>
+
+        <p class="footer-desc">
+          BMW specialist. Any car welcome. Honest work. Real results.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a class="footer-link" href="mailto:quest.mullins@gmail.com">Email quest.mullins@gmail.com</a>
+        <div class="footer-link">Location Fullerton, CA</div>
+        <div class="footer-link">Appointment By Appointment</div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a class="footer-link" href="https://www.instagram.com/m5x_mechanix/" target="_blank" rel="noreferrer">Instagram @m5x_mechanix</a>
+        <a class="footer-link" href="https://m.youtube.com/channel/UCm0v-xv1uiD0EIrK2ZOx06w" target="_blank" rel="noreferrer">YouTube M5X Mechanix</a>
+      </div>
+
+      <div class="map-pin">
+        <span class="pin">Location</span>
+        <span>Fullerton<br>California</span>
+      </div>
+    </div>
+
+    <div class="copyright">
+      © 2026 M5X Mechanix. All rights reserved.
+    </div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const updateImageShift = () => {
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = window.scrollY / maxScroll;
+    const shift = ((progress - 0.5) * 20).toFixed(2) + "%";
+    root.style.setProperty("--hero-shift", shift);
+    root.style.setProperty("--about-shift", shift);
+  };
+
+  updateImageShift();
+  window.addEventListener("scroll", updateImageShift, { passive: true });
+  window.addEventListener("resize", updateImageShift);
+})();
+</script>
+</body>
+</html>

@@ -63,12 +63,6 @@ export function AboutExperience() {
                 <span className="plus" />
               </button>
             ))}
-            <div className="sidebar-actions">
-              <SiteMenu className="sidebar-menu-control" onNavigate={navigateWithinKnoplus} showLabel />
-              <a href="mailto:knopluswebsites@gmail.com" className="sidebar-action-link">
-                Contact Us
-              </a>
-            </div>
           </div>
 
           <div className="sidebar-note cta-note">
@@ -79,10 +73,14 @@ export function AboutExperience() {
               <br />
               Knoplus.
             </div>
+            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+              Contact Us
+            </a>
           </div>
         </aside>
 
         <section className="about-stage">
+          <SiteMenu className="stage-menu-control" hideIcon onNavigate={navigateWithinKnoplus} showLabel />
           <div className="about-bg" />
           <div className="about-copy">
             <div className="eyebrow">{aboutIntro.eyebrow}</div>

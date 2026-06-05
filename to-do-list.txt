@@ -1,0 +1,103 @@
+Codex status 2026-06-05:
+- Deploy alert: addressed by root postinstall/build helper so nextjs-elements/out is created before Wrangler deploys.
+- Internal template routes: traditional-auto, cleaning-services, synergy, and dark-luxury imported into Knoplus public templates and verified at 200 locally/publicly.
+- Synergy/dark-luxury: repaired by assembling the generated HTML from the source Next build with its static chunks and referenced images.
+- Menu/contact: Menu moved to the top-left of the stage with no plus; Contact Us returned to the sidebar bottom.
+- Explore button: hover now rotates the plus to a 45-degree X.
+- Process: updated to Discover / Build / Launch copy.
+- Pricing slogan: changed back to Know More. Know Better. Knoplus.
+- Stage preview: added browser-frame preview of the template link.
+- Contact form: feasible, but still open; static export cannot send email alone. Needs Cloudflare Worker endpoint plus Email Routing/send provider configuration.
+
+Original list:
+
+Fix this alert and really take your time combing over everything
+
+20:53:48.852
+Initializing build environment...
+20:53:50.329
+Success: Finished initializing build environment
+20:53:50.826
+Cloning repository...
+20:53:54.889
+Detected the following tools from environment: npm@10.9.2, nodejs@22.16.0
+20:53:54.894
+Restoring from dependencies cache
+20:53:54.897
+Restoring from build output cache
+20:53:54.994
+Installing project dependencies: npm clean-install --progress=false
+20:54:00.809
+20:54:00.811
+added 35 packages, and audited 36 packages in 5s
+20:54:00.811
+20:54:00.812
+7 packages are looking for funding
+20:54:00.812
+  run `npm fund` for details
+20:54:00.812
+20:54:00.812
+found 0 vulnerabilities
+20:54:01.218
+Executing user deploy command: npx wrangler deploy
+20:54:03.376
+20:54:03.376
+ ⛅️ wrangler 4.98.0
+20:54:03.377
+───────────────────
+20:54:03.392
+20:54:03.392
+Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+20:54:03.456
+20:54:03.671
+✘ [ERROR] The directory specified by the "assets.directory" field in your configuration file does not exist:
+20:54:03.671
+20:54:03.671
+  /opt/buildhome/repo/nextjs-elements/out
+20:54:03.671
+20:54:03.672
+20:54:03.766
+🪵  Logs were written to "/opt/buildhome/.config/.wrangler/logs/wrangler-2026-06-05_03-54-03_022.log"
+20:54:03.862
+Failed: error occurred while running deploy command
+
+_
+
+I purchased the domain kno.plus, so I want you to go to the other websites we have linking out and bring them into knoplus-website, and have them as know.plus/template name
+_
+
+Remove the + from Menu, and move the menu button to a floating on the top left of the stage, and the contact us back to the bottom
+_
+
+When hovering over the explore template button, it should shift to an x, not a + again, 45 not 90 degrees
+_
+
+Our Process should be more like this
+
+Tab 1: Discover
+With Knoplus, website creation is easy, simply select a template and we can update the information, color themes, and photos with what you are looking for. If you are looking for more, let us know and we can quote your proposal and work towards a solution together.
+
+Tab 2: Build
+We expect the customization process to be quick so long as we have the required material, your photos, logo, section descriptions, and colors.
+
+We do offer light customizations to the elements per new user, so let us know what you want!
+
+Light customizations cover: Minor UI tweaks, Additional photos, 1 module addition, minor special effects
+
+Tab 3: Launch
+
+We can host it all for you, please view our pricing page for a better understanding of our current offers, but if you want it set up and done, then the standard plan should be enough for you. (build this out Codex)
+_
+
+Can we make a form (not using formspree) that is built in and will email us about users that want to work with us?
+
+_
+
+The slogan on the bottom of pricing needs to be changed too the slogan that is everywhere else.
+
+_
+
+I want users to see the template they will view in the stage, lets adjust the stage to have a screenshot of the template within the stage
+
+
+

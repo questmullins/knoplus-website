@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "npm install --prefix nextjs-elements && node scripts/build-next-export.mjs",
     "build": "npm install --prefix nextjs-elements && node scripts/build-next-export.mjs",
     "deploy": "npm run build && wrangler deploy"
   },

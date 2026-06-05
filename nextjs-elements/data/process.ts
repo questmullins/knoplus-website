@@ -1,27 +1,26 @@
 export const processSteps = [
   {
     label: "Discover",
-    text: "We learn the business, the customer, the offer, and the moments where the website needs to create trust quickly."
-  },
-  {
-    label: "Shape",
-    text: "We turn that context into a clear structure: the right pages, the right calls to action, and a visual direction that fits the company."
+    text:
+      "With Knoplus, website creation starts simple: choose a template and we update the information, color themes, photography, and details around what you are looking for. If you need more than the template path, tell us what you have in mind and we can quote a custom proposal together."
   },
   {
     label: "Build",
-    text: "We produce the site with responsive layouts, clean interaction, contact paths, deployment setup, and practical SEO foundations."
+    text:
+      "The customization process is built to move quickly once we have the required material: your photos, logo, section descriptions, colors, and key business details. Light customizations can include minor UI tweaks, additional photos, one module addition, and small special effects."
   },
   {
     label: "Launch",
-    text: "We connect the domain, verify the live experience, and give the client a site that feels polished without becoming a maintenance burden."
+    text:
+      "We can host and manage the site for you after launch. If you want it set up, connected, monitored, and handled without thinking about the technical pieces, the Standard Care plan is usually enough for most template websites."
   }
 ];
 
 export const processIntro = {
   eyebrow: "Our process",
-  title: "Clear steps.\nBetter launches.",
+  title: "Choose a path.\nWe shape the launch.",
   body:
-    "Knoplus takes the messy middle of web design and makes it legible. We listen first, shape the strongest version of the business online, build with care, and launch with the practical details handled.",
+    "Knoplus keeps website creation direct: start with a proven template, customize it around the business, and launch with the practical details handled. When a project needs more, we scope it honestly and build toward the right solution.",
   pitch:
-    "* Strategy, design, build, and launch support are kept tight so independent companies can move with confidence instead of getting buried in process."
+    "* Bring the essentials: logo, photos, colors, copy direction, and the services you want people to understand. We turn that into a usable site without burying you in process."
 };

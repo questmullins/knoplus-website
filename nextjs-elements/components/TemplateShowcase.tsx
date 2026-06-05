@@ -242,12 +242,6 @@ export function TemplateShowcase() {
                 <span className="plus" />
               </button>
             ))}
-            <div className="sidebar-actions">
-              <SiteMenu className="sidebar-menu-control" showLabel />
-              <a href="mailto:knopluswebsites@gmail.com" className="sidebar-action-link">
-                Contact Us
-              </a>
-            </div>
           </div>
 
           <div className="sidebar-note cta-note">
@@ -258,10 +252,14 @@ export function TemplateShowcase() {
               <br />
               Knoplus.
             </div>
+            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+              Contact Us
+            </a>
           </div>
         </aside>
 
         <section className="stage" data-theme={currentTemplate.theme}>
+          <SiteMenu className="stage-menu-control" hideIcon showLabel />
           <div className="preview-bg" style={{ "--bg": currentTemplate.image } as CSSProperties} />
           <div
             className={`preview-bg-next ${isBgChanging ? "show" : ""}`}
@@ -296,6 +294,22 @@ export function TemplateShowcase() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className={`template-stage-preview ${isCopyFading ? "fade" : ""}`} aria-hidden={isCopyFading}>
+            <div className="template-stage-browser">
+              <div className="template-browser-bar">
+                <span />
+                <span />
+                <span />
+              </div>
+              <iframe
+                src={currentTemplate.link}
+                title={`${currentTemplate.navTitle} template preview`}
+                loading="lazy"
+                suppressHydrationWarning
+              />
             </div>
           </div>
 

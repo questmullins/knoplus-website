@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 type SiteMenuProps = {
   className?: string;
+  hideIcon?: boolean;
   onNavigate?: (destination: string) => void;
   showLabel?: boolean;
 };
@@ -16,7 +17,7 @@ const menuItems = [
   { label: "Pricing", href: "/pricing" }
 ];
 
-export function SiteMenu({ className = "", onNavigate, showLabel = false }: SiteMenuProps) {
+export function SiteMenu({ className = "", hideIcon = false, onNavigate, showLabel = false }: SiteMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -40,7 +41,7 @@ export function SiteMenu({ className = "", onNavigate, showLabel = false }: Site
         type="button"
       >
         {showLabel ? <span className="top-menu-text">Menu</span> : null}
-        <span className="menu-plus" />
+        {hideIcon ? null : <span className="menu-plus" />}
       </button>
 
       <div className={`menu-panel ${isMenuOpen ? "open" : ""}`}>

@@ -189,26 +189,24 @@ export function PricingExperience() {
                 <span className="plus" />
               </button>
             ))}
-            <div className="sidebar-actions">
-              <SiteMenu className="sidebar-menu-control" onNavigate={navigateWithinKnoplus} showLabel />
-              <a href="mailto:knopluswebsites@gmail.com" className="sidebar-action-link">
-                Contact Us
-              </a>
-            </div>
           </div>
 
           <div className="sidebar-note">
             <div className="cta-copy">
-              Sexy pricing.
+              Know More.
               <br />
-              Less spreadsheet.
+              Know Better.
               <br />
-              More clarity.
+              Knoplus.
             </div>
+            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+              Contact Us
+            </a>
           </div>
         </aside>
 
         <section className="pricing-choice-stage">
+          <SiteMenu className="stage-menu-control" hideIcon onNavigate={navigateWithinKnoplus} showLabel />
           <div className="pricing-choice-bg" />
           <div className={`pricing-choice-copy ${isStageFading ? "is-fading" : ""}`}>
             <div className="eyebrow">{active.eyebrow}</div>

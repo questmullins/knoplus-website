@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About Kole | M5X Mechanix</title>
+<meta
+  name="description"
+  content="Learn more about Kole and the BMW-focused repair approach behind M5X Mechanix in Fullerton, California."
+>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --cream:#f2eadf;
+  --ink:#10171c;
+  --dark:#071014;
+  --red:#c93223;
+  --red-dark:#9f2219;
+  --soft:#fffaf2;
+  --line:rgba(8,15,18,.16);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Outfit",Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+
+.header{
+  height:118px;
+  padding:0 36px;
+  background:linear-gradient(180deg,#0b151a,#071014);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:34px;
+}
+
+.logo{
+  line-height:.82;
+  font-size:38px;
+  font-weight:950;
+  font-style:italic;
+  letter-spacing:-2px;
+  color:white;
+}
+.logo .x{color:var(--red)}
+.logo small{
+  display:block;
+  margin-top:9px;
+  font-size:12px;
+  letter-spacing:8px;
+  font-style:normal;
+  color:white;
+}
+
+.nav{display:flex;align-items:center;gap:38px;font-size:14px;font-weight:800;text-transform:uppercase}
+.nav a{display:inline-flex;align-items:center;gap:8px;opacity:.92;color:white}
+.nav a:hover,.nav a:focus-visible{opacity:1;color:white}
+.nav svg{width:16px;height:16px;fill:currentColor}
+
+.hero{
+  min-height:610px;
+  display:grid;
+  grid-template-columns:minmax(320px,48%) 1fr;
+  background:url("Photos/generated/technician_hands_hero.jpg");
+  background-size:cover;
+  background-position:center;
+}
+
+.hero-content{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:70px 8vw;
+}
+
+.kicker{
+  color:var(--red);
+  font-size:14px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:22px;
+}
+
+h1{
+  max-width:650px;
+  font-size:clamp(56px,7vw,96px);
+  line-height:.92;
+  letter-spacing:-3px;
+  text-transform:uppercase;
+  margin-top:48px;
+  margin-bottom:28px;
+  color:white;
+}
+
+h1 span{color:var(--red)}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  margin-top:0;
+  order:2;
+}
+h1{order:3}
+
+.hero-button-strip{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  padding:28px 8vw;
+  background:var(--cream);
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:54px;
+  padding:0 25px;
+  border-radius:3px;
+  font-size:14px;
+  font-weight:950;
+  text-transform:uppercase;
+  transition:.2s ease;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-red{background:linear-gradient(180deg,var(--red),var(--red-dark));color:white}
+.btn-dark{background:#101820;color:white;border:1px solid rgba(255,255,255,.44)}
+
+.story{
+  padding:70px 8vw;
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  gap:46px;
+  align-items:start;
+}
+
+.portrait-card{
+  min-height:520px;
+  border-radius:3px;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(7,16,20,0),rgba(7,16,20,.74)),
+    url("Photos/generated/bmw_f_hero_mirror.jpg");
+  background-size:cover;
+  background-position:center;
+  color:white;
+  display:flex;
+  align-items:flex-end;
+  padding:34px;
+}
+
+.portrait-card h2{
+  max-width:360px;
+  font-size:36px;
+  line-height:1;
+  text-transform:uppercase;
+}
+
+.copy-panel{
+  background:rgba(255,250,242,.74);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:42px;
+}
+
+.copy-panel h2{
+  color:var(--red);
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:18px;
+}
+
+.copy-panel p{
+  font-size:18px;
+  line-height:1.65;
+  color:#1b2225;
+  margin-bottom:20px;
+}
+
+.values{
+  margin-top:28px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.value{
+  min-height:142px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:3px;
+  background:white;
+}
+
+.value strong{
+  display:block;
+  color:var(--red);
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:10px;
+}
+
+.value span{
+  display:block;
+  color:#252b2e;
+  font-size:15px;
+  line-height:1.45;
+}
+
+.cta{
+  padding:58px 8vw;
+  background:#071014;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:30px;
+}
+
+.cta h2{
+  font-size:38px;
+  line-height:1;
+  text-transform:uppercase;
+}
+
+.cta p{
+  max-width:500px;
+  margin-top:10px;
+  color:#d6d6cf;
+  font-size:17px;
+  line-height:1.5;
+}
+
+@media(max-width:860px){
+  .header{height:auto;align-items:flex-start;flex-direction:column;gap:22px;padding:26px 28px}
+  .logo{font-size:34px}
+  .nav{gap:18px;justify-content:flex-start;overflow-x:auto;padding-bottom:4px;font-weight:800}
+  .hero{
+    grid-template-columns:1fr;
+    min-height:560px;
+    background-image:url("Photos/generated/technician_hands_small.jpg");
+    background-size:cover;
+    background-position:center bottom;
+  }
+  .hero-content{padding:64px 28px}
+  .kicker{letter-spacing:.08em;margin-bottom:22px}
+  h1{font-size:54px;letter-spacing:-2px}
+  .hero-actions{display:grid;gap:14px;width:100%}
+  .hero-button-strip{display:grid;gap:14px;padding:24px 28px 30px}
+  .story{grid-template-columns:1fr;padding:42px 28px}
+  .portrait-card{min-height:360px}
+  .copy-panel{padding:28px}
+  .values{grid-template-columns:1fr}
+  .cta{align-items:flex-start;flex-direction:column;padding:42px 28px}
+  .btn{width:100%}
+}
+</style>
+</head>
+
+<body>
+  <header class="header">
+    <a class="logo" href="index.html">
+      M5<span class="x">X</span>
+      <small>MECHANIX</small>
+    </a>
+
+    <nav class="nav">
+      <a href="mailto:quest.mullins@gmail.com">Email</a>
+      <a href="about-kole.html">About</a>
+      <a href="https://www.instagram.com/m5x_mechanix/" target="_blank" rel="noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5Zm8.95 1.35a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2ZM12 6.9A5.1 5.1 0 1 1 6.9 12 5.1 5.1 0 0 1 12 6.9Zm0 1.8A3.3 3.3 0 1 0 15.3 12 3.3 3.3 0 0 0 12 8.7Z"/></svg>
+        Instagram
+      </a>
+      <a href="https://m.youtube.com/channel/UCm0v-xv1uiD0EIrK2ZOx06w" target="_blank" rel="noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 7.1a2.96 2.96 0 0 0-2.08-2.09C17.48 4.5 12 4.5 12 4.5s-5.48 0-7.32.51A2.96 2.96 0 0 0 2.6 7.1 30.7 30.7 0 0 0 2.1 12a30.7 30.7 0 0 0 .5 4.9 2.96 2.96 0 0 0 2.08 2.09c1.84.51 7.32.51 7.32.51s5.48 0 7.32-.51a2.96 2.96 0 0 0 2.08-2.09 30.7 30.7 0 0 0 .5-4.9 30.7 30.7 0 0 0-.5-4.9ZM10.2 15.34V8.66L15.96 12Z"/></svg>
+        YouTube
+      </a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <div class="kicker">About Kole | M5X Mechanix</div>
+        <h1>Built by an <span>enthusiast.</span> Run with care.</h1>
+      </div>
+    </section>
+
+    <div class="hero-button-strip" aria-label="Hero actions">
+      <a class="btn btn-red" href="index.html#schedule">Schedule Service</a>
+      <a class="btn btn-dark" href="index.html">Back Home</a>
+    </div>
+
+    <section class="story">
+      <div class="portrait-card">
+        <h2>BMW knowledge with practical repair judgment.</h2>
+      </div>
+
+      <article class="copy-panel">
+        <h2>The Working Standard</h2>
+        <p>
+          Kole's background is rooted in BMW enthusiast culture, hands-on diagnostics,
+          and the kind of careful mechanical work that rewards patience. The shop is
+          BMW-focused, but the approach applies to every car that comes in: listen to
+          the concern, verify the failure, explain the path forward, and do the work
+          with pride.
+        </p>
+        <p>
+          Whether the job is a cooling system issue, suspension refresh, pre-purchase
+          inspection, performance part, or a strange drivability problem, the goal is
+          the same. M5X Mechanix is built to give customers straight answers and cars
+          that leave better than they arrived.
+        </p>
+        <p>
+          This page is placeholder copy for now, but the voice is intentional: skilled,
+          honest, enthusiast-led, and grounded in real service.
+        </p>
+
+        <div class="values">
+          <div class="value">
+            <strong>Diagnostics</strong>
+            <span>Root-cause thinking before parts get thrown at the car.</span>
+          </div>
+          <div class="value">
+            <strong>BMW Focus</strong>
+            <span>Special attention to common BMW patterns, service needs, and failure points.</span>
+          </div>
+          <div class="value">
+            <strong>Honest Work</strong>
+            <span>Clear recommendations, practical priorities, and no pressure theater.</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="cta">
+      <div>
+        <h2>Ready to talk through the car?</h2>
+        <p>Send the basics and Kole will follow up with the next step for service, inspection, or diagnostics.</p>
+      </div>
+      <a class="btn btn-red" href="index.html#schedule">Start A Service Request</a>
+    </section>
+  </main>
+</body>
+</html>
