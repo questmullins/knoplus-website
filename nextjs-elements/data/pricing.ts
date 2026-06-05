@@ -24,7 +24,7 @@ export const includedItems = [
   "Contact form integration",
   "Cloudflare deployment",
   "SSL security",
-  "Domain connection",
+  "Client-owned domain connection",
   "Basic SEO setup",
   "Launch support"
 ];
@@ -41,19 +41,19 @@ export const carePlans = [
   },
   {
     name: "Standard Care",
-    price: "$29/month",
+    price: "$39/month",
     details: [
       "Hosting management",
       "SSL monitoring",
-      "Domain management assistance",
+      "Client-owned domain and DNS connection assistance",
       "Basic uptime checks",
       "Monthly plugin/static asset check where applicable",
-      "Up to 15 minutes of content updates per month"
+      "Up to 30 minutes of content updates per month"
     ]
   },
   {
     name: "Business Care",
-    price: "$79/month",
+    price: "$99/month",
     details: [
       "Everything in Standard Care",
       "Priority support",
@@ -68,9 +68,11 @@ export const careComparison = [
   { feature: "Launch handoff", self: true, standard: true, business: true },
   { feature: "Hosting management", self: false, standard: true, business: true },
   { feature: "SSL monitoring", self: false, standard: true, business: true },
-  { feature: "Domain assistance", self: false, standard: true, business: true },
+  { feature: "Client-owned domain connection", self: false, standard: true, business: true },
+  { feature: "Domain registration included", self: false, standard: false, business: false },
   { feature: "Basic uptime checks", self: false, standard: true, business: true },
-  { feature: "Monthly content updates", self: false, standard: true, business: true },
+  { feature: "30 minutes of updates", self: false, standard: true, business: true },
+  { feature: "1 hour of updates", self: false, standard: false, business: true },
   { feature: "Priority support", self: false, standard: false, business: true },
   { feature: "Performance health check", self: false, standard: false, business: true },
   { feature: "Basic SEO health check", self: false, standard: false, business: true },
@@ -78,6 +80,7 @@ export const careComparison = [
 ];
 
 export const additionalServices = [
+  { label: "Domain Setup Service", value: "$75 one-time" },
   { label: "New Page", value: "Current page rate" },
   { label: "Major Redesign", value: "Custom Quote" },
   { label: "Booking Systems", value: "Custom Quote" },

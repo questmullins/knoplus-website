@@ -37,7 +37,7 @@ export const seoPages: SeoPage[] = [
       {
         heading: "Practical launch support",
         body:
-          "Knoplus can help with structure, copy direction, imagery, forms, Cloudflare deployment, SSL, domain connection, and monthly care after launch."
+          "Knoplus can help with structure, copy direction, imagery, forms, Cloudflare deployment, SSL, client-owned domain connection, and monthly care after launch."
       }
     ],
     links: [
@@ -113,7 +113,7 @@ export const seoPages: SeoPage[] = [
     eyebrow: "Website care plans",
     title: "Website care plans for hosting, updates, SSL, and support.",
     description:
-      "Knoplus website care plans help businesses manage hosting, SSL monitoring, domain support, priority support, and small content updates after launch.",
+      "Knoplus website care plans help businesses manage hosting, SSL monitoring, client-owned domain connection support, priority support, and small content updates after launch.",
     keywords: [
       "website care plans",
       "website maintenance",
@@ -125,7 +125,7 @@ export const seoPages: SeoPage[] = [
       {
         heading: "Launch is not the whole story",
         body:
-          "After a site goes live, someone still has to think about hosting, SSL, domain support, small updates, and basic upkeep."
+          "After a site goes live, someone still has to think about hosting, SSL, DNS records, small updates, and basic upkeep. Clients own and renew their domains directly so they always control the business asset."
       },
       {
         heading: "Choose the level of hands-off",

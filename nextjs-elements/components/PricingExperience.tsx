@@ -69,8 +69,8 @@ const pricingOptions = [
     eyebrow: "From $0/month",
     title: "Choose how hands-off you want launch to feel after the site goes live.",
     description:
-      "Monthly care can cover hosting, SSL, domain support, and small content updates so clients are not left alone with maintenance.",
-    accent: "$29",
+      "Monthly care can cover hosting, SSL, DNS connection support, and small content updates. Clients own and renew their domains, while Knoplus helps connect the records cleanly.",
+    accent: "$39",
     note: "Standard monthly care",
     image: "url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=80')",
     plans: carePlans
@@ -81,7 +81,7 @@ const pricingOptions = [
     title: "See what each monthly care tier actually covers.",
     description:
       "The comparison keeps the choice simple: Self Managed is a handoff, Standard covers essential upkeep, and Business adds priority attention plus monthly health checks.",
-    accent: "$79",
+    accent: "$99",
     note: "Full support tier",
     image: "url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1800&q=80')",
     comparison: careComparison
@@ -91,7 +91,7 @@ const pricingOptions = [
     eyebrow: "Launch essentials",
     title: "The practical things every site needs are already part of the build.",
     description:
-      "A focused launch package with mobile design, forms, deployment, security, domain connection, basic SEO, and support.",
+      "A focused launch package with mobile design, forms, deployment, security, client-owned domain connection, basic SEO, and support.",
     accent: "7",
     note: "Included essentials",
     image: "url('https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80')",
@@ -347,6 +347,7 @@ export function PricingExperience() {
           <blockquote className="pricing-pitch">
             * Modern, professional websites start at $500. Monthly care plans are
             optional and can cover hosting, updates, and maintenance after launch.
+            Domain registration and renewal stay client-owned and are billed separately by the registrar.
           </blockquote>
           <ScreenCounter current={activeIndex + 1} total={pricingOptions.length} />
         </section>
@@ -467,6 +468,7 @@ export function PricingExperience() {
           <p>
             * Modern, professional websites start at $500. Monthly care plans are
             optional and can cover hosting, updates, and maintenance after launch.
+            Domain registration and renewal stay client-owned and are billed separately by the registrar.
           </p>
         </footer>
       </main>

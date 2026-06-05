@@ -12,7 +12,7 @@ export const processSteps = [
   {
     label: "Launch",
     text:
-      "We can host and manage the site for you after launch. If you want it set up, connected, monitored, and handled without thinking about the technical pieces, the Standard Care plan is usually enough for most template websites."
+      "We can host and manage the site for you after launch. Clients keep ownership of their domain and pay the registrar directly; Knoplus helps connect it, configure DNS, monitor SSL, and keep the site handled after launch."
   }
 ];
 
