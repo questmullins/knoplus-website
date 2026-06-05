@@ -2,6 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "knoplus-website",
   "compatibility_date": "2026-06-05",
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": "./nextjs-elements/out"
   },
