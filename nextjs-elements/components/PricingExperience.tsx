@@ -174,7 +174,6 @@ export function PricingExperience() {
         <aside className="pricing-choice-sidebar">
           <div className="sidebar-brand">
             <BrandLogo />
-            <SiteMenu onNavigate={navigateWithinKnoplus} />
           </div>
 
           <div className="pricing-choice-nav">
@@ -190,6 +189,12 @@ export function PricingExperience() {
                 <span className="plus" />
               </button>
             ))}
+            <div className="sidebar-actions">
+              <SiteMenu className="sidebar-menu-control" onNavigate={navigateWithinKnoplus} showLabel />
+              <a href="mailto:knopluswebsites@gmail.com" className="sidebar-action-link">
+                Contact Us
+              </a>
+            </div>
           </div>
 
           <div className="sidebar-note">
@@ -200,9 +205,6 @@ export function PricingExperience() {
               <br />
               More clarity.
             </div>
-            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
-              Contact Us
-            </a>
           </div>
         </aside>
 

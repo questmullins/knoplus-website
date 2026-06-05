@@ -4,7 +4,9 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 
 type SiteMenuProps = {
+  className?: string;
   onNavigate?: (destination: string) => void;
+  showLabel?: boolean;
 };
 
 const menuItems = [
@@ -14,7 +16,7 @@ const menuItems = [
   { label: "Pricing", href: "/pricing" }
 ];
 
-export function SiteMenu({ onNavigate }: SiteMenuProps) {
+export function SiteMenu({ className = "", onNavigate, showLabel = false }: SiteMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -30,13 +32,14 @@ export function SiteMenu({ onNavigate }: SiteMenuProps) {
   }
 
   return (
-    <>
+    <div className={`site-menu ${className}`.trim()}>
       <button
         className={`top-menu ${isMenuOpen ? "open" : ""}`}
         aria-label="Open menu"
         onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
         type="button"
       >
+        {showLabel ? <span className="top-menu-text">Menu</span> : null}
         <span className="menu-plus" />
       </button>
 
@@ -66,6 +69,6 @@ export function SiteMenu({ onNavigate }: SiteMenuProps) {
           </a>
         </div>
       </div>
-    </>
+    </div>
   );
 }

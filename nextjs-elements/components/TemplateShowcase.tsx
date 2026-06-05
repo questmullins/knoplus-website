@@ -226,7 +226,6 @@ export function TemplateShowcase() {
         <aside>
           <div className="sidebar-brand">
             <BrandLogo />
-            <SiteMenu />
           </div>
 
           <div className="template-nav">
@@ -243,6 +242,12 @@ export function TemplateShowcase() {
                 <span className="plus" />
               </button>
             ))}
+            <div className="sidebar-actions">
+              <SiteMenu className="sidebar-menu-control" showLabel />
+              <a href="mailto:knopluswebsites@gmail.com" className="sidebar-action-link">
+                Contact Us
+              </a>
+            </div>
           </div>
 
           <div className="sidebar-note cta-note">
@@ -253,9 +258,6 @@ export function TemplateShowcase() {
               <br />
               Knoplus.
             </div>
-            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
-              Contact Us
-            </a>
           </div>
         </aside>
 

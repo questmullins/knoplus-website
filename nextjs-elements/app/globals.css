@@ -85,25 +85,6 @@ h1 {
   line-height: 1;
 }
 
-.sidebar-brand .top-menu {
-  position: absolute;
-  top: auto;
-  left: calc(50% + 88px);
-  right: auto;
-  flex: 0 0 auto;
-}
-
-.sidebar-brand .menu-panel {
-  top: calc(100% + 24px);
-  right: 50%;
-  width: min(300px, calc(var(--sidebar-width) - 40px));
-  transform: translate(50%, -12px) scale(0.98);
-}
-
-.sidebar-brand .menu-panel.open {
-  transform: translate(50%, 0) scale(1);
-}
-
 .brand-logo-link {
   transition:
     opacity 0.22s ease,
@@ -121,6 +102,65 @@ h1 {
   display: grid;
   min-width: 0;
   width: 100%;
+}
+
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.site-menu {
+  position: relative;
+}
+
+.sidebar-menu-control {
+  width: fit-content;
+}
+
+.sidebar-actions .top-menu,
+.sidebar-action-link {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: fit-content;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(246, 243, 236, 0.18);
+  background: rgba(246, 243, 236, 0.06);
+  color: rgba(246, 243, 236, 0.66);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.sidebar-actions .top-menu:hover,
+.sidebar-actions .top-menu:focus-visible,
+.sidebar-action-link:hover,
+.sidebar-action-link:focus-visible {
+  color: var(--white);
+  background: rgba(246, 243, 236, 0.11);
+  border-color: rgba(246, 243, 236, 0.36);
+  transform: translateX(4px);
+}
+
+.top-menu-text {
+  display: inline-block;
+}
+
+.sidebar-actions .menu-panel {
+  top: auto;
+  bottom: calc(100% + 14px);
+  left: 0;
+  right: auto;
+  width: min(300px, calc(var(--sidebar-width) - 40px));
 }
 
 .nav-label {
