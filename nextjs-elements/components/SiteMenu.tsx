@@ -13,6 +13,8 @@ type SiteMenuProps = {
 
 const menuItems = [
   { label: "Home", href: "/" },
+  { label: "Website Templates", href: "/website-templates" },
+  { label: "Custom Websites", href: "/custom-websites" },
   { label: "About Us", href: "/about" },
   { label: "Our Process", href: "/process" },
   { label: "Pricing", href: "/pricing" }

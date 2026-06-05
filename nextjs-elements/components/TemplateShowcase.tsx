@@ -9,11 +9,23 @@ import { templates, type TemplateItem } from "@/data/templates";
 
 const genres = ["All", ...Array.from(new Set(templates.map((template) => template.genre)))];
 
+const serviceIntro = {
+  label: "Website template service",
+  navTitle: "Website Service",
+  title: "Modern websites.<br />Clear pricing.<br /><em>Built to launch.</em>",
+  description:
+    "Knoplus builds professional websites for independent businesses using polished website templates, custom website design, mobile-friendly layouts, SEO-ready page structure, contact forms, Cloudflare deployment, and practical launch support.",
+  image: "url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80')",
+  features: ["Template websites", "Custom websites", "Mobile-friendly design"],
+  sellingPoints: ["Starting at $500", "Built for local business launches"]
+};
+
 function formatCounter(index: number, total: number) {
   return `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
 }
 
 export function TemplateShowcase() {
+  const [isIntroActive, setIsIntroActive] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(0);
   const [isCopyFading, setIsCopyFading] = useState(false);
@@ -45,6 +57,9 @@ export function TemplateShowcase() {
 
   const currentTemplate = templates[currentIndex];
   const nextTemplate = templates[nextIndex];
+  const stageImage = isIntroActive ? serviceIntro.image : currentTemplate.image;
+  const nextStageImage = isIntroActive ? serviceIntro.image : nextTemplate.image;
+  const stageTheme = isIntroActive ? "service" : currentTemplate.theme;
   const counterLabel = useMemo(
     () => formatCounter(currentVisibleIndex, visibleTemplates.length || templates.length),
     [currentVisibleIndex, visibleTemplates.length]
@@ -56,6 +71,8 @@ export function TemplateShowcase() {
 
   const setTemplate = useCallback(
     (index: number) => {
+      setIsIntroActive(false);
+
       if (index === currentIndex) {
         return;
       }
@@ -100,6 +117,20 @@ export function TemplateShowcase() {
       }
 
       const direction = event.deltaY > 0 ? 1 : -1;
+
+      if (isIntroActive) {
+        if (direction > 0) {
+          event.preventDefault();
+          isWheelLocked = true;
+          setIsIntroActive(false);
+          window.setTimeout(() => {
+            isWheelLocked = false;
+          }, 420);
+        }
+
+        return;
+      }
+
       const nextVisible = Math.max(0, Math.min(visibleTemplates.length - 1, currentVisibleIndex + direction));
       const nextTemplate = visibleTemplates[nextVisible];
 
@@ -120,7 +151,21 @@ export function TemplateShowcase() {
     return () => {
       window.removeEventListener("wheel", advanceFromWheel);
     };
-  }, [currentIndex, currentVisibleIndex, setTemplate, visibleTemplates]);
+  }, [currentIndex, currentVisibleIndex, isIntroActive, setTemplate, visibleTemplates]);
+
+  useEffect(() => {
+    const resetTemplateExit = () => {
+      setIsTransitioning(false);
+    };
+
+    window.addEventListener("pageshow", resetTemplateExit);
+    window.addEventListener("focus", resetTemplateExit);
+
+    return () => {
+      window.removeEventListener("pageshow", resetTemplateExit);
+      window.removeEventListener("focus", resetTemplateExit);
+    };
+  }, []);
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
@@ -148,6 +193,7 @@ export function TemplateShowcase() {
 
       setCurrentIndex(index);
       setNextIndex(index);
+      setIsIntroActive(false);
       setActiveMobileIndex(index);
       setRevealedMobileIndexes((indexes) => new Set(indexes).add(index));
 
@@ -232,6 +278,14 @@ export function TemplateShowcase() {
 
           <div className="template-nav">
             <div className="nav-label">Templates</div>
+            <button
+              className={`template-btn ${isIntroActive ? "active" : ""}`}
+              onClick={() => setIsIntroActive(true)}
+              type="button"
+            >
+              <span>{serviceIntro.navTitle}</span>
+              <span className="plus" />
+            </button>
             {visibleTemplates.map(({ template, index }) => (
               <button
                 className={`template-btn ${index === currentIndex ? "active" : ""}`}
@@ -260,49 +314,63 @@ export function TemplateShowcase() {
           </div>
         </aside>
 
-        <section className="stage" data-theme={currentTemplate.theme}>
+        <section className="stage" data-theme={stageTheme}>
           <SiteMenu className="stage-menu-control" hideIcon onContact={() => setIsContactOpen(true)} showLabel />
-          <div className="preview-bg" style={{ "--bg": currentTemplate.image } as CSSProperties} />
+          <div className="preview-bg" style={{ "--bg": stageImage } as CSSProperties} />
           <div
             className={`preview-bg-next ${isBgChanging ? "show" : ""}`}
-            style={{ "--bg": nextTemplate.image } as CSSProperties}
+            style={{ "--bg": nextStageImage } as CSSProperties}
           />
 
           <div className="content">
             <div className={`copy ${isCopyFading ? "fade" : ""}`}>
               <div className="copy-anchor">
-                <div className="eyebrow">{currentTemplate.label}</div>
-                <h1>{currentTemplate.navTitle}</h1>
-                <p>{currentTemplate.description}</p>
+                <div className="eyebrow">{isIntroActive ? serviceIntro.label : currentTemplate.label}</div>
+                {isIntroActive ? (
+                  <h1 dangerouslySetInnerHTML={{ __html: serviceIntro.title }} />
+                ) : (
+                  <h1>{currentTemplate.navTitle}</h1>
+                )}
+                <p>{isIntroActive ? serviceIntro.description : currentTemplate.description}</p>
 
                 <div className="actions">
-                  <button className="circle-link" onClick={() => openTemplate()} type="button" aria-label="Open template">
+                  <button
+                    className="circle-link"
+                    onClick={() => (isIntroActive ? setIsIntroActive(false) : openTemplate())}
+                    type="button"
+                    aria-label={isIntroActive ? "Explore website templates" : "Open template"}
+                  >
                     <span className="circle-plus" />
                   </button>
-                  <button className="text-link" onClick={() => openTemplate()} type="button">
-                    Explore Template
+                  <button className="text-link" onClick={() => (isIntroActive ? setIsIntroActive(false) : openTemplate())} type="button">
+                    {isIntroActive ? "Explore Templates" : "Explore Template"}
                   </button>
                 </div>
 
-                <div className="template-panel-details" aria-label={`${currentTemplate.navTitle} features and price`}>
-                  <strong>{currentTemplate.price}</strong>
+                <div
+                  className="template-panel-details"
+                  aria-label={isIntroActive ? "Knoplus website service highlights" : `${currentTemplate.navTitle} features and price`}
+                >
+                  <strong>{isIntroActive ? "From $500" : currentTemplate.price}</strong>
                   <div>
                     <span>Features</span>
-                    <p>{currentTemplate.features.join(" / ")}</p>
+                    <p>{(isIntroActive ? serviceIntro.features : currentTemplate.features).join(" / ")}</p>
                   </div>
                   <div>
                     <span>Selling Points</span>
-                    <p>{currentTemplate.sellingPoints.join(" / ")}</p>
+                    <p>{(isIntroActive ? serviceIntro.sellingPoints : currentTemplate.sellingPoints).join(" / ")}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className={`counter ${isCounterChanging ? "crossfade" : ""}`}>
-            <span className="counter-value current">{counterLabel}</span>
-            <span className="counter-value next">{nextCounterLabel}</span>
-          </div>
+          {isIntroActive ? null : (
+            <div className={`counter ${isCounterChanging ? "crossfade" : ""}`}>
+              <span className="counter-value current">{counterLabel}</span>
+              <span className="counter-value next">{nextCounterLabel}</span>
+            </div>
+          )}
         </section>
       </main>
 
@@ -313,6 +381,49 @@ export function TemplateShowcase() {
         </header>
 
         <div className="mobile-scroll-kicker">Templates</div>
+        <section className="mobile-template-section mobile-service-intro is-revealed" data-theme="service">
+          <h2>
+            Website service
+            <br />
+            for real businesses.
+          </h2>
+          <p>{serviceIntro.description}</p>
+          <div className="actions mobile-actions">
+            <button
+              className="circle-link"
+              onClick={() => {
+                const nextSection = document.querySelector<HTMLElement>(".mobile-template-section[data-index]");
+                nextSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              type="button"
+              aria-label="Explore templates"
+            >
+              <span className="circle-plus" />
+            </button>
+            <button
+              className="text-link"
+              onClick={() => {
+                const nextSection = document.querySelector<HTMLElement>(".mobile-template-section[data-index]");
+                nextSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              type="button"
+            >
+              Explore Templates
+            </button>
+          </div>
+          <div className="template-panel-details" aria-label="Knoplus website service highlights">
+            <strong>From $500</strong>
+            <div>
+              <span>Website Services</span>
+              <p>Template websites / Custom websites / SEO-ready structure</p>
+            </div>
+            <div>
+              <span>Built For</span>
+              <p>Independent companies / Local businesses / Fast launches</p>
+            </div>
+          </div>
+        </section>
+
         {visibleTemplates.map(({ template, index }, visibleIndex) => (
           <section
             className={`mobile-template-section ${activeMobileIndex === index ? "is-active" : ""} ${
