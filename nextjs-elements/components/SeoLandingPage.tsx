@@ -58,10 +58,10 @@ export function SeoLandingPage({ page }: SeoLandingPageProps) {
 
           <nav className="seo-nav" aria-label="Website service pages">
             <span>Explore</span>
-            <Link href="/custom-websites">Custom Websites</Link>
+            <Link href="/">Template Viewer</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/small-business-websites">Small Business Websites</Link>
-            <Link href="/website-templates">Website Templates</Link>
+            <Link href="/process">Our Process</Link>
           </nav>
 
           <div className="sidebar-note cta-note">

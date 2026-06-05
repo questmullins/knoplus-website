@@ -16,68 +16,6 @@ export type SeoPage = {
 
 export const seoPages: SeoPage[] = [
   {
-    slug: "website-templates",
-    eyebrow: "Template websites",
-    title: "Website templates customized for independent businesses.",
-    description:
-      "Knoplus website templates give small businesses a professional, mobile-friendly site foundation with clear pricing, useful sections, contact forms, SEO-ready structure, and Cloudflare deployment.",
-    keywords: [
-      "website templates",
-      "small business website templates",
-      "professional website templates",
-      "mobile-friendly website templates",
-      "local business website templates"
-    ],
-    sections: [
-      {
-        heading: "Start polished, then make it yours",
-        body:
-          "A template website is not a generic copy-paste site. Knoplus starts with a proven framework, then adapts the layout, content, imagery, calls to action, and brand feel around the business."
-      },
-      {
-        heading: "Built for launches, not confusion",
-        body:
-          "Template builds are best for companies that need a clean online presence quickly: service pages, contact forms, local trust signals, mobile-friendly layouts, and basic SEO setup."
-      }
-    ],
-    links: [
-      { label: "Explore Templates", href: "/" },
-      { label: "View Pricing", href: "/pricing" },
-      { label: "See Our Process", href: "/process" }
-    ]
-  },
-  {
-    slug: "custom-websites",
-    eyebrow: "Custom websites",
-    title: "Custom websites for brands that need their own direction.",
-    description:
-      "Knoplus custom websites are designed from the ground up for businesses that need original layouts, sharper positioning, unique visual direction, and a website experience shaped around their goals.",
-    keywords: [
-      "custom websites",
-      "custom website design",
-      "small business custom websites",
-      "professional custom websites",
-      "brand website design"
-    ],
-    sections: [
-      {
-        heading: "When template is not enough",
-        body:
-          "Custom builds are for businesses that need more control over layout, tone, content flow, integrations, and the way customers move through the site."
-      },
-      {
-        heading: "Form, function, and efficiency",
-        body:
-          "The goal is not decorative complexity. The goal is a website that feels sharp, loads cleanly, explains the offer, and makes the next step obvious."
-      }
-    ],
-    links: [
-      { label: "View Custom Pricing", href: "/pricing" },
-      { label: "Read About Knoplus", href: "/about" },
-      { label: "See Our Process", href: "/process" }
-    ]
-  },
-  {
     slug: "small-business-websites",
     eyebrow: "Small business websites",
     title: "Professional websites for small and independent businesses.",
@@ -103,7 +41,7 @@ export const seoPages: SeoPage[] = [
       }
     ],
     links: [
-      { label: "Explore Website Templates", href: "/website-templates" },
+      { label: "Explore Templates", href: "/" },
       { label: "View Pricing", href: "/pricing" },
       { label: "Website Care Plans", href: "/website-care-plans" }
     ]
@@ -136,7 +74,7 @@ export const seoPages: SeoPage[] = [
     links: [
       { label: "Explore Automotive Templates", href: "/" },
       { label: "View Template Pricing", href: "/pricing" },
-      { label: "Custom Automotive Website", href: "/custom-websites" }
+      { label: "Request Custom Quote", href: "/pricing" }
     ]
   },
   {
@@ -197,8 +135,8 @@ export const seoPages: SeoPage[] = [
     ],
     links: [
       { label: "View Care Pricing", href: "/pricing" },
-      { label: "Explore Templates", href: "/website-templates" },
-      { label: "Custom Websites", href: "/custom-websites" }
+      { label: "Explore Templates", href: "/" },
+      { label: "Request Custom Quote", href: "/pricing" }
     ]
   }
 ];

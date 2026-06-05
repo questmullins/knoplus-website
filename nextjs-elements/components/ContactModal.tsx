@@ -6,6 +6,7 @@ import { templates } from "@/data/templates";
 type ContactModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  selectedTemplate?: string;
 };
 
 type FormStatus = {
@@ -18,10 +19,11 @@ const initialStatus: FormStatus = {
   tone: "idle"
 };
 
-export function ContactModal({ isOpen, onClose }: ContactModalProps) {
+export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: ContactModalProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
   const [projectKind, setProjectKind] = useState("Template");
+  const [templateChoice, setTemplateChoice] = useState(selectedTemplate || templates[0]?.navTitle || "");
   const [status, setStatus] = useState<FormStatus>(initialStatus);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,6 +34,8 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
   useEffect(() => {
     if (isOpen) {
+      setProjectKind("Template");
+      setTemplateChoice(selectedTemplate || templates[0]?.navTitle || "");
       setShouldRender(true);
       const frame = window.requestAnimationFrame(() => setIsVisible(true));
 
@@ -42,7 +46,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     const timeout = window.setTimeout(() => setShouldRender(false), 360);
 
     return () => window.clearTimeout(timeout);
-  }, [isOpen]);
+  }, [isOpen, selectedTemplate]);
 
   useEffect(() => {
     if (!shouldRender) {
@@ -166,7 +170,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
           {projectKind === "Template" ? (
             <label>
               <span>Template</span>
-              <select name="templateName">
+              <select name="templateName" value={templateChoice} onChange={(event) => setTemplateChoice(event.target.value)}>
                 {templates.map((template) => (
                   <option key={template.navTitle}>{template.navTitle}</option>
                 ))}
@@ -176,7 +180,12 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
           <label className={projectKind === "Template" ? "contact-wide" : ""}>
             <span>Subject</span>
-            <input name="subject" required type="text" />
+            <input
+              name="subject"
+              required
+              type="text"
+              defaultValue={selectedTemplate ? `Interested in ${selectedTemplate}` : ""}
+            />
           </label>
 
           <label className="contact-message">

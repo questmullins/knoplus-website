@@ -12,12 +12,10 @@ type SiteMenuProps = {
 };
 
 const menuItems = [
-  { label: "About Us", href: "/about" },
-  { label: "Custom Websites", href: "/custom-websites" },
   { label: "Home", href: "/" },
-  { label: "Our Process", href: "/process" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Website Templates", href: "/website-templates" }
+  { label: "Our Process", href: "/process" },
+  { label: "About Us", href: "/about" }
 ];
 
 export function SiteMenu({ className = "", hideIcon = false, onContact, onNavigate, showLabel = false }: SiteMenuProps) {
@@ -25,9 +23,8 @@ export function SiteMenu({ className = "", hideIcon = false, onContact, onNaviga
   const pathname = usePathname();
   const visibleMenuItems = onContact
     ? [
-        menuItems[0],
-        { label: "Contact Us", href: "#contact" },
-        ...menuItems.slice(1)
+        ...menuItems,
+        { label: "Contact Us", href: "#contact" }
       ]
     : menuItems;
 

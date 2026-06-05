@@ -1194,7 +1194,8 @@ h1 {
 
 .pricing-rate-list,
 .pricing-plan-stack,
-.pricing-chip-grid {
+.pricing-chip-grid,
+.pricing-path-grid {
   display: grid;
   gap: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
@@ -1288,6 +1289,43 @@ h1 {
   font-size: 13px;
   line-height: 1.5;
   font-weight: 300;
+}
+
+.pricing-path-card {
+  padding: 28px 0;
+  display: grid;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pricing-path-card:last-child {
+  border-bottom: 0;
+}
+
+.pricing-path-card span {
+  color: rgba(246, 243, 236, 0.62);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+
+.pricing-path-card strong {
+  color: var(--panel-accent, var(--white));
+  font-family: var(--font-body);
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.pricing-path-card p {
+  max-width: 460px;
+  margin: 0;
+  color: rgba(246, 243, 236, 0.7);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .pricing-chip-grid {
@@ -1900,6 +1938,7 @@ p {
   font-size: clamp(32px, 4vw, 54px);
   font-weight: 500;
   letter-spacing: 0.12em;
+  line-height: 1;
   text-transform: uppercase;
   color: var(--white);
   opacity: 0;
@@ -2213,6 +2252,7 @@ p {
   .mobile-pricing-section h2,
   .mobile-pricing-section p,
   .mobile-pricing-section .pricing-spotlight,
+  .mobile-pricing-section .pricing-path-grid,
   .mobile-pricing-section .pricing-rate-list,
   .mobile-pricing-section .pricing-plan-stack,
   .mobile-pricing-section .pricing-chip-grid,
@@ -2236,6 +2276,7 @@ p {
   .mobile-pricing-section.is-active h2,
   .mobile-pricing-section.is-active p,
   .mobile-pricing-section.is-active .pricing-spotlight,
+  .mobile-pricing-section.is-active .pricing-path-grid,
   .mobile-pricing-section.is-active .pricing-rate-list,
   .mobile-pricing-section.is-active .pricing-plan-stack,
   .mobile-pricing-section.is-active .pricing-chip-grid,
@@ -2244,6 +2285,7 @@ p {
   .mobile-pricing-section.is-revealed h2,
   .mobile-pricing-section.is-revealed p,
   .mobile-pricing-section.is-revealed .pricing-spotlight,
+  .mobile-pricing-section.is-revealed .pricing-path-grid,
   .mobile-pricing-section.is-revealed .pricing-rate-list,
   .mobile-pricing-section.is-revealed .pricing-plan-stack,
   .mobile-pricing-section.is-revealed .pricing-chip-grid,
@@ -2442,7 +2484,8 @@ p {
 
   .mobile-pricing-section .pricing-rate-list,
   .mobile-pricing-section .pricing-plan-stack,
-  .mobile-pricing-section .pricing-chip-grid {
+  .mobile-pricing-section .pricing-chip-grid,
+  .mobile-pricing-section .pricing-path-grid {
     width: 100%;
   }
 

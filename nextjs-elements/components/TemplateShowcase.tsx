@@ -39,6 +39,7 @@ export function TemplateShowcase() {
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [selectedContactTemplate, setSelectedContactTemplate] = useState("");
 
   const visibleTemplates = useMemo(
     () =>
@@ -204,6 +205,39 @@ export function TemplateShowcase() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const selectedFromQuery = params.get("template");
+    const shouldOpenContact = params.get("contact") === "template";
+    let selectedFromStorage = "";
+
+    try {
+      selectedFromStorage = window.sessionStorage.getItem("knoplus:selected-template") ?? "";
+      window.sessionStorage.removeItem("knoplus:selected-template");
+    } catch {
+      selectedFromStorage = "";
+    }
+
+    const templateName = selectedFromStorage || selectedFromQuery || "";
+
+    if (templateName) {
+      const templateIndex = templates.findIndex(
+        (template) => template.navTitle.toLowerCase() === templateName.toLowerCase()
+      );
+
+      if (templateIndex >= 0) {
+        setCurrentIndex(templateIndex);
+        setNextIndex(templateIndex);
+        setSelectedContactTemplate(templates[templateIndex].navTitle);
+        setIsIntroActive(false);
+      }
+    }
+
+    if (shouldOpenContact || selectedFromStorage) {
+      window.requestAnimationFrame(() => setIsContactOpen(true));
+    }
+  }, []);
+
+  useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const hashIndex = hashParams.get("template");
     const hashScrollY = hashParams.get("scroll");
@@ -305,6 +339,14 @@ export function TemplateShowcase() {
     }, 1450);
   }
 
+  function chooseTemplate(template: TemplateItem = currentTemplate, index: number = currentIndex) {
+    setSelectedContactTemplate(template.navTitle);
+    setCurrentIndex(index);
+    setNextIndex(index);
+    setIsIntroActive(false);
+    setIsContactOpen(true);
+  }
+
   return (
     <>
       <main className="app">
@@ -382,6 +424,11 @@ export function TemplateShowcase() {
                   <button className="text-link" onClick={() => (isIntroActive ? setTemplate(currentIndex) : openTemplate())} type="button">
                     {isIntroActive ? "Explore Templates" : "Explore Template"}
                   </button>
+                  {isIntroActive ? null : (
+                    <button className="text-link choose-template-link" onClick={() => chooseTemplate()} type="button">
+                      Choose This Template
+                    </button>
+                  )}
                 </div>
 
                 <div
@@ -495,6 +542,13 @@ export function TemplateShowcase() {
               >
                 Explore Template
               </button>
+              <button
+                className="text-link choose-template-link"
+                onClick={() => chooseTemplate(template, index)}
+                type="button"
+              >
+                Choose This Template
+              </button>
             </div>
             <div className="template-panel-details" aria-label={`${template.navTitle} features and price`}>
               <strong>{template.price}</strong>
@@ -557,7 +611,12 @@ export function TemplateShowcase() {
         <div className="transition-logo">KNOPLUS</div>
       </div>
 
-      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      <ContactModal
+        key={selectedContactTemplate}
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
+        selectedTemplate={selectedContactTemplate}
+      />
     </>
   );
 }

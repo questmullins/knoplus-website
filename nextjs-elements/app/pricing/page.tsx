@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { PricingExperience } from "@/components/PricingExperience";
 
 export const metadata: Metadata = {
-  title: "Website Pricing",
+  title: "Website Pricing for Template and Custom Builds",
   description:
-    "Website pricing for Knoplus template websites, custom websites, care plans, new pages, redesigns, booking systems, e-commerce, and custom functionality.",
+    "Compare Knoplus template website pricing, custom website pricing, care plans, launch essentials, add-ons, redesigns, booking systems, e-commerce, and custom functionality.",
   alternates: {
     canonical: "/pricing"
   }

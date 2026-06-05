@@ -60,20 +60,16 @@ const structuredData = [
     "@type": "SiteNavigationElement",
     name: [
       "About Us",
-      "Custom Websites",
       "Home",
       "Our Process",
       "Pricing",
-      "Website Templates",
       "Sitemap"
     ],
     url: [
       "https://kno.plus/about",
-      "https://kno.plus/custom-websites",
       "https://kno.plus",
       "https://kno.plus/process",
       "https://kno.plus/pricing",
-      "https://kno.plus/website-templates",
       "https://kno.plus/sitemap"
     ]
   }

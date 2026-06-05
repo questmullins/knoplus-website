@@ -17,6 +17,30 @@ import {
 
 const pricingOptions = [
   {
+    label: "Choose Path",
+    eyebrow: "Template or custom",
+    title: "Pick the build path that fits the business.",
+    description:
+      "Template websites are the cleanest path when a business needs a polished launch quickly. Custom websites are for brands that need original structure, deeper systems, or a sharper visual direction.",
+    accent: "$500",
+    note: "Template starting point",
+    image: "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')",
+    paths: [
+      {
+        name: "Template Website",
+        price: "From $500",
+        body:
+          "Best when you like one of the existing directions and want it adapted around your business, branding, copy, imagery, and goals."
+      },
+      {
+        name: "Custom Website",
+        price: "From $1,500",
+        body:
+          "Best when the layout, user experience, brand system, integrations, or content flow needs to be designed from the ground up."
+      }
+    ]
+  },
+  {
     label: "Template Sites",
     eyebrow: "Starting at $500",
     title: "A proven framework, tailored until it feels like yours.",
@@ -242,6 +266,18 @@ export function PricingExperience() {
               </div>
             ) : null}
 
+            {"paths" in active && active.paths ? (
+              <div className="pricing-path-grid" aria-label="Choose between template and custom websites">
+                {active.paths.map((path) => (
+                  <article className="pricing-path-card" key={path.name}>
+                    <span>{path.name}</span>
+                    <strong>{path.price}</strong>
+                    <p>{path.body}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
             {"items" in active && active.items ? (
               <div className="pricing-chip-grid" aria-label={`${active.label} details`}>
                 {active.items.map((item) => (
@@ -322,6 +358,18 @@ export function PricingExperience() {
                       <strong>{plan.price}</strong>
                     </div>
                     <p>{plan.details.join(" / ")}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
+            {"paths" in option && option.paths ? (
+              <div className="pricing-path-grid" aria-label="Choose between template and custom websites">
+                {option.paths.map((path) => (
+                  <article className="pricing-path-card" key={path.name}>
+                    <span>{path.name}</span>
+                    <strong>{path.price}</strong>
+                    <p>{path.body}</p>
                   </article>
                 ))}
               </div>

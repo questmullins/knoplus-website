@@ -4,38 +4,79 @@
   var homeStyle = document.createElement("style");
   homeStyle.id = "knoplus-template-home-style";
   homeStyle.textContent = [
-    ".knoplus-template-home{",
-    "position:fixed;left:20px;top:20px;z-index:2147483645;",
-    "min-height:42px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;",
-    "border:1px solid rgba(246,243,236,.38);background:rgba(5,5,6,.78);color:#f6f3ec;",
-    "font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.24em;",
-    "text-decoration:none;text-transform:uppercase;backdrop-filter:blur(16px);",
-    "box-shadow:0 16px 42px rgba(0,0,0,.28);transition:background .22s ease,color .22s ease,transform .22s ease;",
+    ".knoplus-template-actions{",
+    "position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:2147483645;",
+    "display:grid;justify-items:center;gap:9px;font-family:Kanit,Arial,Helvetica,sans-serif;",
     "}",
-    ".knoplus-template-home:hover,.knoplus-template-home:focus-visible{",
+    ".knoplus-template-home,.knoplus-template-choose{",
+    "min-height:42px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;",
+    "border:1px solid rgba(246,243,236,.38);background:rgba(5,5,6,.82);color:#f6f3ec;",
+    "font-size:12px;font-weight:500;letter-spacing:.18em;line-height:1;text-decoration:none;text-transform:uppercase;",
+    "backdrop-filter:blur(16px);box-shadow:0 16px 42px rgba(0,0,0,.32);",
+    "transition:background .22s ease,color .22s ease,transform .22s ease;",
+    "}",
+    ".knoplus-template-choose{min-height:36px;padding:0 14px;font-size:10px;letter-spacing:.2em;cursor:pointer;}",
+    ".knoplus-template-home:hover,.knoplus-template-home:focus-visible,.knoplus-template-choose:hover,.knoplus-template-choose:focus-visible{",
     "background:#f6f3ec;color:#050506;transform:translateY(-1px);",
     "}",
-    "@media (max-width:720px){.knoplus-template-home{left:14px;top:14px;min-height:38px;padding:0 13px;font-size:10px;}}"
+    "@media (max-width:720px){.knoplus-template-actions{top:12px;}.knoplus-template-home{min-height:38px;padding:0 13px;font-size:10px;}.knoplus-template-choose{min-height:34px;font-size:9px;}}"
   ].join("");
   document.head.appendChild(homeStyle);
 
-  function addHomeButton() {
-    if (document.querySelector(".knoplus-template-home")) {
+  function getTemplateName() {
+    var path = window.location.pathname.toLowerCase();
+
+    if (path.indexOf("cleaning-services") >= 0) {
+      return "Cleaning Services";
+    }
+
+    if (path.indexOf("synergy") >= 0) {
+      return path.indexOf("glass-colorful") >= 0 ? "Dark Luxury" : "Synergy";
+    }
+
+    if (path.indexOf("traditional-auto") >= 0) {
+      return "Traditional Auto";
+    }
+
+    return "Traditional Auto";
+  }
+
+  function chooseTemplate() {
+    try {
+      window.sessionStorage.setItem("knoplus:selected-template", getTemplateName());
+    } catch {}
+
+    window.location.href = "/?contact=template";
+  }
+
+  function addTemplateActions() {
+    if (document.querySelector(".knoplus-template-actions")) {
       return;
     }
 
+    var wrapper = document.createElement("div");
+    var choose = document.createElement("button");
     var link = document.createElement("a");
+
+    wrapper.className = "knoplus-template-actions";
     link.className = "knoplus-template-home";
     link.href = "/";
     link.setAttribute("aria-label", "Return to Knoplus");
     link.textContent = "KNOPLUS";
-    document.body.appendChild(link);
+    choose.className = "knoplus-template-choose";
+    choose.type = "button";
+    choose.textContent = "Choose This Template";
+    choose.addEventListener("click", chooseTemplate);
+
+    wrapper.appendChild(link);
+    wrapper.appendChild(choose);
+    document.body.appendChild(wrapper);
   }
 
   if (document.body) {
-    addHomeButton();
+    addTemplateActions();
   } else {
-    document.addEventListener("DOMContentLoaded", addHomeButton, { once: true });
+    document.addEventListener("DOMContentLoaded", addTemplateActions, { once: true });
   }
 
   try {
@@ -60,8 +101,8 @@
     "}",
     "html.knoplus-template-transition-active::after{",
     "content:\"KNOPLUS\";position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);",
-    "z-index:2147483647;color:#f6f3ec;font-family:Arial,Helvetica,sans-serif;",
-    "font-size:clamp(24px,5vw,48px);font-weight:600;letter-spacing:.28em;",
+    "z-index:2147483647;color:#f6f3ec;font-family:Kanit,Arial,Helvetica,sans-serif;",
+    "font-size:clamp(32px,4vw,54px);font-weight:500;letter-spacing:.12em;line-height:1;",
     "opacity:1;transition:opacity 620ms ease;pointer-events:none;",
     "}",
     "html.knoplus-template-transition-active.knoplus-template-transition-fade::before,",
