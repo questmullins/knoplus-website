@@ -2256,7 +2256,7 @@ p {
     background:
       linear-gradient(180deg, rgba(5, 5, 6, 0.34), rgba(5, 5, 6, 0.82) 72%),
       linear-gradient(90deg, rgba(5, 5, 6, 0.58), rgba(5, 5, 6, 0.14)),
-      url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
+      var(--bg, url("https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80"));
     background-size: cover;
     background-position: center;
   }

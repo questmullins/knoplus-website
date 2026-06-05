@@ -290,7 +290,8 @@ export function TemplateShowcase() {
   }, []);
 
   useEffect(() => {
-    const sections = mobileSectionRefs.current.filter(Boolean) as HTMLElement[];
+    const sections = Array.from(document.querySelectorAll<HTMLElement>(".mobile-template-section"));
+    const observedSections = mobileSectionRefs.current.filter(Boolean) as HTMLElement[];
 
     if (!sections.length) {
       return;
@@ -320,7 +321,7 @@ export function TemplateShowcase() {
       { threshold: 0.42 }
     );
 
-    sections.forEach((section) => observer.observe(section));
+    observedSections.forEach((section) => observer.observe(section));
     updateParallax();
     window.addEventListener("scroll", updateParallax, { passive: true });
     window.addEventListener("resize", updateParallax);
@@ -476,7 +477,11 @@ export function TemplateShowcase() {
         </header>
 
         <div className="mobile-scroll-kicker">Templates</div>
-        <section className="mobile-template-section mobile-service-intro is-revealed" data-theme="service">
+        <section
+          className="mobile-template-section mobile-service-intro is-revealed"
+          data-theme="service"
+          style={{ "--bg": serviceIntro.image } as CSSProperties}
+        >
           <h2>
             Website service
             <br />
