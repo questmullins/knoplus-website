@@ -24,7 +24,7 @@ export function ProcessExperience() {
           <div className="about-nav">
             <div className="nav-label">Process</div>
             {processSteps.map((step, index) => (
-              <div className="about-nav-item about-nav-static" key={step.label}>
+              <div className="template-btn about-nav-static" key={step.label}>
                 <span>{step.label}</span>
                 <small>{String(index + 1).padStart(2, "0")}</small>
               </div>

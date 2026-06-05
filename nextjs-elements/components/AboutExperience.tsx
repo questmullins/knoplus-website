@@ -24,7 +24,7 @@ export function AboutExperience() {
           <div className="about-nav">
             <div className="nav-label">About</div>
             {aboutPrinciples.map((principle, index) => (
-              <div className="about-nav-item about-nav-static" key={principle.label}>
+              <div className="template-btn about-nav-static" key={principle.label}>
                 <span>{principle.label}</span>
                 <small>{String(index + 1).padStart(2, "0")}</small>
               </div>

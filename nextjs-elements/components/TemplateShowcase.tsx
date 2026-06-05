@@ -33,6 +33,7 @@ export function TemplateShowcase() {
   const [isBgChanging, setIsBgChanging] = useState(false);
   const [isCounterChanging, setIsCounterChanging] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMainRevealing, setIsMainRevealing] = useState(false);
   const mobileSectionRefs = useRef<Array<HTMLElement | null>>([]);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const [revealedMobileIndexes, setRevealedMobileIndexes] = useState<Set<number>>(() => new Set([0]));
@@ -194,6 +195,17 @@ export function TemplateShowcase() {
     const resetTemplateExit = () => {
       setIsTransitioning(false);
     };
+
+    try {
+      if (window.sessionStorage.getItem("knoplus:main-transition") === "reveal") {
+        window.sessionStorage.removeItem("knoplus:main-transition");
+        setIsMainRevealing(true);
+
+        window.setTimeout(() => {
+          setIsMainRevealing(false);
+        }, 920);
+      }
+    } catch {}
 
     window.addEventListener("pageshow", resetTemplateExit);
     window.addEventListener("focus", resetTemplateExit);
@@ -412,21 +424,13 @@ export function TemplateShowcase() {
                 )}
                 <p>{isIntroActive ? serviceIntro.description : currentTemplate.description}</p>
 
-                <div className="actions">
-                  <button
-                    className="circle-link"
-                    onClick={() => (isIntroActive ? setTemplate(currentIndex) : openTemplate())}
-                    type="button"
-                    aria-label={isIntroActive ? "Explore website templates" : "Open template"}
-                  >
-                    <span className="circle-plus" />
-                  </button>
-                  <button className="text-link" onClick={() => (isIntroActive ? setTemplate(currentIndex) : openTemplate())} type="button">
-                    {isIntroActive ? "Explore Templates" : "Explore Template"}
+                <div className="actions template-actions">
+                  <button className="cta-button explore-button" onClick={() => (isIntroActive ? setTemplate(currentIndex) : openTemplate())} type="button">
+                    {isIntroActive ? "Explore Templates" : "Explore"}
                   </button>
                   {isIntroActive ? null : (
-                    <button className="text-link choose-template-link" onClick={() => chooseTemplate()} type="button">
-                      Choose This Template
+                    <button className="cta-button inquire-button" onClick={() => chooseTemplate()} type="button">
+                      Inquire
                     </button>
                   )}
                 </div>
@@ -472,20 +476,9 @@ export function TemplateShowcase() {
             for real businesses.
           </h2>
           <p>{serviceIntro.description}</p>
-          <div className="actions mobile-actions">
+          <div className="actions mobile-actions template-actions">
             <button
-              className="circle-link"
-              onClick={() => {
-                const nextSection = document.querySelector<HTMLElement>(".mobile-template-section[data-index]");
-                nextSection?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              type="button"
-              aria-label="Explore templates"
-            >
-              <span className="circle-plus" />
-            </button>
-            <button
-              className="text-link"
+              className="cta-button explore-button"
               onClick={() => {
                 const nextSection = document.querySelector<HTMLElement>(".mobile-template-section[data-index]");
                 nextSection?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -526,28 +519,20 @@ export function TemplateShowcase() {
             </div>
             <h2>{template.navTitle}</h2>
             <p>{template.description}</p>
-            <div className="actions mobile-actions">
+            <div className="actions mobile-actions template-actions">
               <button
-                className="circle-link"
-                onClick={() => openTemplate(template, index)}
-                type="button"
-                aria-label="Open template"
-              >
-                <span className="circle-plus" />
-              </button>
-              <button
-                className="text-link"
+                className="cta-button explore-button"
                 onClick={() => openTemplate(template, index)}
                 type="button"
               >
-                Explore Template
+                Explore
               </button>
               <button
-                className="text-link choose-template-link"
+                className="cta-button inquire-button"
                 onClick={() => chooseTemplate(template, index)}
                 type="button"
               >
-                Choose This Template
+                Inquire
               </button>
             </div>
             <div className="template-panel-details" aria-label={`${template.navTitle} features and price`}>
@@ -607,7 +592,7 @@ export function TemplateShowcase() {
         </div>
       </main>
 
-      <div className={`transition-screen ${isTransitioning ? "active" : ""}`}>
+      <div className={`transition-screen ${isTransitioning || isMainRevealing ? "active" : ""} ${isMainRevealing ? "revealing" : ""}`}>
         <div className="transition-logo">KNOPLUS</div>
       </div>
 

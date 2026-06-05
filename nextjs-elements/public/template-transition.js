@@ -19,6 +19,9 @@
     ".knoplus-template-home:hover,.knoplus-template-home:focus-visible,.knoplus-template-choose:hover,.knoplus-template-choose:focus-visible{",
     "background:#f6f3ec;color:#050506;transform:translateY(-1px);",
     "}",
+    ".knoplus-exit-transition{position:fixed;inset:0;z-index:2147483646;background:#050506;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;transition:opacity 720ms ease;}",
+    ".knoplus-exit-transition::after{content:\"KNOPLUS\";color:#f6f3ec;font-family:Kanit,Arial,Helvetica,sans-serif;font-size:clamp(32px,4vw,54px);font-weight:500;letter-spacing:.12em;line-height:1;text-transform:uppercase;}",
+    ".knoplus-exit-transition.active{opacity:1;pointer-events:auto;}",
     "@media (max-width:720px){.knoplus-template-actions{top:12px;}.knoplus-template-home{min-height:38px;padding:0 13px;font-size:10px;}.knoplus-template-choose{min-height:34px;font-size:9px;}}"
   ].join("");
   document.head.appendChild(homeStyle);
@@ -41,12 +44,34 @@
     return "Traditional Auto";
   }
 
+  function exitToKnoplus(destination) {
+    var screen = document.querySelector(".knoplus-exit-transition");
+
+    try {
+      window.sessionStorage.setItem("knoplus:main-transition", "reveal");
+    } catch {}
+
+    if (!screen) {
+      screen = document.createElement("div");
+      screen.className = "knoplus-exit-transition";
+      document.body.appendChild(screen);
+    }
+
+    window.requestAnimationFrame(function () {
+      screen.classList.add("active");
+
+      window.setTimeout(function () {
+        window.location.href = destination;
+      }, 820);
+    });
+  }
+
   function chooseTemplate() {
     try {
       window.sessionStorage.setItem("knoplus:selected-template", getTemplateName());
     } catch {}
 
-    window.location.href = "/?contact=template";
+    exitToKnoplus("/?contact=template");
   }
 
   function addTemplateActions() {
@@ -63,6 +88,10 @@
     link.href = "/";
     link.setAttribute("aria-label", "Return to Knoplus");
     link.textContent = "KNOPLUS";
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+      exitToKnoplus("/");
+    });
     choose.className = "knoplus-template-choose";
     choose.type = "button";
     choose.textContent = "Choose This Template";
