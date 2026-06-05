@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 type SiteMenuProps = {
   className?: string;
   hideIcon?: boolean;
+  onContact?: () => void;
   onNavigate?: (destination: string) => void;
   showLabel?: boolean;
 };
@@ -17,7 +18,7 @@ const menuItems = [
   { label: "Pricing", href: "/pricing" }
 ];
 
-export function SiteMenu({ className = "", hideIcon = false, onNavigate, showLabel = false }: SiteMenuProps) {
+export function SiteMenu({ className = "", hideIcon = false, onContact, onNavigate, showLabel = false }: SiteMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -30,6 +31,11 @@ export function SiteMenu({ className = "", hideIcon = false, onNavigate, showLab
     }
 
     window.location.href = destination;
+  }
+
+  function handleContactClick() {
+    setIsMenuOpen(false);
+    onContact?.();
   }
 
   return (
@@ -53,7 +59,11 @@ export function SiteMenu({ className = "", hideIcon = false, onNavigate, showLab
                 {item.label}
               </button>
             ))}
-          <a href="mailto:knopluswebsites@gmail.com">Contact Us</a>
+          {onContact ? (
+            <button onClick={handleContactClick} type="button">
+              Contact Us
+            </button>
+          ) : null}
         </nav>
 
         <div className="menu-divider" />
@@ -65,7 +75,7 @@ export function SiteMenu({ className = "", hideIcon = false, onNavigate, showLab
           <a href="#" aria-label="LinkedIn">
             in
           </a>
-          <a href="mailto:knopluswebsites@gmail.com" aria-label="Email">
+          <a href="mailto:quest@kno.plus" aria-label="Email">
             mail
           </a>
         </div>

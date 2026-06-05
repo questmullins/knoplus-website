@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
+import { ContactModal } from "./ContactModal";
 import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 import {
@@ -79,6 +80,7 @@ export function PricingExperience() {
   const mobileSectionRefs = useRef<Array<HTMLElement | null>>([]);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const [revealedMobileIndexes, setRevealedMobileIndexes] = useState<Set<number>>(() => new Set([0]));
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const active = pricingOptions[activeIndex];
 
   function navigateWithinKnoplus(destination: string) {
@@ -199,14 +201,20 @@ export function PricingExperience() {
               <br />
               Knoplus.
             </div>
-            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+            <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
               Contact Us
-            </a>
+            </button>
           </div>
         </aside>
 
         <section className="pricing-choice-stage">
-          <SiteMenu className="stage-menu-control" hideIcon onNavigate={navigateWithinKnoplus} showLabel />
+          <SiteMenu
+            className="stage-menu-control"
+            hideIcon
+            onContact={() => setIsContactOpen(true)}
+            onNavigate={navigateWithinKnoplus}
+            showLabel
+          />
           <div className="pricing-choice-bg" />
           <div className={`pricing-choice-copy ${isStageFading ? "is-fading" : ""}`}>
             <div className="eyebrow">{active.eyebrow}</div>
@@ -278,7 +286,7 @@ export function PricingExperience() {
       <main className="mobile-scroll-page mobile-pricing-page">
         <header className="mobile-scroll-header">
           <BrandLogo />
-          <SiteMenu onNavigate={navigateWithinKnoplus} />
+          <SiteMenu onContact={() => setIsContactOpen(true)} onNavigate={navigateWithinKnoplus} />
         </header>
 
         <div className="mobile-scroll-kicker">Pricing</div>
@@ -360,6 +368,7 @@ export function PricingExperience() {
           </p>
         </footer>
       </main>
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </>
   );
 }

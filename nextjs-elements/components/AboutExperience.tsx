@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
+import { ContactModal } from "./ContactModal";
 import { SiteMenu } from "./SiteMenu";
 import { ScreenCounter } from "./ScreenCounter";
 import { aboutIntro, aboutPrinciples } from "@/data/about";
 
 export function AboutExperience() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   function navigateWithinKnoplus(destination: string) {
     window.location.href = destination;
@@ -73,14 +75,20 @@ export function AboutExperience() {
               <br />
               Knoplus.
             </div>
-            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+            <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
               Contact Us
-            </a>
+            </button>
           </div>
         </aside>
 
         <section className="about-stage">
-          <SiteMenu className="stage-menu-control" hideIcon onNavigate={navigateWithinKnoplus} showLabel />
+          <SiteMenu
+            className="stage-menu-control"
+            hideIcon
+            onContact={() => setIsContactOpen(true)}
+            onNavigate={navigateWithinKnoplus}
+            showLabel
+          />
           <div className="about-bg" />
           <div className="about-copy">
             <div className="eyebrow">{aboutIntro.eyebrow}</div>
@@ -111,7 +119,7 @@ export function AboutExperience() {
       <main className="mobile-scroll-page mobile-about-page">
         <header className="mobile-scroll-header">
           <BrandLogo />
-          <SiteMenu onNavigate={navigateWithinKnoplus} />
+          <SiteMenu onContact={() => setIsContactOpen(true)} onNavigate={navigateWithinKnoplus} />
         </header>
 
         <section className="mobile-about-section">
@@ -141,11 +149,13 @@ export function AboutExperience() {
             <br />
             Knoplus.
           </p>
-          <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+          <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
             Contact Us
-          </a>
+          </button>
         </footer>
       </main>
+
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </>
   );
 }

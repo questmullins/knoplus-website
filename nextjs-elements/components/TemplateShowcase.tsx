@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
+import { ContactModal } from "./ContactModal";
 import { SiteMenu } from "./SiteMenu";
 import { templates, type TemplateItem } from "@/data/templates";
 
@@ -24,6 +25,7 @@ export function TemplateShowcase() {
   const [revealedMobileIndexes, setRevealedMobileIndexes] = useState<Set<number>>(() => new Set([0]));
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   const visibleTemplates = useMemo(
     () =>
@@ -252,14 +254,14 @@ export function TemplateShowcase() {
               <br />
               Knoplus.
             </div>
-            <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+            <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
               Contact Us
-            </a>
+            </button>
           </div>
         </aside>
 
         <section className="stage" data-theme={currentTemplate.theme}>
-          <SiteMenu className="stage-menu-control" hideIcon showLabel />
+          <SiteMenu className="stage-menu-control" hideIcon onContact={() => setIsContactOpen(true)} showLabel />
           <div className="preview-bg" style={{ "--bg": currentTemplate.image } as CSSProperties} />
           <div
             className={`preview-bg-next ${isBgChanging ? "show" : ""}`}
@@ -297,22 +299,6 @@ export function TemplateShowcase() {
             </div>
           </div>
 
-          <div className={`template-stage-preview ${isCopyFading ? "fade" : ""}`} aria-hidden={isCopyFading}>
-            <div className="template-stage-browser">
-              <div className="template-browser-bar">
-                <span />
-                <span />
-                <span />
-              </div>
-              <iframe
-                src={currentTemplate.link}
-                title={`${currentTemplate.navTitle} template preview`}
-                loading="lazy"
-                suppressHydrationWarning
-              />
-            </div>
-          </div>
-
           <div className={`counter ${isCounterChanging ? "crossfade" : ""}`}>
             <span className="counter-value current">{counterLabel}</span>
             <span className="counter-value next">{nextCounterLabel}</span>
@@ -323,7 +309,7 @@ export function TemplateShowcase() {
       <main className="mobile-scroll-page">
         <header className="mobile-scroll-header">
           <BrandLogo />
-          <SiteMenu />
+          <SiteMenu onContact={() => setIsContactOpen(true)} />
         </header>
 
         <div className="mobile-scroll-kicker">Templates</div>
@@ -384,9 +370,9 @@ export function TemplateShowcase() {
             <br />
             Knoplus.
           </p>
-          <a href="mailto:knopluswebsites@gmail.com" className="cta-button">
+          <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
             Contact Us
-          </a>
+          </button>
         </footer>
 
         <div className="template-filter">
@@ -422,6 +408,8 @@ export function TemplateShowcase() {
       <div className={`transition-screen ${isTransitioning ? "active" : ""}`}>
         <div className="transition-logo">KNOPLUS</div>
       </div>
+
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </>
   );
 }

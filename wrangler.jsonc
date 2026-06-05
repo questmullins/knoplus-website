@@ -2,10 +2,15 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "knoplus-website",
   "compatibility_date": "2026-06-05",
+  "main": "./worker.js",
   "workers_dev": true,
   "preview_urls": true,
   "assets": {
-    "directory": "./nextjs-elements/out"
+    "directory": "./nextjs-elements/out",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "CONTACT_TO": "quest@kno.plus"
   },
   "observability": {
     "enabled": true

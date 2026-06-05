@@ -25,6 +25,10 @@ body {
   overflow: hidden;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 a,
 button {
   font: inherit;
@@ -598,6 +602,15 @@ h1 {
   background-position: center;
 }
 
+.contact-bg {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 6, 0.96), rgba(5, 5, 6, 0.58) 56%, rgba(5, 5, 6, 0.92)),
+    radial-gradient(circle at 74% 22%, rgba(246, 243, 236, 0.14), transparent 24%),
+    url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
 .pricing-choice-stage::after {
   content: "";
   position: absolute;
@@ -644,6 +657,200 @@ h1 {
 
 .about-copy p {
   max-width: 580px;
+}
+
+.contact-copy {
+  flex-basis: 590px;
+}
+
+.contact-form {
+  flex: 0 1 500px;
+  width: min(500px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(5, 5, 6, 0.44);
+  backdrop-filter: blur(20px);
+}
+
+.contact-form label {
+  display: grid;
+  gap: 10px;
+}
+
+.contact-form span {
+  color: rgba(246, 243, 236, 0.56);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(246, 243, 236, 0.16);
+  border-radius: 0;
+  background: rgba(246, 243, 236, 0.055);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 300;
+  outline: none;
+  padding: 0 14px;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+.contact-form select {
+  appearance: none;
+}
+
+.contact-form textarea {
+  min-height: 142px;
+  padding: 14px;
+  resize: vertical;
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+  border-color: rgba(246, 243, 236, 0.56);
+  background: rgba(246, 243, 236, 0.09);
+}
+
+.contact-form option {
+  color: #050506;
+}
+
+.contact-message,
+.contact-submit-row {
+  grid-column: 1 / -1;
+}
+
+.contact-submit-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 48px;
+}
+
+.contact-form .cta-button {
+  cursor: pointer;
+}
+
+.contact-form .cta-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+  transform: none;
+}
+
+.contact-status {
+  margin: 0;
+  color: rgba(246, 243, 236, 0.7);
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 300;
+}
+
+.contact-status.success {
+  color: #86d5c3;
+}
+
+.contact-status.error {
+  color: #f0a7a0;
+}
+
+.contact-honeypot {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.contact-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+}
+
+.contact-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 58% 36%, rgba(246, 243, 236, 0.08), transparent 30%),
+    rgba(0, 0, 0, 0.74);
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+}
+
+.contact-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(760px, calc(100vw - 40px));
+  max-height: min(860px, calc(100svh - 40px));
+  overflow-y: auto;
+  border: 1px solid rgba(246, 243, 236, 0.16);
+  background: rgba(7, 7, 8, 0.94);
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.54);
+}
+
+.contact-modal-head {
+  padding: 34px 34px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.contact-modal-head .eyebrow {
+  margin-bottom: 18px;
+}
+
+.contact-modal-head h2 {
+  max-width: 520px;
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  font-weight: 300;
+}
+
+.modal-close {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(246, 243, 236, 0.24);
+  background: rgba(246, 243, 236, 0.08);
+  color: var(--white);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.modal-close .plus {
+  transform: rotate(45deg);
+}
+
+.contact-modal .contact-form {
+  width: 100%;
+  padding: 34px;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.contact-wide {
+  grid-column: 1 / -1;
 }
 
 .pricing-spotlight {
@@ -1160,59 +1367,6 @@ h1 {
   transform: translateX(-4px);
 }
 
-.template-stage-preview {
-  position: absolute;
-  right: clamp(34px, 6vw, 96px);
-  bottom: clamp(82px, 10vh, 132px);
-  width: min(520px, 34vw);
-  aspect-ratio: 16 / 10;
-  opacity: 0.82;
-  transform: translateY(0);
-  transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.template-stage-preview.fade {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.template-stage-browser {
-  height: 100%;
-  overflow: hidden;
-  border: 1px solid rgba(246, 243, 236, 0.18);
-  background: rgba(5, 5, 6, 0.62);
-  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.42);
-}
-
-.template-browser-bar {
-  height: 28px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border-bottom: 1px solid rgba(246, 243, 236, 0.12);
-  background: rgba(246, 243, 236, 0.08);
-}
-
-.template-browser-bar span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(246, 243, 236, 0.42);
-}
-
-.template-stage-browser iframe {
-  width: 100%;
-  height: calc(100% - 28px);
-  border: 0;
-  background: var(--black);
-  transform-origin: top left;
-}
-
 .pricing-choice-copy,
 .pricing-detail {
   opacity: 1;
@@ -1517,10 +1671,6 @@ p {
     min-height: 500px;
   }
 
-  .template-stage-preview {
-    display: none;
-  }
-
   .cta-copy {
     font-size: 16px;
   }
@@ -1728,6 +1878,14 @@ p {
     background:
       linear-gradient(180deg, rgba(5, 5, 6, 0.62), rgba(5, 5, 6, 0.96) 72%),
       url("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .mobile-contact-section::before {
+    background:
+      linear-gradient(180deg, rgba(5, 5, 6, 0.64), rgba(5, 5, 6, 0.96) 72%),
+      url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
   }
@@ -2010,5 +2168,49 @@ p {
     color: rgba(246, 243, 236, 0.82);
     font-size: 18px;
     line-height: 1.45;
+  }
+
+  .mobile-contact-section {
+    min-height: calc(120svh - 67.2px);
+    justify-content: flex-start;
+  }
+
+  .mobile-contact-section .contact-form {
+    width: 100%;
+    margin-top: 42px;
+    padding: 0;
+    grid-template-columns: 1fr;
+    border: 0;
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  .mobile-contact-section .contact-submit-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contact-modal {
+    padding: 12px;
+    align-items: end;
+  }
+
+  .contact-modal-panel {
+    width: 100%;
+    max-height: calc(100svh - 24px);
+  }
+
+  .contact-modal-head {
+    padding: 26px 22px 0;
+  }
+
+  .contact-modal .contact-form {
+    grid-template-columns: 1fr;
+    padding: 26px 22px 28px;
+  }
+
+  .contact-submit-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
