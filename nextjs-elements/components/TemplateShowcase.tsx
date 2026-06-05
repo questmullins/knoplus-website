@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { BrandLogo } from "./BrandLogo";
 import { SiteMenu } from "./SiteMenu";
 import { templates, type TemplateItem } from "@/data/templates";
 
@@ -189,7 +190,7 @@ export function TemplateShowcase() {
     <>
       <main className="app">
         <aside>
-          <div className="brand">Knoplus</div>
+          <BrandLogo />
 
           <div className="template-nav">
             <div className="nav-label">Templates</div>
@@ -234,17 +235,8 @@ export function TemplateShowcase() {
             <div className={`copy ${isCopyFading ? "fade" : ""}`}>
               <div className="copy-anchor">
                 <div className="eyebrow">{currentTemplate.label}</div>
-                <h1 dangerouslySetInnerHTML={{ __html: currentTemplate.title }} />
+                <h1>{currentTemplate.navTitle}</h1>
                 <p>{currentTemplate.description}</p>
-                <div className="template-tag-row" aria-label={`${currentTemplate.navTitle} tags`}>
-                  <span>{currentTemplate.genre}</span>
-                  {currentTemplate.stack.map((tag) => (
-                    <span key={tag}>{tag}</span>
-                  ))}
-                  {currentTemplate.styleTags.map((tag) => (
-                    <span key={tag}>{tag}</span>
-                  ))}
-                </div>
 
                 <div className="actions">
                   <button className="circle-link" onClick={() => openTemplate()} type="button" aria-label="Open template">
@@ -256,6 +248,7 @@ export function TemplateShowcase() {
                 </div>
 
                 <div className="template-panel-details" aria-label={`${currentTemplate.navTitle} features and price`}>
+                  <strong>{currentTemplate.price}</strong>
                   <div>
                     <span>Features</span>
                     <p>{currentTemplate.features.join(" / ")}</p>
@@ -264,7 +257,6 @@ export function TemplateShowcase() {
                     <span>Selling Points</span>
                     <p>{currentTemplate.sellingPoints.join(" / ")}</p>
                   </div>
-                  <strong>{currentTemplate.price}</strong>
                 </div>
               </div>
             </div>
@@ -279,7 +271,7 @@ export function TemplateShowcase() {
 
       <main className="mobile-scroll-page">
         <header className="mobile-scroll-header">
-          <div className="brand">Knoplus</div>
+          <BrandLogo />
           <SiteMenu />
         </header>
 
@@ -300,17 +292,8 @@ export function TemplateShowcase() {
             <div className="mobile-section-count">
               {String(visibleIndex + 1).padStart(2, "0")} / {String(visibleTemplates.length).padStart(2, "0")}
             </div>
-            <h2 dangerouslySetInnerHTML={{ __html: template.title }} />
+            <h2>{template.navTitle}</h2>
             <p>{template.description}</p>
-            <div className="template-tag-row" aria-label={`${template.navTitle} tags`}>
-              <span>{template.genre}</span>
-              {template.stack.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-              {template.styleTags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
             <div className="actions mobile-actions">
               <button
                 className="circle-link"
@@ -329,6 +312,7 @@ export function TemplateShowcase() {
               </button>
             </div>
             <div className="template-panel-details" aria-label={`${template.navTitle} features and price`}>
+              <strong>{template.price}</strong>
               <div>
                 <span>Features</span>
                 <p>{template.features.join(" / ")}</p>
@@ -337,7 +321,6 @@ export function TemplateShowcase() {
                 <span>Selling Points</span>
                 <p>{template.sellingPoints.join(" / ")}</p>
               </div>
-              <strong>{template.price}</strong>
             </div>
           </section>
         ))}

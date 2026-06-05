@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Knoplus Brand Variants</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&family=Stack+Sans+Text:wght@200..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --black: #050506;
+        --white: #f6f3ec;
+        --muted: rgba(246, 243, 236, 0.62);
+        --line: rgba(246, 243, 236, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 78% 16%, rgba(246, 243, 236, 0.12), transparent 25%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent 34%),
+          var(--black);
+        color: var(--white);
+        font-family: "Stack Sans Text", sans-serif;
+      }
+
+      main {
+        width: min(1180px, calc(100vw - 44px));
+        margin: 0 auto;
+        padding: 56px 0 72px;
+      }
+
+      header {
+        margin-bottom: 42px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 24px;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Kanit", sans-serif;
+        font-size: clamp(38px, 6vw, 82px);
+        line-height: 0.9;
+        font-weight: 300;
+        letter-spacing: -0.055em;
+      }
+
+      .note {
+        max-width: 310px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1px;
+        background: var(--line);
+        border: 1px solid var(--line);
+      }
+
+      .tile {
+        min-height: 320px;
+        padding: 28px;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 26px;
+        background: rgba(5, 5, 6, 0.88);
+      }
+
+      .tile-label {
+        justify-self: start;
+        align-self: start;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.34em;
+        font-size: 11px;
+        font-weight: 300;
+      }
+
+      .logo {
+        color: var(--white);
+        font-family: "Kanit", sans-serif;
+        text-transform: uppercase;
+        text-decoration: none;
+      }
+
+      .mark {
+        display: block;
+        overflow: hidden;
+      }
+
+      .mark img {
+        width: 100%;
+        height: 116%;
+        display: block;
+        object-fit: contain;
+        object-position: center top;
+      }
+
+      .word {
+        font-family: "Kanit", sans-serif;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: 0.08em;
+      }
+
+      .stacked {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .stacked .mark {
+        width: 72px;
+        height: 82px;
+      }
+
+      .stacked .word {
+        font-size: 25px;
+      }
+
+      .stacked-tight {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .stacked-tight .mark {
+        width: 48px;
+        height: 55px;
+      }
+
+      .stacked-tight .word {
+        font-size: 22px;
+      }
+
+      .horizontal {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .horizontal .mark {
+        width: 34px;
+        height: 38px;
+      }
+
+      .horizontal .word {
+        font-size: 23px;
+      }
+
+      .mark-only .mark {
+        width: 96px;
+        height: 110px;
+      }
+
+      .transition-scale {
+        display: inline-flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .transition-scale .mark {
+        width: 68px;
+        height: 78px;
+      }
+
+      .transition-scale .word {
+        font-size: clamp(38px, 5vw, 58px);
+        letter-spacing: 0.12em;
+      }
+
+      .mock-header {
+        width: min(390px, 100%);
+        height: 56px;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        background: rgba(5, 5, 6, 0.96);
+      }
+
+      .mock-header .stacked-tight .mark {
+        width: 25px;
+        height: 28px;
+      }
+
+      .mock-header .stacked-tight .word {
+        font-size: 18px;
+      }
+
+      .mock-menu {
+        width: 24px;
+        height: 24px;
+        position: relative;
+      }
+
+      .mock-menu::before,
+      .mock-menu::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 24px;
+        height: 1.5px;
+        background: var(--white);
+      }
+
+      .mock-menu::after {
+        transform: rotate(90deg);
+      }
+
+      @media (max-width: 760px) {
+        header {
+          display: grid;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Brand lockups</h1>
+        <p class="note">
+          Quick visual options using the edited white mark. The visible word is real Kanit text,
+          so it keeps the original site weight.
+        </p>
+      </header>
+
+      <section class="grid" aria-label="Brand logo variants">
+        <article class="tile">
+          <span class="tile-label">01 / Stacked</span>
+          <a class="logo stacked" href="/">
+            <span class="mark"><img src="/brand/knowplus-white.svg" alt="" /></span>
+            <span class="word">Knoplus</span>
+          </a>
+        </article>
+
+        <article class="tile">
+          <span class="tile-label">02 / Compact Stacked</span>
+          <a class="logo stacked-tight" href="/">
+            <span class="mark"><img src="/brand/knowplus-white.svg" alt="" /></span>
+            <span class="word">Knoplus</span>
+          </a>
+        </article>
+
+        <article class="tile">
+          <span class="tile-label">03 / Current Horizontal</span>
+          <a class="logo horizontal" href="/">
+            <span class="mark"><img src="/brand/knowplus-white.svg" alt="" /></span>
+            <span class="word">Knoplus</span>
+          </a>
+        </article>
+
+        <article class="tile">
+          <span class="tile-label">04 / Mark Only</span>
+          <a class="logo mark-only" href="/" aria-label="Knoplus">
+            <span class="mark"><img src="/brand/knowplus-white.svg" alt="" /></span>
+          </a>
+        </article>
+
+        <article class="tile">
+          <span class="tile-label">05 / Transition Scale</span>
+          <div class="logo transition-scale">
+            <span class="mark"><img src="/brand/knowplus-white.svg" alt="" /></span>
+            <span class="word">KNOPLUS</span>
+          </div>
+        </article>
+
+        <article class="tile">
+          <span class="tile-label">06 / Mobile Header Test</span>
+          <div class="mock-header">
+            <a class="logo stacked-tight" href="/">
+              <span class="mark"><img src="/brand/knowplus-white.svg" alt="" /></span>
+              <span class="word">Knoplus</span>
+            </a>
+            <span class="mock-menu" aria-hidden="true"></span>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

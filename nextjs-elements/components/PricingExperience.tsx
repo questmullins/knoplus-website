@@ -1,8 +1,8 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { BrandLogo } from "./BrandLogo";
 import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 import {
@@ -140,9 +140,7 @@ export function PricingExperience() {
     <>
       <main className="pricing-choice-app">
         <aside className="pricing-choice-sidebar">
-          <Link className="brand" href="/">
-            Knoplus
-          </Link>
+          <BrandLogo />
 
           <div className="pricing-choice-nav">
             <div className="nav-label">Pricing</div>
@@ -246,9 +244,7 @@ export function PricingExperience() {
 
       <main className="mobile-scroll-page mobile-pricing-page">
         <header className="mobile-scroll-header">
-          <Link className="brand" href="/">
-            Knoplus
-          </Link>
+          <BrandLogo />
           <SiteMenu onNavigate={navigateWithinKnoplus} showHomeLink />
         </header>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { BrandLogo } from "./BrandLogo";
 import { SiteMenu } from "./SiteMenu";
 import { ScreenCounter } from "./ScreenCounter";
 
@@ -32,9 +32,7 @@ export function AboutExperience() {
     <>
       <main className="about-app">
         <aside className="about-sidebar">
-          <Link className="brand" href="/">
-            Knoplus
-          </Link>
+          <BrandLogo />
 
           <div className="about-nav">
             <div className="nav-label">About</div>
@@ -97,9 +95,7 @@ export function AboutExperience() {
 
       <main className="mobile-scroll-page mobile-about-page">
         <header className="mobile-scroll-header">
-          <Link className="brand" href="/">
-            Knoplus
-          </Link>
+          <BrandLogo />
           <SiteMenu onNavigate={navigateWithinKnoplus} showHomeLink />
         </header>
 
