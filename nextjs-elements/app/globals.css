@@ -1472,12 +1472,26 @@ h1 {
   font-size: 18px;
   font-weight: 300;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    padding 0.2s ease;
 }
 
 .menu-panel a:hover,
 .menu-panel button:hover {
   color: var(--white);
+}
+
+.menu-panel button.active {
+  padding: 8px 12px;
+  background: rgba(246, 243, 236, 0.86);
+  color: var(--black);
+}
+
+.menu-panel button.active:hover,
+.menu-panel button.active:focus-visible {
+  color: var(--black);
 }
 
 .menu-divider {

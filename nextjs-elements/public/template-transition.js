@@ -1,6 +1,42 @@
 (function () {
   var transitionKey = "knoplus:template-transition";
   var shouldReveal = false;
+  var homeStyle = document.createElement("style");
+  homeStyle.id = "knoplus-template-home-style";
+  homeStyle.textContent = [
+    ".knoplus-template-home{",
+    "position:fixed;left:20px;top:20px;z-index:2147483645;",
+    "min-height:42px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;",
+    "border:1px solid rgba(246,243,236,.38);background:rgba(5,5,6,.78);color:#f6f3ec;",
+    "font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.24em;",
+    "text-decoration:none;text-transform:uppercase;backdrop-filter:blur(16px);",
+    "box-shadow:0 16px 42px rgba(0,0,0,.28);transition:background .22s ease,color .22s ease,transform .22s ease;",
+    "}",
+    ".knoplus-template-home:hover,.knoplus-template-home:focus-visible{",
+    "background:#f6f3ec;color:#050506;transform:translateY(-1px);",
+    "}",
+    "@media (max-width:720px){.knoplus-template-home{left:14px;top:14px;min-height:38px;padding:0 13px;font-size:10px;}}"
+  ].join("");
+  document.head.appendChild(homeStyle);
+
+  function addHomeButton() {
+    if (document.querySelector(".knoplus-template-home")) {
+      return;
+    }
+
+    var link = document.createElement("a");
+    link.className = "knoplus-template-home";
+    link.href = "/";
+    link.setAttribute("aria-label", "Return to Knoplus");
+    link.textContent = "KNOPLUS";
+    document.body.appendChild(link);
+  }
+
+  if (document.body) {
+    addHomeButton();
+  } else {
+    document.addEventListener("DOMContentLoaded", addHomeButton, { once: true });
+  }
 
   try {
     shouldReveal = window.sessionStorage.getItem(transitionKey) === "reveal";

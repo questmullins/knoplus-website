@@ -54,13 +54,21 @@ export function SiteMenu({ className = "", hideIcon = false, onContact, onNaviga
 
       <div className={`menu-panel ${isMenuOpen ? "open" : ""}`}>
         <nav>
-          {menuItems
-            .filter((item) => item.href !== pathname)
-            .map((item) => (
-              <button onClick={() => handleInternalNavigation(item.href)} type="button" key={item.href}>
+          {menuItems.map((item) => {
+            const isActive = item.href === pathname;
+
+            return (
+              <button
+                className={isActive ? "active" : ""}
+                onClick={() => handleInternalNavigation(item.href)}
+                type="button"
+                key={item.href}
+                aria-current={isActive ? "page" : undefined}
+              >
                 {item.label}
               </button>
-            ))}
+            );
+          })}
           {onContact ? (
             <button onClick={handleContactClick} type="button">
               Contact Us
