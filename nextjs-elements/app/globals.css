@@ -799,9 +799,14 @@ h1 {
   width: min(760px, calc(100vw - 40px));
   max-height: min(860px, calc(100svh - 40px));
   overflow-y: auto;
+  scrollbar-width: none;
   border: 1px solid rgba(246, 243, 236, 0.16);
   background: rgba(7, 7, 8, 0.94);
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.54);
+}
+
+.contact-modal-panel::-webkit-scrollbar {
+  display: none;
 }
 
 .contact-modal-head {

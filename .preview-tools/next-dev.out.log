@@ -3,7 +3,4 @@
    - Network:      http://0.0.0.0:3220
 
  ✓ Starting...
- ✓ Ready in 1649ms
- ○ Compiling / ...
- ✓ Compiled / in 2.4s (612 modules)
- GET / 200 in 2731ms
+ ✓ Ready in 1584ms

@@ -1,5 +1,5 @@
 const CONTACT_TO_FALLBACK = "quest@kno.plus";
-const CONTACT_FROM_FALLBACK = "Knoplus <onboarding@resend.dev>";
+const CONTACT_FROM_FALLBACK = "Knoplus <quest@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
 
 export default {

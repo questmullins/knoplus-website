@@ -10,7 +10,8 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "CONTACT_TO": "quest@kno.plus"
+    "CONTACT_TO": "quest@kno.plus",
+    "CONTACT_FROM": "Knoplus <quest@kno.plus>"
   },
   "observability": {
     "enabled": true
