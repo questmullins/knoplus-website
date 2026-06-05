@@ -1,0 +1,12 @@
+{
+  "name": "knoplus-website-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm install --prefix nextjs-elements && npm run build --prefix nextjs-elements",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.98.0"
+  }
+}

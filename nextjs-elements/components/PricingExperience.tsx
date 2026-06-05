@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
 import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
@@ -85,17 +85,20 @@ export function PricingExperience() {
     window.location.href = destination;
   }
 
-  function setPricingOption(index: number) {
-    if (index === activeIndex) {
-      return;
-    }
+  const setPricingOption = useCallback(
+    (index: number) => {
+      if (index === activeIndex) {
+        return;
+      }
 
-    setIsStageFading(true);
-    window.setTimeout(() => {
-      setActiveIndex(index);
-      setIsStageFading(false);
-    }, 170);
-  }
+      setIsStageFading(true);
+      window.setTimeout(() => {
+        setActiveIndex(index);
+        setIsStageFading(false);
+      }, 170);
+    },
+    [activeIndex]
+  );
 
   useEffect(() => {
     let isWheelLocked = false;
@@ -124,7 +127,7 @@ export function PricingExperience() {
     return () => {
       window.removeEventListener("wheel", advanceFromWheel);
     };
-  }, [activeIndex]);
+  }, [activeIndex, setPricingOption]);
 
   useEffect(() => {
     const sections = mobileSectionRefs.current.filter(Boolean) as HTMLElement[];

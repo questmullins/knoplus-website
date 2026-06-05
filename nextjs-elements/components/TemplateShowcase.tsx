@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
 import { SiteMenu } from "./SiteMenu";
 import { templates, type TemplateItem } from "@/data/templates";
@@ -52,6 +52,30 @@ export function TemplateShowcase() {
     [nextVisibleIndex, visibleTemplates.length]
   );
 
+  const setTemplate = useCallback(
+    (index: number) => {
+      if (index === currentIndex) {
+        return;
+      }
+
+      setNextIndex(index);
+      setIsCopyFading(true);
+      setIsBgChanging(true);
+      setIsCounterChanging(true);
+
+      window.setTimeout(() => {
+        setCurrentIndex(index);
+        setIsCopyFading(false);
+        setIsBgChanging(false);
+      }, 420);
+
+      window.setTimeout(() => {
+        setIsCounterChanging(false);
+      }, 360);
+    },
+    [currentIndex]
+  );
+
   useEffect(() => {
     if (!visibleTemplates.some(({ index }) => index === currentIndex)) {
       const nextVisible = visibleTemplates[0];
@@ -94,7 +118,7 @@ export function TemplateShowcase() {
     return () => {
       window.removeEventListener("wheel", advanceFromWheel);
     };
-  }, [currentIndex, currentVisibleIndex, visibleTemplates]);
+  }, [currentIndex, currentVisibleIndex, setTemplate, visibleTemplates]);
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
@@ -132,27 +156,6 @@ export function TemplateShowcase() {
       window.sessionStorage?.removeItem("knoplus:last-template-panel");
     }
   }, []);
-
-  function setTemplate(index: number) {
-    if (index === currentIndex) {
-      return;
-    }
-
-    setNextIndex(index);
-    setIsCopyFading(true);
-    setIsBgChanging(true);
-    setIsCounterChanging(true);
-
-    window.setTimeout(() => {
-      setCurrentIndex(index);
-      setIsCopyFading(false);
-      setIsBgChanging(false);
-    }, 420);
-
-    window.setTimeout(() => {
-      setIsCounterChanging(false);
-    }, 360);
-  }
 
   useEffect(() => {
     const sections = mobileSectionRefs.current.filter(Boolean) as HTMLElement[];
