@@ -1354,6 +1354,52 @@ h1 {
   border-bottom: 0;
 }
 
+.care-comparison {
+  display: grid;
+  min-width: min(680px, 100%);
+  overflow-x: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.care-comparison-row {
+  min-width: 640px;
+  display: grid;
+  grid-template-columns: 1.15fr repeat(3, 0.85fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 58px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.care-comparison-row:last-child {
+  border-bottom: 0;
+}
+
+.care-comparison-row span,
+.care-comparison-row strong {
+  color: rgba(246, 243, 236, 0.72);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.care-comparison-row p {
+  max-width: none;
+  margin: 0;
+  color: rgba(246, 243, 236, 0.68);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.care-comparison-head strong,
+.care-comparison-head span {
+  color: var(--white);
+}
+
 .pricing-pitch {
   position: absolute;
   left: clamp(42px, 5vw, 86px);
@@ -2311,6 +2357,7 @@ p {
   .mobile-pricing-section .pricing-path-grid,
   .mobile-pricing-section .pricing-rate-list,
   .mobile-pricing-section .pricing-plan-stack,
+  .mobile-pricing-section .care-comparison,
   .mobile-pricing-section .pricing-chip-grid,
   .mobile-pricing-section .pricing-examples {
     opacity: 0;
@@ -2335,6 +2382,7 @@ p {
   .mobile-pricing-section.is-active .pricing-path-grid,
   .mobile-pricing-section.is-active .pricing-rate-list,
   .mobile-pricing-section.is-active .pricing-plan-stack,
+  .mobile-pricing-section.is-active .care-comparison,
   .mobile-pricing-section.is-active .pricing-chip-grid,
   .mobile-pricing-section.is-active .pricing-examples,
   .mobile-pricing-section.is-revealed .eyebrow,
@@ -2344,6 +2392,7 @@ p {
   .mobile-pricing-section.is-revealed .pricing-path-grid,
   .mobile-pricing-section.is-revealed .pricing-rate-list,
   .mobile-pricing-section.is-revealed .pricing-plan-stack,
+  .mobile-pricing-section.is-revealed .care-comparison,
   .mobile-pricing-section.is-revealed .pricing-chip-grid,
   .mobile-pricing-section.is-revealed .pricing-examples {
     opacity: 1;
@@ -2541,7 +2590,8 @@ p {
   .mobile-pricing-section .pricing-rate-list,
   .mobile-pricing-section .pricing-plan-stack,
   .mobile-pricing-section .pricing-chip-grid,
-  .mobile-pricing-section .pricing-path-grid {
+  .mobile-pricing-section .pricing-path-grid,
+  .mobile-pricing-section .care-comparison {
     width: 100%;
   }
 

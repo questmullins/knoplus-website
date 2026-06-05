@@ -1,17 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { processIntro, processSteps } from "@/data/process";
 import { BrandLogo } from "./BrandLogo";
 import { ContactModal } from "./ContactModal";
+import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 
 export function ProcessExperience() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isStageFading, setIsStageFading] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const active = processSteps[activeIndex];
 
   function navigateWithinKnoplus(destination: string) {
     window.location.href = destination;
   }
+
+  const setProcessOption = useCallback(
+    (index: number) => {
+      if (index === activeIndex) {
+        return;
+      }
+
+      setIsStageFading(true);
+      window.setTimeout(() => {
+        setActiveIndex(index);
+        setIsStageFading(false);
+      }, 170);
+    },
+    [activeIndex]
+  );
+
+  useEffect(() => {
+    let isWheelLocked = false;
+
+    const advanceFromWheel = (event: WheelEvent) => {
+      if (window.matchMedia("(max-width: 760px)").matches || Math.abs(event.deltaY) < 24 || isWheelLocked) {
+        return;
+      }
+
+      const nextIndex = Math.max(0, Math.min(processSteps.length - 1, activeIndex + (event.deltaY > 0 ? 1 : -1)));
+
+      if (nextIndex === activeIndex) {
+        return;
+      }
+
+      event.preventDefault();
+      isWheelLocked = true;
+      setProcessOption(nextIndex);
+      window.setTimeout(() => {
+        isWheelLocked = false;
+      }, 420);
+    };
+
+    window.addEventListener("wheel", advanceFromWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", advanceFromWheel);
+    };
+  }, [activeIndex, setProcessOption]);
 
   return (
     <>
@@ -24,10 +72,15 @@ export function ProcessExperience() {
           <div className="about-nav">
             <div className="nav-label">Process</div>
             {processSteps.map((step, index) => (
-              <div className="template-btn about-nav-static" key={step.label}>
+              <button
+                className={`template-btn ${index === activeIndex ? "active" : ""}`}
+                key={step.label}
+                onClick={() => setProcessOption(index)}
+                type="button"
+              >
                 <span>{step.label}</span>
-                <small>{String(index + 1).padStart(2, "0")}</small>
-              </div>
+                <span className="plus" />
+              </button>
             ))}
           </div>
 
@@ -54,7 +107,7 @@ export function ProcessExperience() {
             showLabel
           />
           <div className="about-bg process-bg" />
-          <div className="about-copy">
+          <div className={`about-copy pricing-choice-copy ${isStageFading ? "is-fading" : ""}`}>
             <div className="eyebrow">{processIntro.eyebrow}</div>
             <h1>
               {processIntro.title.split("\n")[0]}
@@ -64,16 +117,19 @@ export function ProcessExperience() {
             <p>{processIntro.body}</p>
           </div>
 
-          <div className="about-principles" aria-label="Knoplus process">
-            {processSteps.map((step, index) => (
-              <article className="about-principle active" key={step.label}>
-                <span>{step.label}</span>
-                <p>{step.text}</p>
-              </article>
-            ))}
+          <div className={`about-principles pricing-detail ${isStageFading ? "is-fading" : ""}`} aria-label="Knoplus process">
+            <article className="about-principle active">
+              <span>{active.label}</span>
+              <p>{active.text}</p>
+            </article>
+            <article className="about-principle active">
+              <span>What You Get</span>
+              <p>A clear next step, a realistic scope, and a site path that matches the level of customization the business actually needs.</p>
+            </article>
           </div>
 
           <blockquote className="about-pitch">{processIntro.pitch}</blockquote>
+          <ScreenCounter current={activeIndex + 1} total={processSteps.length} />
         </section>
       </main>
 

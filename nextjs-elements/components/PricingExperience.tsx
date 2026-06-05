@@ -8,6 +8,7 @@ import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 import {
   additionalServices,
+  careComparison,
   carePlans,
   customPricing,
   includedItems,
@@ -72,7 +73,8 @@ const pricingOptions = [
     accent: "$29",
     note: "Standard monthly care",
     image: "url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=80')",
-    plans: carePlans
+    plans: carePlans,
+    comparison: careComparison
   },
   {
     label: "Included",
@@ -253,17 +255,37 @@ export function PricingExperience() {
 
           <div className={`pricing-detail ${isStageFading ? "is-fading" : ""}`}>
             {"plans" in active && active.plans ? (
-              <div className="pricing-plan-stack" aria-label="Website care plans">
-                {active.plans.map((plan) => (
-                  <article className="pricing-plan-row" key={plan.name}>
-                    <div>
-                      <span>{plan.name}</span>
-                      <strong>{plan.price}</strong>
+              <>
+                <div className="pricing-plan-stack" aria-label="Website care plans">
+                  {active.plans.map((plan) => (
+                    <article className="pricing-plan-row" key={plan.name}>
+                      <div>
+                        <span>{plan.name}</span>
+                        <strong>{plan.price}</strong>
+                      </div>
+                      <p>{plan.details.join(" / ")}</p>
+                    </article>
+                  ))}
+                </div>
+                {"comparison" in active && active.comparison ? (
+                  <div className="care-comparison" aria-label="Website care plan comparison">
+                    <div className="care-comparison-row care-comparison-head">
+                      <span>Feature</span>
+                      <strong>Self</strong>
+                      <strong>Standard</strong>
+                      <strong>Business</strong>
                     </div>
-                    <p>{plan.details.join(" / ")}</p>
-                  </article>
-                ))}
-              </div>
+                    {active.comparison.map((row) => (
+                      <div className="care-comparison-row" key={row.feature}>
+                        <span>{row.feature}</span>
+                        <p>{row.self}</p>
+                        <p>{row.standard}</p>
+                        <p>{row.business}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </>
             ) : null}
 
             {"paths" in active && active.paths ? (
@@ -350,17 +372,37 @@ export function PricingExperience() {
             </div>
 
             {"plans" in option && option.plans ? (
-              <div className="pricing-plan-stack" aria-label="Website care plans">
-                {option.plans.map((plan) => (
-                  <article className="pricing-plan-row" key={plan.name}>
-                    <div>
-                      <span>{plan.name}</span>
-                      <strong>{plan.price}</strong>
+              <>
+                <div className="pricing-plan-stack" aria-label="Website care plans">
+                  {option.plans.map((plan) => (
+                    <article className="pricing-plan-row" key={plan.name}>
+                      <div>
+                        <span>{plan.name}</span>
+                        <strong>{plan.price}</strong>
+                      </div>
+                      <p>{plan.details.join(" / ")}</p>
+                    </article>
+                  ))}
+                </div>
+                {"comparison" in option && option.comparison ? (
+                  <div className="care-comparison" aria-label="Website care plan comparison">
+                    <div className="care-comparison-row care-comparison-head">
+                      <span>Feature</span>
+                      <strong>Self</strong>
+                      <strong>Standard</strong>
+                      <strong>Business</strong>
                     </div>
-                    <p>{plan.details.join(" / ")}</p>
-                  </article>
-                ))}
-              </div>
+                    {option.comparison.map((row) => (
+                      <div className="care-comparison-row" key={row.feature}>
+                        <span>{row.feature}</span>
+                        <p>{row.self}</p>
+                        <p>{row.standard}</p>
+                        <p>{row.business}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </>
             ) : null}
 
             {"paths" in option && option.paths ? (

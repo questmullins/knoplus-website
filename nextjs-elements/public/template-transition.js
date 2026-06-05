@@ -49,6 +49,7 @@
 
     try {
       window.sessionStorage.setItem("knoplus:main-transition", "reveal");
+      window.sessionStorage.setItem("knoplus:return-template", getTemplateName());
     } catch {}
 
     if (!screen) {

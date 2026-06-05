@@ -35,6 +35,8 @@ export function TemplateShowcase() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMainRevealing, setIsMainRevealing] = useState(false);
   const mobileSectionRefs = useRef<Array<HTMLElement | null>>([]);
+  const shouldRestoreMobileRef = useRef(false);
+  const returningTemplateIndexRef = useRef<number | null>(null);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const [revealedMobileIndexes, setRevealedMobileIndexes] = useState<Set<number>>(() => new Set([0]));
   const [selectedGenre, setSelectedGenre] = useState("All");
@@ -195,6 +197,7 @@ export function TemplateShowcase() {
     try {
       if (window.sessionStorage.getItem("knoplus:main-transition") === "reveal") {
         window.sessionStorage.removeItem("knoplus:main-transition");
+        shouldRestoreMobileRef.current = true;
         setIsMainRevealing(true);
 
         window.setTimeout(() => {
@@ -223,15 +226,19 @@ export function TemplateShowcase() {
     const selectedFromQuery = params.get("template");
     const shouldOpenContact = params.get("contact") === "template";
     let selectedFromStorage = "";
+    let returningTemplate = "";
 
     try {
       selectedFromStorage = window.sessionStorage.getItem("knoplus:selected-template") ?? "";
+      returningTemplate = window.sessionStorage.getItem("knoplus:return-template") ?? "";
       window.sessionStorage.removeItem("knoplus:selected-template");
+      window.sessionStorage.removeItem("knoplus:return-template");
     } catch {
       selectedFromStorage = "";
+      returningTemplate = "";
     }
 
-    const templateName = selectedFromStorage || selectedFromQuery || "";
+    const templateName = selectedFromStorage || returningTemplate || selectedFromQuery || "";
 
     if (templateName) {
       const templateIndex = templates.findIndex(
@@ -243,6 +250,19 @@ export function TemplateShowcase() {
         setNextIndex(templateIndex);
         setSelectedContactTemplate(templates[templateIndex].navTitle);
         setIsIntroActive(false);
+        returningTemplateIndexRef.current = returningTemplate ? templateIndex : null;
+
+        if (returningTemplate) {
+          window.requestAnimationFrame(() => {
+            const mobileSection = document.querySelector<HTMLElement>(
+              `.mobile-template-section[data-index="${templateIndex}"]`
+            );
+
+            if (window.matchMedia("(max-width: 760px)").matches && mobileSection) {
+              mobileSection.scrollIntoView({ behavior: "auto", block: "start" });
+            }
+          });
+        }
       }
     }
 
@@ -259,6 +279,18 @@ export function TemplateShowcase() {
       typeof window.sessionStorage === "undefined"
         ? null
         : window.sessionStorage.getItem("knoplus:last-template-panel");
+
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    const allowMobileRestore = shouldRestoreMobileRef.current;
+
+    if (isMobile && !allowMobileRestore) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+
+    if (isMobile && returningTemplateIndexRef.current !== null) {
+      return;
+    }
 
     if (!savedPanel && hashIndex === null) {
       return;

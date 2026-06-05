@@ -33,7 +33,11 @@ export const carePlans = [
   {
     name: "Self Managed",
     price: "$0/month",
-    details: ["Client receives website and manages future updates."]
+    details: [
+      "Website handoff after launch",
+      "Client manages hosting, renewals, updates, and content changes",
+      "Best for teams comfortable owning the technical follow-through"
+    ]
   },
   {
     name: "Standard Care",
@@ -42,6 +46,8 @@ export const carePlans = [
       "Hosting management",
       "SSL monitoring",
       "Domain management assistance",
+      "Basic uptime checks",
+      "Monthly plugin/static asset check where applicable",
       "Up to 15 minutes of content updates per month"
     ]
   },
@@ -51,9 +57,22 @@ export const carePlans = [
     details: [
       "Everything in Standard Care",
       "Priority support",
+      "Monthly performance and SEO health check",
+      "Minor layout polish for seasonal offers or service changes",
       "Up to 1 hour of content updates per month"
     ]
   }
+];
+
+export const careComparison = [
+  { feature: "Hosting management", self: "Client managed", standard: "Included", business: "Included" },
+  { feature: "SSL monitoring", self: "Client managed", standard: "Included", business: "Included" },
+  { feature: "Domain help", self: "Launch handoff", standard: "Assistance", business: "Priority assistance" },
+  { feature: "Content updates", self: "Quoted as needed", standard: "15 min/month", business: "1 hr/month" },
+  { feature: "Support speed", self: "As available", standard: "Standard", business: "Priority" },
+  { feature: "Performance checks", self: "Not included", standard: "Basic uptime", business: "Monthly review" },
+  { feature: "SEO health checks", self: "Not included", standard: "Launch setup only", business: "Monthly basics" },
+  { feature: "Best fit", self: "Hands-on owners", standard: "Simple sites", business: "Active businesses" }
 ];
 
 export const additionalServices = [

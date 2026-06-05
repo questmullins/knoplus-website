@@ -1,17 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
 import { ContactModal } from "./ContactModal";
+import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 import { aboutIntro, aboutPrinciples } from "@/data/about";
 
 export function AboutExperience() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isStageFading, setIsStageFading] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const active = aboutPrinciples[activeIndex];
 
   function navigateWithinKnoplus(destination: string) {
     window.location.href = destination;
   }
+
+  const setAboutOption = useCallback(
+    (index: number) => {
+      if (index === activeIndex) {
+        return;
+      }
+
+      setIsStageFading(true);
+      window.setTimeout(() => {
+        setActiveIndex(index);
+        setIsStageFading(false);
+      }, 170);
+    },
+    [activeIndex]
+  );
+
+  useEffect(() => {
+    let isWheelLocked = false;
+
+    const advanceFromWheel = (event: WheelEvent) => {
+      if (window.matchMedia("(max-width: 760px)").matches || Math.abs(event.deltaY) < 24 || isWheelLocked) {
+        return;
+      }
+
+      const nextIndex = Math.max(0, Math.min(aboutPrinciples.length - 1, activeIndex + (event.deltaY > 0 ? 1 : -1)));
+
+      if (nextIndex === activeIndex) {
+        return;
+      }
+
+      event.preventDefault();
+      isWheelLocked = true;
+      setAboutOption(nextIndex);
+      window.setTimeout(() => {
+        isWheelLocked = false;
+      }, 420);
+    };
+
+    window.addEventListener("wheel", advanceFromWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", advanceFromWheel);
+    };
+  }, [activeIndex, setAboutOption]);
 
   return (
     <>
@@ -24,10 +72,15 @@ export function AboutExperience() {
           <div className="about-nav">
             <div className="nav-label">About</div>
             {aboutPrinciples.map((principle, index) => (
-              <div className="template-btn about-nav-static" key={principle.label}>
+              <button
+                className={`template-btn ${index === activeIndex ? "active" : ""}`}
+                key={principle.label}
+                onClick={() => setAboutOption(index)}
+                type="button"
+              >
                 <span>{principle.label}</span>
-                <small>{String(index + 1).padStart(2, "0")}</small>
-              </div>
+                <span className="plus" />
+              </button>
             ))}
           </div>
 
@@ -54,7 +107,7 @@ export function AboutExperience() {
             showLabel
           />
           <div className="about-bg" />
-          <div className="about-copy">
+          <div className={`about-copy pricing-choice-copy ${isStageFading ? "is-fading" : ""}`}>
             <div className="eyebrow">{aboutIntro.eyebrow}</div>
             <h1>
               {aboutIntro.title.split("\n")[0]}
@@ -64,18 +117,21 @@ export function AboutExperience() {
             <p>{aboutIntro.body}</p>
           </div>
 
-          <div className="about-principles" aria-label="Knoplus principles">
-            {aboutPrinciples.map((principle, index) => (
-              <article className="about-principle active" key={principle.label}>
-                <span>{principle.label}</span>
-                <p>{principle.text}</p>
-              </article>
-            ))}
+          <div className={`about-principles pricing-detail ${isStageFading ? "is-fading" : ""}`} aria-label="Knoplus principles">
+            <article className="about-principle active">
+              <span>{active.label}</span>
+              <p>{active.text}</p>
+            </article>
+            <article className="about-principle active">
+              <span>Why It Matters</span>
+              <p>Each decision is filtered through whether it helps the business look trustworthy, explain itself clearly, and move without wasted complexity.</p>
+            </article>
           </div>
 
           <blockquote className="about-pitch">
             {aboutIntro.pitch}
           </blockquote>
+          <ScreenCounter current={activeIndex + 1} total={aboutPrinciples.length} />
         </section>
       </main>
 
