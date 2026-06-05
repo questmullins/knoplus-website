@@ -22,7 +22,7 @@ const pricingOptions = [
     eyebrow: "Template or custom",
     title: "Pick the build path that fits the business.",
     description:
-      "Template websites are the cleanest path when a business needs a polished launch quickly. Custom websites are for brands that need original structure, deeper systems, or a sharper visual direction.",
+      "Template websites are the cleanest path when a business needs a polished launch quickly. Knoplus is strongest for pre-built experiences, clear service pages, lead forms, and fast management; heavy e-commerce, payment processing, or highly modified software builds are usually not the right fit.",
     accent: "$500",
     note: "Template starting point",
     image: "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')",
@@ -38,6 +38,12 @@ const pricingOptions = [
         price: "From $1,500",
         body:
           "Best when the layout, user experience, brand system, integrations, or content flow needs to be designed from the ground up."
+      },
+      {
+        name: "Not The Best Fit",
+        price: "Storefront builds",
+        body:
+          "If the project needs shopping carts, subscriptions, payment processing, complex customer accounts, or constant custom feature changes, a dedicated e-commerce developer is probably a better match."
       }
     ]
   },
@@ -100,9 +106,9 @@ const pricingOptions = [
   {
     label: "Add Ons",
     eyebrow: "Custom quote",
-    title: "When the site needs deeper systems, we scope it cleanly.",
+    title: "Simple add-ons are welcome. Heavy commerce is not the lane.",
     description:
-      "Booking systems, API work, e-commerce, memberships, and custom functionality can be layered in when the business needs it.",
+      "Knoplus can scope light add-ons when they support the website experience, but the core offer is fast, polished, pre-built service websites. Full storefronts, payment systems, complex accounts, and ongoing custom software are better handled by a specialist.",
     accent: "Quote",
     note: "Scoped separately",
     image: "url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80')",
@@ -348,6 +354,7 @@ export function PricingExperience() {
             * Modern, professional websites start at $500. Monthly care plans are
             optional and can cover hosting, updates, and maintenance after launch.
             Domain registration and renewal stay client-owned and are billed separately by the registrar.
+            Knoplus is built for service websites and lead generation, not heavy e-commerce or payment processing.
           </blockquote>
           <ScreenCounter current={activeIndex + 1} total={pricingOptions.length} />
         </section>
@@ -469,6 +476,7 @@ export function PricingExperience() {
             * Modern, professional websites start at $500. Monthly care plans are
             optional and can cover hosting, updates, and maintenance after launch.
             Domain registration and renewal stay client-owned and are billed separately by the registrar.
+            Knoplus is built for service websites and lead generation, not heavy e-commerce or payment processing.
           </p>
         </footer>
       </main>

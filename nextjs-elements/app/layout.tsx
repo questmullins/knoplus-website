@@ -10,7 +10,7 @@ const structuredData = [
     url: "https://kno.plus",
     email: "quest@kno.plus",
     description:
-      "Knoplus builds website templates and custom websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
+      "Knoplus builds fast website templates and service websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
     areaServed: "United States",
     offers: [
       {
@@ -30,9 +30,9 @@ const structuredData = [
       {
         "@type": "Offer",
         name: "Website Care Plan",
-        price: "29",
+        price: "39",
         priceCurrency: "USD",
-        description: "Optional monthly website care for hosting management, SSL monitoring, domain support, and content updates."
+        description: "Optional monthly website care for hosting management, SSL monitoring, client-owned domain connection support, and content updates."
       }
     ],
     serviceType: [
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
     template: "%s | Knoplus"
   },
   description:
-    "Knoplus builds modern website templates and custom websites for independent companies, local businesses, automotive shops, home service companies, and growing brands.",
+    "Knoplus builds modern website templates and service websites for independent companies, local businesses, automotive shops, home service companies, and growing brands that need fast launch timelines and simple management.",
   keywords: [
     "website templates",
     "custom websites",
@@ -93,6 +93,8 @@ export const metadata: Metadata = {
     "SEO website setup",
     "Cloudflare website deployment",
     "website care plans",
+    "service business websites",
+    "lead generation websites",
     "automotive website templates",
     "home services website templates",
     "Knoplus"

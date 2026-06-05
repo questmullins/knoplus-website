@@ -83,9 +83,9 @@ export const additionalServices = [
   { label: "Domain Setup Service", value: "$75 one-time" },
   { label: "New Page", value: "Current page rate" },
   { label: "Major Redesign", value: "Custom Quote" },
-  { label: "Booking Systems", value: "Custom Quote" },
-  { label: "API Integrations", value: "Custom Quote" },
-  { label: "E-Commerce", value: "Custom Quote" },
-  { label: "Membership Areas", value: "Custom Quote" },
-  { label: "Custom Functionality", value: "Custom Quote" }
+  { label: "Light Booking Links", value: "Custom Quote" },
+  { label: "Simple API Connections", value: "Custom Quote" },
+  { label: "E-Commerce / Payments", value: "Not primary fit" },
+  { label: "Membership Areas", value: "Not primary fit" },
+  { label: "Heavy Custom Functionality", value: "Not primary fit" }
 ];

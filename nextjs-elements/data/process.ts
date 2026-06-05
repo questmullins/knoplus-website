@@ -2,7 +2,7 @@ export const processSteps = [
   {
     label: "Discover",
     text:
-      "With Knoplus, website creation starts simple: choose a template and we update the information, color themes, photography, and details around what you are looking for. If you need more than the template path, tell us what you have in mind and we can quote a custom proposal together."
+      "With Knoplus, website creation starts simple: choose a template and we update the information, color themes, photography, and details around what you are looking for. The best fit is a fast, polished service website with clear pages and contact paths; if you need e-commerce, payment processing, or heavy custom software, we will be honest about whether another specialist is a better option."
   },
   {
     label: "Build",

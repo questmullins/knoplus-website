@@ -20,19 +20,21 @@ export const seoPages: SeoPage[] = [
     eyebrow: "Small business websites",
     title: "Professional websites for small and independent businesses.",
     description:
-      "Knoplus builds small business websites with mobile-friendly design, clear services, contact forms, basic SEO setup, launch support, and optional care plans.",
+      "Knoplus builds small business service websites with mobile-friendly design, clear services, contact forms, basic SEO setup, launch support, and optional care plans.",
     keywords: [
       "small business websites",
       "independent business websites",
       "local business website design",
       "professional websites for small business",
-      "affordable business websites"
+      "affordable business websites",
+      "service business websites",
+      "lead generation websites"
     ],
     sections: [
       {
         heading: "Clear enough to trust",
         body:
-          "A good small business website explains who you are, what you do, why people should trust you, and how they can take the next step."
+          "A good small business service website explains who you are, what you do, why people should trust you, and how they can take the next step. Knoplus is focused on service pages and lead generation, not full e-commerce storefronts."
       },
       {
         heading: "Practical launch support",
@@ -130,7 +132,7 @@ export const seoPages: SeoPage[] = [
       {
         heading: "Choose the level of hands-off",
         body:
-          "Clients can self-manage, use Standard Care for essentials, or choose Business Care for priority support and more monthly update time."
+          "Clients can self-manage, use Standard Care for essentials, or choose Business Care for priority support and more monthly update time. Care plans are built for content, hosting, SSL, and lead-generation sites rather than active storefront management."
       }
     ],
     links: [
