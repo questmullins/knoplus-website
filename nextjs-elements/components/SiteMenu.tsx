@@ -4,9 +4,10 @@ import { useState } from "react";
 
 type SiteMenuProps = {
   onNavigate?: (destination: string) => void;
+  showHomeLink?: boolean;
 };
 
-export function SiteMenu({ onNavigate }: SiteMenuProps) {
+export function SiteMenu({ onNavigate, showHomeLink = false }: SiteMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   function handleInternalNavigation(destination: string) {
@@ -31,7 +32,14 @@ export function SiteMenu({ onNavigate }: SiteMenuProps) {
 
       <div className={`menu-panel ${isMenuOpen ? "open" : ""}`}>
         <nav>
-          <a href="#">About Us</a>
+          {showHomeLink ? (
+            <button onClick={() => handleInternalNavigation("/")} type="button">
+              Home
+            </button>
+          ) : null}
+          <button onClick={() => handleInternalNavigation("/about")} type="button">
+            About Us
+          </button>
           <a href="#">Our Process</a>
           <button onClick={() => handleInternalNavigation("/pricing")} type="button">
             Pricing

@@ -1,7 +1,8 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScreenCounter } from "./ScreenCounter";
 import { SiteMenu } from "./SiteMenu";
 import {
@@ -22,6 +23,7 @@ const pricingOptions = [
       "Best for small businesses that need a polished launch without paying for a ground-up design system.",
     accent: "$500",
     note: "One-page starter",
+    image: "url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80')",
     rows: pagePricing,
     examples: templateExamples
   },
@@ -33,6 +35,7 @@ const pricingOptions = [
       "Designed from the ground up with custom layouts, branding, user experience, and visual direction.",
     accent: "$1,500",
     note: "Custom first page",
+    image: "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')",
     rows: customPricing
   },
   {
@@ -43,6 +46,7 @@ const pricingOptions = [
       "Monthly care can cover hosting, SSL, domain support, and small content updates so clients are not left alone with maintenance.",
     accent: "$29",
     note: "Standard monthly care",
+    image: "url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=80')",
     plans: carePlans
   },
   {
@@ -53,6 +57,7 @@ const pricingOptions = [
       "A focused launch package with mobile design, forms, deployment, security, domain connection, basic SEO, and support.",
     accent: "7",
     note: "Included essentials",
+    image: "url('https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80')",
     items: includedItems
   },
   {
@@ -63,13 +68,17 @@ const pricingOptions = [
       "Booking systems, API work, e-commerce, memberships, and custom functionality can be layered in when the business needs it.",
     accent: "Quote",
     note: "Scoped separately",
-    items: additionalServices.map((service) => service.label)
+    image: "url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80')",
+    rows: additionalServices
   }
 ];
 
 export function PricingExperience() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isStageFading, setIsStageFading] = useState(false);
+  const mobileSectionRefs = useRef<Array<HTMLElement | null>>([]);
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+  const [revealedMobileIndexes, setRevealedMobileIndexes] = useState<Set<number>>(() => new Set([0]));
   const active = pricingOptions[activeIndex];
 
   function navigateWithinKnoplus(destination: string) {
@@ -87,6 +96,45 @@ export function PricingExperience() {
       setIsStageFading(false);
     }, 170);
   }
+
+  useEffect(() => {
+    const sections = mobileSectionRefs.current.filter(Boolean) as HTMLElement[];
+
+    if (!sections.length) {
+      return;
+    }
+
+    const updateParallax = () => {
+      const viewportHeight = window.innerHeight || 1;
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        const progress = (rect.top - viewportHeight / 2) / viewportHeight;
+        const distance = Math.abs(rect.top + rect.height / 2 - viewportHeight / 2);
+
+        section.style.setProperty("--parallax-y", `${Math.max(-38, Math.min(38, progress * -46))}px`);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      setActiveMobileIndex(closestIndex);
+      setRevealedMobileIndexes((indexes) => new Set(indexes).add(closestIndex));
+    };
+
+    updateParallax();
+    window.addEventListener("scroll", updateParallax, { passive: true });
+    window.addEventListener("resize", updateParallax);
+
+    return () => {
+      window.removeEventListener("scroll", updateParallax);
+      window.removeEventListener("resize", updateParallax);
+    };
+  }, []);
 
   return (
     <>
@@ -127,7 +175,7 @@ export function PricingExperience() {
 
         <section className="pricing-choice-stage">
           <div className="pricing-choice-bg" />
-          <SiteMenu onNavigate={navigateWithinKnoplus} />
+          <SiteMenu onNavigate={navigateWithinKnoplus} showHomeLink />
 
           <div className={`pricing-choice-copy ${isStageFading ? "is-fading" : ""}`}>
             <div className="eyebrow">{active.eyebrow}</div>
@@ -189,17 +237,99 @@ export function PricingExperience() {
           </div>
 
           <blockquote className="pricing-pitch">
-            Know More.
-            <br />
-            Know Better.
-            <br />
-            Knoplus.
+            * Modern, professional websites start at $500. Monthly care plans are
+            optional and can cover hosting, updates, and maintenance after launch.
           </blockquote>
-          <button className="pricing-home" onClick={() => navigateWithinKnoplus("/")} type="button">
-            Back Home
-          </button>
           <ScreenCounter current={activeIndex + 1} total={pricingOptions.length} />
         </section>
+      </main>
+
+      <main className="mobile-scroll-page mobile-pricing-page">
+        <header className="mobile-scroll-header">
+          <Link className="brand" href="/">
+            Knoplus
+          </Link>
+          <SiteMenu onNavigate={navigateWithinKnoplus} showHomeLink />
+        </header>
+
+        <div className="mobile-scroll-kicker">Pricing</div>
+        {pricingOptions.map((option, index) => (
+          <section
+            className={`mobile-pricing-section ${activeMobileIndex === index ? "is-active" : ""} ${
+              revealedMobileIndexes.has(index) ? "is-revealed" : ""
+            }`}
+            data-index={index}
+            key={option.label}
+            ref={(node) => {
+              mobileSectionRefs.current[index] = node;
+            }}
+            style={{ "--bg": option.image } as CSSProperties}
+          >
+            <div className="mobile-section-count">
+              {String(index + 1).padStart(2, "0")} / {String(pricingOptions.length).padStart(2, "0")}
+            </div>
+            <div className="eyebrow">{option.eyebrow}</div>
+            <h2>{option.title}</h2>
+            <p>{option.description}</p>
+            <div className="pricing-spotlight">
+              <span>{option.note}</span>
+              <strong>{option.accent}</strong>
+            </div>
+
+            {"plans" in option && option.plans ? (
+              <div className="pricing-plan-stack" aria-label="Website care plans">
+                {option.plans.map((plan) => (
+                  <article className="pricing-plan-row" key={plan.name}>
+                    <div>
+                      <span>{plan.name}</span>
+                      <strong>{plan.price}</strong>
+                    </div>
+                    <p>{plan.details.join(" / ")}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
+            {"items" in option && option.items ? (
+              <div className="pricing-chip-grid" aria-label={`${option.label} details`}>
+                {option.items.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+            ) : null}
+
+            {"rows" in option && option.rows ? (
+              <div className="pricing-rate-list" aria-label={`${option.label} rates`}>
+                {option.rows.map((row) => (
+                  <div className="pricing-rate-row" key={`${row.label}-${row.value}`}>
+                    <span>{row.label}</span>
+                    <strong>{row.value}</strong>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {"examples" in option && option.examples ? (
+              <div className="pricing-examples">
+                <span>Common builds</span>
+                <div>
+                  {option.examples.map((example) => (
+                    <small key={`${example.label}-${example.value}`}>
+                      {example.label} <b>{example.value}</b>
+                    </small>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </section>
+        ))}
+
+        <footer className="mobile-scroll-footer">
+          <p>
+            * Modern, professional websites start at $500. Monthly care plans are
+            optional and can cover hosting, updates, and maintenance after launch.
+          </p>
+        </footer>
       </main>
     </>
   );

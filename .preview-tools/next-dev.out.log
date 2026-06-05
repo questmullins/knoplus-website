@@ -1,0 +1,18 @@
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3220
+   - Network:      http://0.0.0.0:3220
+
+ ✓ Starting...
+ ✓ Ready in 1555ms
+ ○ Compiling /about ...
+ ✓ Compiled /about in 2.2s (606 modules)
+ GET /about 200 in 2520ms
+ GET /about 200 in 43ms
+ GET /about 200 in 42ms
+ ✓ Compiled / in 259ms (602 modules)
+ GET / 200 in 443ms
+ GET /about 200 in 138ms
+ ✓ Compiled /pricing in 290ms (612 modules)
+ GET /pricing 200 in 436ms
+ GET /about 200 in 38ms
+ GET / 200 in 87ms
