@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BrandLogo } from "./BrandLogo";
 import { ContactModal } from "./ContactModal";
 import { SiteMenu } from "./SiteMenu";
@@ -191,11 +191,7 @@ export function TemplateShowcase() {
     };
   }, [currentIndex, currentVisibleIndex, isIntroActive, setTemplate, showIntro, visibleTemplates]);
 
-  useEffect(() => {
-    const resetTemplateExit = () => {
-      setIsTransitioning(false);
-    };
-
+  useLayoutEffect(() => {
     try {
       if (window.sessionStorage.getItem("knoplus:main-transition") === "reveal") {
         window.sessionStorage.removeItem("knoplus:main-transition");
@@ -206,6 +202,12 @@ export function TemplateShowcase() {
         }, 920);
       }
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const resetTemplateExit = () => {
+      setIsTransitioning(false);
+    };
 
     window.addEventListener("pageshow", resetTemplateExit);
     window.addEventListener("focus", resetTemplateExit);
@@ -359,6 +361,11 @@ export function TemplateShowcase() {
     setIsContactOpen(true);
   }
 
+  function openGeneralContact() {
+    setSelectedContactTemplate("");
+    window.requestAnimationFrame(() => setIsContactOpen(true));
+  }
+
   return (
     <>
       <main className="app">
@@ -399,14 +406,14 @@ export function TemplateShowcase() {
               <br />
               Knoplus.
             </div>
-            <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
+            <button onClick={openGeneralContact} type="button" className="cta-button">
               Contact Us
             </button>
           </div>
         </aside>
 
         <section className="stage" data-theme={stageTheme}>
-          <SiteMenu className="stage-menu-control" hideIcon onContact={() => setIsContactOpen(true)} showLabel />
+          <SiteMenu className="stage-menu-control" hideIcon onContact={openGeneralContact} showLabel />
           <div className="preview-bg" style={{ "--bg": stageImage } as CSSProperties} />
           <div
             className={`preview-bg-next ${isBgChanging ? "show" : ""}`}
@@ -465,7 +472,7 @@ export function TemplateShowcase() {
       <main className="mobile-scroll-page">
         <header className="mobile-scroll-header">
           <BrandLogo />
-          <SiteMenu onContact={() => setIsContactOpen(true)} />
+          <SiteMenu onContact={openGeneralContact} />
         </header>
 
         <div className="mobile-scroll-kicker">Templates</div>
@@ -557,7 +564,7 @@ export function TemplateShowcase() {
             <br />
             Knoplus.
           </p>
-          <button onClick={() => setIsContactOpen(true)} type="button" className="cta-button">
+          <button onClick={openGeneralContact} type="button" className="cta-button">
             Contact Us
           </button>
         </footer>

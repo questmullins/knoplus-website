@@ -341,14 +341,17 @@ h1 {
     color 0.25s ease,
     background 0.25s ease,
     border-color 0.25s ease,
+    opacity 0.25s ease,
     transform 0.25s ease;
 }
 
-.cta-button:hover {
+.cta-button:hover,
+.cta-button:focus-visible {
   color: var(--black);
   background: var(--white);
   border-color: var(--white);
   transform: translateX(4px);
+  outline: none;
 }
 
 .stage {
@@ -1754,8 +1757,9 @@ p {
 }
 
 .template-actions {
-  align-items: flex-start;
-  flex-direction: column;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
@@ -1967,7 +1971,7 @@ p {
 }
 
 .transition-screen.active.revealing {
-  animation: mainReveal 0.92s ease both;
+  animation: mainReveal 1.08s ease both;
 }
 
 @keyframes mainReveal {
@@ -1998,6 +2002,12 @@ p {
   opacity: 1;
   transform: translateY(0);
   transition-delay: 0.35s;
+}
+
+.transition-screen.revealing .transition-logo {
+  opacity: 1;
+  transform: translateY(0);
+  transition: none;
 }
 
 @media (max-width: 950px) {
