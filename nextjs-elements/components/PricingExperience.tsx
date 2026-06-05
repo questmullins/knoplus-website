@@ -73,7 +73,17 @@ const pricingOptions = [
     accent: "$29",
     note: "Standard monthly care",
     image: "url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=80')",
-    plans: carePlans,
+    plans: carePlans
+  },
+  {
+    label: "Compare Plans",
+    eyebrow: "Care plan comparison",
+    title: "See what each monthly care tier actually covers.",
+    description:
+      "The comparison keeps the choice simple: Self Managed is a handoff, Standard covers essential upkeep, and Business adds priority attention plus monthly health checks.",
+    accent: "$79",
+    note: "Full support tier",
+    image: "url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1800&q=80')",
     comparison: careComparison
   },
   {
@@ -267,25 +277,26 @@ export function PricingExperience() {
                     </article>
                   ))}
                 </div>
-                {"comparison" in active && active.comparison ? (
-                  <div className="care-comparison" aria-label="Website care plan comparison">
-                    <div className="care-comparison-row care-comparison-head">
-                      <span>Feature</span>
-                      <strong>Self</strong>
-                      <strong>Standard</strong>
-                      <strong>Business</strong>
-                    </div>
-                    {active.comparison.map((row) => (
-                      <div className="care-comparison-row" key={row.feature}>
-                        <span>{row.feature}</span>
-                        <p>{row.self}</p>
-                        <p>{row.standard}</p>
-                        <p>{row.business}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
               </>
+            ) : null}
+
+            {"comparison" in active && active.comparison ? (
+              <div className="care-comparison" aria-label="Website care plan comparison">
+                <div className="care-comparison-row care-comparison-head">
+                  <span>Feature</span>
+                  <strong>Self</strong>
+                  <strong>Standard</strong>
+                  <strong>Business</strong>
+                </div>
+                {active.comparison.map((row) => (
+                  <div className="care-comparison-row" key={row.feature}>
+                    <span>{row.feature}</span>
+                    <p aria-label={row.self ? "Included" : "Not included"}>{row.self ? "+" : "-"}</p>
+                    <p aria-label={row.standard ? "Included" : "Not included"}>{row.standard ? "+" : "-"}</p>
+                    <p aria-label={row.business ? "Included" : "Not included"}>{row.business ? "+" : "-"}</p>
+                  </div>
+                ))}
+              </div>
             ) : null}
 
             {"paths" in active && active.paths ? (
@@ -384,25 +395,26 @@ export function PricingExperience() {
                     </article>
                   ))}
                 </div>
-                {"comparison" in option && option.comparison ? (
-                  <div className="care-comparison" aria-label="Website care plan comparison">
-                    <div className="care-comparison-row care-comparison-head">
-                      <span>Feature</span>
-                      <strong>Self</strong>
-                      <strong>Standard</strong>
-                      <strong>Business</strong>
-                    </div>
-                    {option.comparison.map((row) => (
-                      <div className="care-comparison-row" key={row.feature}>
-                        <span>{row.feature}</span>
-                        <p>{row.self}</p>
-                        <p>{row.standard}</p>
-                        <p>{row.business}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
               </>
+            ) : null}
+
+            {"comparison" in option && option.comparison ? (
+              <div className="care-comparison" aria-label="Website care plan comparison">
+                <div className="care-comparison-row care-comparison-head">
+                  <span>Feature</span>
+                  <strong>Self</strong>
+                  <strong>Standard</strong>
+                  <strong>Business</strong>
+                </div>
+                {option.comparison.map((row) => (
+                  <div className="care-comparison-row" key={row.feature}>
+                    <span>{row.feature}</span>
+                    <p aria-label={row.self ? "Included" : "Not included"}>{row.self ? "+" : "-"}</p>
+                    <p aria-label={row.standard ? "Included" : "Not included"}>{row.standard ? "+" : "-"}</p>
+                    <p aria-label={row.business ? "Included" : "Not included"}>{row.business ? "+" : "-"}</p>
+                  </div>
+                ))}
+              </div>
             ) : null}
 
             {"paths" in option && option.paths ? (

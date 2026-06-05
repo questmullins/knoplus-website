@@ -1182,7 +1182,7 @@ h1 {
 .about-principle span {
   color: var(--white);
   font-family: "Kanit", sans-serif;
-  font-size: 22px;
+  font-size: clamp(26px, 2.2vw, 34px);
   line-height: 1.05;
   font-weight: 300;
   letter-spacing: -0.035em;
@@ -1192,8 +1192,8 @@ h1 {
   max-width: none;
   margin: 0;
   color: rgba(246, 243, 236, 0.68);
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: clamp(17px, 1.35vw, 22px);
+  line-height: 1.45;
   font-weight: 300;
 }
 
@@ -1390,9 +1390,11 @@ h1 {
 .care-comparison-row p {
   max-width: none;
   margin: 0;
-  color: rgba(246, 243, 236, 0.68);
-  font-size: 13px;
-  line-height: 1.35;
+  color: var(--panel-accent, var(--white));
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 300;
+  text-align: center;
 }
 
 .care-comparison-head strong,

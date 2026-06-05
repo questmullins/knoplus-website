@@ -65,14 +65,16 @@ export const carePlans = [
 ];
 
 export const careComparison = [
-  { feature: "Hosting management", self: "Client managed", standard: "Included", business: "Included" },
-  { feature: "SSL monitoring", self: "Client managed", standard: "Included", business: "Included" },
-  { feature: "Domain help", self: "Launch handoff", standard: "Assistance", business: "Priority assistance" },
-  { feature: "Content updates", self: "Quoted as needed", standard: "15 min/month", business: "1 hr/month" },
-  { feature: "Support speed", self: "As available", standard: "Standard", business: "Priority" },
-  { feature: "Performance checks", self: "Not included", standard: "Basic uptime", business: "Monthly review" },
-  { feature: "SEO health checks", self: "Not included", standard: "Launch setup only", business: "Monthly basics" },
-  { feature: "Best fit", self: "Hands-on owners", standard: "Simple sites", business: "Active businesses" }
+  { feature: "Launch handoff", self: true, standard: true, business: true },
+  { feature: "Hosting management", self: false, standard: true, business: true },
+  { feature: "SSL monitoring", self: false, standard: true, business: true },
+  { feature: "Domain assistance", self: false, standard: true, business: true },
+  { feature: "Basic uptime checks", self: false, standard: true, business: true },
+  { feature: "Monthly content updates", self: false, standard: true, business: true },
+  { feature: "Priority support", self: false, standard: false, business: true },
+  { feature: "Performance health check", self: false, standard: false, business: true },
+  { feature: "Basic SEO health check", self: false, standard: false, business: true },
+  { feature: "Seasonal layout polish", self: false, standard: false, business: true }
 ];
 
 export const additionalServices = [

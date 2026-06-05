@@ -1,7 +1,13 @@
 (function () {
   var transitionKey = "knoplus:template-transition";
   var shouldReveal = false;
+  var fontLink = document.createElement("link");
   var homeStyle = document.createElement("style");
+
+  fontLink.rel = "stylesheet";
+  fontLink.href = "https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap";
+  document.head.appendChild(fontLink);
+
   homeStyle.id = "knoplus-template-home-style";
   homeStyle.textContent = [
     ".knoplus-template-actions{",
