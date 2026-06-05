@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Location | Homey Coffee</title>
+    <meta name="description" content="A coffeehouse location page with address, hours, and map details.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="/template-transition.js"></script>
+  </head>
+  <body class="inner-page">
+    <header class="coffee-header">
+      <a class="coffee-brand" href="./index.html"><strong>Homey</strong><span>Coffee</span></a>
+      <nav class="coffee-nav" aria-label="Coffeehouse navigation">
+        <a href="./story.html">Our Story</a>
+        <a href="./location.html">Location</a>
+        <a href="./careers.html">Careers</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+      <a class="coffee-cta" href="./contact.html">Plan a Visit</a>
+      <button class="mobile-toggle" type="button" aria-label="Open mobile menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </header>
+    <div class="mobile-panel"><a href="./index.html">Home</a><a href="./story.html">Our Story</a><a href="./location.html">Location</a><a href="./careers.html">Careers</a><a href="./contact.html">Contact</a></div>
+    <main>
+      <section class="page-hero" data-parallax style="--hero-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1900&q=82');">
+        <div class="reveal visible">
+          <p class="eyebrow">Location</p>
+          <h1>Easy to find. Easy to settle in.</h1>
+        </div>
+      </section>
+      <section class="location-strip">
+        <div class="location-grid">
+          <div class="reveal">
+            <p class="eyebrow">Orange location</p>
+            <h2>One clear page for visits, hours, and directions.</h2>
+            <div class="detail-list">
+              <div class="detail-row"><span>Address</span><strong>123 Canyon Lane<br>Orange, CA</strong></div>
+              <div class="detail-row"><span>Weekdays</span><strong>7:00 AM - 6:00 PM</strong></div>
+              <div class="detail-row"><span>Weekend</span><strong>Sat 7:00 AM - 6:00 PM<br>Sun 8:00 AM - 3:00 PM</strong></div>
+              <div class="detail-row"><span>Parking</span><strong>Shared plaza parking</strong></div>
+            </div>
+          </div>
+          <div class="map-card reveal">
+            <iframe title="Coffeehouse map" src="https://www.google.com/maps?q=Orange,+CA&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="coffee-footer"><a class="coffee-brand" href="./index.html"><strong>Homey</strong><span>Coffee</span></a><span>Location ready</span></footer>
+    <script src="./coffee.js"></script>
+  </body>
+</html>

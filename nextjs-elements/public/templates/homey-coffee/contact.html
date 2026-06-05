@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact | Homey Coffee</title>
+    <meta name="description" content="A warm coffeehouse contact page for questions, private events, and partnerships.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="/template-transition.js"></script>
+  </head>
+  <body class="inner-page">
+    <header class="coffee-header">
+      <a class="coffee-brand" href="./index.html"><strong>Homey</strong><span>Coffee</span></a>
+      <nav class="coffee-nav" aria-label="Coffeehouse navigation">
+        <a href="./story.html">Our Story</a>
+        <a href="./location.html">Location</a>
+        <a href="./careers.html">Careers</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+      <a class="coffee-cta" href="./contact.html">Plan a Visit</a>
+      <button class="mobile-toggle" type="button" aria-label="Open mobile menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </header>
+    <div class="mobile-panel"><a href="./index.html">Home</a><a href="./story.html">Our Story</a><a href="./location.html">Location</a><a href="./careers.html">Careers</a><a href="./contact.html">Contact</a></div>
+    <main>
+      <section class="page-hero" data-parallax style="--hero-image: url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1900&q=82');">
+        <div class="reveal visible">
+          <p class="eyebrow">Contact</p>
+          <h1>Questions, events, partnerships, and hello.</h1>
+        </div>
+      </section>
+      <section class="contact-section">
+        <div class="contact-grid">
+          <div class="reveal">
+            <p class="eyebrow">Reach out</p>
+            <h2>A contact page that stays warm and useful.</h2>
+            <p>Use it for general questions, vendor partnerships, private event notes, press, or anything else that needs a human response.</p>
+          </div>
+          <form class="contact-form soft-card reveal" action="mailto:hello@homeycoffee.example" method="post" enctype="text/plain">
+            <label>First Name<input type="text" name="first_name" required></label>
+            <label>Last Name<input type="text" name="last_name" required></label>
+            <label class="full">Email<input type="email" name="email" required></label>
+            <label class="full">Subject<input type="text" name="subject" required></label>
+            <label class="full">Message<textarea name="message" required></textarea></label>
+            <button class="button" type="submit">Send Message</button>
+          </form>
+        </div>
+      </section>
+    </main>
+    <footer class="coffee-footer"><a class="coffee-brand" href="./index.html"><strong>Homey</strong><span>Coffee</span></a><span>Contact ready</span></footer>
+    <script src="./coffee.js"></script>
+  </body>
+</html>

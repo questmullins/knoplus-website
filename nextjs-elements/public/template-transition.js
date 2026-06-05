@@ -39,6 +39,10 @@
       return "Cleaning Services";
     }
 
+    if (path.indexOf("homey-coffee") >= 0) {
+      return "Homey Coffee";
+    }
+
     if (path.indexOf("synergy") >= 0) {
       return path.indexOf("glass-colorful") >= 0 ? "Dark Luxury" : "Synergy";
     }

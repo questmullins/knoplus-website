@@ -391,6 +391,11 @@ h1 {
   --panel-accent: #86d5c3;
 }
 
+.stage[data-theme="homey-coffee"],
+.mobile-template-section[data-theme="homey-coffee"] {
+  --panel-accent: #d9b06f;
+}
+
 .preview-bg,
 .preview-bg-next {
   position: absolute;
@@ -1882,6 +1887,11 @@ p {
 .stage[data-theme="cleaning-restoration"] .circle-link,
 .mobile-template-section[data-theme="cleaning-restoration"] .circle-link {
   color: var(--black);
+}
+
+.stage[data-theme="homey-coffee"] h1,
+.mobile-template-section[data-theme="homey-coffee"] h2 {
+  letter-spacing: -0.025em;
 }
 
 .circle-link:hover .circle-plus,

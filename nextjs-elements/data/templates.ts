@@ -5,11 +5,17 @@ export type TemplateItem = {
   description: string;
   image: string;
   link: string;
-  theme: "traditional-auto" | "synergy" | "editorial-local" | "dark-luxury" | "cleaning-restoration";
+  theme:
+    | "traditional-auto"
+    | "synergy"
+    | "editorial-local"
+    | "dark-luxury"
+    | "cleaning-restoration"
+    | "homey-coffee";
   features: string[];
   sellingPoints: string[];
   price: string;
-  genre: "Automotive" | "Home Services" | "General Local" | "Premium";
+  genre: "Automotive" | "Food & Beverage" | "Home Services" | "General Local" | "Premium";
   stack: string[];
   styleTags: string[];
 };
@@ -46,19 +52,20 @@ export const templates: TemplateItem[] = [
     styleTags: ["Modern", "Glass", "Soft UI"]
   },
   {
-    label: "Local trust",
-    navTitle: "Editorial Local",
-    title: "Clear details.<br>Useful sections.<br><em>Local proof.</em>",
-    description: "Built for businesses that need services, about copy, hours, reviews, and contact details to feel organized and credible.",
-    image: "url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80')",
-    link: "/templates/traditional-auto/index.html",
-    theme: "editorial-local",
-    features: ["2-page build", "About section", "Location details"],
-    sellingPoints: ["Strong local credibility", "Clear customer path"],
-    price: "$750 as shown",
-    genre: "General Local",
+    label: "Neighborhood coffeehouse",
+    navTitle: "Homey Coffee",
+    title: "Warm cups.<br>Soft corners.<br><em>Stay awhile.</em>",
+    description:
+      "A cozy cafe template with a Synergy-inspired polish, story-led pages, location details, hiring copy, and a calm contact path.",
+    image: "url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=80')",
+    link: "/templates/homey-coffee/index.html",
+    theme: "homey-coffee",
+    features: ["5-page build", "Menu highlights", "Location and careers"],
+    sellingPoints: ["Feels warm and local", "Built for cafe discovery"],
+    price: "$1,250 as shown",
+    genre: "Food & Beverage",
     stack: ["HTML", "CSS", "JavaScript"],
-    styleTags: ["Editorial", "Classic", "Trust-focused"]
+    styleTags: ["Homey", "Editorial", "Soft UI"]
   },
   {
     label: "Premium dark mode",

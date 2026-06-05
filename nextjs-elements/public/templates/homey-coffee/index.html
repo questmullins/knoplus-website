@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Homey Coffee | Coffeehouse Template</title>
+    <meta name="description" content="A warm coffeehouse website template with story, menu highlights, location, careers, and contact pages.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="/template-transition.js"></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="coffee-header">
+        <a class="coffee-brand" href="./index.html" aria-label="Homey Coffee home">
+          <strong>Homey</strong>
+          <span>Coffee</span>
+        </a>
+        <nav class="coffee-nav" aria-label="Coffeehouse navigation">
+          <a href="./story.html">Our Story</a>
+          <a href="./location.html">Location</a>
+          <a href="./careers.html">Careers</a>
+          <a href="./contact.html">Contact</a>
+        </nav>
+        <a class="coffee-cta" href="./contact.html">Plan a Visit</a>
+        <button class="mobile-toggle" type="button" aria-label="Open mobile menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </header>
+
+      <div class="mobile-panel" aria-label="Mobile navigation">
+        <a href="./index.html">Home</a>
+        <a href="./story.html">Our Story</a>
+        <a href="./location.html">Location</a>
+        <a href="./careers.html">Careers</a>
+        <a href="./contact.html">Contact</a>
+      </div>
+
+      <main>
+        <section class="hero" data-parallax style="--hero-image: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1900&q=82');">
+          <div class="hero-copy reveal visible">
+            <p class="eyebrow">Neighborhood coffeehouse</p>
+            <h1>Warm cups. Soft corners. Stay awhile.</h1>
+            <p>A homey cafe template for coffee shops that want the site to feel like the room: calm, welcoming, simple to navigate, and easy to visit.</p>
+            <div class="hero-actions">
+              <a class="button light" href="#menu">View Highlights</a>
+              <a class="button" href="./location.html">Find Us</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="split-section">
+          <div class="soft-card reveal">
+            <p class="eyebrow">Simple, warm, useful</p>
+            <h2>Built for familiar faces and first visits.</h2>
+            <p>This template keeps the feeling local. It gives customers the essentials quickly: what you serve, why the shop feels special, where to go, how to reach you, and whether you are hiring.</p>
+            <div class="section-actions">
+              <a class="button" href="./story.html">Read the Story</a>
+            </div>
+          </div>
+          <div class="photo-stack reveal">
+            <div class="photo-card large">
+              <img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=1000&q=80" alt="Warm coffee shop interior with wood tables">
+            </div>
+            <div class="photo-card small">
+              <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80" alt="Latte in a ceramic cup">
+            </div>
+          </div>
+        </section>
+
+        <section class="menu-section" id="menu">
+          <div class="menu-head reveal">
+            <p class="eyebrow">Menu rhythm</p>
+            <h2>Coffee, matcha, pastries, and the little rituals people come back for.</h2>
+          </div>
+          <div class="menu-grid">
+            <article class="menu-card reveal" style="--card-image: url('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=80');">
+              <span>Espresso</span>
+              <h3>Clean pulls</h3>
+            </article>
+            <article class="menu-card reveal" style="--card-image: url('https://images.unsplash.com/photo-1579888071069-c107a6f79d82?auto=format&fit=crop&w=900&q=80');">
+              <span>Matcha</span>
+              <h3>Soft greens</h3>
+            </article>
+            <article class="menu-card reveal" style="--card-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80');">
+              <span>Pastries</span>
+              <h3>Fresh bites</h3>
+            </article>
+          </div>
+        </section>
+
+        <section class="story-band">
+          <img class="reveal" src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1000&q=80" alt="Coffee being poured into a cup">
+          <div class="reveal">
+            <p class="eyebrow">The feeling</p>
+            <h2>Nothing loud. Just a place that makes the day easier.</h2>
+            <p>A coffeehouse site should do more than list drinks. It should help people picture themselves inside, understand the pace, and feel invited before they ever walk through the door.</p>
+          </div>
+        </section>
+
+        <section class="location-strip">
+          <div class="location-grid">
+            <div class="reveal">
+              <p class="eyebrow">Visit</p>
+              <h2>Made for one location now, ready for more later.</h2>
+              <div class="detail-list">
+                <div class="detail-row"><span>Address</span><strong>123 Canyon Lane<br>Orange, CA</strong></div>
+                <div class="detail-row"><span>Hours</span><strong>Mon-Sat 7-6<br>Sun 8-3</strong></div>
+                <div class="detail-row"><span>Contact</span><strong>hello@homeycoffee.example</strong></div>
+              </div>
+            </div>
+            <div class="map-card reveal">
+              <iframe title="Coffeehouse map" src="https://www.google.com/maps?q=Orange,+CA&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="coffee-footer">
+        <a class="coffee-brand" href="./index.html">
+          <strong>Homey</strong>
+          <span>Coffee</span>
+        </a>
+        <span>Our Story / Location / Careers / Contact</span>
+      </footer>
+    </div>
+    <script src="./coffee.js"></script>
+  </body>
+</html>

@@ -10,8 +10,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const corePages = ["", "/about", "/process", "/pricing", "/sitemap"];
   const servicePages = seoPages.map((page) => `/${page.slug}`);
   const templatePages = Array.from(new Set(templates.map((template) => template.link)));
+  const templateSubpages = [
+    "/templates/homey-coffee/story.html",
+    "/templates/homey-coffee/location.html",
+    "/templates/homey-coffee/careers.html",
+    "/templates/homey-coffee/contact.html"
+  ];
 
-  return [...corePages, ...servicePages, ...templatePages].map((path) => ({
+  return [...corePages, ...servicePages, ...templatePages, ...templateSubpages].map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
     changeFrequency: path === "" || path.startsWith("/templates/") ? "weekly" : "monthly",
