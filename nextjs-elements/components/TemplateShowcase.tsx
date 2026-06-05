@@ -15,7 +15,7 @@ const serviceIntro = {
   title: "Modern websites.<br />Clear pricing.<br /><em>Built to launch.</em>",
   description:
     "Knoplus builds professional websites for independent businesses using polished website templates, custom website design, mobile-friendly layouts, SEO-ready page structure, contact forms, Cloudflare deployment, and practical launch support.",
-  image: "url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80')",
+  image: "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')",
   features: ["Template websites", "Custom websites", "Mobile-friendly design"],
   sellingPoints: ["Starting at $500", "Built for local business launches"]
 };
@@ -28,6 +28,7 @@ export function TemplateShowcase() {
   const [isIntroActive, setIsIntroActive] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(0);
+  const [nextPreviewImage, setNextPreviewImage] = useState(serviceIntro.image);
   const [isCopyFading, setIsCopyFading] = useState(false);
   const [isBgChanging, setIsBgChanging] = useState(false);
   const [isCounterChanging, setIsCounterChanging] = useState(false);
@@ -56,9 +57,8 @@ export function TemplateShowcase() {
   );
 
   const currentTemplate = templates[currentIndex];
-  const nextTemplate = templates[nextIndex];
   const stageImage = isIntroActive ? serviceIntro.image : currentTemplate.image;
-  const nextStageImage = isIntroActive ? serviceIntro.image : nextTemplate.image;
+  const nextStageImage = nextPreviewImage;
   const stageTheme = isIntroActive ? "service" : currentTemplate.theme;
   const counterLabel = useMemo(
     () => formatCounter(currentVisibleIndex, visibleTemplates.length || templates.length),
@@ -71,19 +71,19 @@ export function TemplateShowcase() {
 
   const setTemplate = useCallback(
     (index: number) => {
-      setIsIntroActive(false);
-
-      if (index === currentIndex) {
+      if (!isIntroActive && index === currentIndex) {
         return;
       }
 
       setNextIndex(index);
+      setNextPreviewImage(templates[index].image);
       setIsCopyFading(true);
       setIsBgChanging(true);
       setIsCounterChanging(true);
 
       window.setTimeout(() => {
         setCurrentIndex(index);
+        setIsIntroActive(false);
         setIsCopyFading(false);
         setIsBgChanging(false);
       }, 420);
@@ -92,8 +92,29 @@ export function TemplateShowcase() {
         setIsCounterChanging(false);
       }, 360);
     },
-    [currentIndex]
+    [currentIndex, isIntroActive]
   );
+
+  const showIntro = useCallback(() => {
+    if (isIntroActive) {
+      return;
+    }
+
+    setIsCopyFading(true);
+    setIsBgChanging(true);
+    setIsCounterChanging(true);
+    setNextPreviewImage(serviceIntro.image);
+
+    window.setTimeout(() => {
+      setIsIntroActive(true);
+      setIsCopyFading(false);
+      setIsBgChanging(false);
+    }, 420);
+
+    window.setTimeout(() => {
+      setIsCounterChanging(false);
+    }, 360);
+  }, [isIntroActive]);
 
   useEffect(() => {
     if (!visibleTemplates.some(({ index }) => index === currentIndex)) {
@@ -122,10 +143,15 @@ export function TemplateShowcase() {
         if (direction > 0) {
           event.preventDefault();
           isWheelLocked = true;
-          setIsIntroActive(false);
+          const nextTemplate = visibleTemplates[currentVisibleIndex] ?? visibleTemplates[0];
+
+          if (nextTemplate) {
+            setTemplate(nextTemplate.index);
+          }
+
           window.setTimeout(() => {
             isWheelLocked = false;
-          }, 420);
+          }, 620);
         }
 
         return;
@@ -134,10 +160,10 @@ export function TemplateShowcase() {
       if (direction < 0 && currentVisibleIndex === 0) {
         event.preventDefault();
         isWheelLocked = true;
-        setIsIntroActive(true);
+        showIntro();
         window.setTimeout(() => {
           isWheelLocked = false;
-        }, 420);
+        }, 620);
         return;
       }
 
@@ -161,7 +187,7 @@ export function TemplateShowcase() {
     return () => {
       window.removeEventListener("wheel", advanceFromWheel);
     };
-  }, [currentIndex, currentVisibleIndex, isIntroActive, setTemplate, visibleTemplates]);
+  }, [currentIndex, currentVisibleIndex, isIntroActive, setTemplate, showIntro, visibleTemplates]);
 
   useEffect(() => {
     const resetTemplateExit = () => {
@@ -291,7 +317,7 @@ export function TemplateShowcase() {
             <div className="nav-label">Templates</div>
             <button
               className={`template-btn ${isIntroActive ? "active" : ""}`}
-              onClick={() => setIsIntroActive(true)}
+              onClick={showIntro}
               type="button"
             >
               <span>{serviceIntro.navTitle}</span>
@@ -347,13 +373,13 @@ export function TemplateShowcase() {
                 <div className="actions">
                   <button
                     className="circle-link"
-                    onClick={() => (isIntroActive ? setIsIntroActive(false) : openTemplate())}
+                    onClick={() => (isIntroActive ? setTemplate(currentIndex) : openTemplate())}
                     type="button"
                     aria-label={isIntroActive ? "Explore website templates" : "Open template"}
                   >
                     <span className="circle-plus" />
                   </button>
-                  <button className="text-link" onClick={() => (isIntroActive ? setIsIntroActive(false) : openTemplate())} type="button">
+                  <button className="text-link" onClick={() => (isIntroActive ? setTemplate(currentIndex) : openTemplate())} type="button">
                     {isIntroActive ? "Explore Templates" : "Explore Template"}
                   </button>
                 </div>
