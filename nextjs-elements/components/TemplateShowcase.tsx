@@ -261,6 +261,7 @@ export function TemplateShowcase() {
         savedAt: Date.now()
       })
     );
+    window.sessionStorage?.setItem("knoplus:template-transition", "reveal");
 
     setIsTransitioning(true);
     window.setTimeout(() => {
