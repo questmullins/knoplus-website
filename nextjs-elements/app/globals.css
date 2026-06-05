@@ -65,10 +65,43 @@ h1 {
 }
 
 .brand {
-  font-size: 23px;
+  font-size: 26px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.sidebar-brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  z-index: 30;
+}
+
+.sidebar-brand .brand {
+  font-size: 29px;
+  line-height: 1;
+}
+
+.sidebar-brand .top-menu {
+  position: absolute;
+  top: auto;
+  left: calc(50% + 88px);
+  right: auto;
+  flex: 0 0 auto;
+}
+
+.sidebar-brand .menu-panel {
+  top: calc(100% + 24px);
+  right: 50%;
+  width: min(300px, calc(var(--sidebar-width) - 40px));
+  transform: translate(50%, -12px) scale(0.98);
+}
+
+.sidebar-brand .menu-panel.open {
+  transform: translate(50%, 0) scale(1);
 }
 
 .brand-logo-link {
@@ -308,15 +341,28 @@ h1 {
   position: absolute;
   top: 44px;
   right: 46px;
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: transparent;
-  color: var(--white);
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(246, 243, 236, 0.28);
+  background: rgba(246, 243, 236, 0.08);
+  color: rgba(246, 243, 236, 0.9);
   cursor: pointer;
   z-index: 20;
   display: grid;
   place-items: center;
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.top-menu:hover,
+.top-menu:focus-visible {
+  color: var(--black);
+  background: var(--white);
+  border-color: var(--white);
+  transform: translateX(4px);
 }
 
 .menu-panel {
@@ -383,7 +429,11 @@ h1 {
 }
 
 .about-nav-item {
+  border: 0;
+  background: transparent;
   min-height: 78px;
+  width: 100%;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -393,10 +443,24 @@ h1 {
   font-size: 21px;
   line-height: 1;
   font-weight: 300;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
 }
 
-.about-nav-item:first-of-type {
+.about-nav-item.active {
   color: var(--white);
+}
+
+.about-nav-item:hover {
+  color: rgba(246, 243, 236, 0.9);
+  transform: translateX(4px);
+}
+
+.about-nav-item.active .plus {
+  transform: rotate(45deg);
 }
 
 .pricing-choice-stage {
@@ -405,11 +469,10 @@ h1 {
   overflow-x: hidden;
   overflow-y: auto;
   isolation: isolate;
-  display: grid;
-  grid-template-columns: minmax(360px, 0.92fr) minmax(340px, 0.78fr);
-  gap: clamp(34px, 5vw, 88px);
+  display: flex;
+  gap: clamp(30px, 4vw, 58px);
   align-items: center;
-  padding: 88px clamp(42px, 7vw, 118px);
+  padding: 88px clamp(42px, 5vw, 86px);
   --panel-accent: var(--accent);
 }
 
@@ -419,11 +482,10 @@ h1 {
   overflow-x: hidden;
   overflow-y: auto;
   isolation: isolate;
-  display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(360px, 0.82fr);
-  gap: clamp(34px, 5vw, 88px);
+  display: flex;
+  gap: clamp(30px, 4vw, 58px);
   align-items: center;
-  padding: 88px clamp(42px, 7vw, 118px);
+  padding: 88px clamp(42px, 5vw, 86px);
 }
 
 .pricing-choice-bg {
@@ -452,6 +514,15 @@ h1 {
   z-index: -3;
 }
 
+.process-bg {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 6, 0.94), rgba(5, 5, 6, 0.54) 58%, rgba(5, 5, 6, 0.9)),
+    radial-gradient(circle at 76% 22%, rgba(246, 243, 236, 0.16), transparent 25%),
+    url("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
 .pricing-choice-stage::after {
   content: "";
   position: absolute;
@@ -475,11 +546,13 @@ h1 {
 }
 
 .pricing-choice-copy {
-  max-width: 760px;
+  flex: 0 1 670px;
+  max-width: 670px;
 }
 
 .about-copy {
-  max-width: 760px;
+  flex: 0 1 670px;
+  max-width: 670px;
 }
 
 .pricing-choice-copy h1 {
@@ -527,18 +600,26 @@ h1 {
 }
 
 .pricing-detail {
+  flex: 0 1 500px;
   width: min(500px, 100%);
-  justify-self: end;
   display: grid;
   gap: 30px;
 }
 
 .about-principles {
+  flex: 0 1 520px;
   width: min(560px, 100%);
-  justify-self: end;
   display: grid;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.about-principle.active span {
+  color: var(--panel-accent, var(--white));
+}
+
+.about-principle.active p {
+  color: rgba(246, 243, 236, 0.86);
 }
 
 .about-principle {
@@ -692,7 +773,7 @@ h1 {
 
 .pricing-pitch {
   position: absolute;
-  left: clamp(42px, 7vw, 118px);
+  left: clamp(42px, 5vw, 86px);
   right: 190px;
   bottom: 38px;
   max-width: 860px;
@@ -704,7 +785,7 @@ h1 {
 
 .about-pitch {
   position: absolute;
-  left: clamp(42px, 7vw, 118px);
+  left: clamp(42px, 5vw, 86px);
   right: 190px;
   bottom: 38px;
   max-width: 860px;
@@ -1280,6 +1361,18 @@ p {
     padding: 34px 20px;
   }
 
+  .sidebar-brand {
+    justify-content: center;
+  }
+
+  .sidebar-brand .brand {
+    font-size: 24px;
+  }
+
+  .sidebar-brand .top-menu {
+    left: calc(50% + 76px);
+  }
+
   .template-btn {
     font-size: 18px;
   }
@@ -1319,15 +1412,17 @@ p {
   }
 
   .pricing-choice-stage {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     align-content: center;
+    align-items: flex-start;
     gap: 32px;
     padding: 72px 48px 110px;
   }
 
   .about-stage {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     align-content: center;
+    align-items: flex-start;
     gap: 32px;
     padding: 72px 48px 110px;
   }
@@ -1391,9 +1486,9 @@ p {
     position: relative;
     top: auto;
     right: auto;
-    width: 28px;
-    height: 28px;
-    color: var(--white);
+    width: 40px;
+    height: 40px;
+    color: rgba(246, 243, 236, 0.9);
   }
 
   .mobile-scroll-header .brand {
@@ -1408,13 +1503,13 @@ p {
   }
 
   .mobile-scroll-header .menu-plus {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
   .mobile-scroll-header .menu-plus::before,
   .mobile-scroll-header .menu-plus::after {
-    width: 22px;
+    width: 20px;
     height: 1.5px;
   }
 
@@ -1493,6 +1588,14 @@ p {
     background:
       linear-gradient(180deg, rgba(5, 5, 6, 0.62), rgba(5, 5, 6, 0.96) 72%),
       url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .process-mobile-section::before {
+    background:
+      linear-gradient(180deg, rgba(5, 5, 6, 0.62), rgba(5, 5, 6, 0.96) 72%),
+      url("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
   }

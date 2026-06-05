@@ -1,16 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 type SiteMenuProps = {
   onNavigate?: (destination: string) => void;
-  showHomeLink?: boolean;
 };
 
-export function SiteMenu({ onNavigate, showHomeLink = false }: SiteMenuProps) {
+const menuItems = [
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Our Process", href: "/process" },
+  { label: "Pricing", href: "/pricing" }
+];
+
+export function SiteMenu({ onNavigate }: SiteMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   function handleInternalNavigation(destination: string) {
+    setIsMenuOpen(false);
+
     if (onNavigate) {
       onNavigate(destination);
       return;
@@ -32,19 +42,13 @@ export function SiteMenu({ onNavigate, showHomeLink = false }: SiteMenuProps) {
 
       <div className={`menu-panel ${isMenuOpen ? "open" : ""}`}>
         <nav>
-          {showHomeLink ? (
-            <button onClick={() => handleInternalNavigation("/")} type="button">
-              Home
-            </button>
-          ) : null}
-          <button onClick={() => handleInternalNavigation("/about")} type="button">
-            About Us
-          </button>
-          <a href="#">Our Process</a>
-          <button onClick={() => handleInternalNavigation("/pricing")} type="button">
-            Pricing
-          </button>
-          <a href="#">FAQ</a>
+          {menuItems
+            .filter((item) => item.href !== pathname)
+            .map((item) => (
+              <button onClick={() => handleInternalNavigation(item.href)} type="button" key={item.href}>
+                {item.label}
+              </button>
+            ))}
           <a href="mailto:knopluswebsites@gmail.com">Contact Us</a>
         </nav>
 

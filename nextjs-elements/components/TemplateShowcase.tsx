@@ -66,6 +66,37 @@ export function TemplateShowcase() {
   }, [currentIndex, visibleTemplates]);
 
   useEffect(() => {
+    let isWheelLocked = false;
+
+    const advanceFromWheel = (event: WheelEvent) => {
+      if (window.matchMedia("(max-width: 760px)").matches || Math.abs(event.deltaY) < 24 || isWheelLocked) {
+        return;
+      }
+
+      const direction = event.deltaY > 0 ? 1 : -1;
+      const nextVisible = Math.max(0, Math.min(visibleTemplates.length - 1, currentVisibleIndex + direction));
+      const nextTemplate = visibleTemplates[nextVisible];
+
+      if (!nextTemplate || nextTemplate.index === currentIndex) {
+        return;
+      }
+
+      event.preventDefault();
+      isWheelLocked = true;
+      setTemplate(nextTemplate.index);
+      window.setTimeout(() => {
+        isWheelLocked = false;
+      }, 620);
+    };
+
+    window.addEventListener("wheel", advanceFromWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", advanceFromWheel);
+    };
+  }, [currentIndex, currentVisibleIndex, visibleTemplates]);
+
+  useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const hashIndex = hashParams.get("template");
     const hashScrollY = hashParams.get("scroll");
@@ -190,7 +221,10 @@ export function TemplateShowcase() {
     <>
       <main className="app">
         <aside>
-          <BrandLogo />
+          <div className="sidebar-brand">
+            <BrandLogo />
+            <SiteMenu />
+          </div>
 
           <div className="template-nav">
             <div className="nav-label">Templates</div>
@@ -228,8 +262,6 @@ export function TemplateShowcase() {
             className={`preview-bg-next ${isBgChanging ? "show" : ""}`}
             style={{ "--bg": nextTemplate.image } as CSSProperties}
           />
-
-          <SiteMenu />
 
           <div className="content">
             <div className={`copy ${isCopyFading ? "fade" : ""}`}>

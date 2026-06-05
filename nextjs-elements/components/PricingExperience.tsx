@@ -98,6 +98,35 @@ export function PricingExperience() {
   }
 
   useEffect(() => {
+    let isWheelLocked = false;
+
+    const advanceFromWheel = (event: WheelEvent) => {
+      if (window.matchMedia("(max-width: 760px)").matches || Math.abs(event.deltaY) < 24 || isWheelLocked) {
+        return;
+      }
+
+      const nextIndex = Math.max(0, Math.min(pricingOptions.length - 1, activeIndex + (event.deltaY > 0 ? 1 : -1)));
+
+      if (nextIndex === activeIndex) {
+        return;
+      }
+
+      event.preventDefault();
+      isWheelLocked = true;
+      setPricingOption(nextIndex);
+      window.setTimeout(() => {
+        isWheelLocked = false;
+      }, 420);
+    };
+
+    window.addEventListener("wheel", advanceFromWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", advanceFromWheel);
+    };
+  }, [activeIndex]);
+
+  useEffect(() => {
     const sections = mobileSectionRefs.current.filter(Boolean) as HTMLElement[];
 
     if (!sections.length) {
@@ -140,7 +169,10 @@ export function PricingExperience() {
     <>
       <main className="pricing-choice-app">
         <aside className="pricing-choice-sidebar">
-          <BrandLogo />
+          <div className="sidebar-brand">
+            <BrandLogo />
+            <SiteMenu onNavigate={navigateWithinKnoplus} />
+          </div>
 
           <div className="pricing-choice-nav">
             <div className="nav-label">Pricing</div>
@@ -173,8 +205,6 @@ export function PricingExperience() {
 
         <section className="pricing-choice-stage">
           <div className="pricing-choice-bg" />
-          <SiteMenu onNavigate={navigateWithinKnoplus} showHomeLink />
-
           <div className={`pricing-choice-copy ${isStageFading ? "is-fading" : ""}`}>
             <div className="eyebrow">{active.eyebrow}</div>
             <h1>{active.title}</h1>
@@ -245,7 +275,7 @@ export function PricingExperience() {
       <main className="mobile-scroll-page mobile-pricing-page">
         <header className="mobile-scroll-header">
           <BrandLogo />
-          <SiteMenu onNavigate={navigateWithinKnoplus} showHomeLink />
+          <SiteMenu onNavigate={navigateWithinKnoplus} />
         </header>
 
         <div className="mobile-scroll-kicker">Pricing</div>

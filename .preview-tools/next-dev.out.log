@@ -3,9 +3,23 @@
    - Network:      http://0.0.0.0:3220
 
  ✓ Starting...
- ✓ Ready in 1642ms
- ○ Compiling / ...
- ✓ Compiled / in 2.3s (608 modules)
- GET / 200 in 2872ms
- GET / 200 in 2597ms
- GET / 200 in 64ms
+ ✓ Ready in 1671ms
+ ○ Compiling /pricing ...
+ ✓ Compiled /pricing in 2.3s (610 modules)
+ GET /pricing 200 in 2700ms
+ GET /pricing 200 in 62ms
+ GET /pricing 200 in 53ms
+ GET /pricing 200 in 71ms
+ ✓ Compiled in 239ms (598 modules)
+ ✓ Compiled in 145ms (598 modules)
+ ✓ Compiled in 144ms (598 modules)
+ GET /pricing 200 in 111ms
+ ✓ Compiled in 168ms (612 modules)
+ GET /pricing 200 in 74ms
+ ✓ Compiled / in 271ms (608 modules)
+ GET / 200 in 451ms
+ GET / 200 in 19ms
+ GET / 200 in 18ms
+ ✓ Compiled in 217ms (622 modules)
+ GET / 200 in 48ms
+ GET / 200 in 20ms

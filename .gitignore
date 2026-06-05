@@ -1,0 +1,9 @@
+.preview-tools/
+cloudflared.exe
+cloudflared.pid
+cloudflared-tunnel.log
+next-dev.out.log
+next-dev.err.log
+wrangler.toml
+.wrangler/
+
