@@ -1,28 +1,12 @@
 (function () {
-  var entry = document.querySelector(".vault-entry");
-  var enterButton = document.querySelector(".vault-entry button");
   var header = document.querySelector(".watch-header");
   var watchMenu = document.querySelector("[data-watch-menu]");
   var menuToggle = document.querySelector(".watch-menu-toggle");
   var menuLinks = watchMenu ? watchMenu.querySelectorAll(".watch-orbit a") : [];
   var rail = document.querySelector(".scroll-rail span");
   var parallaxTargets = document.querySelectorAll("[data-parallax]");
-  var revealTargets = document.querySelectorAll(".reveal");
   var watchItems = document.querySelectorAll(".watch-item");
   var watchSections = document.querySelectorAll(".watch-section");
-  var revealedSections = new WeakSet();
-
-  function openVault() {
-    if (!entry) {
-      return;
-    }
-
-    entry.classList.add("is-hidden");
-    document.body.classList.remove("is-locked");
-    try {
-      window.sessionStorage.setItem("granite-watches:entered", "true");
-    } catch {}
-  }
 
   function updateScrollState() {
     var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -75,33 +59,10 @@
     watchSections.forEach(function (section) {
       if (section === closestSection) {
         section.classList.add("is-active");
-        section.classList.add("is-revealed");
-        revealedSections.add(section);
       } else {
         section.classList.remove("is-active");
-        if (revealedSections.has(section)) {
-          section.classList.add("is-revealed");
-        }
       }
     });
-  }
-
-  if (entry) {
-    var hasEntered = false;
-
-    try {
-      hasEntered = window.sessionStorage.getItem("granite-watches:entered") === "true";
-    } catch {}
-
-    if (hasEntered || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      openVault();
-    } else {
-      document.body.classList.add("is-locked");
-    }
-  }
-
-  if (enterButton) {
-    enterButton.addEventListener("click", openVault);
   }
 
   function setMenuAngle(link) {
@@ -156,28 +117,6 @@
         watchMenu.classList.remove("open");
         menuToggle.setAttribute("aria-expanded", "false");
       }
-    });
-  }
-
-  if ("IntersectionObserver" in window) {
-    var observer = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.18 }
-    );
-
-    revealTargets.forEach(function (target) {
-      observer.observe(target);
-    });
-  } else {
-    revealTargets.forEach(function (target) {
-      target.classList.add("visible");
     });
   }
 
