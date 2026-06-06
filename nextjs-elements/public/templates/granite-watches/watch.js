@@ -2,12 +2,15 @@
   var entry = document.querySelector(".vault-entry");
   var enterButton = document.querySelector(".vault-entry button");
   var header = document.querySelector(".watch-header");
-  var toggle = document.querySelector(".mobile-toggle");
-  var drawer = document.querySelector(".mobile-drawer");
+  var watchMenu = document.querySelector("[data-watch-menu]");
+  var menuToggle = document.querySelector(".watch-menu-toggle");
+  var menuLinks = watchMenu ? watchMenu.querySelectorAll(".watch-orbit a") : [];
   var rail = document.querySelector(".scroll-rail span");
   var parallaxTargets = document.querySelectorAll("[data-parallax]");
   var revealTargets = document.querySelectorAll(".reveal");
   var watchItems = document.querySelectorAll(".watch-item");
+  var watchSections = document.querySelectorAll(".watch-section");
+  var revealedSections = new WeakSet();
 
   function openVault() {
     if (!entry) {
@@ -42,6 +45,8 @@
 
     var closest = null;
     var closestDistance = Infinity;
+    var closestSection = null;
+    var closestSectionDistance = Infinity;
 
     watchItems.forEach(function (item) {
       var rect = item.getBoundingClientRect();
@@ -55,6 +60,29 @@
 
     watchItems.forEach(function (item) {
       item.classList.toggle("active", item === closest);
+    });
+
+    watchSections.forEach(function (section) {
+      var rect = section.getBoundingClientRect();
+      var distance = Math.abs(rect.top + rect.height / 2 - window.innerHeight / 2);
+
+      if (distance < closestSectionDistance) {
+        closestSectionDistance = distance;
+        closestSection = section;
+      }
+    });
+
+    watchSections.forEach(function (section) {
+      if (section === closestSection) {
+        section.classList.add("is-active");
+        section.classList.add("is-revealed");
+        revealedSections.add(section);
+      } else {
+        section.classList.remove("is-active");
+        if (revealedSections.has(section)) {
+          section.classList.add("is-revealed");
+        }
+      }
     });
   }
 
@@ -76,17 +104,58 @@
     enterButton.addEventListener("click", openVault);
   }
 
-  if (toggle && drawer) {
-    toggle.addEventListener("click", function () {
-      var isOpen = drawer.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", String(isOpen));
+  function setMenuAngle(link) {
+    if (!watchMenu || !link) {
+      return;
+    }
+
+    var angle = link.getAttribute("data-angle") || "-72";
+    watchMenu.style.setProperty("--hand-angle", angle + "deg");
+
+    menuLinks.forEach(function (menuLink) {
+      menuLink.classList.toggle("active", menuLink === link);
+    });
+  }
+
+  if (watchMenu && menuToggle) {
+    menuToggle.addEventListener("click", function () {
+      var isOpen = !watchMenu.classList.contains("open");
+      watchMenu.classList.toggle("open", isOpen);
+      menuToggle.setAttribute("aria-expanded", String(isOpen));
     });
 
-    drawer.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        drawer.classList.remove("open");
-        toggle.setAttribute("aria-expanded", "false");
+    menuLinks.forEach(function (link) {
+      var linkUrl = new URL(link.href, window.location.href);
+      var currentPath = window.location.pathname.split("/").pop() || "index.html";
+      var linkPath = linkUrl.pathname.split("/").pop() || "index.html";
+
+      if (currentPath === linkPath) {
+        setMenuAngle(link);
+      }
+
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        setMenuAngle(link);
+
+        if (currentPath === linkPath) {
+          window.setTimeout(function () {
+            watchMenu.classList.remove("open");
+            menuToggle.setAttribute("aria-expanded", "false");
+          }, 240);
+          return;
+        }
+
+        window.setTimeout(function () {
+          window.location.href = link.href;
+        }, 420);
       });
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!watchMenu.contains(event.target) && watchMenu.classList.contains("open")) {
+        watchMenu.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+      }
     });
   }
 

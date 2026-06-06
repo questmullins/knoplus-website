@@ -15,55 +15,53 @@
     <div class="scroll-rail" aria-hidden="true"><span></span></div>
     <header class="watch-header">
       <a class="brand" href="./index.html"><strong>Granite</strong><span>Watches</span></a>
-      <nav class="watch-nav" aria-label="Luxury watch navigation">
-        <a href="./collection.html">Collection</a>
-        <a href="./craftsmanship.html">Craftsmanship</a>
-        <a href="./private-viewing.html">Private Viewing</a>
-        <a href="./contact.html">Contact</a>
-      </nav>
       <a class="header-action" href="./private-viewing.html">Request Viewing</a>
-      <button class="mobile-toggle" type="button" aria-label="Open mobile menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="watch-menu" data-watch-menu style="--hand-angle: -36deg">
+        <button class="watch-menu-toggle" type="button" aria-label="Open watch menu" aria-expanded="false"><span></span><small>Menu</small></button>
+        <nav class="watch-orbit" aria-label="Luxury watch navigation">
+          <a href="./index.html" data-angle="-72" style="--angle: -72deg; --label-angle: 72deg">Home</a>
+          <a href="./collection.html" data-angle="-36" style="--angle: -36deg; --label-angle: 36deg">Collection</a>
+          <a href="./craftsmanship.html" data-angle="0" style="--angle: 0deg; --label-angle: 0deg">Craft</a>
+          <a href="./private-viewing.html" data-angle="36" style="--angle: 36deg; --label-angle: -36deg">Viewing</a>
+          <a href="./contact.html" data-angle="72" style="--angle: 72deg; --label-angle: -72deg">Contact</a>
+        </nav>
+        <div class="watch-hand" aria-hidden="true"><span></span></div>
+      </div>
     </header>
-    <div class="mobile-drawer"><a href="./index.html">Home</a><a href="./collection.html">Collection</a><a href="./craftsmanship.html">Craftsmanship</a><a href="./private-viewing.html">Private Viewing</a><a href="./contact.html">Contact</a></div>
-    <main>
-      <section class="page-hero" data-parallax style="--hero-image: url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1900&q=84');">
+    <main class="watch-main">
+      <section class="page-hero watch-section" data-parallax style="--hero-image: url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1900&q=84');">
         <div class="reveal visible">
           <p class="eyebrow">Collection</p>
           <h1>Numbered references for careful collectors.</h1>
         </div>
       </section>
-      <section class="collection-section">
+      <section class="collection-section watch-section">
         <div class="collection-head reveal">
           <p class="eyebrow">Current selection</p>
           <h2>Designed to feel curated, not crowded.</h2>
           <p>Each item can link to a deeper detail page, inquiry modal, or private availability conversation.</p>
         </div>
-        <div class="collection-list">
-          <a class="watch-item reveal" href="./private-viewing.html" style="--watch-image: url('https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&w=1200&q=82');">
-            <span class="number">[01]</span>
-            <h3>Royal Oak</h3>
-            <div class="watch-meta"><span>Integrated bracelet</span><span>// 41 mm</span></div>
-          </a>
-          <a class="watch-item reveal" href="./private-viewing.html" style="--watch-image: url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1200&q=82');">
-            <span class="number">[02]</span>
-            <h3>Nautilus</h3>
-            <div class="watch-meta"><span>Archive select</span><span>// Blue dial</span></div>
-          </a>
-          <a class="watch-item reveal" href="./private-viewing.html" style="--watch-image: url('https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=82');">
-            <span class="number">[03]</span>
-            <h3>Daytona</h3>
-            <div class="watch-meta"><span>Chronograph</span><span>// Oyster case</span></div>
-          </a>
-          <a class="watch-item reveal" href="./private-viewing.html" style="--watch-image: url('https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=82');">
-            <span class="number">[04]</span>
-            <h3>Calatrava</h3>
-            <div class="watch-meta"><span>White gold</span><span>// Dress watch</span></div>
-          </a>
-          <a class="watch-item reveal" href="./private-viewing.html" style="--watch-image: url('https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&w=1200&q=82');">
-            <span class="number">[05]</span>
-            <h3>Tank</h3>
-            <div class="watch-meta"><span>Rectangular icon</span><span>// Manual wind</span></div>
-          </a>
+        <div class="watch-stage-list">
+          <article class="watch-item watch-stage reveal" style="--watch-image: url('https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&w=1600&q=82');">
+            <div class="watch-stage-media"><img src="https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&w=1100&q=82" alt="Luxury steel watch on dark display"></div>
+            <div class="watch-stage-copy"><span class="number">[01]</span><h3>Royal Oak</h3><p>Integrated steel architecture presented as a full stage for collector inquiry.</p><div class="watch-meta"><span>Integrated bracelet</span><span>// 41 mm</span></div><a class="button" href="./private-viewing.html">Request Viewing</a></div>
+          </article>
+          <article class="watch-item watch-stage reveal" style="--watch-image: url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1600&q=82');">
+            <div class="watch-stage-media"><img src="https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1100&q=82" alt="Luxury watch on red leather surface"></div>
+            <div class="watch-stage-copy"><span class="number">[02]</span><h3>Nautilus</h3><p>A softer blue-dial reference framed in gold and dark stone.</p><div class="watch-meta"><span>Archive select</span><span>// Blue dial</span></div><a class="button" href="./private-viewing.html">Request Viewing</a></div>
+          </article>
+          <article class="watch-item watch-stage reveal" style="--watch-image: url('https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1600&q=82');">
+            <div class="watch-stage-media"><img src="https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1100&q=82" alt="Chronograph watch detail"></div>
+            <div class="watch-stage-copy"><span class="number">[03]</span><h3>Daytona</h3><p>Chronograph energy with the weight of an exhibit instead of a product thumbnail.</p><div class="watch-meta"><span>Chronograph</span><span>// Oyster case</span></div><a class="button" href="./private-viewing.html">Request Viewing</a></div>
+          </article>
+          <article class="watch-item watch-stage reveal" style="--watch-image: url('https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1600&q=82');">
+            <div class="watch-stage-media"><img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1100&q=82" alt="Minimal dress watch on dark background"></div>
+            <div class="watch-stage-copy"><span class="number">[04]</span><h3>Calatrava</h3><p>Dress-watch restraint with enough silence for premium context.</p><div class="watch-meta"><span>White gold</span><span>// Dress watch</span></div><a class="button" href="./private-viewing.html">Request Viewing</a></div>
+          </article>
+          <article class="watch-item watch-stage reveal" style="--watch-image: url('https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&w=1600&q=82');">
+            <div class="watch-stage-media"><img src="https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&w=1100&q=82" alt="Rectangular dress watch"></div>
+            <div class="watch-stage-copy"><span class="number">[05]</span><h3>Tank</h3><p>A rectangular icon staged with editorial pacing and private access language.</p><div class="watch-meta"><span>Rectangular icon</span><span>// Manual wind</span></div><a class="button" href="./private-viewing.html">Request Viewing</a></div>
+          </article>
         </div>
       </section>
     </main>
