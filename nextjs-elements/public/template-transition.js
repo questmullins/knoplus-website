@@ -11,24 +11,29 @@
   homeStyle.id = "knoplus-template-home-style";
   homeStyle.textContent = [
     ".knoplus-template-actions{",
-    "position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:2147483645;",
-    "display:grid;justify-items:center;gap:9px;font-family:Kanit,Arial,Helvetica,sans-serif;",
+    "position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483645;",
+    "width:min(224px,calc(100vw - 24px));padding:14px 12px 14px 16px;",
+    "display:grid;gap:9px;font-family:Kanit,Arial,Helvetica,sans-serif;",
+    "background:rgba(5,5,6,.84);color:#f6f3ec;backdrop-filter:blur(18px);",
+    "box-shadow:0 18px 54px rgba(0,0,0,.34);",
+    "} .knoplus-template-actions::before{",
+    "content:\"Template Options\";display:block;margin:0 0 4px;color:rgba(246,243,236,.58);",
+    "font-size:9px;font-weight:500;letter-spacing:.22em;line-height:1;text-transform:uppercase;",
     "}",
     ".knoplus-template-home,.knoplus-template-choose{",
-    "min-height:42px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;",
-    "border:1px solid rgba(246,243,236,.38);background:rgba(5,5,6,.82);color:#f6f3ec;",
-    "font-size:12px;font-weight:500;letter-spacing:.18em;line-height:1;text-decoration:none;text-transform:uppercase;",
-    "backdrop-filter:blur(16px);box-shadow:0 16px 42px rgba(0,0,0,.32);",
-    "transition:background .22s ease,color .22s ease,transform .22s ease;",
+    "min-height:42px;padding:0 14px;display:flex;align-items:center;justify-content:flex-start;",
+    "border:0;background:rgba(246,243,236,.08);color:#f6f3ec;",
+    "font-size:11px;font-weight:500;letter-spacing:.18em;line-height:1;text-decoration:none;text-transform:uppercase;",
+    "transition:background .22s ease,color .22s ease,transform .22s ease;cursor:pointer;",
     "}",
-    ".knoplus-template-choose{min-height:36px;padding:0 14px;font-size:10px;letter-spacing:.2em;cursor:pointer;}",
+    ".knoplus-template-choose{background:rgba(246,243,236,.88);color:#050506;}",
     ".knoplus-template-home:hover,.knoplus-template-home:focus-visible,.knoplus-template-choose:hover,.knoplus-template-choose:focus-visible{",
-    "background:#f6f3ec;color:#050506;transform:translateY(-1px);",
+    "background:#f6f3ec;color:#050506;outline:none;transform:translateX(2px);",
     "}",
     ".knoplus-exit-transition{position:fixed;inset:0;z-index:2147483646;background:#050506;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;transition:opacity 720ms ease;}",
     ".knoplus-exit-transition::after{content:\"KNOPLUS\";color:#f6f3ec;font-family:Kanit,Arial,Helvetica,sans-serif;font-size:clamp(32px,4vw,54px);font-weight:500;letter-spacing:.12em;line-height:1;text-transform:uppercase;}",
     ".knoplus-exit-transition.active{opacity:1;pointer-events:auto;}",
-    "@media (max-width:720px){.knoplus-template-actions{top:12px;}.knoplus-template-home{min-height:38px;padding:0 13px;font-size:10px;}.knoplus-template-choose{min-height:34px;font-size:9px;}}"
+    "@media (max-width:720px){.knoplus-template-actions{left:10px;right:auto;top:auto;bottom:12px;transform:none;width:min(232px,calc(100vw - 20px));padding:11px;}.knoplus-template-actions::before{font-size:8px;}.knoplus-template-home,.knoplus-template-choose{min-height:36px;padding:0 12px;font-size:9px;}}"
   ].join("");
   document.head.appendChild(homeStyle);
 
