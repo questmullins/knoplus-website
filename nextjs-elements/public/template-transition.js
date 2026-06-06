@@ -43,6 +43,10 @@
       return "Homey Coffee";
     }
 
+    if (path.indexOf("granite-watches") >= 0) {
+      return "Granite Watches";
+    }
+
     if (path.indexOf("synergy") >= 0) {
       return path.indexOf("glass-colorful") >= 0 ? "Dark Luxury" : "Synergy";
     }

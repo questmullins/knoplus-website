@@ -9,7 +9,7 @@ export type TemplateItem = {
     | "traditional-auto"
     | "synergy"
     | "editorial-local"
-    | "dark-luxury"
+    | "granite-watches"
     | "cleaning-restoration"
     | "homey-coffee";
   features: string[];
@@ -68,19 +68,20 @@ export const templates: TemplateItem[] = [
     styleTags: ["Homey", "Editorial", "Soft UI"]
   },
   {
-    label: "Premium dark mode",
-    navTitle: "Dark Luxury",
-    title: "Cinematic visuals.<br>Minimal chrome.<br><em>Sharper mood.</em>",
-    description: "A darker version of the concept site for brands that want polish, restraint, and a more premium first impression.",
-    image: "url('https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1800&q=80')",
-    link: "/templates/synergy/glass-colorful.html",
-    theme: "dark-luxury",
-    features: ["2-page build", "Premium sections", "Minimal UI"],
-    sellingPoints: ["Feels high-end quickly", "Great for visual brands"],
-    price: "$750 as shown",
+    label: "Granite and gold",
+    navTitle: "Granite Watches",
+    title: "Dark stone.<br>Gold light.<br><em>Quiet precision.</em>",
+    description:
+      "A luxury watch showcase template with private-gallery pacing, numbered collection cards, appointment-led contact, and a premium dark granite atmosphere.",
+    image: "url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1800&q=80')",
+    link: "/templates/granite-watches/index.html",
+    theme: "granite-watches",
+    features: ["5-page build", "Collection showcase", "Private appointment path"],
+    sellingPoints: ["Premium gallery energy", "Built for high-ticket inquiry"],
+    price: "$1,500 as shown",
     genre: "Premium",
-    stack: ["Next.js", "React", "JavaScript"],
-    styleTags: ["Luxury", "Dark", "Cinematic"]
+    stack: ["HTML", "CSS", "JavaScript"],
+    styleTags: ["Luxury", "Granite", "Gold"]
   },
   {
     label: "Emergency lead-gen",

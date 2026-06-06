@@ -381,9 +381,9 @@ h1 {
   --panel-accent: #d8c4a3;
 }
 
-.stage[data-theme="dark-luxury"],
-.mobile-template-section[data-theme="dark-luxury"] {
-  --panel-accent: #b7c7d9;
+.stage[data-theme="granite-watches"],
+.mobile-template-section[data-theme="granite-watches"] {
+  --panel-accent: #d5ad63;
 }
 
 .stage[data-theme="cleaning-restoration"],
@@ -1879,9 +1879,9 @@ p {
   letter-spacing: -0.035em;
 }
 
-.stage[data-theme="dark-luxury"] .text-link,
-.mobile-template-section[data-theme="dark-luxury"] .text-link {
-  color: rgba(246, 243, 236, 0.86);
+.stage[data-theme="granite-watches"] .text-link,
+.mobile-template-section[data-theme="granite-watches"] .text-link {
+  color: rgba(246, 243, 236, 0.9);
 }
 
 .stage[data-theme="cleaning-restoration"] .circle-link,
