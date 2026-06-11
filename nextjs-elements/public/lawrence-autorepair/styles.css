@@ -73,7 +73,7 @@ body {
   padding: 120px clamp(24px, 8vw, 96px) 70px;
   background:
     linear-gradient(90deg, rgba(0, 0, 18, 0.96), rgba(7, 17, 166, 0.7) 48%, rgba(7, 17, 166, 0.14)),
-    var(--page-image, url("./images/shop1-160x120.jpg")) center / cover no-repeat;
+    var(--page-image, url("./images/google/lawrence-google-6.jpg")) center / cover no-repeat;
 }
 
 .hero h1,
@@ -546,7 +546,7 @@ h3 {
   align-content: end;
   background:
     linear-gradient(90deg, rgba(0, 0, 18, 0.98), rgba(7, 17, 166, 0.68)),
-    var(--page-image, url("./images/shop1-160x120.jpg")) center / cover no-repeat;
+    var(--page-image, url("./images/google/lawrence-google-6.jpg")) center / cover no-repeat;
 }
 
 .list {
