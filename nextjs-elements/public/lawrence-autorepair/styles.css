@@ -181,15 +181,67 @@ h3 {
   .site-header {
     min-height: 78px;
     padding: 18px 24px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
   }
 
   .menu-toggle {
-    top: 17px;
-    right: 24px;
+    position: static;
+    top: auto;
+    right: auto;
+    z-index: auto;
+    width: 48px;
+    height: 42px;
+    min-height: 42px;
+    margin-left: auto;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 0, 0.46);
+    background: rgba(48, 196, 223, 0.16);
+  }
+
+  .menu-toggle span {
+    width: 24px;
+    height: 13px;
+    display: grid;
+    align-content: space-between;
+  }
+
+  .menu-toggle i {
+    display: block;
+    height: 2px;
+    background: var(--yellow);
   }
 
   .nav {
-    top: 78px;
+    position: static;
+    order: 4;
+    width: 100%;
+    display: grid;
+    gap: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    visibility: visible;
+    opacity: 1;
+    background: transparent;
+    border-bottom: 0;
+    transform: none;
+    transition: max-height 0.24s ease;
+  }
+
+  .nav.is-open {
+    max-height: 280px;
+    transform: none;
+  }
+
+  .nav a {
+    padding: 14px 0;
+    border-top: 1px solid rgba(255, 255, 0, 0.18);
+    border-bottom: 0;
   }
 }
 
