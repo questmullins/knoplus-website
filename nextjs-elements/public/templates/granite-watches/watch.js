@@ -5,6 +5,7 @@
   var windowTargets = document.querySelectorAll("[data-window-parallax]");
   var watchItems = document.querySelectorAll(".watch-item");
   var watchSections = document.querySelectorAll(".watch-section");
+  var ticking = false;
 
   function updateScrollState() {
     var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -70,7 +71,20 @@
     });
   }
 
+  function scheduleScrollUpdate() {
+    if (ticking) {
+      return;
+    }
+
+    ticking = true;
+
+    window.requestAnimationFrame(function () {
+      ticking = false;
+      updateScrollState();
+    });
+  }
+
   updateScrollState();
-  window.addEventListener("scroll", updateScrollState, { passive: true });
-  window.addEventListener("resize", updateScrollState);
+  window.addEventListener("scroll", scheduleScrollUpdate, { passive: true });
+  window.addEventListener("resize", scheduleScrollUpdate);
 })();

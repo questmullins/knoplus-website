@@ -11,7 +11,7 @@
   homeStyle.id = "knoplus-template-home-style";
   homeStyle.textContent = [
     ".knoplus-template-actions{",
-    "position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483645;",
+    "position:fixed;left:16px;top:96px;z-index:2147483645;",
     "width:min(224px,calc(100vw - 24px));padding:14px 12px 14px 16px;",
     "display:grid;gap:9px;font-family:Kanit,Arial,Helvetica,sans-serif;",
     "background:rgba(5,5,6,.84);color:#f6f3ec;backdrop-filter:blur(18px);",

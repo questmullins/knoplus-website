@@ -2043,6 +2043,7 @@ p {
 }
 
 .transition-logo {
+  font-family: Kanit, Arial, Helvetica, sans-serif;
   font-size: clamp(32px, 4vw, 54px);
   font-weight: 500;
   letter-spacing: 0.12em;
