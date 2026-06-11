@@ -1,3 +1,5 @@
+import { EmailMessage } from "cloudflare:email";
+
 const CONTACT_TO_FALLBACK = "quest@kno.plus";
 const CONTACT_FROM_FALLBACK = "Knoplus <quest@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
@@ -120,7 +122,7 @@ async function sendContactEmail(contact, env) {
     return;
   }
 
-  if (env.EMAIL && typeof env.EMAIL.send === "function" && typeof EmailMessage === "function") {
+  if (env.EMAIL && typeof env.EMAIL.send === "function") {
     const to = env.CONTACT_TO || CONTACT_TO_FALLBACK;
     const from = env.CONTACT_FROM || CONTACT_FROM_FALLBACK;
     await env.EMAIL.send(new EmailMessage(from, to, buildMimeMessage(contact, from, to)));

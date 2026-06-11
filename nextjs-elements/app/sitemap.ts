@@ -11,6 +11,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const servicePages = seoPages.map((page) => `/${page.slug}`);
   const templatePages = Array.from(new Set(templates.map((template) => template.link)));
   const templateSubpages = [
+    "/lawrence-autorepair",
+    "/lawrence-autorepair/services.html",
+    "/lawrence-autorepair/knowledgebase.html",
+    "/lawrence-autorepair/testimonial.html",
+    "/lawrence-autorepair/contact.html",
     "/templates/homey-coffee/story.html",
     "/templates/homey-coffee/location.html",
     "/templates/homey-coffee/careers.html",
