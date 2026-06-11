@@ -1,88 +1,713 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lawrence Auto Repair | Anaheim Auto Repair Near Disneyland</title>
-  <meta name="description" content="Modern auto repair template for Lawrence Auto Repair in Anaheim, CA near Disneyland. Diagnostics, brakes, smog checks, maintenance, air conditioning, electrical repair, and NAPA-backed service.">
-  <meta name="keywords" content="Anaheim auto repair, mechanic near Disneyland, smog check Anaheim, brake repair Anaheim, check engine light Anaheim, NAPA auto care Anaheim, car repair near Disneyland">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css">
-</head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lawrence Auto Repair | Anaheim, CA</title>
+<meta
+  name="description"
+  content="Lawrence Auto Repair is an Anaheim automotive repair shop one block from Disneyland offering diagnostics, smog checks, brakes, maintenance, A/C service, electrical repair, and NAPA-backed service."
+>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --cream:#fff7d7;
+  --cream-2:#fff1b8;
+  --black:#000012;
+  --ink:#061033;
+  --dark:#000012;
+  --red:#ff6600;
+  --red-dark:#d94f00;
+  --yellow:#ffff00;
+  --blue:#0711a6;
+  --blue-2:#224fe8;
+  --cyan:#30c4df;
+  --muted:#33406b;
+  --line:rgba(0,0,18,.18);
+  --white:#ffffff;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Outfit",Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.page{width:100%;overflow:hidden}
+
+.header{
+  height:118px;
+  padding:0 36px;
+  background:linear-gradient(180deg,#0711a6,#000012);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:34px;
+  border-bottom:2px solid rgba(255,255,0,.42);
+}
+
+.logo{
+  line-height:.82;
+  font-size:36px;
+  font-weight:950;
+  font-style:italic;
+  letter-spacing:-1px;
+  color:white;
+  text-transform:uppercase;
+}
+
+.logo .x{color:var(--yellow)}
+.logo small{
+  display:block;
+  margin-top:9px;
+  font-size:12px;
+  letter-spacing:7px;
+  font-style:normal;
+  color:var(--yellow);
+}
+
+.nav{display:flex;align-items:center;gap:32px;font-size:14px;font-weight:900;text-transform:uppercase}
+.nav a{display:inline-flex;align-items:center;gap:8px;opacity:.94;color:white}
+.nav a:hover,.nav a:focus-visible{opacity:1;color:var(--yellow)}
+.menu-toggle{display:none}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  height:54px;
+  padding:0 25px;
+  border-radius:3px;
+  font-size:14px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+  transition:.2s ease;
+  cursor:pointer;
+}
+
+.btn:hover{transform:translateY(-2px)}
+.btn-dark{background:#0711a6;color:white;border:1px solid rgba(255,255,0,.48)}
+.btn-red{background:linear-gradient(180deg,var(--red),var(--red-dark));color:#000012;border:1px solid rgba(255,255,255,.28)}
+
+.hero{
+  min-height:610px;
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(320px,50%) 1fr;
+  background:
+    linear-gradient(90deg,rgba(0,0,18,.92),rgba(7,17,166,.66) 45%,rgba(7,17,166,.08)),
+    url("./images/merc-sl.png");
+  background-size:cover, min(55vw,720px) auto;
+  background-position:center, right center;
+  background-repeat:no-repeat;
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+  padding:70px 8vw;
+  max-width:650px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+
+.kicker{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--yellow);
+  font-size:14px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  margin-bottom:24px;
+}
+
+.slashes{
+  display:inline-block;
+  width:24px;
+  height:12px;
+  background:
+    linear-gradient(115deg,transparent 0 18%,var(--yellow) 18% 32%,transparent 32% 40%,var(--yellow) 40% 54%,transparent 54% 62%,var(--yellow) 62% 76%,transparent 76%);
+}
+
+.hero h1{
+  color:white;
+  font-size:clamp(56px,7vw,96px);
+  line-height:.92;
+  letter-spacing:-3px;
+  text-transform:uppercase;
+  font-weight:950;
+  margin-top:48px;
+  margin-bottom:28px;
+  order:3;
+}
+
+.script{
+  display:inline;
+  color:var(--yellow);
+  font-size:inherit;
+  line-height:inherit;
+  font-weight:950;
+  text-transform:uppercase;
+}
+
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:0;order:2}
+.hero-actions .btn{width:auto;min-width:188px;height:54px;padding-inline:25px}
+
+.hero-button-strip{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  padding:28px 8vw;
+  background:var(--cream);
+}
+
+.services{
+  padding:70px 8vw 74px;
+  background:
+    radial-gradient(circle at center,rgba(255,255,255,.82),rgba(255,255,255,0) 60%),
+    var(--cream-2);
+  border-top:1px solid rgba(0,0,0,.08);
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.section-head{text-align:center;margin-bottom:32px}
+.section-kicker{color:var(--red);text-transform:uppercase;font-size:13px;font-weight:950;margin-bottom:12px}
+.section-head h2{font-size:38px;line-height:1;text-transform:uppercase;letter-spacing:-1.5px}
+.red-rule{width:62px;height:2px;background:var(--red);margin:17px auto 0}
+
+.service-grid{
+  max-width:1200px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+}
+
+.service-card{
+  min-height:205px;
+  padding:12px 26px 0;
+  text-align:center;
+  border-right:1px solid var(--line);
+}
+.service-card:last-child{border-right:0}
+.service-card h3{font-size:18px;line-height:1.05;text-transform:uppercase;margin-bottom:16px;color:var(--blue)}
+.service-card p{color:#1a1d1f;font-size:15px;line-height:1.45}
+
+.about{
+  min-height:380px;
+  display:grid;
+  grid-template-columns:52% 48%;
+  background:#000012;
+  color:white;
+}
+
+.about-image{
+  background:
+    linear-gradient(90deg,rgba(0,0,18,.01) 0%,rgba(0,0,18,.18) 23%,rgba(0,0,18,0) 25%),
+    url("./images/shop1-160x120.jpg");
+  background-size:cover;
+  background-position:center calc(50% + var(--about-shift,0%));
+  min-height:380px;
+}
+
+.about-copy{
+  padding:62px 54px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.about-copy h2{
+  max-width:520px;
+  font-size:42px;
+  line-height:1.02;
+  text-transform:uppercase;
+  letter-spacing:-1.4px;
+  margin-bottom:24px;
+}
+
+.about-copy p{
+  max-width:540px;
+  color:#ecece8;
+  font-size:17px;
+  line-height:1.58;
+  margin-bottom:28px;
+}
+
+.about-rule{width:58px;height:3px;background:var(--yellow);margin:0 0 24px}
+
+.cta-strip{
+  padding:54px 9vw;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:start;
+  gap:42px;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.88),rgba(255,255,255,.98)),
+    var(--cream);
+  border-top:1px solid rgba(0,0,0,.08);
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.cta-icon{
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--blue);
+  color:var(--yellow);
+  font-size:20px;
+  font-weight:950;
+}
+
+.cta-strip h3{font-size:25px;text-transform:uppercase;letter-spacing:.2px;margin-bottom:4px}
+.cta-strip p{font-size:17px;color:#222}
+.schedule-copy{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:22px;
+  align-items:center;
+  max-width:980px;
+  margin:0 auto 4px;
+}
+.schedule-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  align-self:start;
+}
+.schedule-form label{
+  display:grid;
+  gap:8px;
+  color:#15191b;
+  font-size:13px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.schedule-form label:last-of-type{grid-column:1 / -1}
+.schedule-form input,
+.schedule-form textarea{
+  width:100%;
+  padding:14px 15px;
+  border:1px solid rgba(8,15,18,.24);
+  border-radius:3px;
+  background:#fffaf2;
+  color:#101214;
+  font:inherit;
+}
+.schedule-form textarea{min-height:118px;resize:vertical}
+.schedule-form input:focus,
+.schedule-form textarea:focus{
+  outline:none;
+  border-color:rgba(255,102,0,.66);
+  box-shadow:0 0 0 3px rgba(255,102,0,.16);
+}
+.schedule-form .btn{grid-column:1 / -1;justify-self:start}
+.map-embed{
+  position:relative;
+  aspect-ratio:1 / 1;
+  min-height:0;
+  border:1px solid rgba(8,15,18,.14);
+  border-radius:3px;
+  overflow:hidden;
+  background:#fffaf2;
+}
+.map-embed img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.map-address{
+  position:absolute;
+  left:18px;
+  bottom:18px;
+  max-width:calc(100% - 36px);
+  padding:13px 15px;
+  background:rgba(255,250,242,.94);
+  border:1px solid rgba(8,15,18,.16);
+  border-radius:3px;
+  box-shadow:0 14px 32px rgba(0,0,0,.18);
+}
+.map-address strong{display:block;margin-bottom:4px;color:#10171c;font-size:15px;text-transform:uppercase}
+.map-address span{display:block;color:#42423d;font-size:14px;line-height:1.35}
+
+.recent-video{
+  padding:54px 9vw;
+  display:grid;
+  grid-template-columns:minmax(260px,440px) 1fr;
+  gap:36px;
+  align-items:center;
+  background:#000012;
+  color:white;
+}
+.video-thumb{
+  position:relative;
+  display:block;
+  aspect-ratio:16 / 9;
+  overflow:hidden;
+  border-radius:3px;
+  background:#101820;
+}
+.video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.play-button{
+  position:absolute;
+  inset:50% auto auto 50%;
+  width:54px;
+  height:54px;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:#000012;
+  border-radius:3px;
+  transform:translate(-50%,-50%);
+  font-weight:950;
+}
+.video-copy h2{
+  max-width:620px;
+  font-size:42px;
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:-1.5px;
+  margin-bottom:14px;
+}
+.video-copy p{max-width:520px;color:#d6d6cf;font-size:17px;line-height:1.55;margin-bottom:20px}
+
+.footer{
+  position:relative;
+  min-height:185px;
+  padding:34px 36px 22px;
+  background:#000012;
+  color:white;
+  overflow:hidden;
+}
+
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.14;
+  background:
+    linear-gradient(30deg, transparent 24%, rgba(255,255,0,.18) 25%, rgba(255,255,0,.18) 26%, transparent 27%, transparent 74%, rgba(255,255,0,.18) 75%, rgba(255,255,0,.18) 76%, transparent 77%),
+    linear-gradient(150deg, transparent 24%, rgba(255,255,255,.12) 25%, rgba(255,255,255,.12) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.12) 75%, rgba(255,255,255,.12) 76%, transparent 77%);
+  background-size:54px 94px;
+  pointer-events:none;
+}
+
+.footer-inner{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1.15fr 1.2fr 1fr 1.1fr;
+  gap:26px;
+  align-items:start;
+}
+
+.footer .logo{font-size:42px}
+.footer-desc{color:#d8d8d0;margin-top:16px;max-width:240px;font-size:14px;line-height:1.45}
+.footer-col{border-left:1px solid rgba(255,255,255,.22);padding-left:32px;min-height:96px}
+.footer-col h4{color:var(--yellow);font-size:13px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.footer-link{display:flex;align-items:center;gap:10px;color:#ddd;font-size:14px;margin-bottom:11px}
+.map-pin{align-self:center;justify-self:end;display:flex;align-items:center;gap:12px;text-transform:uppercase;font-size:18px;font-weight:950;line-height:1.05}
+.pin{font-size:42px;color:var(--yellow)}
+.copyright{position:relative;z-index:2;text-align:center;margin-top:18px;color:rgba(255,255,255,.52);font-size:12px}
+
+@media(max-width:1050px){
+  .header{height:auto;padding:28px;flex-wrap:wrap}
+  .nav{order:3;width:100%;justify-content:center}
+  .hero{grid-template-columns:1fr;min-height:560px;background-position:center, right center}
+  .hero-content{padding:70px 8vw}
+  .service-grid{grid-template-columns:repeat(5,1fr)}
+  .service-card{padding:12px 16px 0}
+  .service-card h3{font-size:16px}
+  .service-card p{font-size:13px}
+  .about{grid-template-columns:1fr 1fr}
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .map-pin{justify-self:start}
+}
+
+@media(max-width:760px){
+  .header{position:sticky;top:0;z-index:40;align-items:center;gap:18px;padding:20px 24px}
+  .logo{font-size:30px}
+  .menu-toggle{
+    display:inline-flex;
+    margin-left:auto;
+    width:48px;
+    height:42px;
+    border:1px solid rgba(255,255,0,.46);
+    background:rgba(48,196,223,.16);
+    align-items:center;
+    justify-content:center;
+  }
+  .menu-toggle span{width:24px;height:13px;display:grid;align-content:space-between}
+  .menu-toggle i{display:block;height:2px;background:var(--yellow)}
+  .nav{
+    order:4;
+    width:100%;
+    display:grid;
+    gap:0;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .24s ease;
+  }
+  .nav.is-open{max-height:280px}
+  .nav a{padding:14px 0;border-top:1px solid rgba(255,255,0,.18)}
+  .hero{
+    min-height:620px;
+    background-image:
+      linear-gradient(180deg,rgba(0,0,18,.64),rgba(0,0,18,.98)),
+      url("./images/merc-sl.png");
+    background-size:cover, min(110vw,540px) auto;
+    background-position:center, center 86px;
+  }
+  .hero-content{padding:64px 28px}
+  .kicker{align-items:flex-start;letter-spacing:.08em;margin-bottom:22px}
+  .slashes{display:none}
+  .hero h1{font-size:54px;letter-spacing:-2px;margin-bottom:0}
+  .btn{width:100%}
+  .hero-actions{display:grid;gap:14px;width:100%}
+  .hero-button-strip{display:grid;gap:14px;padding:24px 28px 30px}
+  .services{padding:58px 8vw}
+  .service-grid{grid-template-columns:1fr;gap:0}
+  .service-card{border-right:0;border-bottom:1px solid var(--line);min-height:auto;padding:22px 8px}
+  .service-card:last-child{border-bottom:0}
+  .about{grid-template-columns:1fr}
+  .about-image{min-height:250px}
+  .about-copy{padding:46px 28px}
+  .about-copy h2{font-size:36px}
+  .cta-strip{grid-template-columns:1fr;text-align:left;padding:34px 28px}
+  .schedule-copy{grid-template-columns:1fr;text-align:center}
+  .cta-icon{margin:auto}
+  .schedule-form{grid-template-columns:1fr}
+  .schedule-form .btn{justify-self:stretch}
+  .recent-video{grid-template-columns:1fr;padding:42px 28px}
+  .video-copy h2{font-size:34px}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-col{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.18);padding-top:22px}
+}
+</style>
+<script src="/template-transition.js"></script></head>
+
 <body>
-  <header class="site-header">
-    <a class="brand" href="./index.html"><strong>Lawrence</strong><span>Auto Repair</span></a>
-    <nav class="nav" aria-label="Primary">
-      <a href="./index.html" aria-current="page">Home</a>
+<div class="page">
+  <header class="header">
+    <a class="logo" href="./index.html">
+      Lawrence<span class="x"> Auto</span>
+      <small>Repair</small>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span><i></i><i></i><i></i></span></button>
+
+    <nav class="nav">
       <a href="./services.html">Services</a>
       <a href="./knowledgebase.html">Knowledge</a>
       <a href="./testimonial.html">Reviews</a>
       <a href="./contact.html">Contact</a>
     </nav>
-    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span><i></i><i></i><i></i></span></button>
   </header>
 
   <main>
     <section class="hero">
-      <div>
-        <p class="eyebrow">One block from Disneyland</p>
-        <h1>Anaheim auto repair with <span>clear answers.</span></h1>
-        <p class="lead">A cleaner service-shop experience for diagnostics, maintenance, brakes, air conditioning, electrical systems, smog checks, and everyday repairs.</p>
-        <div class="actions">
-          <a class="button primary" href="tel:+17149714624">Call 714-971-4624</a>
-          <a class="button" href="./services.html">View Services</a>
+      <div class="hero-content">
+        <div class="kicker">
+          <span class="slashes"></span>
+          Complete service in Anaheim / One block from Disneyland
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-red" href="tel:+17149714624">Call 714-971-4624</a>
+          <a class="btn btn-dark" href="#schedule">Schedule Service</a>
+        </div>
+
+        <h1>
+          Honest repair.<br>
+          Clear service.<br>
+          <span class="script">Any car.</span>
+        </h1>
+      </div>
+    </section>
+
+    <div class="hero-button-strip" aria-label="Hero actions">
+      <a class="btn btn-red" href="tel:+17149714628">Call 714-971-4628</a>
+      <a class="btn btn-dark" href="./contact.html">Map &amp; Hours</a>
+    </div>
+
+    <section id="services" class="services">
+      <div class="section-head">
+        <div class="section-kicker">What We Do</div>
+        <h2>Complete Auto Service Near Disneyland.</h2>
+        <div class="red-rule"></div>
+      </div>
+
+      <div class="service-grid">
+        <article class="service-card">
+          <h3>Diagnostics</h3>
+          <p>Computer diagnostics, troubleshooting, check-engine lights, fuel injection, and advanced engine performance.</p>
+        </article>
+
+        <article class="service-card">
+          <h3>Maintenance</h3>
+          <p>Oil lube, filters, tune-ups, factory scheduled service, tire rotation, belts, batteries, and radiator service.</p>
+        </article>
+
+        <article class="service-card">
+          <h3>Brake Service</h3>
+          <p>Brake inspections, repairs, warning-light checks, noise diagnosis, and replacement recommendations.</p>
+        </article>
+
+        <article class="service-card">
+          <h3>A/C &amp; Electrical</h3>
+          <p>Air conditioning service, electrical systems, starters, alternators, ignition, heating, and cooling repair.</p>
+        </article>
+
+        <article class="service-card">
+          <h3>Smog Check</h3>
+          <p>Emission inspection and smog check support for vehicles 2000 and newer.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <div class="about-image"></div>
+
+      <div class="about-copy">
+        <div class="section-kicker">About Lawrence</div>
+
+        <h2>
+          NAPA-backed repair.<br>
+          Local Anaheim trust.
+        </h2>
+
+        <div class="about-rule"></div>
+
+        <p>
+          Lawrence Auto Repair brings over 25 years of automotive experience to domestic,
+          import, and European vehicles. The shop is built around clear communication,
+          quality parts, quick turnaround, and practical repairs that do not waste the
+          customer's time or budget.
+        </p>
+
+        <a class="btn btn-dark" href="./testimonial.html">Read Reviews</a>
+      </div>
+    </section>
+
+    <section id="schedule" class="cta-strip">
+      <div class="schedule-copy">
+        <div class="cta-icon">NAPA</div>
+
+        <div>
+          <h3>Need immediate assistance?</h3>
+          <p>Call the shop directly or send details about the vehicle and concern. Lawrence Auto Repair is located at 460 W. Wilken Way in Anaheim.</p>
         </div>
       </div>
-      <aside class="hero-card">
-        <img src="./images/napa2.png" alt="NAPA AutoCare">
-        <h3>NAPA-backed service</h3>
-        <p>Domestic, import, and European vehicles supported by practical diagnostics, quality parts, and nationwide warranty confidence in the U.S. and Canada.</p>
-      </aside>
+
+      <form action="mailto:lawrenceautorepair@gmail.com" method="POST" enctype="text/plain" class="schedule-form">
+        <label>First Name<input type="text" name="first_name" required></label>
+        <label>Last Name<input type="text" name="last_name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>Car Make<input type="text" name="car_make" required></label>
+        <label>Model<input type="text" name="model" required></label>
+        <label>Year<input type="text" name="year" required></label>
+        <label>Concern<textarea name="concern" rows="8" required></textarea></label>
+        <button type="submit" class="btn btn-red">Send Service Request</button>
+      </form>
+      <a class="map-embed" href="https://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q=460+W+Wilken+Way,+Anaheim,+CA+92802&sll=37.0625,-95.677068&sspn=31.922255,56.513672&ie=UTF8&hq=&hnear=460+W+Wilken+Way,+Anaheim,+Orange,+California+92802&ll=33.802758,-117.908278&spn=0.032665,0.087891&z=14">
+        <img src="./images/map.jpg" alt="Map to Lawrence Auto Repair in Anaheim">
+        <div class="map-address">
+          <strong>Lawrence Auto Repair</strong>
+          <span>460 W. Wilken Way</span>
+          <span>Anaheim, CA 92802</span>
+        </div>
+      </a>
     </section>
 
-    <section class="section">
-      <div class="facts">
-        <div class="fact"><span class="fact-label">Experience</span><span class="fact-value">25+ years</span></div>
-        <div class="fact"><span class="fact-label">Location</span><span class="fact-value">Anaheim, CA</span></div>
-        <div class="fact"><span class="fact-label">Specialty</span><span class="fact-value">Diagnostics</span></div>
-        <div class="fact"><span class="fact-label">Smog</span><span class="fact-value">2000+</span></div>
-      </div>
-    </section>
-
-    <section class="section split">
-      <div class="photo-window" style="--photo: url('./images/shop1-160x120.jpg')" aria-label="Lawrence Auto Repair shop"></div>
-      <div class="panel">
-        <p class="eyebrow">What they do</p>
-        <h2>Fast repairs without the old-shop confusion.</h2>
-        <p>Lawrence Auto Repair handles check-engine lights, fuel injection, air conditioning, brakes, electrical and electronic systems, maintenance, oil lube, and smog checks for vehicles 2000 and newer.</p>
-        <ul class="list">
-          <li>Computer diagnostic and troubleshooting</li>
-          <li>Advanced engine performance and maintenance</li>
-          <li>Domestic, import, and European vehicle service</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <p class="eyebrow">Core services</p>
-        <h2>Built around the repairs people actually need.</h2>
-      </div>
-      <div class="grid">
-        <article class="service-card"><h3>Diagnostics</h3><p>Check-engine lights, drivability issues, fuel injection, electronic faults, and advanced engine performance.</p></article>
-        <article class="service-card"><h3>Maintenance</h3><p>Oil change, lube and filter, tune-ups, factory scheduled maintenance, batteries, belts, and filters.</p></article>
-        <article class="service-card"><h3>Repair</h3><p>Brakes, steering and suspension, cooling systems, water pumps, fuel pumps, starters, alternators, and A/C service.</p></article>
+    <section class="recent-video" aria-label="Lawrence Auto Repair trust points">
+      <a class="video-thumb" href="./services.html" aria-label="View Lawrence Auto Repair services">
+        <img src="./images/napa-warranty-new.gif" alt="NAPA Peace of Mind Warranty" loading="lazy">
+        <span class="play-button" aria-hidden="true">Go</span>
+      </a>
+      <div class="video-copy">
+        <div class="section-kicker">Warranty Support</div>
+        <h2>NAPA AutoCare approved facility.</h2>
+        <p>Lawrence Auto Repair uses quality OEM or NAPA aftermarket parts and supports customers with NAPA nationwide warranty confidence in the U.S. and Canada.</p>
+        <a class="btn btn-red" href="./services.html">View Services</a>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <span>460 W. Wilken Way, Anaheim, CA 92802</span>
-    <span><a href="tel:+17149714624">714-971-4624</a> / <a href="tel:+17149714628">714-971-4628</a></span>
+  <footer id="contact" class="footer">
+    <div class="footer-inner">
+      <div>
+        <a class="logo" href="./index.html">
+          Lawrence<span class="x"> Auto</span>
+          <small>Repair</small>
+        </a>
+
+        <p class="footer-desc">
+          Anaheim auto repair one block from Disneyland. Domestic, import, and European cars welcome.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a class="footer-link" href="tel:+17149714624">Call 714-971-4624</a>
+        <a class="footer-link" href="tel:+17149714628">Call 714-971-4628</a>
+        <a class="footer-link" href="mailto:lawrenceautorepair@gmail.com">lawrenceautorepair@gmail.com</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Hours</h4>
+        <div class="footer-link">Mon-Fri 8:00 AM - 5:00 PM</div>
+        <div class="footer-link">Saturday 8:00 AM - 2:00 PM</div>
+        <div class="footer-link">Sunday Closed</div>
+      </div>
+
+      <div class="map-pin">
+        <span class="pin">Anaheim</span>
+        <span>Near<br>Disneyland</span>
+      </div>
+    </div>
+
+    <div class="copyright">
+      © 2026 Lawrence Auto Repair. Template modernization by Knoplus.
+    </div>
   </footer>
-  <script src="./menu.js"></script>
-  <script src="/template-transition.js"></script>
+</div>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const nav = document.querySelector(".nav");
+  const toggle = document.querySelector(".menu-toggle");
+
+  if (toggle && nav) {
+    toggle.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+    });
+  }
+
+  const updateImageShift = () => {
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = window.scrollY / maxScroll;
+    const shift = ((progress - 0.5) * 20).toFixed(2) + "%";
+    root.style.setProperty("--about-shift", shift);
+  };
+
+  updateImageShift();
+  window.addEventListener("scroll", updateImageShift, { passive: true });
+  window.addEventListener("resize", updateImageShift);
+})();
+</script>
 </body>
 </html>
