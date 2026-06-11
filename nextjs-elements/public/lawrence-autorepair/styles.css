@@ -1,13 +1,17 @@
 :root {
-  --ink: #08090b;
-  --panel: #111318;
-  --panel-soft: #191c22;
-  --paper: #f6f1e8;
-  --muted: rgba(246, 241, 232, 0.68);
-  --line: rgba(246, 241, 232, 0.16);
-  --red: #d8342a;
-  --red-dark: #a92018;
-  --steel: #a9b3bd;
+  --ink: #000012;
+  --blue: #0711a6;
+  --blue-bright: #224fe8;
+  --cyan: #30c4df;
+  --yellow: #ffff00;
+  --orange: #ff9900;
+  --orange-deep: #ff6600;
+  --panel: rgba(9, 18, 169, 0.72);
+  --panel-soft: rgba(33, 78, 232, 0.34);
+  --paper: #ffffff;
+  --muted: rgba(255, 255, 255, 0.74);
+  --line: rgba(255, 255, 0, 0.36);
+  --steel: #c0c0c0;
   --max: 1160px;
   --body: "Kanit", Arial, Helvetica, sans-serif;
 }
@@ -24,8 +28,9 @@ body {
   margin: 0;
   color: var(--paper);
   background:
-    radial-gradient(circle at 85% 5%, rgba(216, 52, 42, 0.22), transparent 28rem),
-    linear-gradient(135deg, #07080a, #16181d 46%, #090a0c);
+    radial-gradient(circle at 24% 18%, rgba(34, 79, 232, 0.52), transparent 28rem),
+    radial-gradient(circle at 86% 4%, rgba(255, 153, 0, 0.2), transparent 24rem),
+    linear-gradient(135deg, #000012, #061096 48%, #000012);
   font-family: var(--body);
   font-weight: 300;
 }
@@ -38,8 +43,8 @@ body::before {
   pointer-events: none;
   opacity: 0.24;
   background:
-    linear-gradient(115deg, transparent 0 38%, rgba(255, 255, 255, 0.045) 39%, transparent 41%),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 32px);
+    linear-gradient(115deg, transparent 0 38%, rgba(255, 255, 0, 0.06) 39%, transparent 41%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 32px);
 }
 
 a {
@@ -62,7 +67,7 @@ img {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  background: linear-gradient(180deg, rgba(8, 9, 11, 0.92), rgba(8, 9, 11, 0.62), transparent);
+  background: linear-gradient(180deg, rgba(0, 0, 18, 0.96), rgba(0, 0, 18, 0.72), transparent);
 }
 
 .brand {
@@ -91,7 +96,7 @@ img {
 
 .brand span,
 .eyebrow {
-  color: var(--red);
+  color: var(--yellow);
 }
 
 .nav {
@@ -101,12 +106,39 @@ img {
 }
 
 .nav a {
-  color: rgba(246, 241, 232, 0.72);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .nav a:hover,
 .nav a[aria-current="page"] {
+  color: var(--yellow);
+}
+
+.menu-toggle {
+  display: none;
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 0, 0.42);
+  background: linear-gradient(180deg, rgba(48, 196, 223, 0.28), rgba(34, 79, 232, 0.42));
   color: var(--paper);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.menu-toggle span {
+  width: 24px;
+  height: 12px;
+  display: inline-grid;
+  align-content: space-between;
+}
+
+.menu-toggle i {
+  display: block;
+  height: 2px;
+  background: var(--yellow);
 }
 
 .hero {
@@ -117,7 +149,7 @@ img {
   gap: clamp(36px, 7vw, 92px);
   align-items: end;
   background:
-    linear-gradient(90deg, rgba(8, 9, 11, 0.96), rgba(8, 9, 11, 0.66) 52%, rgba(8, 9, 11, 0.26)),
+    linear-gradient(90deg, rgba(0, 0, 18, 0.98), rgba(7, 17, 166, 0.72) 52%, rgba(7, 17, 166, 0.18)),
     url("./images/merc-sl.png") right center / contain no-repeat;
 }
 
@@ -133,7 +165,7 @@ img {
 
 .hero h1 span,
 .page-title h1 span {
-  color: var(--red);
+  color: var(--yellow);
   font-weight: 500;
 }
 
@@ -159,13 +191,13 @@ img {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(246, 241, 232, 0.18);
-  background: rgba(246, 241, 232, 0.08);
+  background: linear-gradient(180deg, rgba(48, 196, 223, 0.28), rgba(34, 79, 232, 0.32));
 }
 
 .button.primary {
-  border-color: var(--red);
-  background: var(--red);
-  color: white;
+  border-color: var(--orange);
+  background: linear-gradient(180deg, var(--orange), var(--orange-deep));
+  color: #000012;
 }
 
 .hero-card,
@@ -175,7 +207,7 @@ img {
 .qa {
   background: rgba(17, 19, 24, 0.78);
   border: 1px solid var(--line);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+  box-shadow: 0 28px 80px rgba(0, 0, 18, 0.42);
 }
 
 .hero-card {
@@ -284,7 +316,7 @@ h3 {
   display: grid;
   align-content: end;
   background:
-    linear-gradient(90deg, rgba(8, 9, 11, 0.98), rgba(8, 9, 11, 0.64)),
+    linear-gradient(90deg, rgba(0, 0, 18, 0.98), rgba(7, 17, 166, 0.68)),
     var(--page-image, url("./images/shop1-160x120.jpg")) center / cover no-repeat;
 }
 
@@ -313,7 +345,7 @@ h3 {
 .quote cite {
   display: block;
   margin-top: 18px;
-  color: var(--red);
+  color: var(--yellow);
   font-style: normal;
   font-weight: 500;
 }
@@ -352,17 +384,47 @@ h3 {
     position: sticky;
     min-height: 74px;
     padding: 14px 18px;
-    background: rgba(8, 9, 11, 0.94);
+    background: rgba(0, 0, 18, 0.96);
+  }
+
+  .menu-toggle {
+    position: fixed;
+    top: 15px;
+    right: clamp(18px, calc(100vw - 420px), 72px);
+    z-index: 60;
+    width: 48px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
   }
 
   .nav {
-    gap: 10px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    position: fixed;
+    top: 74px;
+    left: 0;
+    right: 0;
+    display: grid;
+    gap: 0;
+    padding: 10px 18px 18px;
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(0, 0, 18, 0.97);
+    border-bottom: 1px solid var(--line);
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
   }
 
-  .nav::-webkit-scrollbar {
-    display: none;
+  .nav.is-open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .nav a {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 0, 0.16);
   }
 
   .hero,
@@ -377,7 +439,7 @@ h3 {
     min-height: auto;
     padding: 76px 22px 52px;
     background:
-      linear-gradient(180deg, rgba(8, 9, 11, 0.82), rgba(8, 9, 11, 0.98)),
+      linear-gradient(180deg, rgba(0, 0, 18, 0.72), rgba(0, 0, 18, 0.98)),
       url("./images/merc-sl.png") center 90px / min(92vw, 540px) auto no-repeat;
   }
 
