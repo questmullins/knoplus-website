@@ -9,7 +9,7 @@ export type TemplateItem = {
     | "traditional-auto"
     | "synergy"
     | "editorial-local"
-    | "granite-watches"
+    | "photo-portfolio"
     | "cleaning-restoration"
     | "homey-coffee";
   features: string[];
@@ -74,8 +74,8 @@ export const templates: TemplateItem[] = [
     description:
       "A refined photography portfolio template with full-width category panels, filtered galleries, print inquiries, and a calm editorial feel.",
     image: "url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80')",
-    link: "/templates/granite-watches/index.html",
-    theme: "granite-watches",
+    link: "/templates/photo-portfolio/index.html",
+    theme: "photo-portfolio",
     features: ["Portfolio filtering", "Image-led sections", "Print/contact path"],
     sellingPoints: ["Strong visual first impression", "Easy gallery browsing"],
     price: "$1,500 as shown",

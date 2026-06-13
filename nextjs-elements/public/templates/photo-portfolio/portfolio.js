@@ -5,6 +5,7 @@
   var galleryTitle = document.getElementById("gallery-title");
   var galleryDescription = document.getElementById("gallery-description");
   var portfolio = document.getElementById("portfolio");
+  var ticking = false;
 
   var copy = {
     wild: {
@@ -65,5 +66,35 @@
     });
   });
 
+  function updateHeroParallax() {
+    var viewportHeight = window.innerHeight || 1;
+
+    categoryPanels.forEach(function (panel, index) {
+      var rect = panel.getBoundingClientRect();
+      var midpoint = rect.top + rect.height / 2;
+      var distance = (midpoint - viewportHeight / 2) / viewportHeight;
+      var drift = Math.max(-22, Math.min(22, distance * -34));
+      var offset = drift + index * 1.5;
+
+      panel.style.setProperty("--panel-y", offset + "px");
+    });
+  }
+
+  function scheduleParallax() {
+    if (ticking) {
+      return;
+    }
+
+    ticking = true;
+
+    window.requestAnimationFrame(function () {
+      ticking = false;
+      updateHeroParallax();
+    });
+  }
+
   setFilter("wild", false);
+  updateHeroParallax();
+  window.addEventListener("scroll", scheduleParallax, { passive: true });
+  window.addEventListener("resize", scheduleParallax);
 })();

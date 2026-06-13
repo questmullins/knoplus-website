@@ -381,8 +381,8 @@ h1 {
   --panel-accent: #d8c4a3;
 }
 
-.stage[data-theme="granite-watches"],
-.mobile-template-section[data-theme="granite-watches"] {
+.stage[data-theme="photo-portfolio"],
+.mobile-template-section[data-theme="photo-portfolio"] {
   --panel-accent: #d5ad63;
 }
 
@@ -1879,8 +1879,8 @@ p {
   letter-spacing: -0.035em;
 }
 
-.stage[data-theme="granite-watches"] .text-link,
-.mobile-template-section[data-theme="granite-watches"] .text-link {
+.stage[data-theme="photo-portfolio"] .text-link,
+.mobile-template-section[data-theme="photo-portfolio"] .text-link {
   color: rgba(246, 243, 236, 0.9);
 }
 

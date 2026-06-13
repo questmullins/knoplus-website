@@ -20,10 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/templates/homey-coffee/location.html",
     "/templates/homey-coffee/careers.html",
     "/templates/homey-coffee/contact.html",
-    "/templates/granite-watches/collection.html",
-    "/templates/granite-watches/craftsmanship.html",
-    "/templates/granite-watches/private-viewing.html",
-    "/templates/granite-watches/contact.html"
+    "/templates/photo-portfolio/index.html"
   ];
 
   return [...corePages, ...servicePages, ...templatePages, ...templateSubpages].map((path) => ({

@@ -48,7 +48,7 @@
       return "Homey Coffee";
     }
 
-    if (path.indexOf("granite-watches") >= 0) {
+    if (path.indexOf("photo-portfolio") >= 0) {
       return "Photography";
     }
 
