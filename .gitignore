@@ -6,4 +6,4 @@ next-dev.out.log
 next-dev.err.log
 wrangler.toml
 .wrangler/
-
+nextjs-elements/public/templates/photo-portfolio/photo-manifest.json

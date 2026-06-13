@@ -105,6 +105,11 @@ img {
   background: #111;
 }
 
+.noscript-note {
+  padding: 120px var(--hero-pad-x);
+  color: var(--white);
+}
+
 .category-panel {
   width: 100%;
   min-height: clamp(180px, 19vh, 260px);

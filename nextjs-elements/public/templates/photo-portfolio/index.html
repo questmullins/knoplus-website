@@ -27,27 +27,10 @@
     </header>
 
     <main>
-      <section class="category-stack" aria-label="Portfolio categories">
-        <button class="category-panel is-active" type="button" data-filter="wild" style="--image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2200&q=84');">
-          <span class="category-number">01</span>
-          <span class="category-title">Wild Places</span>
-          <span class="category-action">View Gallery</span>
-        </button>
-        <button class="category-panel" type="button" data-filter="architecture" style="--image: url('https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2200&q=84');">
-          <span class="category-number">02</span>
-          <span class="category-title">Architecture</span>
-          <span class="category-action">View Gallery</span>
-        </button>
-        <button class="category-panel" type="button" data-filter="portraits" style="--image: url('https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=2200&q=84');">
-          <span class="category-number">03</span>
-          <span class="category-title">Portraits</span>
-          <span class="category-action">View Gallery</span>
-        </button>
-        <button class="category-panel" type="button" data-filter="still-life" style="--image: url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=2200&q=84');">
-          <span class="category-number">04</span>
-          <span class="category-title">Still Life</span>
-          <span class="category-action">View Gallery</span>
-        </button>
+      <section class="category-stack" id="top" aria-label="Portfolio categories" data-category-stack>
+        <noscript>
+          <p class="noscript-note">Enable JavaScript to view the interactive portfolio.</p>
+        </noscript>
       </section>
 
       <section class="portfolio-section" id="portfolio">
@@ -56,74 +39,11 @@
           <p class="eyebrow">Selected Work</p>
           <h1 id="gallery-title">Wild Places</h1>
           <p id="gallery-description">A collection of landscapes from remote corners of the world. Exploring the beauty and power of nature.</p>
-          <ol class="filter-list" aria-label="Portfolio filters">
-            <li><button class="filter-button is-active" type="button" data-filter="wild">Wild Places</button></li>
-            <li><button class="filter-button" type="button" data-filter="architecture">Architecture</button></li>
-            <li><button class="filter-button" type="button" data-filter="portraits">Portraits</button></li>
-            <li><button class="filter-button" type="button" data-filter="still-life">Still Life</button></li>
+          <ol class="filter-list" aria-label="Portfolio filters" data-filter-list>
           </ol>
         </aside>
 
-        <div class="gallery-grid" aria-live="polite">
-          <figure class="gallery-item wide" data-category="wild">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1500&q=84" alt="Mountain range under dramatic clouds">
-            <figcaption>Mountain Range</figcaption>
-          </figure>
-          <figure class="gallery-item tall" data-category="wild">
-            <img src="https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=1200&q=84" alt="Hiker standing near sharp mountain peaks">
-            <figcaption>The Highlands</figcaption>
-          </figure>
-          <figure class="gallery-item" data-category="wild">
-            <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=84" alt="Winding coastal road">
-            <figcaption>Coastal Roads</figcaption>
-          </figure>
-          <figure class="gallery-item" data-category="wild">
-            <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1200&q=84" alt="Person walking through desert dunes">
-            <figcaption>Desert Dunes</figcaption>
-          </figure>
-          <figure class="gallery-item" data-category="wild">
-            <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=84" alt="Forest path with tall trees">
-            <figcaption>Forest Walks</figcaption>
-          </figure>
-
-          <figure class="gallery-item wide" data-category="architecture">
-            <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1500&q=84" alt="Minimal concrete house exterior">
-            <figcaption>Concrete Shade</figcaption>
-          </figure>
-          <figure class="gallery-item" data-category="architecture">
-            <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=84" alt="Geometric modern building">
-            <figcaption>Facade Study</figcaption>
-          </figure>
-          <figure class="gallery-item tall" data-category="architecture">
-            <img src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=84" alt="Plant shadows on architectural wall">
-            <figcaption>Courtyard Palm</figcaption>
-          </figure>
-
-          <figure class="gallery-item wide" data-category="portraits">
-            <img src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=1500&q=84" alt="Portrait of woman outdoors">
-            <figcaption>Wind Portrait</figcaption>
-          </figure>
-          <figure class="gallery-item" data-category="portraits">
-            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=84" alt="Editorial portrait in natural light">
-            <figcaption>Soft Direction</figcaption>
-          </figure>
-          <figure class="gallery-item tall" data-category="portraits">
-            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=84" alt="Studio portrait with clean styling">
-            <figcaption>Studio Quiet</figcaption>
-          </figure>
-
-          <figure class="gallery-item wide" data-category="still-life">
-            <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1500&q=84" alt="Ceramic vessel in soft light">
-            <figcaption>Ceramic Form</figcaption>
-          </figure>
-          <figure class="gallery-item" data-category="still-life">
-            <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=84" alt="Minimal linen still life">
-            <figcaption>Linen Study</figcaption>
-          </figure>
-          <figure class="gallery-item tall" data-category="still-life">
-            <img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1200&q=84" alt="Plant and object still life">
-            <figcaption>Window Object</figcaption>
-          </figure>
+        <div class="gallery-grid" aria-live="polite" data-gallery-grid>
         </div>
       </section>
 
