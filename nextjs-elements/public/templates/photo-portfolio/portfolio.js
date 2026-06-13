@@ -5,6 +5,9 @@
   var galleryTitle = document.getElementById("gallery-title");
   var galleryDescription = document.getElementById("gallery-description");
   var portfolio = document.getElementById("portfolio");
+  var header = document.querySelector(".photo-header");
+  var menuToggle = document.querySelector(".menu-toggle");
+  var photoNav = document.querySelector(".photo-nav");
   var categoryPanels = [];
   var filterButtons = [];
   var galleryItems = [];
@@ -242,6 +245,28 @@
     window.requestAnimationFrame(function () {
       ticking = false;
       updateHeroParallax();
+    });
+  }
+
+  function closeMenu() {
+    if (!header || !menuToggle) {
+      return;
+    }
+
+    header.classList.remove("is-menu-open");
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
+
+  if (menuToggle && header) {
+    menuToggle.addEventListener("click", function () {
+      var isOpen = header.classList.toggle("is-menu-open");
+      menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+  }
+
+  if (photoNav) {
+    Array.prototype.slice.call(photoNav.querySelectorAll("a")).forEach(function (link) {
+      link.addEventListener("click", closeMenu);
     });
   }
 

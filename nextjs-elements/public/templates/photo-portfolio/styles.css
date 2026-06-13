@@ -95,6 +95,10 @@ img {
   text-transform: uppercase;
 }
 
+.menu-toggle {
+  display: none;
+}
+
 .category-stack {
   min-height: 100vh;
   padding-inline: var(--hero-pad-x);
@@ -102,7 +106,7 @@ img {
   display: grid;
   align-content: stretch;
   gap: 0;
-  background: #111;
+  background: var(--paper);
 }
 
 .noscript-note {
@@ -438,21 +442,71 @@ p {
   .photo-header {
     min-height: 74px;
     padding: 16px 18px;
-    display: grid;
-    gap: 12px;
-    align-items: start;
+    display: flex;
+    align-items: flex-start;
     mix-blend-mode: normal;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.48), transparent);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent);
+  }
+
+  .menu-toggle {
+    width: 48px;
+    height: 42px;
+    border: 1px solid rgba(255, 255, 255, 0.54);
+    display: inline-grid;
+    place-content: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.22);
+    color: var(--white);
+    cursor: pointer;
+  }
+
+  .menu-toggle span {
+    width: 20px;
+    height: 1px;
+    display: block;
+    background: currentColor;
+    transition: transform 0.24s ease;
+  }
+
+  .photo-header.is-menu-open .menu-toggle span:first-child {
+    transform: translateY(4px) rotate(45deg);
+  }
+
+  .photo-header.is-menu-open .menu-toggle span:last-child {
+    transform: translateY(-4px) rotate(-45deg);
   }
 
   .photo-nav {
-    gap: 18px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    position: absolute;
+    top: calc(100% - 4px);
+    right: 18px;
+    width: min(260px, calc(100vw - 36px));
+    padding: 18px;
+    display: grid;
+    gap: 0;
+    background: rgba(8, 8, 8, 0.94);
+    color: var(--white);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    backdrop-filter: blur(16px);
   }
 
-  .photo-nav::-webkit-scrollbar {
-    display: none;
+  .photo-header.is-menu-open .photo-nav {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .photo-nav a {
+    padding: 16px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .category-stack {
+    padding: 0;
+    background: var(--paper);
   }
 
   .category-panel {
