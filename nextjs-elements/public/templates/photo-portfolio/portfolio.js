@@ -8,15 +8,10 @@
   var header = document.querySelector(".photo-header");
   var menuToggle = document.querySelector(".menu-toggle");
   var photoNav = document.querySelector(".photo-nav");
-  var motionTuner = document.querySelector(".motion-tuner");
-  var motionTunerToggle = document.querySelector(".motion-tuner-toggle");
-  var tuneInputs = Array.prototype.slice.call(document.querySelectorAll("[data-tune]"));
   var categoryPanels = [];
   var filterButtons = [];
   var galleryItems = [];
   var categories = [];
-  var pressedPanel = null;
-  var focusPoint = 50;
   var ticking = false;
 
   var fallbackCategories = [
@@ -180,31 +175,6 @@
         setFilter(panel.dataset.filter, true);
       });
 
-      panel.addEventListener("pointerdown", function () {
-        pressedPanel = panel;
-        updateHeroParallax();
-      });
-
-      panel.addEventListener("pointerup", function () {
-        if (pressedPanel === panel) {
-          pressedPanel = null;
-          updateHeroParallax();
-        }
-      });
-
-      panel.addEventListener("pointercancel", function () {
-        if (pressedPanel === panel) {
-          pressedPanel = null;
-          updateHeroParallax();
-        }
-      });
-
-      panel.addEventListener("pointerleave", function () {
-        if (pressedPanel === panel) {
-          pressedPanel = null;
-          updateHeroParallax();
-        }
-      });
     });
 
     filterButtons.forEach(function (button) {
@@ -254,31 +224,15 @@
 
   function updateHeroParallax() {
     var viewportHeight = window.innerHeight || 1;
-    var isMobile = window.matchMedia("(max-width: 900px)").matches;
-    var headerOffset = header && isMobile ? header.getBoundingClientRect().height : 0;
-    var targetCenter = headerOffset + (viewportHeight - headerOffset) * (focusPoint / 100);
-    var closestPanel = null;
-    var closestDistance = Infinity;
 
     categoryPanels.forEach(function (panel, index) {
       var rect = panel.getBoundingClientRect();
       var midpoint = rect.top + rect.height / 2;
       var distance = (midpoint - viewportHeight / 2) / viewportHeight;
-      var absoluteDistance = Math.abs(midpoint - targetCenter);
       var drift = Math.max(-22, Math.min(22, distance * -34));
       var offset = drift + index * 1.5;
 
-      if (absoluteDistance < closestDistance) {
-        closestDistance = absoluteDistance;
-        closestPanel = panel;
-      }
-
       panel.style.setProperty("--panel-y", offset + "px");
-    });
-
-    categoryPanels.forEach(function (panel) {
-      panel.classList.toggle("is-pressed", pressedPanel === panel);
-      panel.classList.toggle("is-centered", isMobile && !pressedPanel && panel === closestPanel);
     });
   }
 
@@ -317,55 +271,6 @@
     });
   }
 
-  function getTuneValue(name, fallback) {
-    var input = tuneInputs.find(function (item) {
-      return item.dataset.tune === name;
-    });
-
-    return input ? parseFloat(input.value) : fallback;
-  }
-
-  function setOutput(name, value) {
-    var output = document.querySelector('[data-output="' + name + '"]');
-
-    if (output) {
-      output.textContent = value;
-    }
-  }
-
-  function applyMotionTuning() {
-    var duration = getTuneValue("duration", 1.62);
-    var x1 = getTuneValue("x1", 0.16);
-    var y1 = getTuneValue("y1", 1);
-    var x2 = getTuneValue("x2", 0.28);
-    var y2 = getTuneValue("y2", 1);
-
-    focusPoint = getTuneValue("focus", 50);
-
-    document.documentElement.style.setProperty("--hero-focus-point", focusPoint);
-    document.documentElement.style.setProperty("--hero-expand-duration", duration + "s");
-    document.documentElement.style.setProperty("--hero-expand-ease", "cubic-bezier(" + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ")");
-
-    setOutput("focus", Math.round(focusPoint) + "%");
-    setOutput("duration", duration.toFixed(2) + "s");
-    setOutput("x1", x1.toFixed(2));
-    setOutput("y1", y1.toFixed(2));
-    setOutput("x2", x2.toFixed(2));
-    setOutput("y2", y2.toFixed(2));
-    updateHeroParallax();
-  }
-
-  if (motionTunerToggle && motionTuner) {
-    motionTunerToggle.addEventListener("click", function () {
-      var isOpen = motionTuner.classList.toggle("is-open");
-      motionTunerToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    });
-  }
-
-  tuneInputs.forEach(function (input) {
-    input.addEventListener("input", applyMotionTuning);
-  });
-
   function normalizeCategories(manifest) {
     if (!manifest || !Array.isArray(manifest.categories) || manifest.categories.length === 0) {
       return fallbackCategories;
@@ -402,5 +307,4 @@
 
   window.addEventListener("scroll", scheduleParallax, { passive: true });
   window.addEventListener("resize", scheduleParallax);
-  applyMotionTuning();
 })();
