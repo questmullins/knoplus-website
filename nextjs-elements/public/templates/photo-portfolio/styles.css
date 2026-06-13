@@ -10,6 +10,9 @@
   --hero-pad-x: clamp(46px, 8vw, 132px);
   --content-pad-x: clamp(38px, 9vw, 150px);
   --content-max: 1680px;
+  --hero-expand-duration: 1.62s;
+  --hero-expand-ease: cubic-bezier(0.16, 1, 0.28, 1);
+  --hero-focus-point: 50;
 }
 
 * {
@@ -99,6 +102,73 @@ img {
   display: none;
 }
 
+.motion-tuner {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 80;
+  width: min(310px, calc(100vw - 36px));
+  color: var(--white);
+  font-size: 12px;
+}
+
+.motion-tuner-toggle {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(10, 10, 9, 0.88);
+  color: var(--white);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  backdrop-filter: blur(18px);
+}
+
+.motion-tuner-panel {
+  display: none;
+  padding: 16px;
+  background: rgba(10, 10, 9, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 0;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.motion-tuner.is-open .motion-tuner-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.motion-tuner label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.motion-tuner label span,
+.motion-tuner output {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.motion-tuner input {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--ink);
+}
+
+.motion-tuner p {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .category-stack {
   min-height: 100vh;
   padding-inline: var(--hero-pad-x);
@@ -130,9 +200,9 @@ img {
   overflow: hidden;
   background: #111;
   transition:
-    min-height 0.54s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.54s cubic-bezier(0.22, 1, 0.36, 1),
-    z-index 0.54s cubic-bezier(0.22, 1, 0.36, 1);
+    min-height var(--hero-expand-duration) var(--hero-expand-ease),
+    transform var(--hero-expand-duration) var(--hero-expand-ease),
+    z-index var(--hero-expand-duration) var(--hero-expand-ease);
 }
 
 .category-panel::before {
@@ -148,9 +218,9 @@ img {
   filter: grayscale(0.12) saturate(0.82);
   transform: translateY(var(--panel-y, 0px)) scale(1.08);
   transition:
-    filter 0.54s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.54s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.54s cubic-bezier(0.22, 1, 0.36, 1);
+    filter var(--hero-expand-duration) var(--hero-expand-ease),
+    transform var(--hero-expand-duration) var(--hero-expand-ease),
+    opacity var(--hero-expand-duration) var(--hero-expand-ease);
   will-change: transform;
 }
 
