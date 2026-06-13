@@ -49,7 +49,7 @@
     }
 
     if (path.indexOf("granite-watches") >= 0) {
-      return "Granite Watches";
+      return "Photography";
     }
 
     if (path.indexOf("synergy") >= 0) {

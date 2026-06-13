@@ -68,20 +68,20 @@ export const templates: TemplateItem[] = [
     styleTags: ["Homey", "Editorial", "Soft UI"]
   },
   {
-    label: "Granite and gold",
-    navTitle: "Granite Watches",
-    title: "Dark stone.<br>Gold light.<br><em>Quiet precision.</em>",
+    label: "Editorial photographer",
+    navTitle: "Photography",
+    title: "Wild places.<br>Quiet frames.<br><em>Real work.</em>",
     description:
-      "A luxury watch showcase template with private-gallery pacing, numbered collection cards, appointment-led contact, and a premium dark granite atmosphere.",
-    image: "url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1800&q=80')",
+      "A refined photography portfolio template with full-width category panels, filtered galleries, print inquiries, and a calm editorial feel.",
+    image: "url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80')",
     link: "/templates/granite-watches/index.html",
     theme: "granite-watches",
-    features: ["5-page build", "Collection showcase", "Private appointment path"],
-    sellingPoints: ["Premium gallery energy", "Built for high-ticket inquiry"],
+    features: ["Portfolio filtering", "Image-led sections", "Print/contact path"],
+    sellingPoints: ["Strong visual first impression", "Easy gallery browsing"],
     price: "$1,500 as shown",
     genre: "Premium",
     stack: ["HTML", "CSS", "JavaScript"],
-    styleTags: ["Luxury", "Granite", "Gold"]
+    styleTags: ["Editorial", "Minimal", "Photography"]
   },
   {
     label: "Emergency lead-gen",

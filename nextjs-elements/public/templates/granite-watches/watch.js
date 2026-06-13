@@ -1,90 +1,69 @@
 (function () {
-  var header = document.querySelector(".watch-header");
-  var rail = document.querySelector(".scroll-rail span");
-  var parallaxTargets = document.querySelectorAll("[data-parallax]");
-  var windowTargets = document.querySelectorAll("[data-window-parallax]");
-  var watchItems = document.querySelectorAll(".watch-item");
-  var watchSections = document.querySelectorAll(".watch-section");
-  var ticking = false;
+  var categoryPanels = Array.prototype.slice.call(document.querySelectorAll(".category-panel"));
+  var filterButtons = Array.prototype.slice.call(document.querySelectorAll(".filter-button"));
+  var galleryItems = Array.prototype.slice.call(document.querySelectorAll(".gallery-item"));
+  var galleryTitle = document.getElementById("gallery-title");
+  var galleryDescription = document.getElementById("gallery-description");
+  var portfolio = document.getElementById("portfolio");
 
-  function updateScrollState() {
-    var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    var progress = Math.max(0, Math.min(1, window.scrollY / max));
+  var copy = {
+    wild: {
+      title: "Wild Places",
+      description: "A collection of landscapes from remote corners of the world. Exploring the beauty and power of nature."
+    },
+    architecture: {
+      title: "Architecture",
+      description: "Clean lines, hard shadows, quiet interiors, and built environments photographed with restraint."
+    },
+    portraits: {
+      title: "Portraits",
+      description: "Editorial portraits with natural direction, soft movement, and a focus on presence over polish."
+    },
+    "still-life": {
+      title: "Still Life",
+      description: "Objects, texture, fabric, and light studies composed for brands, makers, and print collections."
+    }
+  };
 
-    if (header) {
-      header.classList.toggle("is-solid", window.scrollY > 30);
+  function setFilter(category, shouldScroll) {
+    var selected = copy[category] ? category : "wild";
+
+    categoryPanels.forEach(function (panel) {
+      panel.classList.toggle("is-active", panel.dataset.filter === selected);
+    });
+
+    filterButtons.forEach(function (button) {
+      button.classList.toggle("is-active", button.dataset.filter === selected);
+    });
+
+    galleryItems.forEach(function (item) {
+      item.classList.toggle("is-hidden", item.dataset.category !== selected);
+    });
+
+    if (galleryTitle) {
+      galleryTitle.textContent = copy[selected].title;
     }
 
-    if (rail) {
-      rail.style.setProperty("--scroll-progress", progress * 100 + "%");
+    if (galleryDescription) {
+      galleryDescription.textContent = copy[selected].description;
     }
 
-    parallaxTargets.forEach(function (target) {
-      var rect = target.getBoundingClientRect();
-      var viewportHeight = window.innerHeight || 1;
-      var sectionProgress = (rect.top - viewportHeight / 2) / viewportHeight;
-      target.style.setProperty("--parallax-y", Math.max(-36, Math.min(36, sectionProgress * -44)) + "px");
-    });
-
-    windowTargets.forEach(function (target) {
-      var rect = target.getBoundingClientRect();
-      var viewportHeight = window.innerHeight || 1;
-      var imageProgress = (rect.top - viewportHeight / 2) / viewportHeight;
-      target.style.setProperty("--window-y", Math.max(-34, Math.min(34, imageProgress * -54)) + "px");
-    });
-
-    var closest = null;
-    var closestDistance = Infinity;
-    var closestSection = null;
-    var closestSectionDistance = Infinity;
-
-    watchItems.forEach(function (item) {
-      var rect = item.getBoundingClientRect();
-      var distance = Math.abs(rect.top + rect.height / 2 - window.innerHeight / 2);
-
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closest = item;
-      }
-    });
-
-    watchItems.forEach(function (item) {
-      item.classList.toggle("active", item === closest);
-    });
-
-    watchSections.forEach(function (section) {
-      var rect = section.getBoundingClientRect();
-      var distance = Math.abs(rect.top + rect.height / 2 - window.innerHeight / 2);
-
-      if (distance < closestSectionDistance) {
-        closestSectionDistance = distance;
-        closestSection = section;
-      }
-    });
-
-    watchSections.forEach(function (section) {
-      if (section === closestSection) {
-        section.classList.add("is-active");
-      } else {
-        section.classList.remove("is-active");
-      }
-    });
+    if (shouldScroll && portfolio) {
+      portfolio.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
-  function scheduleScrollUpdate() {
-    if (ticking) {
-      return;
-    }
-
-    ticking = true;
-
-    window.requestAnimationFrame(function () {
-      ticking = false;
-      updateScrollState();
+  categoryPanels.forEach(function (panel) {
+    panel.addEventListener("click", function () {
+      setFilter(panel.dataset.filter, true);
     });
-  }
+  });
 
-  updateScrollState();
-  window.addEventListener("scroll", scheduleScrollUpdate, { passive: true });
-  window.addEventListener("resize", scheduleScrollUpdate);
+  filterButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      setFilter(button.dataset.filter, false);
+    });
+  });
+
+  setFilter("wild", false);
 })();
