@@ -165,7 +165,11 @@ img {
 .category-panel:hover,
 .category-panel:focus-visible {
   z-index: 2;
-  min-height: clamp(360px, 38vh, 520px);
+  min-height: clamp(450px, 47.5vh, 650px);
+}
+
+.category-panel.is-centered {
+  z-index: 2;
 }
 
 .category-panel > * {
@@ -510,18 +514,23 @@ p {
   }
 
   .category-panel {
-    min-height: 38vh;
+    min-height: 28vh;
     padding: 92px 22px 38px;
   }
 
   .category-panel + .category-panel {
-    min-height: 34vh;
+    min-height: 28vh;
     padding-top: 42px;
   }
 
   .category-panel:hover,
   .category-panel:focus-visible {
-    min-height: 52vh;
+    min-height: 28vh;
+  }
+
+  .category-panel.is-centered,
+  .category-panel.is-pressed {
+    min-height: 70vh;
   }
 
   .category-title {

@@ -12,6 +12,7 @@
   var filterButtons = [];
   var galleryItems = [];
   var categories = [];
+  var pressedPanel = null;
   var ticking = false;
 
   var fallbackCategories = [
@@ -174,6 +175,32 @@
       panel.addEventListener("click", function () {
         setFilter(panel.dataset.filter, true);
       });
+
+      panel.addEventListener("pointerdown", function () {
+        pressedPanel = panel;
+        updateHeroParallax();
+      });
+
+      panel.addEventListener("pointerup", function () {
+        if (pressedPanel === panel) {
+          pressedPanel = null;
+          updateHeroParallax();
+        }
+      });
+
+      panel.addEventListener("pointercancel", function () {
+        if (pressedPanel === panel) {
+          pressedPanel = null;
+          updateHeroParallax();
+        }
+      });
+
+      panel.addEventListener("pointerleave", function () {
+        if (pressedPanel === panel) {
+          pressedPanel = null;
+          updateHeroParallax();
+        }
+      });
     });
 
     filterButtons.forEach(function (button) {
@@ -223,15 +250,31 @@
 
   function updateHeroParallax() {
     var viewportHeight = window.innerHeight || 1;
+    var isMobile = window.matchMedia("(max-width: 900px)").matches;
+    var headerOffset = header && isMobile ? header.getBoundingClientRect().height : 0;
+    var targetCenter = headerOffset + (viewportHeight - headerOffset) / 2;
+    var closestPanel = null;
+    var closestDistance = Infinity;
 
     categoryPanels.forEach(function (panel, index) {
       var rect = panel.getBoundingClientRect();
       var midpoint = rect.top + rect.height / 2;
       var distance = (midpoint - viewportHeight / 2) / viewportHeight;
+      var absoluteDistance = Math.abs(midpoint - targetCenter);
       var drift = Math.max(-22, Math.min(22, distance * -34));
       var offset = drift + index * 1.5;
 
+      if (absoluteDistance < closestDistance) {
+        closestDistance = absoluteDistance;
+        closestPanel = panel;
+      }
+
       panel.style.setProperty("--panel-y", offset + "px");
+    });
+
+    categoryPanels.forEach(function (panel) {
+      panel.classList.toggle("is-pressed", pressedPanel === panel);
+      panel.classList.toggle("is-centered", isMobile && !pressedPanel && panel === closestPanel);
     });
   }
 
