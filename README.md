@@ -18,7 +18,7 @@ The contact modal posts to `/api/contact`, which is handled by `worker.js` durin
 
 To turn on email delivery, configure one of these provider paths:
 
-- Add a `RESEND_API_KEY` secret in Cloudflare Workers. The Worker sends to `CONTACT_TO` from `wrangler.jsonc`, currently `quest@kno.plus`.
+- Add a `RESEND_API_KEY` secret in Cloudflare Workers. The Worker sends to `CONTACT_TO` from `wrangler.jsonc`, currently `info@kno.plus`.
 - Or add a Cloudflare Email Sending binding named `EMAIL` and set `CONTACT_FROM` to a verified sender.
 
 Without one of those configured, the form stays visible but returns a setup message instead of sending mail.

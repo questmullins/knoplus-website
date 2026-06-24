@@ -12,12 +12,12 @@
   "send_email": [
     {
       "name": "EMAIL",
-      "destination_address": "quest@kno.plus"
+      "destination_address": "info@kno.plus"
     }
   ],
   "vars": {
-    "CONTACT_TO": "quest@kno.plus",
-    "CONTACT_FROM": "Knoplus <quest@kno.plus>"
+    "CONTACT_TO": "info@kno.plus",
+    "CONTACT_FROM": "Knoplus <info@kno.plus>"
   },
   "observability": {
     "enabled": true

@@ -1,7 +1,7 @@
 import { EmailMessage } from "cloudflare:email";
 
-const CONTACT_TO_FALLBACK = "quest@kno.plus";
-const CONTACT_FROM_FALLBACK = "Knoplus <quest@kno.plus>";
+const CONTACT_TO_FALLBACK = "info@kno.plus";
+const CONTACT_FROM_FALLBACK = "Knoplus <info@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
 
 export default {
@@ -59,7 +59,7 @@ async function handleContact(request, env) {
     return jsonResponse(
       {
         message:
-          "The contact form is not fully configured yet. You can still email quest@kno.plus directly."
+          "The contact form is not fully configured yet. You can still email info@kno.plus directly."
       },
       503,
       request

@@ -4,6 +4,9 @@ cloudflared.pid
 cloudflared-tunnel.log
 next-dev.out.log
 next-dev.err.log
+wrangler-dev.out.log
+wrangler-dev.err.log
 wrangler.toml
 .wrangler/
+.dev.vars
 nextjs-elements/public/templates/photo-portfolio/photo-manifest.json

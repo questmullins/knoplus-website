@@ -84,7 +84,7 @@ export function SiteMenu({ className = "", hideIcon = false, onContact, onNaviga
           <a href="#" aria-label="LinkedIn">
             in
           </a>
-          <a href="mailto:quest@kno.plus" aria-label="Email">
+          <a href="mailto:info@kno.plus" aria-label="Email">
             mail
           </a>
         </div>

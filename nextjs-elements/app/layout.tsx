@@ -8,7 +8,7 @@ const structuredData = [
     "@type": "ProfessionalService",
     name: "Knoplus",
     url: "https://kno.plus",
-    email: "quest@kno.plus",
+    email: "info@kno.plus",
     description:
       "Knoplus builds fast website templates and service websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
     areaServed: "United States",
@@ -52,7 +52,7 @@ const structuredData = [
     url: "https://kno.plus",
     potentialAction: {
       "@type": "ContactAction",
-      target: "mailto:quest@kno.plus"
+      target: "mailto:info@kno.plus"
     }
   },
   {

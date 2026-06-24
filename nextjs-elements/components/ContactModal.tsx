@@ -110,7 +110,7 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
         message:
           error instanceof Error
             ? error.message
-            : "The message could not be sent yet. You can still email quest@kno.plus directly.",
+            : "The message could not be sent yet. You can still email info@kno.plus directly.",
         tone: "error"
       });
     } finally {
