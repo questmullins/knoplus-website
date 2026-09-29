@@ -1,0 +1,11 @@
+/* Standalone fallback while studio.js loads. The editor's theme tokens take over afterward. */
+.screen[data-theme="light"] {
+  --u-text: #1a1830;
+  --u-muted: #53616d;
+  --u-card: #e9f4fa;
+  --u-nav: #ffffff;
+  --u-plan: linear-gradient(90deg, #e7ecfa, #f1f2fc);
+  --u-out: linear-gradient(90deg, #ffe1cc, #fff0e6);
+  --u-em: linear-gradient(90deg, #ffd4dc, #ffe5ea);
+  --u-bg: radial-gradient(circle at 38% 8%, #f5f9fb 0%, #ffffff 52%, #f9fbfc 100%);
+}

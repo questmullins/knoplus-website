@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>UpDate · Full App Workbench</title>
+  <link rel="stylesheet" href="studio.css">
+  <link rel="stylesheet" href="studio-light.css">
+</head>
+<body>
+  <header class="studio-header">
+    <div><h1>UpDate <span>App Workbench</span></h1><p>Explore synthetic screens. Edit a component once, preview both themes, and export the design.</p></div>
+    <div class="header-actions">
+      <button id="undo" type="button" title="Undo (Ctrl+Z)">Undo</button>
+      <button id="redo" type="button" title="Redo (Ctrl+Y)">Redo</button>
+      <button id="export" type="button">Export edits</button>
+      <button id="import" type="button">Import edits</button>
+      <input id="import-file" type="file" accept="application/json" hidden>
+    </div>
+  </header>
+  <div class="studio-layout">
+    <aside class="navigator">
+      <div class="panel-heading"><strong>Pages</strong><span id="page-count"></span></div>
+      <input id="page-search" type="search" placeholder="Find a page" aria-label="Find a page">
+      <nav id="page-nav" aria-label="Prototype pages"></nav>
+      <div class="navigator-foot"><p>Prototype only. Emergency, messages, calls, payments, and backups never run here.</p><button id="reset-all" type="button">Reset all edits</button></div>
+    </aside>
+    <main class="workspace">
+      <div class="workspace-bar">
+        <div class="bar-left"><button id="back" type="button" aria-label="Go back">←</button><div><strong id="current-page"></strong><small id="current-path"></small></div></div>
+        <div class="bar-controls">
+          <div class="segmented" role="group" aria-label="Interaction mode"><button id="mode-browse" type="button">Browse</button><button id="mode-edit" type="button">Select element</button></div>
+          <div class="segmented" role="group" aria-label="Theme"><button id="theme-dark" type="button">Dark</button><button id="theme-light" type="button">Light</button></div>
+          <label class="zoom-label">Zoom <input id="zoom" type="range" min="70" max="120" value="100"><output id="zoom-value">100%</output></label>
+        </div>
+      </div>
+      <div class="preview-wrap"><div class="preview-column"><div id="phone" class="phone"><div id="screen" class="screen"></div></div><p class="preview-note" id="preview-note">Browse mode: follow links and buttons to see associated pages. No real actions run.</p></div></div>
+    </main>
+    <aside class="inspector">
+      <div class="panel-heading"><strong>Design controls</strong><span id="edit-count"></span></div>
+      <div class="inspector-scroll">
+        <section class="inspector-section"><h2>Global design</h2><p>Shared tokens affect every page and system preview.</p><div id="global-controls"></div></section>
+        <section class="inspector-section"><h2>Selected element</h2><div id="selection-empty">Switch to <b>Select element</b>, then click anything in the phone. Browse mode follows links normally.</div><div id="selection-controls" hidden></div></section>
+        <section class="inspector-section"><h2>Data and export</h2><p>Edits stay in this browser. Export JSON to share them or import it later.</p><button id="copy-json" type="button">Copy JSON</button><button id="export-css" type="button">Export CSS overrides</button><p id="status" role="status" aria-live="polite"></p></section>
+      </div>
+    </aside>
+  </div>
+  <script src="icon-catalog.js"></script>
+  <script src="icon-model.js"></script>
+  <script src="studio.js"></script>
+</body>
+</html>

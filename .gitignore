@@ -1,4 +1,5 @@
 .preview-tools/
+/node_modules/
 cloudflared.exe
 cloudflared.pid
 cloudflared-tunnel.log
