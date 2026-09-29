@@ -8,6 +8,7 @@
   <title>UpDate · Full App Workbench</title>
   <link rel="stylesheet" href="studio.css">
   <link rel="stylesheet" href="studio-light.css">
+  <link rel="stylesheet" href="studio-responsive.css">
 </head>
 <body>
   <header class="studio-header">
@@ -21,7 +22,7 @@
     </div>
   </header>
   <div class="studio-layout">
-    <aside class="navigator">
+    <aside class="navigator" id="navigator">
       <div class="panel-heading"><strong>Pages</strong><span id="page-count"></span></div>
       <input id="page-search" type="search" placeholder="Find a page" aria-label="Find a page">
       <nav id="page-nav" aria-label="Prototype pages"></nav>
@@ -31,22 +32,44 @@
       <div class="workspace-bar">
         <div class="bar-left"><button id="back" type="button" aria-label="Go back">←</button><div><strong id="current-page"></strong><small id="current-path"></small></div></div>
         <div class="bar-controls">
+          <button id="mobile-pages-toggle" class="mobile-tool" type="button" aria-controls="navigator" aria-expanded="false">Pages</button>
+          <button id="mobile-inspector-toggle" class="mobile-tool" type="button" aria-controls="inspector" aria-expanded="false">Design</button>
           <div class="segmented" role="group" aria-label="Interaction mode"><button id="mode-browse" type="button">Browse</button><button id="mode-edit" type="button">Select element</button></div>
           <div class="segmented" role="group" aria-label="Theme"><button id="theme-dark" type="button">Dark</button><button id="theme-light" type="button">Light</button></div>
           <label class="zoom-label">Zoom <input id="zoom" type="range" min="70" max="120" value="100"><output id="zoom-value">100%</output></label>
         </div>
       </div>
-      <div class="preview-wrap"><div class="preview-column"><div id="phone" class="phone"><div id="screen" class="screen"></div></div><p class="preview-note" id="preview-note">Browse mode: follow links and buttons to see associated pages. No real actions run.</p></div></div>
+      <div class="device-bar" role="group" aria-label="Simulated phone size">
+        <label for="device-preset">Phone</label>
+        <select id="device-preset" aria-label="Simulated phone size">
+          <option value="compact">Compact · 360 × 780</option>
+          <option value="standard">Standard · 390 × 844</option>
+          <option value="large">Large · 430 × 932</option>
+          <option value="fold-cover">Fold cover · 344 × 882</option>
+          <option value="fold-open">Fold open · 600 × 852</option>
+          <option value="custom">Custom size</option>
+        </select>
+        <button id="device-rotate" type="button" aria-label="Rotate simulated phone" title="Rotate simulated phone">↻ <span>Rotate</span></button>
+        <span id="device-size" aria-live="polite"></span>
+        <div id="custom-device-fields" hidden>
+          <label>Width <input id="device-width" type="number" min="280" max="900" step="1" inputmode="numeric"></label>
+          <label>Height <input id="device-height" type="number" min="480" max="1200" step="1" inputmode="numeric"></label>
+          <button id="apply-device-size" type="button">Apply size</button>
+        </div>
+      </div>
+      <div class="preview-wrap" id="preview-wrap"><div class="preview-column"><div id="phone-stage"><div id="phone" class="phone"><div id="screen" class="screen"></div></div></div><p class="preview-note" id="preview-note">Browse mode: follow links and buttons to see associated pages. No real actions run.</p></div></div>
     </main>
-    <aside class="inspector">
-      <div class="panel-heading"><strong>Design controls</strong><span id="edit-count"></span></div>
+    <aside class="inspector" id="inspector">
+      <div class="panel-heading"><strong>Design controls</strong><span id="edit-count"></span><button id="mobile-inspector-close" class="mobile-tool" type="button" aria-label="Close design controls">×</button></div>
       <div class="inspector-scroll">
+        <label class="mobile-zoom">Preview zoom <input id="mobile-zoom" type="range" min="70" max="120" value="100"><output id="mobile-zoom-value">100%</output></label>
         <section class="inspector-section"><h2>Global design</h2><p>Shared tokens affect every page and system preview.</p><div id="global-controls"></div></section>
         <section class="inspector-section"><h2>Selected element</h2><div id="selection-empty">Switch to <b>Select element</b>, then click anything in the phone. Browse mode follows links normally.</div><div id="selection-controls" hidden></div></section>
         <section class="inspector-section"><h2>Data and export</h2><p>Edits stay in this browser. Export JSON to share them or import it later.</p><button id="copy-json" type="button">Copy JSON</button><button id="export-css" type="button">Export CSS overrides</button><p id="status" role="status" aria-live="polite"></p></section>
       </div>
     </aside>
   </div>
+  <button id="mobile-backdrop" class="mobile-backdrop" type="button" aria-label="Close panel" hidden></button>
   <script src="icon-catalog.js"></script>
   <script src="icon-model.js"></script>
   <script src="studio.js"></script>

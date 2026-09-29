@@ -1,0 +1,60 @@
+.device-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 16px;background:#171d30;border-bottom:1px solid #343a51;color:#d9deec;font-size:12px}
+.device-bar select,.device-bar input,.device-bar button{border:1px solid #57617b;border-radius:8px;background:#252d44;color:#f7f6fd;min-height:36px;padding:6px 9px}
+.device-bar select{max-width:min(100%,235px)}
+.device-bar input{width:72px}
+.device-bar label{display:inline-flex;align-items:center;gap:6px}
+.device-bar #device-size{color:#aeb8cc;font-size:11px;font-variant-numeric:tabular-nums}
+#custom-device-fields{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+#custom-device-fields[hidden],.mobile-backdrop[hidden]{display:none!important}
+#phone-stage{position:relative;flex:none;max-width:100%}
+#phone-stage .phone{position:absolute;top:0;left:0;transform-origin:top left}
+.mobile-tool,.mobile-backdrop{display:none}
+.mobile-zoom{display:none}
+@media(max-width:650px){
+  .studio-header{padding:12px 14px;gap:9px}
+  .studio-header h1{font-size:18px}
+  .studio-header p{display:none}
+  .header-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:5px}
+  .header-actions button{min-width:0;min-height:38px;padding:6px 3px;font-size:11px}
+  .studio-layout{display:block;height:auto;min-height:0}
+  .workspace{min-height:0;height:auto}
+  .workspace-bar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;padding:8px 10px}
+  .bar-left{grid-column:1;min-width:0;width:auto}
+  .bar-left strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+  .bar-controls{display:contents}
+  #mobile-pages-toggle{grid-column:2}
+  #mobile-inspector-toggle{grid-column:3}
+  .bar-controls .segmented{min-width:0;grid-row:2}
+  .bar-controls .segmented[aria-label="Interaction mode"]{grid-column:1}
+  .bar-controls .segmented[aria-label="Theme"]{grid-column:2/4}
+  .bar-controls .segmented button{flex:1;min-height:42px;padding:6px 4px;font-size:11px}
+  .bar-controls .zoom-label{display:none}
+  .mobile-tool{display:inline-flex;align-items:center;justify-content:center;min-height:42px;border:1px solid #57617b;border-radius:8px;background:#252d44;color:#fff;padding:7px 10px;font-size:12px}
+  .device-bar{padding:9px 10px;gap:7px}
+  .device-bar select{flex:1;min-width:155px;max-width:none}
+  .device-bar #device-size{width:100%;text-align:center}
+  #custom-device-fields{width:100%;justify-content:center}
+  .preview-wrap{overflow:visible;padding:16px 10px;display:block;min-height:0}
+  .preview-column{width:100%}
+  .preview-note{max-width:300px}
+  .navigator{display:none;position:fixed;z-index:62;top:0;bottom:0;left:0;width:min(86vw,360px);max-height:none;border-right:1px solid #57617b;border-bottom:0;box-shadow:15px 0 50px #0009}
+  body.pages-open .navigator{display:flex}
+  .navigator-foot{display:block}
+  .nav-link{min-height:42px;font-size:14px}
+  #page-search{font-size:16px;min-height:42px}
+  .inspector{display:none;position:fixed;z-index:62;left:0;right:0;bottom:0;max-height:min(78dvh,780px);border:1px solid #57617b;border-radius:18px 18px 0 0;box-shadow:0 -18px 55px #0009}
+  body.inspector-open .inspector{display:flex}
+  .inspector .panel-heading{min-height:52px}
+  #mobile-inspector-close{border:0;background:transparent;font-size:24px;min-width:44px}
+  .inspector-scroll{display:flex;flex-direction:column;gap:0;overflow:auto;padding:0 16px 25px}
+  .mobile-zoom{display:flex;align-items:center;gap:9px;min-height:50px;color:#d9deec;font-size:12px}
+  .mobile-zoom input{flex:1;min-width:90px}
+  .mobile-zoom output{min-width:75px;text-align:right;font-size:11px;color:#aeb8cc}
+  .inspector-section{border-top:1px solid #343a51}
+  .inspector-section:nth-child(2){order:-1}
+  .prop input:not([type=color]),.prop textarea,.prop select{font-size:16px;min-height:42px}
+  .scope-row button{min-height:42px}
+  .mobile-backdrop{position:fixed;z-index:61;inset:0;display:block;border:0;background:#050710aa}
+  body.panel-open{overflow:hidden}
+}
+@media(max-width:360px){.studio-header p{font-size:11px}.device-bar label[for=device-preset]{display:none}.bar-left strong{max-width:105px}}
