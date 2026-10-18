@@ -92,7 +92,7 @@ export const projects: ProjectItem[] = [
       }
     ],
     goal: "Give people, especially women, a credible safety tool they trust enough to use every time, without handing their private life to anyone.",
-    links: []
+    links: [{ label: "See the App Preview", href: "/apps/update" }]
   },
   {
     slug: "rosewave",
@@ -138,7 +138,7 @@ export const projects: ProjectItem[] = [
       }
     ],
     goal: "Turn a photographer's portfolio into something people live with every day, and give the photographer a steady way to earn from it.",
-    links: [{ label: "Try the Preview", href: "/apps/rosewave/" }]
+    links: [{ label: "See the App Preview", href: "/apps/rosewave" }]
   },
   {
     slug: "freestyle",
