@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteMenu } from "@/components/SiteMenu";
+import { projectPages } from "@/data/projects";
 import { seoPages } from "@/data/seoPages";
 import { templates } from "@/data/templates";
 
 export const metadata: Metadata = {
   title: "Sitemap",
   description:
-    "Browse the Knoplus sitemap for website templates, custom website design, pricing, process, care plans, and template previews.",
+    "Browse the Knoplus sitemap for projects, website templates, custom website design, pricing, process, care plans, and template previews.",
   alternates: {
     canonical: "/sitemap"
   },
@@ -18,10 +19,11 @@ export const metadata: Metadata = {
 };
 
 const corePages = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
-  { label: "Our Process", href: "/process" },
-  { label: "Pricing", href: "/pricing" }
+  { label: "Projects", href: "/" },
+  { label: "Website Templates", href: "/websites" },
+  { label: "About Us", href: "/websites/about" },
+  { label: "Our Process", href: "/websites/process" },
+  { label: "Pricing", href: "/websites/pricing" }
 ];
 
 export default function SitemapPage() {
@@ -34,9 +36,9 @@ export default function SitemapPage() {
       <SiteMenu className="sitemap-menu" />
       <section className="sitemap-hero">
         <div className="eyebrow">Knoplus sitemap</div>
-        <h1>Find the website service, pricing, or template path you need.</h1>
+        <h1>Find the project, website service, or template you need.</h1>
         <p>
-          This sitemap connects the main Knoplus website design pages, service landing pages,
+          This sitemap connects the Knoplus projects, website design pages, service landing pages,
           template previews, pricing, care plans, and process information for easier browsing and indexing.
         </p>
       </section>
@@ -52,9 +54,18 @@ export default function SitemapPage() {
         </div>
 
         <div className="sitemap-group">
+          <h2>Projects</h2>
+          {projectPages.map((project) => (
+            <Link href={project.href} key={project.slug}>
+              {project.navTitle}
+            </Link>
+          ))}
+        </div>
+
+        <div className="sitemap-group">
           <h2>Website Services</h2>
           {seoPages.map((page) => (
-            <Link href={`/${page.slug}`} key={page.slug}>
+            <Link href={`/websites/${page.slug}`} key={page.slug}>
               {page.title}
             </Link>
           ))}

@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { TemplateShowcase } from "@/components/TemplateShowcase";
+import { ProjectHub } from "@/components/ProjectHub";
 
 export const metadata: Metadata = {
-  title: "Website Templates and Custom Websites",
+  title: {
+    absolute: "Knoplus | Apps, Web Tools and Websites"
+  },
   description:
-    "Explore Knoplus website templates, custom website options, mobile-friendly layouts, SEO-ready structure, and launch support for independent businesses.",
+    "Knoplus is a hub for apps, browser tools, design automation and the Knoplus website service. Explore UpDate, Rosewave, Freestyle, Prepress Assistant and more.",
   alternates: {
     canonical: "/"
   }
 };
 
 export default function HomePage() {
-  return <TemplateShowcase />;
+  return <ProjectHub />;
 }

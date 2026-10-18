@@ -43,9 +43,9 @@ export const seoPages: SeoPage[] = [
       }
     ],
     links: [
-      { label: "Explore Templates", href: "/" },
-      { label: "View Pricing", href: "/pricing" },
-      { label: "Website Care Plans", href: "/website-care-plans" }
+      { label: "Explore Templates", href: "/websites" },
+      { label: "View Pricing", href: "/websites/pricing" },
+      { label: "Website Care Plans", href: "/websites/website-care-plans" }
     ]
   },
   {
@@ -74,9 +74,9 @@ export const seoPages: SeoPage[] = [
       }
     ],
     links: [
-      { label: "Explore Automotive Templates", href: "/" },
-      { label: "View Template Pricing", href: "/pricing" },
-      { label: "Request Custom Quote", href: "/pricing" }
+      { label: "Explore Automotive Templates", href: "/websites" },
+      { label: "View Template Pricing", href: "/websites/pricing" },
+      { label: "Request Custom Quote", href: "/websites/pricing" }
     ]
   },
   {
@@ -105,9 +105,9 @@ export const seoPages: SeoPage[] = [
       }
     ],
     links: [
-      { label: "Explore Home Service Templates", href: "/" },
-      { label: "View Pricing", href: "/pricing" },
-      { label: "See Our Process", href: "/process" }
+      { label: "Explore Home Service Templates", href: "/websites" },
+      { label: "View Pricing", href: "/websites/pricing" },
+      { label: "See Our Process", href: "/websites/process" }
     ]
   },
   {
@@ -136,9 +136,9 @@ export const seoPages: SeoPage[] = [
       }
     ],
     links: [
-      { label: "View Care Pricing", href: "/pricing" },
-      { label: "Explore Templates", href: "/" },
-      { label: "Request Custom Quote", href: "/pricing" }
+      { label: "View Care Pricing", href: "/websites/pricing" },
+      { label: "Explore Templates", href: "/websites" },
+      { label: "Request Custom Quote", href: "/websites/pricing" }
     ]
   }
 ];

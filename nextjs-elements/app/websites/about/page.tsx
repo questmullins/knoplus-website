@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Knoplus supports independent companies with professional website design, practical website templates, custom builds, efficient launches, and pride in the details.",
   alternates: {
-    canonical: "/about"
+    canonical: "/websites/about"
   }
 };
 
