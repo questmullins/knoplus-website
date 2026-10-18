@@ -1339,7 +1339,7 @@
       }
     });
     $$(".mode").forEach((b) => b.classList.toggle("on", b.dataset.mode === state.mode));
-    $$(".swatch").forEach((s) => s.classList.toggle("on", s.dataset.style === state.style));
+    $$(".swatch[data-style]").forEach((s) => s.classList.toggle("on", s.dataset.style === state.style));
     $("#custom-panel").hidden = state.style !== "custom";
     $("#texture-upload").hidden = state.customTexture !== "image";
     $("#labels-section").hidden = state.mode !== "ba";
@@ -1437,7 +1437,7 @@
   });
 
   function paintSwatches() {
-    $$(".swatch").forEach((b) => paintSwatch(b.dataset.style, $("canvas", b)));
+    $$(".swatch[data-style]").forEach((b) => paintSwatch(b.dataset.style, $("canvas", b)));
   }
 
   $("#texture-file").addEventListener("change", async (e) => {
@@ -1792,15 +1792,62 @@
         remove.className = "remove";
         remove.textContent = "×";
         remove.setAttribute("aria-label", `Delete preset ${preset.name}`);
-        remove.addEventListener("click", () => {
-          if (!confirm(`Delete the "${preset.name}" preset?`)) return;
-          storePresets(loadPresets().filter((p) => p.name !== preset.name));
-          renderPresets();
-        });
+        remove.addEventListener("click", () => deletePreset(preset));
         chip.append(apply, remove);
         container.appendChild(chip);
       });
     });
+    renderPresetTiles(list);
+  }
+
+  // Saved presets also sit in the style grid, after the built-in looks.
+  function paintPresetTile(preset, cv) {
+    const keep = { style: state.style, customBg: state.customBg, customTexture: state.customTexture };
+    const st = preset.settings;
+    if (typeof st.customBg === "string") state.customBg = st.customBg;
+    state.customTexture = st.customTexture === "image" ? "none" : st.customTexture || "none";
+    const key = STYLES[st.style] ? st.style : "eggshell";
+    state.style = key;
+    const c = cv.getContext("2d");
+    STYLES[key].paint(c, cv.width, cv.height, mulberry32(7));
+    c.fillStyle = typeof st.captionColor === "string" && st.captionColor ? st.captionColor : STYLES[key].text;
+    c.font = `500 ${cv.width * 0.3}px "Playfair Display", Georgia, serif`;
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText("Aa", cv.width / 2, cv.height / 2);
+    Object.assign(state, keep);
+  }
+
+  function renderPresetTiles(list) {
+    $$(".preset-tile", stylesEl).forEach((el) => el.remove());
+    list.forEach((preset) => {
+      const tile = document.createElement("div");
+      tile.className = "preset-tile";
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "swatch";
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 160;
+      paintPresetTile(preset, cv);
+      const name = document.createElement("span");
+      name.textContent = preset.name;
+      b.append(cv, name);
+      b.addEventListener("click", () => { haptic(); applyPreset(preset); });
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "tile-remove";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", `Delete preset ${preset.name}`);
+      remove.addEventListener("click", () => deletePreset(preset));
+      tile.append(b, remove);
+      stylesEl.appendChild(tile);
+    });
+  }
+
+  function deletePreset(preset) {
+    if (!confirm(`Delete the "${preset.name}" preset?`)) return;
+    storePresets(loadPresets().filter((p) => p.name !== preset.name));
+    renderPresets();
   }
 
   function applyPreset(preset) {
@@ -1836,7 +1883,7 @@
       renderPresets();
       toast(state.customTexture === "image" && state.style === "custom"
         ? `Saved "${name}". Texture photos aren't saved with presets.`
-        : `Saved "${name}". Find it on the first step.`);
+        : `Saved "${name}". Find it under Pick a style.`);
     });
   });
 
