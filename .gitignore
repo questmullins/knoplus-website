@@ -11,3 +11,4 @@ wrangler.toml
 .wrangler/
 .dev.vars
 nextjs-elements/public/templates/photo-portfolio/photo-manifest.json
+*.tsbuildinfo
