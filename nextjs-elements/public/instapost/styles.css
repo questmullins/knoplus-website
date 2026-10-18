@@ -506,7 +506,7 @@ textarea:focus, .handle-field:focus-within { outline: 2px solid var(--accent); o
 }
 
 /* Style swatches */
-.styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.styles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 
 .swatch {
   display: flex;
@@ -1002,4 +1002,24 @@ textarea:focus, .handle-field:focus-within { outline: 2px solid var(--accent); o
 @keyframes wiggle {
   from { transform: rotate(-4deg); }
   to { transform: rotate(4deg); }
+}
+
+/* Saved presets in the style grid */
+.preset-tile { position: relative; min-width: 0; }
+.preset-tile .swatch { width: 100%; }
+.preset-tile .swatch span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(58, 44, 30, 0.18);
 }
