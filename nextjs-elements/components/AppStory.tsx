@@ -2,34 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { BrandLogo } from "./BrandLogo";
-import { SiteMenu } from "./SiteMenu";
-import { storyScreens } from "./AppStoryScreens";
+import { HubShell } from "./hub/HubShell";
 import type { AppStory as AppStoryData } from "@/data/appStories";
 
 type AppStoryProps = {
   story: AppStoryData;
 };
 
-function Phone({ screen }: { screen: string }) {
-  const Screen = storyScreens[screen];
-
+function Phone({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="story-phone">
-      <div className="story-phone-screen">
-        <Screen />
-      </div>
-    </div>
+    <figure className="hub-phone">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt={alt} loading="lazy" src={src} />
+    </figure>
   );
 }
 
 export function AppStory({ story }: AppStoryProps) {
   const [active, setActive] = useState(0);
   const chapterRefs = useRef<Array<HTMLElement | null>>([]);
-  const scrollerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    // The chapter crossing the middle of the view decides which screen the sticky phone shows.
+    // The chapter crossing the middle of the window decides which screen the sticky phone shows.
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -38,7 +32,7 @@ export function AppStory({ story }: AppStoryProps) {
           }
         });
       },
-      { root: window.innerWidth > 720 ? scrollerRef.current : null, rootMargin: "-45% 0px -45% 0px" }
+      { rootMargin: "-45% 0px -45% 0px" }
     );
 
     chapterRefs.current.forEach((node) => node && observer.observe(node));
@@ -46,66 +40,83 @@ export function AppStory({ story }: AppStoryProps) {
   }, []);
 
   return (
-    <main className={`project-page story-page project-theme-${story.theme}`} ref={scrollerRef}>
-      <header className="project-topbar story-topbar">
-        <BrandLogo />
-        <nav aria-label="Story navigation">
-          <Link className="project-back" href={`/projects/${story.slug}`}>
-            About {story.name}
-          </Link>
-          <SiteMenu className="project-menu" hideIcon showLabel />
-        </nav>
-      </header>
+    <HubShell
+      accent={story.accent}
+      accentInk={story.accentInk}
+      cta={{ label: `About ${story.name}`, href: `/projects/${story.slug}` }}
+      links={[
+        { label: "Projects", href: "/#projects" },
+        { label: "The story", href: "#story" }
+      ]}
+    >
+      <main className="hub-main">
+        <section className="hub-hero story-hero">
+          <div className="hub-hero-copy">
+            <span className="hub-eyebrow">{story.name} · App story</span>
+            <h1>{story.title}</h1>
+            <p>{story.intro}</p>
+            <div className="hub-actions">
+              <a className="hub-button" href="#story">
+                Start the story
+              </a>
+            </div>
+          </div>
+          <div className="hub-hero-art count-1">
+            <Phone alt={story.chapters[0].alt} src={story.chapters[0].screen} />
+          </div>
+        </section>
 
-      <section className="story-hero">
-        <div className="eyebrow">
-          {story.name} · {story.kicker}
-        </div>
-        <h1 dangerouslySetInnerHTML={{ __html: story.title }} />
-        <p>{story.intro}</p>
-        <span className="story-scroll-cue">Scroll</span>
-      </section>
-
-      <div className="story-body">
-        <div className="story-chapters">
-          {story.chapters.map((chapter, index) => (
-            <article
-              className={`story-chapter ${index === active ? "is-active" : ""}`}
-              data-index={index}
-              key={chapter.screen}
-              ref={(node) => {
-                chapterRefs.current[index] = node;
-              }}
-            >
-              <span className="story-eyebrow">{chapter.eyebrow}</span>
-              <h2>{chapter.heading}</h2>
-              <p>{chapter.body}</p>
-              <div className="story-inline-phone">
-                <Phone screen={chapter.screen} />
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="story-stage" aria-hidden="true">
-          <div className="story-sticky">
+        <section className="story-body" id="story">
+          <div className="story-chapters">
             {story.chapters.map((chapter, index) => (
-              <div className={`story-stage-screen ${index === active ? "is-active" : ""}`} key={chapter.screen}>
-                <Phone screen={chapter.screen} />
-              </div>
+              <article
+                className={`hub-card story-chapter ${index === active ? "is-active" : ""}`}
+                data-index={index}
+                key={chapter.screen}
+                ref={(node) => {
+                  chapterRefs.current[index] = node;
+                }}
+              >
+                <span className="hub-eyebrow">{chapter.eyebrow}</span>
+                <h2>{chapter.heading}</h2>
+                <p>{chapter.body}</p>
+                <div className="story-inline-phone">
+                  <Phone alt={chapter.alt} src={chapter.screen} />
+                </div>
+              </article>
             ))}
           </div>
-        </div>
-      </div>
 
-      <section className="story-closing">
-        <h2>{story.closing.heading}</h2>
-        <p>{story.closing.body}</p>
-        <p className="story-disclaimer">Screens shown here are illustrations of the app, with example names and places.</p>
-        <Link className="cta-button project-primary" href={`/projects/${story.slug}`}>
-          Read about {story.name}
-        </Link>
-      </section>
-    </main>
+          <div className="story-stage" aria-hidden="true">
+            <div className="story-sticky">
+              {story.chapters.map((chapter, index) => (
+                <div className={`story-stage-screen ${index === active ? "is-active" : ""}`} key={chapter.screen}>
+                  <Phone alt="" src={chapter.screen} />
+                </div>
+              ))}
+              <div className="story-dots">
+                {story.chapters.map((chapter, index) => (
+                  <i className={index === active ? "on" : ""} key={chapter.screen} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="hub-section hub-cta">
+          <h2>{story.closing.heading}</h2>
+          <p>{story.closing.body}</p>
+          <p className="story-note">Screens are from the current build, shown with example names and places.</p>
+          <div className="hub-actions center">
+            <Link className="hub-button" href={`/projects/${story.slug}`}>
+              Read about {story.name}
+            </Link>
+            <Link className="hub-button ghost" href="/#projects">
+              All projects
+            </Link>
+          </div>
+        </section>
+      </main>
+    </HubShell>
   );
 }
