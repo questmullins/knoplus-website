@@ -14,20 +14,33 @@
     ratio: "5:4",
     layout: "side",
     layoutTouched: false,
-    labels: false,
     rounded: false,
+    labelStyle: "none",
+    labelBefore: "Before",
+    labelAfter: "After",
+    labelSize: 34,
+    labelFont: "modern",
+    labelColor: "",
     caption: "",
     placement: "between",
     captionFont: "serif",
     captionSize: 72,
+    captionColor: "",
     handle: "",
+    handleFont: "modern",
     handleSize: 30,
+    handleColor: "",
     showHandle: true,
     style: "eggshell",
     customBg: "#e6d9c6",
-    customText: "#3b322b",
     customTexture: "paper"
   };
+
+  // Everything a preset remembers. The handle is saved separately and stays put.
+  const PRESET_KEYS = Object.keys(DEFAULTS).filter((k) => k !== "handle" && k !== "layoutTouched");
+
+  // Starting label size for each label style, applied when the style changes.
+  const LABEL_SIZES = { vertical: 34, overlay: 64, corner: 30, below: 34, badge: 26 };
 
   const EMOJIS = ["✨", "🤍", "💕", "🌸", "💫", "🔥", "😍", "👏", "🖤", "🌿", "👇", "➡️"];
 
@@ -297,8 +310,8 @@
     },
     custom: {
       name: "Your own",
-      get text() { return state.customText; },
-      get sub() { return state.customText; },
+      get text() { return isLight(state.customBg) ? "#2f2924" : "#f4ede3"; },
+      get sub() { return isLight(state.customBg) ? "#5e554c" : "#cfc5b8"; },
       get pill() { return mixHex(state.customBg, isLight(state.customBg) ? "#ffffff" : "#000000", 0.15); },
       get placeholder() { return isLight(state.customBg) ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.07)"; },
       get light() { return isLight(state.customBg); },
@@ -352,15 +365,25 @@
 
   const EMOJI_FONTS = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"';
 
-  function captionFont(size) {
-    switch (state.captionFont) {
-      case "sans":
-        return `600 ${size}px Montserrat, ${EMOJI_FONTS}, system-ui, sans-serif`;
-      case "script":
-        return `${Math.round(size * 1.3)}px "Great Vibes", ${EMOJI_FONTS}, cursive`;
-      default:
-        return `500 ${size}px "Playfair Display", ${EMOJI_FONTS}, Georgia, serif`;
-    }
+  // One font list shared by the caption, the handle and the labels so they can match.
+  // scale evens out how large each face looks at the same size.
+  const FONTS = {
+    serif: { name: "Elegant", family: '"Playfair Display"', weight: 500, scale: 1, fallback: "Georgia, serif" },
+    classic: { name: "Classic", family: '"Cormorant Garamond"', weight: 600, scale: 1.14, fallback: "Georgia, serif" },
+    sans: { name: "Clean", family: "Montserrat", weight: 600, scale: 0.94, fallback: "system-ui, sans-serif", spacing: 0.04 },
+    modern: { name: "Modern", family: "Inter", weight: 500, scale: 1, fallback: "system-ui, sans-serif", spacing: 0.03 },
+    bold: { name: "Bold", family: '"Bebas Neue"', weight: 400, scale: 1.22, fallback: "Impact, sans-serif", spacing: 0.05 },
+    script: { name: "Script", family: '"Great Vibes"', weight: 400, scale: 1.3, fallback: "cursive", script: true },
+    type: { name: "Typewriter", family: '"Courier Prime"', weight: 400, scale: 1, fallback: "ui-monospace, monospace" }
+  };
+
+  function fontOf(key) {
+    return FONTS[key] || FONTS.serif;
+  }
+
+  function fontString(key, size, weight) {
+    const f = fontOf(key);
+    return `${weight || f.weight} ${Math.round(size * f.scale)}px ${f.family}, ${EMOJI_FONTS}, ${f.fallback}`;
   }
 
   function wrapLines(c, text, maxWidth) {
@@ -395,6 +418,32 @@
   function handleText() {
     const h = state.handle.trim().replace(/^@+/, "");
     return state.showHandle && h ? `@${h}` : "";
+  }
+
+  // The color actually used for a color setting, falling back to the style's own.
+  function colorFor(key) {
+    if (state[key]) return state[key];
+    const st = STYLES[state.style];
+    if (key === "captionColor") return st.text;
+    if (key === "handleColor") return st.sub;
+    if (key === "labelColor") {
+      if (state.labelStyle === "overlay" || state.labelStyle === "corner") return "#ffffff";
+      if (state.labelStyle === "badge") return "#2e2924";
+      return st.text;
+    }
+    if (key === "customBg") return state.customBg;
+    return st.text;
+  }
+
+  function labelText(index) {
+    const text = (index ? state.labelAfter : state.labelBefore).trim();
+    const caps = ["vertical", "corner", "badge"].includes(state.labelStyle) && !fontOf(state.labelFont).script;
+    return caps ? text.toUpperCase() : text;
+  }
+
+  function labelSpacing() {
+    if (fontOf(state.labelFont).script) return "0px";
+    return ["vertical", "corner", "badge"].includes(state.labelStyle) ? "0.18em" : `${fontOf(state.labelFont).spacing || 0}em`;
   }
 
   // Photo offsets (ox, oy) run from -1 to 1 across the part of the photo that overflows its cell.
@@ -433,13 +482,13 @@
     let bottom = H - P;
 
     const handle = handleText();
-    const hs = state.handleSize;
+    const hs = state.handleSize * fontOf(state.handleFont).scale;
     if (handle) bottom = H - P * 0.6 - hs * 2.2;
 
     const caption = state.caption.trim();
     const size = state.captionSize;
-    c.font = captionFont(size);
-    const lineH = size * (state.captionFont === "script" ? 1.35 : 1.22);
+    c.font = fontString(state.captionFont, size);
+    const lineH = size * (fontOf(state.captionFont).script ? 1.35 : 1.22);
     const sideBetween = state.layout === "side" && state.placement === "between";
     const lines = caption ? wrapLines(c, caption, (W - P * 2) * (sideBetween ? 0.7 : 1)) : [];
     const capH = lines.length * lineH;
@@ -472,39 +521,57 @@
       cells.push({ x: area.x + cellW + gap, y: area.y, w: cellW, h: area.h });
     }
 
+    // Labels that sit outside the photos take their room from the photo frames.
+    const ls = state.labelSize * fontOf(state.labelFont).scale;
+    if (state.labelStyle === "vertical") {
+      const band = ls * 1.9;
+      if (state.layout === "side") {
+        cells[0].x += band;
+        cells[0].w -= band;
+        cells[1].w -= band;
+      } else {
+        cells.forEach((cell) => { cell.x += band; cell.w -= band * 2; });
+      }
+    } else if (state.labelStyle === "below") {
+      cells.forEach((cell) => { cell.h -= ls * 1.9; });
+    }
+
     const radius = state.rounded ? W * 0.028 : 0;
     cells.forEach((cell, i) => drawCell(c, cell, photos[i], i, st, radius, W));
+    if (state.labelStyle === "vertical" || state.labelStyle === "below") {
+      cells.forEach((cell, i) => drawOuterLabel(c, cell, i, ls));
+    }
 
     if (lines.length) {
-      c.font = captionFont(size);
+      c.font = fontString(state.captionFont, size);
       c.textAlign = "center";
       c.textBaseline = "middle";
-      setSpacing(c, state.captionFont === "sans" ? "0.04em" : "0px");
+      setSpacing(c, `${fontOf(state.captionFont).spacing || 0}em`);
       if (sideBetween) {
         const widest = Math.max(...lines.map((l) => c.measureText(l).width));
         const pw = Math.min(area.w * 0.9, widest + size * 1.3);
         const ph = capH + size * 0.55;
-        const px = W / 2 - pw / 2;
-        capY = area.y + area.h / 2 - capH / 2;
+        const midY = cells[0].y + cells[0].h / 2;
+        capY = midY - capH / 2;
         c.save();
         c.shadowColor = "rgba(0,0,0,0.18)";
         c.shadowBlur = W * 0.02;
         c.shadowOffsetY = W * 0.004;
         c.fillStyle = st.pill;
-        roundRect(c, px, area.y + area.h / 2 - ph / 2, pw, ph, Math.min(ph / 2, W * 0.05));
+        roundRect(c, W / 2 - pw / 2, midY - ph / 2, pw, ph, Math.min(ph / 2, W * 0.05));
         c.fill();
         c.restore();
       }
-      c.fillStyle = st.text;
+      c.fillStyle = colorFor("captionColor");
       lines.forEach((line, i) => c.fillText(line, W / 2, capY + lineH * (i + 0.5)));
     }
 
     if (handle) {
-      c.font = `500 ${hs}px Inter, ${EMOJI_FONTS}, system-ui, sans-serif`;
+      c.font = fontString(state.handleFont, state.handleSize);
       c.textAlign = "center";
       c.textBaseline = "middle";
-      setSpacing(c, "0.06em");
-      c.fillStyle = st.sub;
+      setSpacing(c, fontOf(state.handleFont).script ? "0px" : "0.06em");
+      c.fillStyle = colorFor("handleColor");
       c.fillText(handle, W / 2, H - P * 0.6 - hs * 0.8);
     }
     setSpacing(c, "0px");
@@ -531,37 +598,90 @@
     } else {
       c.fillStyle = st.placeholder;
       c.fillRect(cell.x, cell.y, cell.w, cell.h);
-      c.fillStyle = st.sub;
-      c.globalAlpha = 0.6;
-      c.font = `500 ${Math.round(W * 0.032)}px Inter, system-ui, sans-serif`;
-      c.textAlign = "center";
-      c.textBaseline = "middle";
-      c.fillText(index ? "After" : "Before", cell.x + cell.w / 2, cell.y + cell.h / 2);
-      c.globalAlpha = 1;
+      if (!["overlay", "corner", "badge"].includes(state.labelStyle) || !labelText(index)) {
+        c.fillStyle = st.sub;
+        c.globalAlpha = 0.6;
+        c.font = `500 ${Math.round(W * 0.032)}px Inter, system-ui, sans-serif`;
+        c.textAlign = "center";
+        c.textBaseline = "middle";
+        c.fillText(index ? "After photo" : "Before photo", cell.x + cell.w / 2, cell.y + cell.h / 2);
+        c.globalAlpha = 1;
+      }
     }
+    drawInnerLabel(c, cell, index, radius);
     c.restore();
+  }
 
-    if (state.labels && photo) {
-      const fs = Math.round(W * 0.022);
-      const label = index ? "AFTER" : "BEFORE";
-      c.save();
-      c.font = `600 ${fs}px Inter, system-ui, sans-serif`;
-      setSpacing(c, "0.14em");
-      const tw = c.measureText(label).width;
-      const pad = fs * 0.8;
+  // Labels drawn on top of the photo: overlay, corner and badge.
+  function drawInnerLabel(c, cell, index, radius) {
+    const text = labelText(index);
+    if (!text || !["overlay", "corner", "badge"].includes(state.labelStyle)) return;
+    const ls = state.labelSize * fontOf(state.labelFont).scale;
+    c.save();
+    c.font = fontString(state.labelFont, state.labelSize);
+    setSpacing(c, labelSpacing());
+    c.textBaseline = "middle";
+    const color = colorFor("labelColor");
+
+    if (state.labelStyle === "overlay") {
+      const scrimH = Math.min(cell.h * 0.45, ls * 4);
+      const g = c.createLinearGradient(0, cell.y + cell.h - scrimH, 0, cell.y + cell.h);
+      g.addColorStop(0, "rgba(0,0,0,0)");
+      g.addColorStop(1, "rgba(0,0,0,0.5)");
+      c.fillStyle = g;
+      c.fillRect(cell.x, cell.y + cell.h - scrimH, cell.w, scrimH);
+      c.textAlign = "center";
+      c.shadowColor = "rgba(0,0,0,0.35)";
+      c.shadowBlur = ls * 0.3;
+      c.fillStyle = color;
+      c.fillText(text, cell.x + cell.w / 2, cell.y + cell.h - ls * 0.95, cell.w * 0.92);
+    } else if (state.labelStyle === "corner") {
+      const inset = Math.max(ls * 0.9, radius * 0.6);
+      c.textAlign = "left";
+      c.shadowColor = "rgba(0,0,0,0.45)";
+      c.shadowBlur = ls * 0.35;
+      c.fillStyle = color;
+      c.fillText(text, cell.x + inset, cell.y + inset + ls * 0.4);
+    } else {
+      const tw = c.measureText(text).width;
+      const pad = ls * 0.8;
       const lw = tw + pad * 2;
-      const lh = fs * 2;
-      const lx = cell.x + Math.max(radius * 0.4, fs * 0.8);
-      const ly = cell.y + cell.h - lh - Math.max(radius * 0.4, fs * 0.8);
+      const lh = ls * 2;
+      const inset = Math.max(radius * 0.4, ls * 0.8);
+      const lx = cell.x + inset;
+      const ly = cell.y + cell.h - lh - inset;
       c.fillStyle = "rgba(255,255,255,0.88)";
       roundRect(c, lx, ly, lw, lh, lh / 2);
       c.fill();
-      c.fillStyle = "#2e2924";
+      c.fillStyle = color;
       c.textAlign = "left";
-      c.textBaseline = "middle";
-      c.fillText(label, lx + pad, ly + lh / 2 + fs * 0.05);
-      c.restore();
+      c.fillText(text, lx + pad, ly + lh / 2 + ls * 0.05);
     }
+    c.restore();
+  }
+
+  // Labels drawn beside the photos: vertical (outer edge) and underneath.
+  function drawOuterLabel(c, cell, index, ls) {
+    const text = labelText(index);
+    if (!text) return;
+    c.save();
+    c.font = fontString(state.labelFont, state.labelSize);
+    setSpacing(c, labelSpacing());
+    c.fillStyle = colorFor("labelColor");
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    if (state.labelStyle === "vertical") {
+      const band = ls * 1.9;
+      // Before reads up the left edge, After reads down the right edge.
+      const onLeft = index === 0;
+      const x = onLeft ? cell.x - band / 2 : cell.x + cell.w + band / 2;
+      c.translate(x, cell.y + cell.h / 2);
+      c.rotate(onLeft ? -Math.PI / 2 : Math.PI / 2);
+      c.fillText(text, 0, 0, cell.h * 0.95);
+    } else {
+      c.fillText(text, cell.x + cell.w / 2, cell.y + cell.h + ls * 1.0, cell.w);
+    }
+    c.restore();
   }
 
   let frame = 0;
@@ -649,6 +769,11 @@
   // Drag a photo inside its frame to reposition it.
   let drag = null;
   canvas.addEventListener("pointerdown", (e) => {
+    if (picking) {
+      e.preventDefault();
+      pickColorAt(canvasPoint(e));
+      return;
+    }
     const pt = canvasPoint(e);
     const index = cells.findIndex((c) => pt.x >= c.x && pt.x <= c.x + c.w && pt.y >= c.y && pt.y <= c.y + c.h);
     if (index < 0 || !photos[index]) return;
@@ -684,8 +809,24 @@
 
   // ---------- Controls ----------
 
+  // Font buttons, each shown in its own face.
+  $$("[data-fonts]").forEach((seg) => {
+    Object.entries(FONTS).forEach(([key, f]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.value = key;
+      b.textContent = f.name;
+      b.style.fontFamily = `${f.family}, ${f.fallback}`;
+      b.style.fontWeight = f.weight;
+      if (f.script) b.style.fontSize = "19px";
+      seg.appendChild(b);
+    });
+  });
+
   function setState(key, value) {
     state[key] = value;
+    if (key === "labelStyle" && LABEL_SIZES[value]) state.labelSize = LABEL_SIZES[value];
+    if (key === "customBg" || key === "customTexture") paintSwatches();
     if (key === "ratio" && !state.layoutTouched) state.layout = value === "16:9" ? "stack" : "side";
     if (key === "layout") state.layoutTouched = true;
     savePrefs();
@@ -707,6 +848,12 @@
     $$(".swatch").forEach((s) => s.classList.toggle("on", s.dataset.style === state.style));
     $("#custom-panel").hidden = state.style !== "custom";
     $("#texture-upload").hidden = state.customTexture !== "image";
+    $("#label-options").hidden = state.labelStyle === "none";
+    $$("[data-color]").forEach((b) => {
+      const key = b.dataset.color;
+      $("i", b).style.background = colorFor(key);
+      $("em", b).textContent = state[key] ? state[key].toUpperCase() : "Auto";
+    });
   }
 
   $$("[data-bind]").forEach((el) => {
@@ -797,6 +944,305 @@
     } catch {
       toast("Couldn't open that texture photo.");
     }
+  });
+
+  $("#match-font").addEventListener("click", () => setState("handleFont", state.captionFont));
+
+  // ---------- Color picker ----------
+
+  const SUGGESTED_TEXT = ["#2e2924", "#5e554c", "#ffffff", "#f4ede3", "#c9a36a", "#b76e79", "#d8a7b1", "#8c4a2f", "#7d8b6a", "#2f3d4d", "#6b3644", "#000000"];
+  const SUGGESTED_BG = ["#f2ece0", "#e6d9c6", "#f3dcd8", "#efe3ea", "#dfe5d5", "#dde6ee", "#c9b29b", "#6f5646", "#4a2c2a", "#2a2629", "#243241", "#1f2b22"];
+  const COLOR_TITLES = { captionColor: "Text color", handleColor: "Handle color", labelColor: "Label color", customBg: "Background color" };
+  const RECENT_KEY = "kno-instapost-recent-colors";
+
+  const sheet = $("#color-sheet");
+  const sv = $("#sv");
+  const svCanvas = $("#sv-canvas");
+  const svDot = $("#sv-dot");
+  const hueInput = $("#hue");
+  const hexInput = $("#hex");
+  let pickerKey = null;
+  let hsv = { h: 0, s: 0, v: 0 };
+  let picking = false;
+
+  function rgbToHex(r, g, b) {
+    return `#${[r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")}`;
+  }
+
+  function hsvToHex({ h, s, v }) {
+    const f = (n) => {
+      const k = (n + h / 60) % 6;
+      return v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
+    };
+    return rgbToHex(f(5) * 255, f(3) * 255, f(1) * 255);
+  }
+
+  function hexToHsv(hex) {
+    const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+    const max = Math.max(r, g, b);
+    const d = max - Math.min(r, g, b);
+    let h = 0;
+    if (d) {
+      if (max === r) h = ((g - b) / d) % 6;
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h = (h * 60 + 360) % 360;
+    }
+    return { h, s: max ? d / max : 0, v: max };
+  }
+
+  function toHex(color) {
+    if (/^#[0-9a-f]{6}$/i.test(color)) return color.toLowerCase();
+    const m = String(color).match(/\d+/g);
+    return m ? rgbToHex(+m[0], +m[1], +m[2]) : "#000000";
+  }
+
+  function loadRecent() {
+    try {
+      const list = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      return Array.isArray(list) ? list.filter((c) => /^#[0-9a-f]{6}$/i.test(c)) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function rememberColor(hex) {
+    const list = [hex, ...loadRecent().filter((c) => c !== hex)].slice(0, 12);
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch {
+      // Storage unavailable: recent colors just won't persist.
+    }
+  }
+
+  function drawSv() {
+    const c = svCanvas.getContext("2d");
+    const { width: w, height: h } = svCanvas;
+    c.fillStyle = hsvToHex({ h: hsv.h, s: 1, v: 1 });
+    c.fillRect(0, 0, w, h);
+    const white = c.createLinearGradient(0, 0, w, 0);
+    white.addColorStop(0, "#fff");
+    white.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = white;
+    c.fillRect(0, 0, w, h);
+    const black = c.createLinearGradient(0, 0, 0, h);
+    black.addColorStop(0, "rgba(0,0,0,0)");
+    black.addColorStop(1, "#000");
+    c.fillStyle = black;
+    c.fillRect(0, 0, w, h);
+  }
+
+  function syncPicker() {
+    const hex = hsvToHex(hsv);
+    drawSv();
+    svDot.style.left = `${hsv.s * 100}%`;
+    svDot.style.top = `${(1 - hsv.v) * 100}%`;
+    svDot.style.background = hex;
+    hueInput.value = Math.round(hsv.h);
+    if (document.activeElement !== hexInput) hexInput.value = hex.toUpperCase();
+    $("#color-now").style.background = hex;
+    $$("#suggested button, #recent button").forEach((b) => b.classList.toggle("on", b.dataset.hex === hex));
+  }
+
+  function swatchButtons(container, colors) {
+    container.innerHTML = "";
+    colors.forEach((hex) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.hex = hex;
+      b.style.background = hex;
+      b.setAttribute("aria-label", hex);
+      b.addEventListener("click", () => applyPicked(hex));
+      container.appendChild(b);
+    });
+  }
+
+  function applyPicked(hex, keepHsv) {
+    if (!keepHsv) hsv = hexToHsv(hex);
+    setState(pickerKey, hex);
+    syncPicker();
+  }
+
+  function openPicker(key) {
+    pickerKey = key;
+    hsv = hexToHsv(toHex(colorFor(key)));
+    $("#color-title").textContent = COLOR_TITLES[key];
+    const st = STYLES[state.style];
+    const styleColors = key === "customBg" ? [] : [toHex(st.text), toHex(st.sub)];
+    const base = key === "customBg" ? SUGGESTED_BG : SUGGESTED_TEXT;
+    swatchButtons($("#suggested"), [...new Set([...styleColors, ...base])]);
+    const recent = loadRecent();
+    $("#recent-block").hidden = !recent.length;
+    swatchButtons($("#recent"), recent);
+    $("#color-auto").hidden = key === "customBg";
+    sheet.hidden = false;
+    syncPicker();
+  }
+
+  function closePicker() {
+    if (pickerKey && state[pickerKey]) rememberColor(state[pickerKey]);
+    sheet.hidden = true;
+    stopPicking();
+    pickerKey = null;
+  }
+
+  $$("[data-color]").forEach((b) => b.addEventListener("click", () => openPicker(b.dataset.color)));
+  $("#color-done").addEventListener("click", closePicker);
+  sheet.addEventListener("click", (e) => { if (e.target === sheet) closePicker(); });
+  $("#color-auto").addEventListener("click", () => {
+    setState(pickerKey, "");
+    pickerKey = null;
+    sheet.hidden = true;
+  });
+
+  hueInput.addEventListener("input", () => {
+    hsv.h = Number(hueInput.value);
+    applyPicked(hsvToHex(hsv), true);
+  });
+
+  hexInput.addEventListener("input", () => {
+    let v = hexInput.value.trim();
+    if (!v.startsWith("#")) v = `#${v}`;
+    if (/^#[0-9a-f]{6}$/i.test(v)) applyPicked(v.toLowerCase());
+  });
+
+  let svDrag = false;
+  function svMove(e) {
+    const r = svCanvas.getBoundingClientRect();
+    hsv.s = clamp((e.clientX - r.left) / r.width, 0, 1);
+    hsv.v = clamp(1 - (e.clientY - r.top) / r.height, 0, 1);
+    applyPicked(hsvToHex(hsv), true);
+  }
+  sv.addEventListener("pointerdown", (e) => {
+    svDrag = true;
+    sv.setPointerCapture(e.pointerId);
+    svMove(e);
+  });
+  sv.addEventListener("pointermove", (e) => { if (svDrag) svMove(e); });
+  sv.addEventListener("pointerup", () => { svDrag = false; });
+  sv.addEventListener("pointercancel", () => { svDrag = false; });
+
+  // Pick from image: hide the sheet, take the next tap on the preview as a color sample.
+  $("#pick-from-image").addEventListener("click", () => {
+    picking = true;
+    sheet.classList.add("picking");
+    canvas.classList.add("picking");
+    canvas.hidden = false;
+    exportImg.hidden = true;
+    toast("Tap anywhere on the preview to pick that color.");
+  });
+
+  function stopPicking() {
+    if (!picking) return;
+    picking = false;
+    sheet.classList.remove("picking");
+    canvas.classList.remove("picking");
+    if (step === 4) scheduleExport(0);
+  }
+
+  function pickColorAt(pt) {
+    const x = clamp(Math.round(pt.x) - 2, 0, canvas.width - 5);
+    const y = clamp(Math.round(pt.y) - 2, 0, canvas.height - 5);
+    const px = ctx.getImageData(x, y, 5, 5).data;
+    let r = 0, g = 0, b = 0;
+    for (let i = 0; i < px.length; i += 4) {
+      r += px[i];
+      g += px[i + 1];
+      b += px[i + 2];
+    }
+    const n = px.length / 4;
+    stopPicking();
+    applyPicked(rgbToHex(r / n, g / n, b / n));
+  }
+
+  // ---------- Presets ----------
+
+  const PRESETS_KEY = "kno-instapost-presets-v1";
+  const STYLE_DOTS = { eggshell: "#f2ece0", moody: "#1e1b1e", spring: "#f5e1e1", summer: "#f8d6b6", autumn: "#7a3f25", winter: "#dfe6ec" };
+
+  function loadPresets() {
+    try {
+      const list = JSON.parse(localStorage.getItem(PRESETS_KEY) || "[]");
+      return Array.isArray(list) ? list.filter((p) => p && typeof p.name === "string" && p.settings) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function storePresets(list) {
+    try {
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(list));
+      return true;
+    } catch {
+      toast("This browser won't let the page save presets.");
+      return false;
+    }
+  }
+
+  function renderPresets() {
+    const list = loadPresets();
+    $$("[data-presets-block]").forEach((block) => { block.hidden = !list.length; });
+    $$("[data-presets]").forEach((container) => {
+      container.innerHTML = "";
+      list.forEach((preset) => {
+        const chip = document.createElement("span");
+        chip.className = "preset";
+        const apply = document.createElement("button");
+        apply.type = "button";
+        apply.className = "apply";
+        const dot = document.createElement("i");
+        dot.style.background = preset.settings.style === "custom" ? preset.settings.customBg : STYLE_DOTS[preset.settings.style] || "#ddd";
+        apply.append(dot, preset.name);
+        apply.addEventListener("click", () => applyPreset(preset));
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `Delete preset ${preset.name}`);
+        remove.addEventListener("click", () => {
+          if (!confirm(`Delete the "${preset.name}" preset?`)) return;
+          storePresets(loadPresets().filter((p) => p.name !== preset.name));
+          renderPresets();
+        });
+        chip.append(apply, remove);
+        container.appendChild(chip);
+      });
+    });
+  }
+
+  function applyPreset(preset) {
+    for (const key of PRESET_KEYS) {
+      if (key in preset.settings && typeof preset.settings[key] === typeof DEFAULTS[key]) state[key] = preset.settings[key];
+    }
+    state.layoutTouched = true;
+    captionInput.value = state.caption;
+    savePrefs();
+    syncControls();
+    paintSwatches();
+    update();
+    toast(`Applied "${preset.name}".`);
+  }
+
+  $$("[data-preset-save]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const input = $("[data-preset-name]", button.parentElement);
+      const name = input.value.trim();
+      if (!name) {
+        toast("Give your preset a name first.");
+        input.focus();
+        return;
+      }
+      const settings = {};
+      PRESET_KEYS.forEach((key) => { settings[key] = state[key]; });
+      const list = loadPresets().filter((p) => p.name !== name);
+      list.unshift({ name, settings });
+      if (!storePresets(list)) return;
+      input.value = "";
+      renderPresets();
+      toast(state.customTexture === "image" && state.style === "custom"
+        ? `Saved "${name}". Texture photos aren't saved with presets.`
+        : `Saved "${name}". Find it in steps 1 and 4.`);
+    });
   });
 
   // ---------- Steps ----------
@@ -965,11 +1411,12 @@
   syncControls();
   syncPhotoPickers();
   paintSwatches();
+  renderPresets();
   showStep(0);
   update();
 
   if (document.fonts) {
-    const faces = ['500 40px "Playfair Display"', '600 40px Montserrat', '40px "Great Vibes"', '500 40px Inter', '600 40px Inter'];
+    const faces = Object.values(FONTS).map((f) => `${f.weight} 40px ${f.family}`).concat("600 40px Inter");
     Promise.all(faces.map((f) => document.fonts.load(f).catch(() => null))).then(() => {
       paintSwatches();
       update();

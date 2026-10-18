@@ -9,7 +9,7 @@
   <title>Before &amp; After · Insta-Post Maker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Montserrat:wght@500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Courier+Prime&family=Great+Vibes&family=Inter:wght@400;500;600&family=Montserrat:wght@500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
         <canvas id="canvas" width="1080" height="1350" aria-label="Post preview"></canvas>
         <img id="export-img" alt="Finished post. Press and hold to save." hidden>
       </div>
-      <p class="stage-hint" id="stage-hint">Drag a photo in the preview to reposition it.</p>
+      <p class="stage-hint" id="stage-hint"></p>
     </section>
 
     <section class="panel">
@@ -38,6 +38,11 @@
 
       <!-- Step 1: photos -->
       <div class="step" data-panel="0">
+        <div class="presets-block" data-presets-block hidden>
+          <span class="field-label">Start from a preset</span>
+          <div class="presets" data-presets></div>
+        </div>
+
         <h2>Add your photos</h2>
         <div class="pickers">
           <div class="picker" data-photo="0">
@@ -77,8 +82,34 @@
           </div>
         </div>
 
-        <label class="toggle"><input type="checkbox" data-bind="labels"> Label photos "Before" and "After"</label>
         <label class="toggle"><input type="checkbox" data-bind="rounded"> Rounded corners</label>
+
+        <div class="field">
+          <span class="field-label">Before &amp; After labels</span>
+          <div class="seg seg-wrap" data-bind="labelStyle">
+            <button type="button" data-value="none">None</button>
+            <button type="button" data-value="vertical">Vertical</button>
+            <button type="button" data-value="overlay">Over photo</button>
+            <button type="button" data-value="corner">Corner</button>
+            <button type="button" data-value="below">Underneath</button>
+            <button type="button" data-value="badge">Badge</button>
+          </div>
+        </div>
+        <div class="label-options" id="label-options">
+          <div class="label-texts">
+            <input type="text" maxlength="24" data-bind="labelBefore" aria-label="Before label text">
+            <input type="text" maxlength="24" data-bind="labelAfter" aria-label="After label text">
+          </div>
+          <label class="slider wide">Label size <input type="range" min="18" max="110" step="1" data-bind="labelSize"></label>
+          <div class="field">
+            <span class="field-label">Label font</span>
+            <div class="seg seg-wrap font-seg" data-bind="labelFont" data-fonts></div>
+          </div>
+          <div class="color-row">
+            <span>Label color</span>
+            <button type="button" class="color-btn" data-color="labelColor"><i></i><em></em></button>
+          </div>
+        </div>
       </div>
 
       <!-- Step 2: caption -->
@@ -98,13 +129,13 @@
         </div>
         <div class="field">
           <span class="field-label">Font</span>
-          <div class="seg" data-bind="captionFont">
-            <button type="button" data-value="serif" class="f-serif">Elegant</button>
-            <button type="button" data-value="sans" class="f-sans">Clean</button>
-            <button type="button" data-value="script" class="f-script">Script</button>
-          </div>
+          <div class="seg seg-wrap font-seg" data-bind="captionFont" data-fonts></div>
         </div>
         <label class="slider wide">Text size <input type="range" min="36" max="140" step="1" data-bind="captionSize"></label>
+        <div class="color-row">
+          <span>Text color</span>
+          <button type="button" class="color-btn" data-color="captionColor"><i></i><em></em></button>
+        </div>
       </div>
 
       <!-- Step 3: handle -->
@@ -115,18 +146,30 @@
           <input id="handle" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="yourhandle">
         </div>
         <p class="note">Saved on this phone, so it's filled in next time.</p>
-        <label class="slider wide">Handle size <input type="range" min="18" max="56" step="1" data-bind="handleSize"></label>
         <label class="toggle"><input type="checkbox" data-bind="showHandle"> Show handle on the image</label>
+        <div class="field">
+          <span class="field-label">Font <button type="button" class="mini-btn" id="match-font">Match my text</button></span>
+          <div class="seg seg-wrap font-seg" data-bind="handleFont" data-fonts></div>
+        </div>
+        <label class="slider wide">Handle size <input type="range" min="18" max="64" step="1" data-bind="handleSize"></label>
+        <div class="color-row">
+          <span>Handle color</span>
+          <button type="button" class="color-btn" data-color="handleColor"><i></i><em></em></button>
+        </div>
       </div>
 
       <!-- Step 4: style -->
       <div class="step" data-panel="3" hidden>
+        <div class="presets-block" data-presets-block hidden>
+          <span class="field-label">Your presets</span>
+          <div class="presets" data-presets></div>
+        </div>
         <h2>Pick a style</h2>
         <div class="styles" id="styles"></div>
         <div class="custom" id="custom-panel" hidden>
-          <div class="custom-row">
-            <label>Background <input type="color" data-bind="customBg"></label>
-            <label>Text <input type="color" data-bind="customText"></label>
+          <div class="color-row">
+            <span>Background color</span>
+            <button type="button" class="color-btn" data-color="customBg"><i></i><em></em></button>
           </div>
           <div class="field">
             <span class="field-label">Texture</span>
@@ -143,6 +186,13 @@
             <input type="file" accept="image/*" id="texture-file">
             <span id="texture-label">Choose a texture photo</span>
           </label>
+        </div>
+        <div class="preset-save">
+          <span class="field-label">Save this look as a preset</span>
+          <div class="preset-form">
+            <input type="text" maxlength="30" placeholder="Name it, like Brow Lam" data-preset-name>
+            <button type="button" data-preset-save>Save</button>
+          </div>
         </div>
       </div>
 
@@ -163,6 +213,13 @@
           <button type="button" id="share-btn" hidden>Share…</button>
         </div>
         <p class="note">On a phone you can also press and hold the image above, then tap Save.</p>
+        <div class="preset-save">
+          <span class="field-label">Save this look as a preset</span>
+          <div class="preset-form">
+            <input type="text" maxlength="30" placeholder="Name it, like Brow Lam" data-preset-name>
+            <button type="button" data-preset-save>Save</button>
+          </div>
+        </div>
       </div>
 
       <div class="nav">
@@ -171,6 +228,30 @@
       </div>
     </section>
   </main>
+
+  <!-- Color picker sheet -->
+  <div class="sheet-backdrop" id="color-sheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="color-title">
+      <div class="sheet-head">
+        <h3 id="color-title">Color</h3>
+        <button type="button" class="mini-btn" id="color-done">Done</button>
+      </div>
+      <div class="sv" id="sv"><canvas id="sv-canvas" width="300" height="180"></canvas><span class="sv-dot" id="sv-dot"></span></div>
+      <input type="range" class="hue" id="hue" min="0" max="360" step="1" aria-label="Hue">
+      <div class="color-tools">
+        <span class="color-now" id="color-now"></span>
+        <input type="text" id="hex" maxlength="7" spellcheck="false" autocapitalize="off" aria-label="Hex color">
+        <button type="button" class="mini-btn" id="pick-from-image">Pick from image</button>
+      </div>
+      <span class="field-label">Suggested</span>
+      <div class="swatch-row" id="suggested"></div>
+      <div class="recent-block" id="recent-block">
+        <span class="field-label">Recent</span>
+        <div class="swatch-row" id="recent"></div>
+      </div>
+      <button type="button" class="link-btn" id="color-auto">Use the style's color</button>
+    </div>
+  </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
