@@ -1461,6 +1461,8 @@
   const SUGGESTED_BG = ["#f2ece0", "#e6d9c6", "#f3dcd8", "#efe3ea", "#dfe5d5", "#dde6ee", "#c9b29b", "#6f5646", "#4a2c2a", "#2a2629", "#243241", "#1f2b22"];
   const COLOR_TITLES = { captionColor: "Text color", handleColor: "Handle color", labelColor: "Label color", customBg: "Background color" };
   const RECENT_KEY = "kno-instapost-recent-colors";
+  const SWATCHES_KEY = "kno-instapost-swatches";
+  const MAX_SWATCHES = 30;
 
   const sheet = $("#color-sheet");
   const sv = $("#sv");
@@ -1522,6 +1524,88 @@
     }
   }
 
+  // Saved swatches: the user's own palette, kept on this device.
+  function loadSwatches() {
+    try {
+      const list = JSON.parse(localStorage.getItem(SWATCHES_KEY) || "[]");
+      return Array.isArray(list) ? list.filter((c) => /^#[0-9a-f]{6}$/i.test(c)) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function storeSwatches(list) {
+    try {
+      localStorage.setItem(SWATCHES_KEY, JSON.stringify(list));
+      return true;
+    } catch {
+      toast("This browser won't let the page save swatches.");
+      return false;
+    }
+  }
+
+  let editingSwatches = false;
+
+  function renderMySwatches() {
+    const list = loadSwatches();
+    const row = $("#my-swatches");
+    row.innerHTML = "";
+    row.classList.toggle("editing", editingSwatches);
+    list.forEach((hex) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.hex = hex;
+      b.style.background = hex;
+      b.setAttribute("aria-label", editingSwatches ? `Delete ${hex}` : hex);
+      b.addEventListener("click", () => {
+        if (editingSwatches) {
+          storeSwatches(loadSwatches().filter((c) => c !== hex));
+          if (!loadSwatches().length) editingSwatches = false;
+          renderMySwatches();
+        } else {
+          applyPicked(hex);
+        }
+      });
+      row.appendChild(b);
+    });
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "swatch-add";
+    add.textContent = "+";
+    add.setAttribute("aria-label", "Save the current color as a swatch");
+    add.hidden = editingSwatches;
+    add.addEventListener("click", () => {
+      const hex = hsvToHex(hsv);
+      const current = loadSwatches();
+      if (current.includes(hex)) {
+        toast("That color is already in your swatches.");
+        return;
+      }
+      if (current.length >= MAX_SWATCHES) {
+        toast(`You can keep up to ${MAX_SWATCHES} swatches. Delete one to add another.`);
+        return;
+      }
+      if (storeSwatches([...current, hex])) {
+        haptic();
+        renderMySwatches();
+        syncPicker();
+      }
+    });
+    row.appendChild(add);
+    const edit = $("#edit-swatches");
+    edit.hidden = !list.length;
+    edit.textContent = editingSwatches ? "Done" : "Delete";
+    $("#my-swatches-note").textContent = editingSwatches
+      ? "Tap a swatch to delete it."
+      : list.length ? "" : "Tap + to save the color above for next time.";
+  }
+
+  $("#edit-swatches").addEventListener("click", () => {
+    editingSwatches = !editingSwatches;
+    renderMySwatches();
+    syncPicker();
+  });
+
   function drawSv() {
     const c = svCanvas.getContext("2d");
     const { width: w, height: h } = svCanvas;
@@ -1548,7 +1632,7 @@
     hueInput.value = Math.round(hsv.h);
     if (document.activeElement !== hexInput) hexInput.value = hex.toUpperCase();
     $("#color-now").style.background = hex;
-    $$("#suggested button, #recent button").forEach((b) => b.classList.toggle("on", b.dataset.hex === hex));
+    $$("#suggested button, #recent button, #my-swatches button").forEach((b) => b.classList.toggle("on", !editingSwatches && b.dataset.hex === hex));
   }
 
   function swatchButtons(container, colors) {
@@ -1578,6 +1662,8 @@
     const styleColors = key === "customBg" ? [] : [toHex(st.text), toHex(st.sub)];
     const base = key === "customBg" ? SUGGESTED_BG : SUGGESTED_TEXT;
     swatchButtons($("#suggested"), [...new Set([...styleColors, ...base])]);
+    editingSwatches = false;
+    renderMySwatches();
     const recent = loadRecent();
     $("#recent-block").hidden = !recent.length;
     swatchButtons($("#recent"), recent);

@@ -960,3 +960,46 @@ textarea:focus, .handle-field:focus-within { outline: 2px solid var(--accent); o
 
 .sheet-actions .danger { grid-column: auto; }
 .sheet-actions #photo-reset { grid-column: 1 / -1; }
+
+/* Saved swatches */
+.swatch-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+.swatch-head .field-label { margin: 0; }
+.swatch-note { margin: -6px 0 12px; }
+.swatch-note:empty { display: none; }
+
+.swatch-row .swatch-add {
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed #b8aa96;
+  background: var(--card);
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--muted);
+}
+
+#my-swatches.editing button {
+  position: relative;
+  animation: wiggle 0.5s ease-in-out infinite alternate;
+}
+
+#my-swatches.editing button::after {
+  content: "×";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #a33a2c;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+@keyframes wiggle {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(4deg); }
+}
