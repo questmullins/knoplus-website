@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="/instapost/">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#f3eee4">
+  <title>Before &amp; After · Insta-Post Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Montserrat:wght@500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Before <span>&amp;</span> After</h1>
+    <p>Insta-post maker</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Preview">
+      <div class="stage-frame">
+        <canvas id="canvas" width="1080" height="1350" aria-label="Post preview"></canvas>
+        <img id="export-img" alt="Finished post. Press and hold to save." hidden>
+      </div>
+      <p class="stage-hint" id="stage-hint">Drag a photo in the preview to reposition it.</p>
+    </section>
+
+    <section class="panel">
+      <nav class="steps" aria-label="Steps">
+        <button type="button" data-step="0" class="active"><b>1</b>Photos</button>
+        <button type="button" data-step="1"><b>2</b>Caption</button>
+        <button type="button" data-step="2"><b>3</b>Handle</button>
+        <button type="button" data-step="3"><b>4</b>Style</button>
+        <button type="button" data-step="4"><b>5</b>Save</button>
+      </nav>
+
+      <!-- Step 1: photos -->
+      <div class="step" data-panel="0">
+        <h2>Add your photos</h2>
+        <div class="pickers">
+          <div class="picker" data-photo="0">
+            <label class="drop">
+              <input type="file" accept="image/*" data-file="0">
+              <span class="thumb" data-thumb="0"></span>
+              <span class="drop-label">Before</span>
+            </label>
+            <label class="slider">Zoom <input type="range" min="1" max="3" step="0.01" value="1" data-zoom="0" disabled></label>
+          </div>
+          <div class="picker" data-photo="1">
+            <label class="drop">
+              <input type="file" accept="image/*" data-file="1">
+              <span class="thumb" data-thumb="1"></span>
+              <span class="drop-label">After</span>
+            </label>
+            <label class="slider">Zoom <input type="range" min="1" max="3" step="0.01" value="1" data-zoom="1" disabled></label>
+          </div>
+        </div>
+        <button type="button" class="link-btn" id="swap">⇄ Swap photos</button>
+
+        <div class="field">
+          <span class="field-label">Size</span>
+          <div class="seg" data-bind="ratio">
+            <button type="button" data-value="1:1">1:1<small>Square</small></button>
+            <button type="button" data-value="5:4">5:4<small>Portrait</small></button>
+            <button type="button" data-value="16:9">16:9<small>Story</small></button>
+          </div>
+          <p class="note">Height to width. 5:4 is Instagram's tall feed post, 16:9 fills Stories and Reels.</p>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Photo layout</span>
+          <div class="seg" data-bind="layout">
+            <button type="button" data-value="side">Side by side</button>
+            <button type="button" data-value="stack">Stacked</button>
+          </div>
+        </div>
+
+        <label class="toggle"><input type="checkbox" data-bind="labels"> Label photos "Before" and "After"</label>
+        <label class="toggle"><input type="checkbox" data-bind="rounded"> Rounded corners</label>
+      </div>
+
+      <!-- Step 2: caption -->
+      <div class="step" data-panel="1" hidden>
+        <h2>Add your text</h2>
+        <div class="field">
+          <textarea id="caption" rows="2" maxlength="120" placeholder="Brow Lam ✨"></textarea>
+          <div class="emoji-bar" id="emoji-bar" aria-label="Quick emojis"></div>
+        </div>
+        <div class="field">
+          <span class="field-label">Placement</span>
+          <div class="seg" data-bind="placement">
+            <button type="button" data-value="above">Above</button>
+            <button type="button" data-value="between">Between</button>
+            <button type="button" data-value="below">Below</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label">Font</span>
+          <div class="seg" data-bind="captionFont">
+            <button type="button" data-value="serif" class="f-serif">Elegant</button>
+            <button type="button" data-value="sans" class="f-sans">Clean</button>
+            <button type="button" data-value="script" class="f-script">Script</button>
+          </div>
+        </div>
+        <label class="slider wide">Text size <input type="range" min="36" max="140" step="1" data-bind="captionSize"></label>
+      </div>
+
+      <!-- Step 3: handle -->
+      <div class="step" data-panel="2" hidden>
+        <h2>Your Instagram handle</h2>
+        <div class="field handle-field">
+          <span>@</span>
+          <input id="handle" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="yourhandle">
+        </div>
+        <p class="note">Saved on this phone, so it's filled in next time.</p>
+        <label class="slider wide">Handle size <input type="range" min="18" max="56" step="1" data-bind="handleSize"></label>
+        <label class="toggle"><input type="checkbox" data-bind="showHandle"> Show handle on the image</label>
+      </div>
+
+      <!-- Step 4: style -->
+      <div class="step" data-panel="3" hidden>
+        <h2>Pick a style</h2>
+        <div class="styles" id="styles"></div>
+        <div class="custom" id="custom-panel" hidden>
+          <div class="custom-row">
+            <label>Background <input type="color" data-bind="customBg"></label>
+            <label>Text <input type="color" data-bind="customText"></label>
+          </div>
+          <div class="field">
+            <span class="field-label">Texture</span>
+            <div class="seg seg-wrap" data-bind="customTexture">
+              <button type="button" data-value="none">None</button>
+              <button type="button" data-value="paper">Paper</button>
+              <button type="button" data-value="linen">Linen</button>
+              <button type="button" data-value="grain">Grain</button>
+              <button type="button" data-value="speckle">Speckle</button>
+              <button type="button" data-value="image">My photo</button>
+            </div>
+          </div>
+          <label class="upload" id="texture-upload" hidden>
+            <input type="file" accept="image/*" id="texture-file">
+            <span id="texture-label">Choose a texture photo</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 5: save -->
+      <div class="step" data-panel="4" hidden>
+        <h2>Your post is ready</h2>
+        <div class="field">
+          <span class="field-label">Size</span>
+          <div class="seg" data-bind="ratio">
+            <button type="button" data-value="1:1">1:1<small>Square</small></button>
+            <button type="button" data-value="5:4">5:4<small>Portrait</small></button>
+            <button type="button" data-value="16:9">16:9<small>Story</small></button>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="primary" id="save-btn">Save image</button>
+          <button type="button" id="copy-btn">Copy image</button>
+          <button type="button" id="share-btn" hidden>Share…</button>
+        </div>
+        <p class="note">On a phone you can also press and hold the image above, then tap Save.</p>
+      </div>
+
+      <div class="nav">
+        <button type="button" id="back">Back</button>
+        <button type="button" id="next" class="primary">Next</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
