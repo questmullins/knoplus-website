@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { projectPages } from "@/data/projects";
 import { seoPages } from "@/data/seoPages";
 import { templates } from "@/data/templates";
 
@@ -7,8 +8,9 @@ const baseUrl = "https://kno.plus";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const corePages = ["", "/about", "/process", "/pricing", "/sitemap"];
-  const servicePages = seoPages.map((page) => `/${page.slug}`);
+  const corePages = ["", "/websites", "/websites/about", "/websites/process", "/websites/pricing", "/sitemap"];
+  const projectPaths = projectPages.map((project) => project.href);
+  const servicePages = seoPages.map((page) => `/websites/${page.slug}`);
   const templatePages = Array.from(new Set(templates.map((template) => template.link)));
   const templateSubpages = [
     "/lawrence-autorepair",
@@ -23,10 +25,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/templates/photo-portfolio/index.html"
   ];
 
-  return [...corePages, ...servicePages, ...templatePages, ...templateSubpages].map((path) => ({
+  return [...corePages, ...projectPaths, ...servicePages, ...templatePages, ...templateSubpages].map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
     changeFrequency: path === "" || path.startsWith("/templates/") ? "weekly" : "monthly",
-    priority: path === "" ? 1 : path === "/pricing" ? 0.9 : path.startsWith("/templates/") ? 0.7 : 0.75
+    priority: path === "" || path === "/websites" ? 1 : path === "/websites/pricing" ? 0.9 : path.startsWith("/templates/") ? 0.7 : 0.75
   }));
 }

@@ -59,17 +59,19 @@ const structuredData = [
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
     name: [
+      "Projects",
+      "Websites",
       "About Us",
-      "Home",
       "Our Process",
       "Pricing",
       "Sitemap"
     ],
     url: [
-      "https://kno.plus/about",
       "https://kno.plus",
-      "https://kno.plus/process",
-      "https://kno.plus/pricing",
+      "https://kno.plus/websites",
+      "https://kno.plus/websites/about",
+      "https://kno.plus/websites/process",
+      "https://kno.plus/websites/pricing",
       "https://kno.plus/sitemap"
     ]
   }
@@ -78,11 +80,11 @@ const structuredData = [
 export const metadata: Metadata = {
   metadataBase: new URL("https://kno.plus"),
   title: {
-    default: "Knoplus | Website Templates and Custom Websites for Independent Businesses",
+    default: "Knoplus | Apps, Web Tools and Websites",
     template: "%s | Knoplus"
   },
   description:
-    "Knoplus builds modern website templates and service websites for independent companies, local businesses, automotive shops, home service companies, and growing brands that need fast launch timelines and simple management.",
+    "Knoplus is a hub for apps, browser tools, design automation and a website service for independent businesses that need fast launch timelines and simple management.",
   keywords: [
     "website templates",
     "custom websites",
@@ -100,9 +102,9 @@ export const metadata: Metadata = {
     "Knoplus"
   ],
   openGraph: {
-    title: "Knoplus | Website Templates and Custom Websites",
+    title: "Knoplus | Apps, Web Tools and Websites",
     description:
-      "Modern, professional websites starting at $500 with templates, custom builds, mobile-friendly design, basic SEO setup, and launch support.",
+      "Phone apps, browser tools, design automation and a website service, all in one place.",
     url: "https://kno.plus",
     siteName: "Knoplus",
     type: "website"
