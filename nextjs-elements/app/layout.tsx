@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./hub.css";
 
 const structuredData = [
   {
@@ -122,7 +123,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&family=Stack+Sans+Text:wght@200..700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&family=Montserrat:wght@400;500;600;700;800;900&family=Stack+Sans+Text:wght@200..700&display=swap"
           rel="stylesheet"
         />
         <script

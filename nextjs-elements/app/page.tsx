@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ProjectHub } from "@/components/ProjectHub";
+import { HubHome } from "@/components/HubHome";
 
 export const metadata: Metadata = {
   title: {
@@ -13,5 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <ProjectHub />;
+  return <HubHome />;
 }
