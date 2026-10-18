@@ -50,8 +50,21 @@
   const EMOJIS = ["✨", "🤍", "💕", "🌸", "💫", "🔥", "😍", "👏", "🖤", "🌿", "👇", "➡️"];
 
   const state = { ...DEFAULTS, ...loadPrefs() };
-  // Each photo: { img, thumb, zoom, ox, oy, role: "before" | "after" }
-  const photos = [];
+  // Every photo picked: { img, thumb, zoom, ox, oy, rot }.
+  const POOL_MAX = 12;
+  const pool = [];
+  // The spots on the post. Before & After uses them as Before A, After A, Before B, After B;
+  // Showcase as photos 1 to 4.
+  const buckets = [null, null, null, null];
+  const BUCKETS = {
+    ba: [
+      { role: "before", pair: 0, name: "Before A" },
+      { role: "after", pair: 0, name: "After A" },
+      { role: "before", pair: 1, name: "Before B" },
+      { role: "after", pair: 1, name: "After B" }
+    ],
+    showcase: [1, 2, 3, 4].map((n) => ({ role: null, pair: 0, name: `Photo ${n}` }))
+  };
   let textureImage = null;
   let textureVersion = 0;
   let step = 0;
@@ -502,17 +515,19 @@
     return state.baArrange || (state.ratio === "16:9" ? "rows" : "cols");
   }
 
-  // The frames on the post. Empty ones show where photos will go.
+  // The frames on the post. Pair A always shows (empty frames say what goes there);
+  // pair B and Showcase frames only appear once filled.
   function slots() {
-    const list = photos.map((photo, i) => ({ photo, index: i, role: photo.role }));
     if (state.mode === "ba") {
-      for (const role of ["before", "after"]) {
-        if (!list.some((s) => s.role === role) && list.length < MAX_PHOTOS) list.push({ photo: null, index: -1, role });
-      }
-    } else if (!list.length) {
-      list.push({ photo: null, index: -1, role: null });
+      const list = [];
+      buckets.forEach((photo, i) => {
+        const spec = BUCKETS.ba[i];
+        if (photo || spec.pair === 0) list.push({ photo, role: spec.role });
+      });
+      return list;
     }
-    return list;
+    const list = buckets.filter(Boolean).map((photo) => ({ photo, role: null }));
+    return list.length ? list : [{ photo: null, role: null }];
   }
 
   // Builds the layout tree and, for Before & After, the before/after groups in display order.
@@ -565,17 +580,26 @@
     return state.mode === "ba" && state.labelStyle !== "none";
   }
 
-  // Photo offsets (ox, oy) run from -1 to 1 across the part of the photo that overflows its frame.
+  // The photo is rotated about its frame's centre and scaled so it always covers the frame.
+  // Offsets (ox, oy) run from -1 to 1 across the overflow, measured along the rotated photo.
   function photoPlacement(photo, cell) {
     const img = photo.img;
-    const scale = Math.max(cell.w / img.width, cell.h / img.height) * photo.zoom;
+    const angle = (photo.rot * Math.PI) / 180;
+    const cos = Math.abs(Math.cos(angle));
+    const sin = Math.abs(Math.sin(angle));
+    const ew = cell.w * cos + cell.h * sin;
+    const eh = cell.w * sin + cell.h * cos;
+    const scale = Math.max(ew / img.width, eh / img.height) * photo.zoom;
     const dw = img.width * scale;
     const dh = img.height * scale;
-    const overX = dw - cell.w;
-    const overY = dh - cell.h;
+    const overX = dw - ew;
+    const overY = dh - eh;
     return {
-      x: cell.x - (overX / 2) * (1 + photo.ox),
-      y: cell.y - (overY / 2) * (1 + photo.oy),
+      cx: cell.x + cell.w / 2,
+      cy: cell.y + cell.h / 2,
+      angle,
+      x: -ew / 2 - (overX / 2) * (1 + photo.ox),
+      y: -eh / 2 - (overY / 2) * (1 + photo.oy),
       dw,
       dh,
       overX,
@@ -722,7 +746,11 @@
     c.clip();
     if (photo) {
       const p = photoPlacement(photo, cell);
+      c.save();
+      c.translate(p.cx, p.cy);
+      c.rotate(p.angle);
       c.drawImage(photo.img, p.x, p.y, p.dw, p.dh);
+      c.restore();
     } else {
       c.fillStyle = st.placeholder;
       c.fillRect(cell.x, cell.y, cell.w, cell.h);
@@ -821,7 +849,7 @@
     frame = requestAnimationFrame(() => {
       frame = 0;
       render();
-      canvas.classList.toggle("draggable", photos.length > 0);
+      canvas.classList.toggle("draggable", buckets.some(Boolean));
       if (step === SAVE_STEP) scheduleExport();
     });
   }
@@ -879,80 +907,124 @@
     return t.toDataURL("image/jpeg", 0.8);
   }
 
-  // New photos fill whichever side has fewer, starting with Before.
-  function nextRole() {
-    const befores = photos.filter((p) => p.role === "before").length;
-    return befores <= photos.length - befores ? "before" : "after";
+  function bucketName(i) {
+    return BUCKETS[state.mode][i].name;
   }
 
+  function bucketOf(photo) {
+    return buckets.indexOf(photo);
+  }
+
+  // Picking: every chosen photo lands in the pool, and fills empty spots in order.
+  // A specific spot can also ask for a photo, which then goes straight there.
   const addInput = $("#add-files");
+  let addTarget = -1;
+
+  function choosePhotos(target) {
+    addTarget = target;
+    addInput.multiple = target < 0;
+    addInput.click();
+  }
+
   addInput.addEventListener("change", async () => {
     const files = Array.from(addInput.files || []);
     addInput.value = "";
-    const room = MAX_PHOTOS - photos.length;
-    if (files.length > room) toast(`Only ${MAX_PHOTOS} photos fit, so the extra ones were skipped.`);
+    const room = POOL_MAX - pool.length;
+    if (files.length > room) toast(`Up to ${POOL_MAX} photos at a time, so the extra ones were skipped.`);
     let failed = 0;
+    const added = [];
     for (const file of files.slice(0, room)) {
       try {
         const img = await loadImageFile(file, 2400);
-        photos.push({ img, thumb: thumbnail(img), zoom: 1, ox: 0, oy: 0, role: nextRole() });
+        added.push({ img, thumb: thumbnail(img), zoom: 1, ox: 0, oy: 0, rot: 0 });
       } catch {
         failed++;
       }
     }
     if (failed) toast("Some photos couldn't be opened. Try JPEG or PNG.");
+    if (!added.length) return;
+    pool.push(...added);
+    if (addTarget >= 0) {
+      buckets[addTarget] = added[0];
+    } else {
+      added.forEach((photo) => {
+        const empty = buckets.indexOf(null);
+        if (empty >= 0) buckets[empty] = photo;
+      });
+    }
+    addTarget = -1;
     transition(false);
-    renderTray();
-    syncControls();
-    update();
+    photosChanged();
   });
 
+  // Tap a photo, then tap a spot to put it there. A photo already in another spot swaps places.
+  let selected = null;
+
+  function placeSelected(i) {
+    const from = bucketOf(selected);
+    if (from >= 0) buckets[from] = buckets[i];
+    buckets[i] = selected;
+    selected = null;
+    haptic();
+    transition(false);
+    photosChanged();
+  }
+
   function renderTray() {
-    const tray = $("#tray");
-    tray.innerHTML = "";
     const ba = state.mode === "ba";
-    photos.forEach((photo, i) => {
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      const pic = document.createElement("button");
-      pic.type = "button";
-      pic.className = "tile-photo";
-      pic.style.backgroundImage = `url(${photo.thumb})`;
-      pic.setAttribute("aria-label", `Edit photo ${i + 1}`);
-      pic.innerHTML = `<b>${i + 1}</b>`;
-      pic.addEventListener("click", () => openPhotoSheet(i));
-      tile.appendChild(pic);
-      if (ba) {
-        const role = document.createElement("button");
-        role.type = "button";
-        role.className = `role ${photo.role}`;
-        role.textContent = photo.role === "after" ? "After" : "Before";
-        role.setAttribute("aria-label", `Photo ${i + 1} is a ${photo.role}. Tap to switch.`);
-        role.addEventListener("click", () => {
-          photo.role = photo.role === "after" ? "before" : "after";
-          haptic();
-          transition(false);
-          renderTray();
-          syncControls();
-          update();
-        });
-        tile.appendChild(role);
-      }
-      tray.appendChild(tile);
+    const poolEl = $("#pool");
+    poolEl.innerHTML = "";
+    pool.forEach((photo) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pool-photo";
+      b.classList.toggle("selected", photo === selected);
+      const where = bucketOf(photo);
+      b.classList.toggle("placed", where >= 0);
+      b.innerHTML = `<i style="background-image:url(${photo.thumb})"></i><small>${where >= 0 ? bucketName(where) : "Not placed"}</small>`;
+      b.addEventListener("click", () => {
+        selected = selected === photo ? null : photo;
+        haptic();
+        renderTray();
+        if (selected) $("#buckets").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      poolEl.appendChild(b);
     });
-    if (photos.length < MAX_PHOTOS) {
+    if (pool.length < POOL_MAX) {
       const add = document.createElement("button");
       add.type = "button";
-      add.className = "tile-add";
-      add.innerHTML = `<span>+</span>${photos.length ? "Add more" : "Add photos"}`;
-      add.addEventListener("click", () => addInput.click());
-      tray.appendChild(add);
+      add.className = "pool-add";
+      add.innerHTML = `<span>+</span>${pool.length ? "More" : "Choose photos"}`;
+      add.addEventListener("click", () => choosePhotos(-1));
+      poolEl.appendChild(add);
     }
-    const min = ba ? 2 : 1;
-    $("#photos-title").textContent = photos.length ? `Your photos (${photos.length} of ${MAX_PHOTOS})` : "Add your photos";
-    $("#tray-note").textContent = ba
-      ? `Add ${min} to ${MAX_PHOTOS} photos. Tap Before or After under a photo to switch it, or tap the photo to frame it.`
-      : `Add 1 to ${MAX_PHOTOS} photos. Tap a photo to frame, reorder or remove it.`;
+    $("#pool-block").classList.toggle("empty", !pool.length);
+
+    const grid = $("#buckets");
+    grid.innerHTML = "";
+    grid.classList.toggle("targeting", Boolean(selected));
+    BUCKETS[state.mode].forEach((spec, i) => {
+      const photo = buckets[i];
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `bucket ${spec.role || ""}`;
+      b.classList.toggle("filled", Boolean(photo));
+      b.innerHTML = `${photo ? `<i style="background-image:url(${photo.thumb})"></i>` : `<span>+</span>`}<b>${spec.name}</b>`;
+      b.setAttribute("aria-label", photo ? `${spec.name}. Tap to edit.` : `${spec.name}. Empty.`);
+      b.addEventListener("click", () => {
+        if (selected) placeSelected(i);
+        else if (photo) openPhotoSheet(i);
+        else if (pool.some((p) => bucketOf(p) < 0)) toast("Tap one of your photos above, then tap this spot.");
+        else choosePhotos(i);
+      });
+      grid.appendChild(b);
+    });
+
+    $("#tray-note").textContent = selected
+      ? "Now tap a spot to place that photo. Tap the photo again to cancel."
+      : ba
+        ? "Pick all your photos first, then tap a photo and tap a spot to place it. The B pair is optional."
+        : "Pick all your photos first, then tap a photo and tap a spot to place it. Fill 1 to 4 spots.";
   }
 
   // Photo editor sheet
@@ -966,14 +1038,12 @@
   }
 
   function syncPhotoSheet() {
-    const photo = photos[editing];
+    const photo = buckets[editing];
     if (!photo) return;
-    $("#photo-title").textContent = `Photo ${editing + 1}`;
-    $("#photo-role-field").hidden = state.mode !== "ba";
-    $$("#photo-role button").forEach((b) => b.classList.toggle("on", b.dataset.value === photo.role));
+    $("#photo-title").textContent = bucketName(editing);
     $("#photo-zoom").value = photo.zoom;
-    $("#photo-earlier").disabled = editing === 0;
-    $("#photo-later").disabled = editing === photos.length - 1;
+    $("#photo-rot").value = photo.rot;
+    $("#rot-value").textContent = `${Math.round(photo.rot)}°`;
   }
 
   function closePhotoSheet() {
@@ -984,71 +1054,67 @@
   function photosChanged() {
     renderTray();
     syncControls();
+    showHint();
     update();
   }
 
   $("#photo-done").addEventListener("click", closePhotoSheet);
   photoSheet.addEventListener("click", (e) => { if (e.target === photoSheet) closePhotoSheet(); });
 
-  $("#photo-role").addEventListener("click", (e) => {
-    const b = e.target.closest("button");
-    if (!b || !photos[editing]) return;
-    photos[editing].role = b.dataset.value;
-    transition(false);
-    syncPhotoSheet();
-    photosChanged();
-  });
-
   $("#photo-zoom").addEventListener("input", (e) => {
-    if (!photos[editing]) return;
-    photos[editing].zoom = Number(e.target.value);
+    if (!buckets[editing]) return;
+    buckets[editing].zoom = Number(e.target.value);
     update();
   });
 
-  function movePhoto(delta) {
-    const j = editing + delta;
-    if (j < 0 || j >= photos.length) return;
-    [photos[editing], photos[j]] = [photos[j], photos[editing]];
-    editing = j;
-    transition(false);
-    syncPhotoSheet();
-    photosChanged();
+  function setRotation(photo, deg) {
+    let d = ((deg + 180) % 360 + 360) % 360 - 180;
+    if (Math.abs(d) < 1.5) d = 0; // snap to straight
+    photo.rot = d;
   }
 
-  $("#photo-earlier").addEventListener("click", () => movePhoto(-1));
-  $("#photo-later").addEventListener("click", () => movePhoto(1));
+  $("#photo-rot").addEventListener("input", (e) => {
+    const photo = buckets[editing];
+    if (!photo) return;
+    setRotation(photo, Number(e.target.value));
+    $("#rot-value").textContent = `${Math.round(photo.rot)}°`;
+    update();
+  });
+
+  $$("[data-rotate]").forEach((b) => b.addEventListener("click", () => {
+    const photo = buckets[editing];
+    if (!photo) return;
+    const step90 = Number(b.dataset.rotate);
+    setRotation(photo, step90 ? Math.round((photo.rot + step90) / 90) * 90 : 0);
+    syncPhotoSheet();
+    transition(false);
+    update();
+  }));
 
   $("#photo-reset").addEventListener("click", () => {
-    const photo = photos[editing];
+    const photo = buckets[editing];
     if (!photo) return;
-    Object.assign(photo, { zoom: 1, ox: 0, oy: 0 });
+    Object.assign(photo, { zoom: 1, ox: 0, oy: 0, rot: 0 });
     syncPhotoSheet();
     update();
   });
 
-  $("#photo-remove").addEventListener("click", () => {
+  $("#photo-unplace").addEventListener("click", () => {
     if (editing < 0) return;
-    photos.splice(editing, 1);
+    buckets[editing] = null;
     closePhotoSheet();
     transition(false);
     photosChanged();
   });
 
-  const replaceInput = $("#replace-file");
-  $("#photo-replace").addEventListener("click", () => replaceInput.click());
-  replaceInput.addEventListener("change", async () => {
-    const file = replaceInput.files && replaceInput.files[0];
-    replaceInput.value = "";
-    const photo = photos[editing];
-    if (!file || !photo) return;
-    try {
-      const img = await loadImageFile(file, 2400);
-      Object.assign(photo, { img, thumb: thumbnail(img), zoom: 1, ox: 0, oy: 0 });
-      syncPhotoSheet();
-      photosChanged();
-    } catch {
-      toast("Couldn't open that photo. Try a JPEG or PNG.");
-    }
+  $("#photo-delete").addEventListener("click", () => {
+    const photo = buckets[editing];
+    if (!photo) return;
+    buckets[editing] = null;
+    pool.splice(pool.indexOf(photo), 1);
+    closePhotoSheet();
+    transition(false);
+    photosChanged();
   });
 
   // Drag a photo inside its frame to move it, pinch (or scroll on a computer) to zoom.
@@ -1068,6 +1134,11 @@
     return Math.hypot(a.x - b.x, a.y - b.y);
   }
 
+  function pinchAngle() {
+    const [a, b] = Array.from(pointers.values());
+    return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+  }
+
   canvas.addEventListener("pointerdown", (e) => {
     const pt = canvasPoint(e);
     if (picking) {
@@ -1084,7 +1155,14 @@
     canvas.setPointerCapture(e.pointerId);
     e.preventDefault();
     if (pointers.size === 2) {
-      gesture = { type: "pinch", photo: gesture.photo, d0: pinchDistance(), z0: gesture.photo.zoom };
+      gesture = {
+        type: "pinch",
+        photo: gesture.photo,
+        d0: pinchDistance(),
+        z0: gesture.photo.zoom,
+        a0: pinchAngle(),
+        r0: gesture.photo.rot
+      };
     }
   });
 
@@ -1097,10 +1175,16 @@
     if (!cell) return;
     if (gesture.type === "pinch" && pointers.size >= 2) {
       photo.zoom = clamp(gesture.z0 * (pinchDistance() / gesture.d0), 1, 4);
+      setRotation(photo, gesture.r0 + pinchAngle() - gesture.a0);
     } else if (gesture.type === "pan") {
       const p = photoPlacement(photo, cell);
-      if (p.overX > 0.5) photo.ox = clamp(photo.ox - (pt.x - gesture.x) / (p.overX / 2), -1, 1);
-      if (p.overY > 0.5) photo.oy = clamp(photo.oy - (pt.y - gesture.y) / (p.overY / 2), -1, 1);
+      // Turn the finger's movement into the rotated photo's own directions.
+      const dx = pt.x - gesture.x;
+      const dy = pt.y - gesture.y;
+      const rx = dx * Math.cos(p.angle) + dy * Math.sin(p.angle);
+      const ry = -dx * Math.sin(p.angle) + dy * Math.cos(p.angle);
+      if (p.overX > 0.5) photo.ox = clamp(photo.ox - rx / (p.overX / 2), -1, 1);
+      if (p.overY > 0.5) photo.oy = clamp(photo.oy - ry / (p.overY / 2), -1, 1);
       gesture.x = pt.x;
       gesture.y = pt.y;
     }
@@ -1125,7 +1209,8 @@
     if (!cell) return;
     e.preventDefault();
     const photo = cell.slot.photo;
-    photo.zoom = clamp(photo.zoom * Math.exp(-e.deltaY * 0.0015), 1, 4);
+    if (e.shiftKey) setRotation(photo, photo.rot + (e.deltaY || e.deltaX) * 0.1);
+    else photo.zoom = clamp(photo.zoom * Math.exp(-e.deltaY * 0.0015), 1, 4);
     update();
   }, { passive: false });
 
@@ -1691,9 +1776,7 @@
     backBtn.disabled = step === 0;
     backBtn.parentElement.classList.toggle("solo", step === 0);
     nextBtn.textContent = NEXT_LABELS[step];
-    $("#stage-hint").textContent = step === SAVE_STEP || !photos.length
-      ? ""
-      : "Drag a photo to move it. Pinch or scroll to zoom.";
+    showHint();
     if (step === SAVE_STEP) {
       scheduleExport(0);
     } else {
@@ -1702,15 +1785,21 @@
     }
   }
 
+  function showHint() {
+    $("#stage-hint").textContent = step === SAVE_STEP || !buckets.some(Boolean)
+      ? ""
+      : "Drag to move a photo. Pinch to zoom and twist to rotate.";
+  }
+
   function photosReady() {
     if (state.mode === "showcase") {
-      if (photos.length) return true;
-      toast("Add at least one photo first.");
+      if (buckets.some(Boolean)) return true;
+      toast(pool.length ? "Tap a photo, then tap a spot to place it." : "Choose at least one photo first.");
       return false;
     }
-    const roles = new Set(photos.map((p) => p.role));
-    if (photos.length >= 2 && roles.size === 2) return true;
-    toast(photos.length < 2 ? "Add a Before and an After photo first." : "Mark at least one photo as Before and one as After.");
+    const filled = (role) => buckets.some((p, i) => p && BUCKETS.ba[i].role === role);
+    if (filled("before") && filled("after")) return true;
+    toast(pool.length ? "Place at least one Before and one After photo." : "Choose your before and after photos first.");
     return false;
   }
 
@@ -1719,8 +1808,10 @@
     haptic();
     if (step === 1 && !photosReady()) return;
     if (step === SAVE_STEP) {
-      if (photos.length && !confirm("Start a new post? Your photos will be cleared. Your style and text stay.")) return;
-      photos.length = 0;
+      if (pool.length && !confirm("Start a new post? Your photos will be cleared. Your style and text stay.")) return;
+      pool.length = 0;
+      buckets.fill(null);
+      selected = null;
       transition(false);
       photosChanged();
       showStep(0);
