@@ -9,16 +9,21 @@
   };
 
   const STORAGE_KEY = "kno-instapost-v1";
+  const MAX_PHOTOS = 4;
+  const SAVE_STEP = 5;
 
   const DEFAULTS = {
+    mode: "ba",
     ratio: "5:4",
-    layout: "side",
-    layoutTouched: false,
+    baArrange: "",
+    baSwap: false,
+    showLayout: "",
+    gap: 22,
     rounded: false,
-    labelStyle: "none",
+    labelStyle: "corner",
     labelBefore: "Before",
     labelAfter: "After",
-    labelSize: 34,
+    labelSize: 30,
     labelFont: "modern",
     labelColor: "",
     caption: "",
@@ -37,7 +42,7 @@
   };
 
   // Everything a preset remembers. The handle is saved separately and stays put.
-  const PRESET_KEYS = Object.keys(DEFAULTS).filter((k) => k !== "handle" && k !== "layoutTouched");
+  const PRESET_KEYS = Object.keys(DEFAULTS).filter((k) => k !== "handle");
 
   // Starting label size for each label style, applied when the style changes.
   const LABEL_SIZES = { vertical: 34, overlay: 64, corner: 30, below: 34, badge: 26 };
@@ -45,7 +50,8 @@
   const EMOJIS = ["✨", "🤍", "💕", "🌸", "💫", "🔥", "😍", "👏", "🖤", "🌿", "👇", "➡️"];
 
   const state = { ...DEFAULTS, ...loadPrefs() };
-  const photos = [null, null];
+  // Each photo: { img, thumb, zoom, ox, oy, role: "before" | "after" }
+  const photos = [];
   let textureImage = null;
   let textureVersion = 0;
   let step = 0;
@@ -56,6 +62,7 @@
   const canvas = $("#canvas");
   const ctx = canvas.getContext("2d");
   const exportImg = $("#export-img");
+  // Where each slot landed on the last render, for dragging and pinching.
   let cells = [];
 
   // ---------- Persistence ----------
@@ -361,7 +368,7 @@
     return bg;
   }
 
-  // ---------- Composition ----------
+  // ---------- Fonts and text ----------
 
   const EMOJI_FONTS = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"';
 
@@ -435,8 +442,8 @@
     return st.text;
   }
 
-  function labelText(index) {
-    const text = (index ? state.labelAfter : state.labelBefore).trim();
+  function labelText(role) {
+    const text = (role === "after" ? state.labelAfter : state.labelBefore).trim();
     const caps = ["vertical", "corner", "badge"].includes(state.labelStyle) && !fontOf(state.labelFont).script;
     return caps ? text.toUpperCase() : text;
   }
@@ -446,7 +453,119 @@
     return ["vertical", "corner", "badge"].includes(state.labelStyle) ? "0.18em" : `${fontOf(state.labelFont).spacing || 0}em`;
   }
 
-  // Photo offsets (ox, oy) run from -1 to 1 across the part of the photo that overflows its cell.
+  // ---------- Layout ----------
+
+  // A layout is a small tree: leaves are photo slots, branches split a box into a
+  // row or a column. Weights let a featured photo take more room.
+  const L = (slot) => ({ slot });
+  const S = (dir, children, weights) => ({ dir, children, weights });
+
+  const SHOWCASE_LAYOUTS = {
+    1: { single: L(0) },
+    2: { side: S("row", [L(0), L(1)]), stack: S("col", [L(0), L(1)]) },
+    3: {
+      heroL: S("row", [L(0), S("col", [L(1), L(2)])], [1.35, 1]),
+      heroT: S("col", [L(0), S("row", [L(1), L(2)])], [1.35, 1]),
+      row3: S("row", [L(0), L(1), L(2)]),
+      col3: S("col", [L(0), L(1), L(2)])
+    },
+    4: {
+      grid: S("col", [S("row", [L(0), L(1)]), S("row", [L(2), L(3)])]),
+      heroL: S("row", [L(0), S("col", [L(1), L(2), L(3)])], [1.6, 1]),
+      heroT: S("col", [L(0), S("row", [L(1), L(2), L(3)])], [1.6, 1]),
+      row4: S("row", [L(0), L(1), L(2), L(3)])
+    }
+  };
+
+  const LAYOUT_NAMES = {
+    single: "Full frame",
+    side: "Side by side",
+    stack: "Stacked",
+    heroL: "Feature left",
+    heroT: "Feature top",
+    row3: "Three across",
+    col3: "Three down",
+    grid: "Grid",
+    row4: "Four across"
+  };
+
+  function defaultShowLayout(n) {
+    const tall = state.ratio === "16:9";
+    return { 1: "single", 2: tall ? "stack" : "side", 3: tall ? "heroT" : "heroL", 4: "grid" }[n];
+  }
+
+  function showLayoutKey(n) {
+    return SHOWCASE_LAYOUTS[n][state.showLayout] ? state.showLayout : defaultShowLayout(n);
+  }
+
+  function baArrange() {
+    return state.baArrange || (state.ratio === "16:9" ? "rows" : "cols");
+  }
+
+  // The frames on the post. Empty ones show where photos will go.
+  function slots() {
+    const list = photos.map((photo, i) => ({ photo, index: i, role: photo.role }));
+    if (state.mode === "ba") {
+      for (const role of ["before", "after"]) {
+        if (!list.some((s) => s.role === role) && list.length < MAX_PHOTOS) list.push({ photo: null, index: -1, role });
+      }
+    } else if (!list.length) {
+      list.push({ photo: null, index: -1, role: null });
+    }
+    return list;
+  }
+
+  // Builds the layout tree and, for Before & After, the before/after groups in display order.
+  function buildLayout(list) {
+    if (state.mode !== "ba") {
+      const n = list.length;
+      return { tree: SHOWCASE_LAYOUTS[n][showLayoutKey(n)], groups: [] };
+    }
+    const groups = ["before", "after"]
+      .map((role) => ({ role, slots: list.map((s, i) => (s.role === role ? i : -1)).filter((i) => i >= 0) }))
+      .filter((g) => g.slots.length);
+    if (state.baSwap) groups.reverse();
+    const cols = baArrange() === "cols";
+    const nodes = groups.map((g) => (g.slots.length === 1 ? L(g.slots[0]) : S(cols ? "col" : "row", g.slots.map(L))));
+    return { tree: nodes.length === 1 ? nodes[0] : S(cols ? "row" : "col", nodes), groups };
+  }
+
+  function placeTree(node, r, gap, out) {
+    if ("slot" in node) {
+      out[node.slot] = { x: r.x, y: r.y, w: r.w, h: r.h };
+      return;
+    }
+    const n = node.children.length;
+    const weights = node.weights || node.children.map(() => 1);
+    const total = weights.reduce((a, b) => a + b, 0);
+    const span = (node.dir === "row" ? r.w : r.h) - gap * (n - 1);
+    let pos = node.dir === "row" ? r.x : r.y;
+    node.children.forEach((child, i) => {
+      const size = (span * weights[i]) / total;
+      const box = node.dir === "row" ? { x: pos, y: r.y, w: size, h: r.h } : { x: r.x, y: pos, w: r.w, h: size };
+      placeTree(child, box, gap, out);
+      pos += size + gap;
+    });
+  }
+
+  function bbox(rects) {
+    const x = Math.min(...rects.map((r) => r.x));
+    const y = Math.min(...rects.map((r) => r.y));
+    return {
+      x,
+      y,
+      w: Math.max(...rects.map((r) => r.x + r.w)) - x,
+      h: Math.max(...rects.map((r) => r.y + r.h)) - y
+    };
+  }
+
+  // ---------- Composition ----------
+
+  function labelsOn() {
+    return state.mode === "ba" && state.labelStyle !== "none";
+  }
+
+  // Photo offsets (ox, oy) run from -1 to 1 across the part of the photo that overflows its frame.
   function photoPlacement(photo, cell) {
     const img = photo.img;
     const scale = Math.max(cell.w / img.width, cell.h / img.height) * photo.zoom;
@@ -476,7 +595,7 @@
     c.drawImage(background(W, H), 0, 0);
 
     const P = Math.round(W * 0.055);
-    const gap = Math.round(W * 0.022);
+    const gap = state.gap;
     const textGap = Math.round(W * 0.03);
     let top = P;
     let bottom = H - P;
@@ -485,12 +604,19 @@
     const hs = state.handleSize * fontOf(state.handleFont).scale;
     if (handle) bottom = H - P * 0.6 - hs * 2.2;
 
+    const list = slots();
+    const { tree, groups } = buildLayout(list);
+    const ls = state.labelSize * fontOf(state.labelFont).scale;
+    const labels = labelsOn() ? state.labelStyle : "none";
+
     const caption = state.caption.trim();
     const size = state.captionSize;
     c.font = fontString(state.captionFont, size);
     const lineH = size * (fontOf(state.captionFont).script ? 1.35 : 1.22);
-    const sideBetween = state.layout === "side" && state.placement === "between";
-    const lines = caption ? wrapLines(c, caption, (W - P * 2) * (sideBetween ? 0.7 : 1)) : [];
+    // "Middle" becomes a band between two stacked halves, or a pill over the centre otherwise.
+    const band = state.placement === "between" && tree.dir === "col" && tree.children.length === 2;
+    const pill = state.placement === "between" && !band;
+    const lines = caption ? wrapLines(c, caption, (W - P * 2) * (pill ? 0.7 : 1)) : [];
     const capH = lines.length * lineH;
 
     let capY = null;
@@ -503,55 +629,56 @@
     }
 
     const area = { x: P, y: top, w: W - P * 2, h: bottom - top };
-    cells = [];
-    if (state.layout === "stack") {
-      if (lines.length && state.placement === "between") {
-        const cellH = (area.h - capH - textGap * 2) / 2;
-        cells.push({ x: area.x, y: area.y, w: area.w, h: cellH });
-        capY = area.y + cellH + textGap;
-        cells.push({ x: area.x, y: capY + capH + textGap, w: area.w, h: cellH });
-      } else {
-        const cellH = (area.h - gap) / 2;
-        cells.push({ x: area.x, y: area.y, w: area.w, h: cellH });
-        cells.push({ x: area.x, y: area.y + cellH + gap, w: area.w, h: cellH });
-      }
+    const labelBand = ls * 1.9;
+    if (labels === "vertical") {
+      area.x += labelBand;
+      area.w -= labelBand * 2;
+    }
+
+    const rects = [];
+    if (band && lines.length) {
+      const weights = tree.weights || [1, 1];
+      const avail = area.h - capH - textGap * 2;
+      const h0 = (avail * weights[0]) / (weights[0] + weights[1]);
+      placeTree(tree.children[0], { x: area.x, y: area.y, w: area.w, h: h0 }, gap, rects);
+      capY = area.y + h0 + textGap;
+      placeTree(tree.children[1], { x: area.x, y: capY + capH + textGap, w: area.w, h: avail - h0 }, gap, rects);
     } else {
-      const cellW = (area.w - gap) / 2;
-      cells.push({ x: area.x, y: area.y, w: cellW, h: area.h });
-      cells.push({ x: area.x + cellW + gap, y: area.y, w: cellW, h: area.h });
+      placeTree(tree, area, gap, rects);
     }
 
-    // Labels that sit outside the photos take their room from the photo frames.
-    const ls = state.labelSize * fontOf(state.labelFont).scale;
-    if (state.labelStyle === "vertical") {
-      const band = ls * 1.9;
-      if (state.layout === "side") {
-        cells[0].x += band;
-        cells[0].w -= band;
-        cells[1].w -= band;
-      } else {
-        cells.forEach((cell) => { cell.x += band; cell.w -= band * 2; });
-      }
-    } else if (state.labelStyle === "below") {
-      cells.forEach((cell) => { cell.h -= ls * 1.9; });
+    // Labels underneath take their room from the bottom frames of each group.
+    const groupBoxes = groups.map((g) => ({ role: g.role, slots: g.slots }));
+    if (labels === "below") {
+      groupBoxes.forEach((g) => {
+        const box = bbox(g.slots.map((i) => rects[i]));
+        g.slots.forEach((i) => {
+          const r = rects[i];
+          if (Math.abs(r.y + r.h - (box.y + box.h)) < 1) r.h -= labelBand;
+        });
+      });
     }
 
+    cells = rects.map((r, i) => ({ ...r, slot: list[i] }));
     const radius = state.rounded ? W * 0.028 : 0;
-    cells.forEach((cell, i) => drawCell(c, cell, photos[i], i, st, radius, W));
-    if (state.labelStyle === "vertical" || state.labelStyle === "below") {
-      cells.forEach((cell, i) => drawOuterLabel(c, cell, i, ls));
-    }
+    cells.forEach((cell) => drawCell(c, cell, st, radius, W, labels));
+
+    groupBoxes.forEach((g, gi) => {
+      if (labels !== "vertical" && labels !== "below") return;
+      drawGroupLabel(c, bbox(g.slots.map((i) => rects[i])), g.role, gi, labels, ls, labelBand);
+    });
 
     if (lines.length) {
       c.font = fontString(state.captionFont, size);
       c.textAlign = "center";
       c.textBaseline = "middle";
       setSpacing(c, `${fontOf(state.captionFont).spacing || 0}em`);
-      if (sideBetween) {
+      if (pill) {
         const widest = Math.max(...lines.map((l) => c.measureText(l).width));
         const pw = Math.min(area.w * 0.9, widest + size * 1.3);
         const ph = capH + size * 0.55;
-        const midY = cells[0].y + cells[0].h / 2;
+        const photosBox = bbox(rects);
+        const midY = photosBox.y + photosBox.h / 2;
         capY = midY - capH / 2;
         c.save();
         c.shadowColor = "rgba(0,0,0,0.18)";
@@ -578,7 +705,8 @@
     c.restore();
   }
 
-  function drawCell(c, cell, photo, index, st, radius, W) {
+  function drawCell(c, cell, st, radius, W, labels) {
+    const photo = cell.slot.photo;
     c.save();
     if (photo && st.light) {
       c.save();
@@ -598,24 +726,23 @@
     } else {
       c.fillStyle = st.placeholder;
       c.fillRect(cell.x, cell.y, cell.w, cell.h);
-      if (!["overlay", "corner", "badge"].includes(state.labelStyle) || !labelText(index)) {
-        c.fillStyle = st.sub;
-        c.globalAlpha = 0.6;
-        c.font = `500 ${Math.round(W * 0.032)}px Inter, system-ui, sans-serif`;
-        c.textAlign = "center";
-        c.textBaseline = "middle";
-        c.fillText(index ? "After photo" : "Before photo", cell.x + cell.w / 2, cell.y + cell.h / 2);
-        c.globalAlpha = 1;
-      }
+      c.fillStyle = st.sub;
+      c.globalAlpha = 0.6;
+      c.font = `500 ${Math.round(W * 0.03)}px Inter, system-ui, sans-serif`;
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      const hint = cell.slot.role ? `${cell.slot.role === "after" ? "After" : "Before"} photo` : "Add a photo";
+      c.fillText(hint, cell.x + cell.w / 2, cell.y + cell.h / 2);
+      c.globalAlpha = 1;
     }
-    drawInnerLabel(c, cell, index, radius);
+    if (["overlay", "corner", "badge"].includes(labels) && photo) drawInnerLabel(c, cell, labels, radius);
     c.restore();
   }
 
-  // Labels drawn on top of the photo: overlay, corner and badge.
-  function drawInnerLabel(c, cell, index, radius) {
-    const text = labelText(index);
-    if (!text || !["overlay", "corner", "badge"].includes(state.labelStyle)) return;
+  // Labels drawn on top of each photo: overlay, corner and badge.
+  function drawInnerLabel(c, cell, labels, radius) {
+    const text = labelText(cell.slot.role);
+    if (!text) return;
     const ls = state.labelSize * fontOf(state.labelFont).scale;
     c.save();
     c.font = fontString(state.labelFont, state.labelSize);
@@ -623,7 +750,7 @@
     c.textBaseline = "middle";
     const color = colorFor("labelColor");
 
-    if (state.labelStyle === "overlay") {
+    if (labels === "overlay") {
       const scrimH = Math.min(cell.h * 0.45, ls * 4);
       const g = c.createLinearGradient(0, cell.y + cell.h - scrimH, 0, cell.y + cell.h);
       g.addColorStop(0, "rgba(0,0,0,0)");
@@ -635,15 +762,15 @@
       c.shadowBlur = ls * 0.3;
       c.fillStyle = color;
       c.fillText(text, cell.x + cell.w / 2, cell.y + cell.h - ls * 0.95, cell.w * 0.92);
-    } else if (state.labelStyle === "corner") {
+    } else if (labels === "corner") {
       const inset = Math.max(ls * 0.9, radius * 0.6);
       c.textAlign = "left";
       c.shadowColor = "rgba(0,0,0,0.45)";
       c.shadowBlur = ls * 0.35;
       c.fillStyle = color;
-      c.fillText(text, cell.x + inset, cell.y + inset + ls * 0.4);
+      c.fillText(text, cell.x + inset, cell.y + inset + ls * 0.4, cell.w - inset * 2);
     } else {
-      const tw = c.measureText(text).width;
+      const tw = Math.min(c.measureText(text).width, cell.w * 0.7);
       const pad = ls * 0.8;
       const lw = tw + pad * 2;
       const lh = ls * 2;
@@ -655,14 +782,15 @@
       c.fill();
       c.fillStyle = color;
       c.textAlign = "left";
-      c.fillText(text, lx + pad, ly + lh / 2 + ls * 0.05);
+      c.fillText(text, lx + pad, ly + lh / 2 + ls * 0.05, tw);
     }
     c.restore();
   }
 
-  // Labels drawn beside the photos: vertical (outer edge) and underneath.
-  function drawOuterLabel(c, cell, index, ls) {
-    const text = labelText(index);
+  // Labels beside a whole group: vertical (first group on the left edge, second on the right)
+  // or underneath.
+  function drawGroupLabel(c, box, role, groupIndex, labels, ls, labelBand) {
+    const text = labelText(role);
     if (!text) return;
     c.save();
     c.font = fontString(state.labelFont, state.labelSize);
@@ -670,29 +798,57 @@
     c.fillStyle = colorFor("labelColor");
     c.textAlign = "center";
     c.textBaseline = "middle";
-    if (state.labelStyle === "vertical") {
-      const band = ls * 1.9;
-      // Before reads up the left edge, After reads down the right edge.
-      const onLeft = index === 0;
-      const x = onLeft ? cell.x - band / 2 : cell.x + cell.w + band / 2;
-      c.translate(x, cell.y + cell.h / 2);
+    if (labels === "vertical") {
+      const onLeft = groupIndex === 0;
+      const x = onLeft ? box.x - labelBand / 2 : box.x + box.w + labelBand / 2;
+      c.translate(x, box.y + box.h / 2);
       c.rotate(onLeft ? -Math.PI / 2 : Math.PI / 2);
-      c.fillText(text, 0, 0, cell.h * 0.95);
+      c.fillText(text, 0, 0, box.h * 0.95);
     } else {
-      c.fillText(text, cell.x + cell.w / 2, cell.y + cell.h + ls * 1.0, cell.w);
+      c.fillText(text, box.x + box.w / 2, box.y + box.h + labelBand * 0.53, box.w);
     }
     c.restore();
   }
 
+  // ---------- Rendering loop and transitions ----------
+
+  const frameEl = $("#frame");
+  const fadeCanvas = $("#fade");
   let frame = 0;
+
   function update() {
     if (frame) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
       render();
-      canvas.classList.toggle("draggable", photos.some(Boolean));
-      if (step === 4) scheduleExport();
+      canvas.classList.toggle("draggable", photos.length > 0);
+      if (step === SAVE_STEP) scheduleExport();
     });
+  }
+
+  // For bigger changes (layout, size, style), fade from a snapshot of the old frame,
+  // or pop the new frame in when the size changes.
+  function transition(sizeChange) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || canvas.hidden) return;
+    if (sizeChange) {
+      frameEl.classList.remove("pop");
+      void frameEl.offsetWidth;
+      frameEl.classList.add("pop");
+      return;
+    }
+    const r = canvas.getBoundingClientRect();
+    const f = frameEl.getBoundingClientRect();
+    fadeCanvas.width = canvas.width / 2;
+    fadeCanvas.height = canvas.height / 2;
+    fadeCanvas.getContext("2d").drawImage(canvas, 0, 0, fadeCanvas.width, fadeCanvas.height);
+    Object.assign(fadeCanvas.style, {
+      left: `${r.left - f.left}px`,
+      top: `${r.top - f.top}px`,
+      width: `${r.width}px`,
+      height: `${r.height}px`
+    });
+    fadeCanvas.className = "fade on";
+    requestAnimationFrame(() => requestAnimationFrame(() => { fadeCanvas.className = "fade out"; }));
   }
 
   // ---------- Photos ----------
@@ -723,80 +879,255 @@
     return t.toDataURL("image/jpeg", 0.8);
   }
 
-  function syncPhotoPickers() {
-    photos.forEach((photo, i) => {
-      const thumb = $(`[data-thumb="${i}"]`);
-      thumb.style.backgroundImage = photo ? `url(${photo.thumb})` : "";
-      thumb.closest(".drop").classList.toggle("has-photo", Boolean(photo));
-      const zoom = $(`[data-zoom="${i}"]`);
-      zoom.disabled = !photo;
-      zoom.value = photo ? photo.zoom : 1;
-    });
+  // New photos fill whichever side has fewer, starting with Before.
+  function nextRole() {
+    const befores = photos.filter((p) => p.role === "before").length;
+    return befores <= photos.length - befores ? "before" : "after";
   }
 
-  $$("[data-file]").forEach((input) => {
-    input.addEventListener("change", async () => {
-      const file = input.files && input.files[0];
-      input.value = "";
-      if (!file) return;
-      const i = Number(input.dataset.file);
+  const addInput = $("#add-files");
+  addInput.addEventListener("change", async () => {
+    const files = Array.from(addInput.files || []);
+    addInput.value = "";
+    const room = MAX_PHOTOS - photos.length;
+    if (files.length > room) toast(`Only ${MAX_PHOTOS} photos fit, so the extra ones were skipped.`);
+    let failed = 0;
+    for (const file of files.slice(0, room)) {
       try {
         const img = await loadImageFile(file, 2400);
-        photos[i] = { img, thumb: thumbnail(img), zoom: 1, ox: 0, oy: 0 };
-        syncPhotoPickers();
-        update();
+        photos.push({ img, thumb: thumbnail(img), zoom: 1, ox: 0, oy: 0, role: nextRole() });
       } catch {
-        toast("Couldn't open that photo. Try a JPEG or PNG.");
+        failed++;
       }
-    });
-  });
-
-  $$("[data-zoom]").forEach((input) => {
-    input.addEventListener("input", () => {
-      const photo = photos[Number(input.dataset.zoom)];
-      if (!photo) return;
-      photo.zoom = Number(input.value);
-      update();
-    });
-  });
-
-  $("#swap").addEventListener("click", () => {
-    photos.reverse();
-    syncPhotoPickers();
+    }
+    if (failed) toast("Some photos couldn't be opened. Try JPEG or PNG.");
+    transition(false);
+    renderTray();
+    syncControls();
     update();
   });
 
-  // Drag a photo inside its frame to reposition it.
-  let drag = null;
+  function renderTray() {
+    const tray = $("#tray");
+    tray.innerHTML = "";
+    const ba = state.mode === "ba";
+    photos.forEach((photo, i) => {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      const pic = document.createElement("button");
+      pic.type = "button";
+      pic.className = "tile-photo";
+      pic.style.backgroundImage = `url(${photo.thumb})`;
+      pic.setAttribute("aria-label", `Edit photo ${i + 1}`);
+      pic.innerHTML = `<b>${i + 1}</b>`;
+      pic.addEventListener("click", () => openPhotoSheet(i));
+      tile.appendChild(pic);
+      if (ba) {
+        const role = document.createElement("button");
+        role.type = "button";
+        role.className = `role ${photo.role}`;
+        role.textContent = photo.role === "after" ? "After" : "Before";
+        role.setAttribute("aria-label", `Photo ${i + 1} is a ${photo.role}. Tap to switch.`);
+        role.addEventListener("click", () => {
+          photo.role = photo.role === "after" ? "before" : "after";
+          haptic();
+          transition(false);
+          renderTray();
+          syncControls();
+          update();
+        });
+        tile.appendChild(role);
+      }
+      tray.appendChild(tile);
+    });
+    if (photos.length < MAX_PHOTOS) {
+      const add = document.createElement("button");
+      add.type = "button";
+      add.className = "tile-add";
+      add.innerHTML = `<span>+</span>${photos.length ? "Add more" : "Add photos"}`;
+      add.addEventListener("click", () => addInput.click());
+      tray.appendChild(add);
+    }
+    const min = ba ? 2 : 1;
+    $("#photos-title").textContent = photos.length ? `Your photos (${photos.length} of ${MAX_PHOTOS})` : "Add your photos";
+    $("#tray-note").textContent = ba
+      ? `Add ${min} to ${MAX_PHOTOS} photos. Tap Before or After under a photo to switch it, or tap the photo to frame it.`
+      : `Add 1 to ${MAX_PHOTOS} photos. Tap a photo to frame, reorder or remove it.`;
+  }
+
+  // Photo editor sheet
+  const photoSheet = $("#photo-sheet");
+  let editing = -1;
+
+  function openPhotoSheet(i) {
+    editing = i;
+    syncPhotoSheet();
+    photoSheet.hidden = false;
+  }
+
+  function syncPhotoSheet() {
+    const photo = photos[editing];
+    if (!photo) return;
+    $("#photo-title").textContent = `Photo ${editing + 1}`;
+    $("#photo-role-field").hidden = state.mode !== "ba";
+    $$("#photo-role button").forEach((b) => b.classList.toggle("on", b.dataset.value === photo.role));
+    $("#photo-zoom").value = photo.zoom;
+    $("#photo-earlier").disabled = editing === 0;
+    $("#photo-later").disabled = editing === photos.length - 1;
+  }
+
+  function closePhotoSheet() {
+    photoSheet.hidden = true;
+    editing = -1;
+  }
+
+  function photosChanged() {
+    renderTray();
+    syncControls();
+    update();
+  }
+
+  $("#photo-done").addEventListener("click", closePhotoSheet);
+  photoSheet.addEventListener("click", (e) => { if (e.target === photoSheet) closePhotoSheet(); });
+
+  $("#photo-role").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || !photos[editing]) return;
+    photos[editing].role = b.dataset.value;
+    transition(false);
+    syncPhotoSheet();
+    photosChanged();
+  });
+
+  $("#photo-zoom").addEventListener("input", (e) => {
+    if (!photos[editing]) return;
+    photos[editing].zoom = Number(e.target.value);
+    update();
+  });
+
+  function movePhoto(delta) {
+    const j = editing + delta;
+    if (j < 0 || j >= photos.length) return;
+    [photos[editing], photos[j]] = [photos[j], photos[editing]];
+    editing = j;
+    transition(false);
+    syncPhotoSheet();
+    photosChanged();
+  }
+
+  $("#photo-earlier").addEventListener("click", () => movePhoto(-1));
+  $("#photo-later").addEventListener("click", () => movePhoto(1));
+
+  $("#photo-reset").addEventListener("click", () => {
+    const photo = photos[editing];
+    if (!photo) return;
+    Object.assign(photo, { zoom: 1, ox: 0, oy: 0 });
+    syncPhotoSheet();
+    update();
+  });
+
+  $("#photo-remove").addEventListener("click", () => {
+    if (editing < 0) return;
+    photos.splice(editing, 1);
+    closePhotoSheet();
+    transition(false);
+    photosChanged();
+  });
+
+  const replaceInput = $("#replace-file");
+  $("#photo-replace").addEventListener("click", () => replaceInput.click());
+  replaceInput.addEventListener("change", async () => {
+    const file = replaceInput.files && replaceInput.files[0];
+    replaceInput.value = "";
+    const photo = photos[editing];
+    if (!file || !photo) return;
+    try {
+      const img = await loadImageFile(file, 2400);
+      Object.assign(photo, { img, thumb: thumbnail(img), zoom: 1, ox: 0, oy: 0 });
+      syncPhotoSheet();
+      photosChanged();
+    } catch {
+      toast("Couldn't open that photo. Try a JPEG or PNG.");
+    }
+  });
+
+  // Drag a photo inside its frame to move it, pinch (or scroll on a computer) to zoom.
+  const pointers = new Map();
+  let gesture = null;
+
+  function cellAt(pt) {
+    return cells.find((c) => c.slot.photo && pt.x >= c.x && pt.x <= c.x + c.w && pt.y >= c.y && pt.y <= c.y + c.h);
+  }
+
+  function liveCell(photo) {
+    return cells.find((c) => c.slot.photo === photo);
+  }
+
+  function pinchDistance() {
+    const [a, b] = Array.from(pointers.values());
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
   canvas.addEventListener("pointerdown", (e) => {
+    const pt = canvasPoint(e);
     if (picking) {
       e.preventDefault();
-      pickColorAt(canvasPoint(e));
+      pickColorAt(pt);
       return;
     }
-    const pt = canvasPoint(e);
-    const index = cells.findIndex((c) => pt.x >= c.x && pt.x <= c.x + c.w && pt.y >= c.y && pt.y <= c.y + c.h);
-    if (index < 0 || !photos[index]) return;
-    drag = { index, x: pt.x, y: pt.y };
+    if (!gesture) {
+      const cell = cellAt(pt);
+      if (!cell) return;
+      gesture = { type: "pan", photo: cell.slot.photo, x: pt.x, y: pt.y };
+    }
+    pointers.set(e.pointerId, pt);
     canvas.setPointerCapture(e.pointerId);
     e.preventDefault();
+    if (pointers.size === 2) {
+      gesture = { type: "pinch", photo: gesture.photo, d0: pinchDistance(), z0: gesture.photo.zoom };
+    }
   });
 
   canvas.addEventListener("pointermove", (e) => {
-    if (!drag) return;
+    if (!gesture || !pointers.has(e.pointerId)) return;
     const pt = canvasPoint(e);
-    const photo = photos[drag.index];
-    const p = photoPlacement(photo, cells[drag.index]);
-    if (p.overX > 0.5) photo.ox = clamp(photo.ox - (pt.x - drag.x) / (p.overX / 2), -1, 1);
-    if (p.overY > 0.5) photo.oy = clamp(photo.oy - (pt.y - drag.y) / (p.overY / 2), -1, 1);
-    drag.x = pt.x;
-    drag.y = pt.y;
+    pointers.set(e.pointerId, pt);
+    const photo = gesture.photo;
+    const cell = liveCell(photo);
+    if (!cell) return;
+    if (gesture.type === "pinch" && pointers.size >= 2) {
+      photo.zoom = clamp(gesture.z0 * (pinchDistance() / gesture.d0), 1, 4);
+    } else if (gesture.type === "pan") {
+      const p = photoPlacement(photo, cell);
+      if (p.overX > 0.5) photo.ox = clamp(photo.ox - (pt.x - gesture.x) / (p.overX / 2), -1, 1);
+      if (p.overY > 0.5) photo.oy = clamp(photo.oy - (pt.y - gesture.y) / (p.overY / 2), -1, 1);
+      gesture.x = pt.x;
+      gesture.y = pt.y;
+    }
     update();
   });
 
-  const endDrag = () => { drag = null; };
-  canvas.addEventListener("pointerup", endDrag);
-  canvas.addEventListener("pointercancel", endDrag);
+  function endPointer(e) {
+    pointers.delete(e.pointerId);
+    if (!gesture) return;
+    if (pointers.size === 1) {
+      const pt = Array.from(pointers.values())[0];
+      gesture = { type: "pan", photo: gesture.photo, x: pt.x, y: pt.y };
+    } else if (!pointers.size) {
+      gesture = null;
+    }
+  }
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+
+  canvas.addEventListener("wheel", (e) => {
+    const cell = cellAt(canvasPoint(e));
+    if (!cell) return;
+    e.preventDefault();
+    const photo = cell.slot.photo;
+    photo.zoom = clamp(photo.zoom * Math.exp(-e.deltaY * 0.0015), 1, 4);
+    update();
+  }, { passive: false });
 
   function canvasPoint(e) {
     const r = canvas.getBoundingClientRect();
@@ -805,6 +1136,10 @@
 
   function clamp(v, min, max) {
     return Math.min(max, Math.max(min, v));
+  }
+
+  function haptic() {
+    if (navigator.vibrate) navigator.vibrate(8);
   }
 
   // ---------- Controls ----------
@@ -823,16 +1158,89 @@
     });
   });
 
+  // Changes that reshape the post get a short transition in the preview.
+  const RESHAPE = ["mode", "baArrange", "baSwap", "showLayout", "style", "placement", "labelStyle", "customTexture", "rounded"];
+
   function setState(key, value) {
+    if (state[key] === value) return;
+    if (key === "ratio") transition(true);
+    else if (RESHAPE.includes(key)) transition(false);
     state[key] = value;
     if (key === "labelStyle" && LABEL_SIZES[value]) state.labelSize = LABEL_SIZES[value];
     if (key === "customBg" || key === "customTexture") paintSwatches();
-    if (key === "ratio" && !state.layoutTouched) state.layout = value === "16:9" ? "stack" : "side";
-    if (key === "layout") state.layoutTouched = true;
+    if (key === "mode") renderTray();
     savePrefs();
     syncControls();
     update();
   }
+
+  // Draws a tiny version of a layout, using the same layout code as the post.
+  function diagram(patch) {
+    const saved = {};
+    for (const k of Object.keys(patch)) {
+      saved[k] = state[k];
+      state[k] = patch[k];
+    }
+    const list = slots();
+    const { tree } = buildLayout(list);
+    Object.assign(state, saved);
+    const [W, H] = SIZES[state.ratio];
+    const w = H / W > 1.5 ? 36 : 44;
+    const h = (w * H) / W;
+    const box = document.createElement("span");
+    box.className = "diagram";
+    box.style.width = `${w}px`;
+    box.style.height = `${h}px`;
+    const rects = [];
+    placeTree(tree, { x: 4, y: 4, w: w - 8, h: h - 8 }, 3, rects);
+    rects.forEach((r, i) => {
+      const cell = document.createElement("i");
+      Object.assign(cell.style, { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
+      const role = list[i].role;
+      if (patch.mode !== "showcase" && role) {
+        cell.textContent = role === "after" ? "A" : "B";
+        if (role === "after") cell.classList.add("after");
+      }
+      box.appendChild(cell);
+    });
+    return box;
+  }
+
+  function optionButton(text, active, patch, onPick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.classList.toggle("on", active);
+    b.append(diagram(patch), text);
+    b.addEventListener("click", () => { haptic(); onPick(); });
+    return b;
+  }
+
+  function renderLayoutPickers() {
+    const ba = state.mode === "ba";
+    $("#ba-arrange").hidden = !ba;
+    $("#show-layouts").hidden = ba;
+    if (ba) {
+      const wrap = $("#ba-arrange .arrange");
+      wrap.innerHTML = "";
+      const first = state.baSwap ? "Afters" : "Befores";
+      const other = state.baSwap ? "befores" : "afters";
+      wrap.append(
+        optionButton(`${first} left, ${other} right`, baArrange() === "cols", { mode: "ba", baArrange: "cols" }, () => setState("baArrange", "cols")),
+        optionButton(`${first} on top, ${other} below`, baArrange() === "rows", { mode: "ba", baArrange: "rows" }, () => setState("baArrange", "rows"))
+      );
+      $("#ba-swap-label").textContent = state.baSwap ? "Put befores first" : "Put afters first";
+    } else {
+      const n = slots().length;
+      const wrap = $("#layout-options");
+      wrap.innerHTML = "";
+      $("#show-layouts").hidden = n < 2;
+      Object.keys(SHOWCASE_LAYOUTS[n]).forEach((key) => {
+        wrap.appendChild(optionButton(LAYOUT_NAMES[key], showLayoutKey(n) === key, { mode: "showcase", showLayout: key }, () => setState("showLayout", key)));
+      });
+    }
+  }
+
+  $("#ba-swap").addEventListener("click", () => { haptic(); setState("baSwap", !state.baSwap); });
 
   function syncControls() {
     $$("[data-bind]").forEach((el) => {
@@ -841,19 +1249,22 @@
         $$("button", el).forEach((b) => b.classList.toggle("on", b.dataset.value === state[key]));
       } else if (el.type === "checkbox") {
         el.checked = state[key];
-      } else if (document.activeElement !== el) {
+      } else if ("value" in el && el.tagName !== "DIV" && document.activeElement !== el) {
         el.value = state[key];
       }
     });
+    $$(".mode").forEach((b) => b.classList.toggle("on", b.dataset.mode === state.mode));
     $$(".swatch").forEach((s) => s.classList.toggle("on", s.dataset.style === state.style));
     $("#custom-panel").hidden = state.style !== "custom";
     $("#texture-upload").hidden = state.customTexture !== "image";
+    $("#labels-section").hidden = state.mode !== "ba";
     $("#label-options").hidden = state.labelStyle === "none";
     $$("[data-color]").forEach((b) => {
       const key = b.dataset.color;
       $("i", b).style.background = colorFor(key);
       $("em", b).textContent = state[key] ? state[key].toUpperCase() : "Auto";
     });
+    renderLayoutPickers();
   }
 
   $$("[data-bind]").forEach((el) => {
@@ -861,15 +1272,25 @@
     if (el.classList.contains("seg")) {
       el.addEventListener("click", (e) => {
         const b = e.target.closest("button");
-        if (b) setState(key, b.dataset.value);
+        if (!b) return;
+        haptic();
+        setState(key, b.dataset.value);
       });
     } else if (el.type === "checkbox") {
       el.addEventListener("change", () => setState(key, el.checked));
     } else if (el.type === "range") {
       el.addEventListener("input", () => setState(key, Number(el.value)));
-    } else {
+    } else if (el.tagName === "INPUT") {
       el.addEventListener("input", () => setState(key, el.value));
     }
+  });
+
+  $$(".mode").forEach((b) => {
+    b.addEventListener("click", () => {
+      haptic();
+      setState("mode", b.dataset.mode);
+      setTimeout(() => showStep(1), 260);
+    });
   });
 
   const captionInput = $("#caption");
@@ -901,6 +1322,8 @@
     setState("handle", clean);
   });
 
+  $("#match-font").addEventListener("click", () => setState("handleFont", state.captionFont));
+
   // Style swatches
   const stylesEl = $("#styles");
   function paintSwatch(key, cv) {
@@ -924,7 +1347,7 @@
     const cv = document.createElement("canvas");
     cv.width = cv.height = 160;
     b.append(cv, style.name);
-    b.addEventListener("click", () => setState("style", key));
+    b.addEventListener("click", () => { haptic(); setState("style", key); });
     stylesEl.appendChild(b);
   });
 
@@ -940,13 +1363,12 @@
       textureImage = await loadImageFile(file, 2000);
       textureVersion++;
       $("#texture-label").textContent = "Texture added. Tap to change it";
+      transition(false);
       update();
     } catch {
       toast("Couldn't open that texture photo.");
     }
   });
-
-  $("#match-font").addEventListener("click", () => setState("handleFont", state.captionFont));
 
   // ---------- Color picker ----------
 
@@ -1137,7 +1559,7 @@
     picking = false;
     sheet.classList.remove("picking");
     canvas.classList.remove("picking");
-    if (step === 4) scheduleExport(0);
+    if (step === SAVE_STEP) scheduleExport(0);
   }
 
   function pickColorAt(pt) {
@@ -1216,6 +1638,8 @@
     }
     state.layoutTouched = true;
     captionInput.value = state.caption;
+    transition(false);
+    renderTray();
     savePrefs();
     syncControls();
     paintSwatches();
@@ -1241,48 +1665,64 @@
       renderPresets();
       toast(state.customTexture === "image" && state.style === "custom"
         ? `Saved "${name}". Texture photos aren't saved with presets.`
-        : `Saved "${name}". Find it in steps 1 and 4.`);
+        : `Saved "${name}". Find it on the first step.`);
     });
   });
 
   // ---------- Steps ----------
 
+  const track = $("#track");
+  const slides = $$(".slide");
   const backBtn = $("#back");
   const nextBtn = $("#next");
+  const NEXT_LABELS = ["Choose photos", "Add text", "Add your handle", "Pick a style", "Finish", "Start a new post"];
 
   function showStep(i) {
-    step = clamp(i, 0, 4);
-    $$("[data-panel]").forEach((p) => { p.hidden = Number(p.dataset.panel) !== step; });
-    $$(".steps button").forEach((b) => {
-      const n = Number(b.dataset.step);
-      b.classList.toggle("active", n === step);
-      b.classList.toggle("done", n < step);
+    step = clamp(i, 0, SAVE_STEP);
+    track.style.transform = `translateX(${-step * 100}%)`;
+    slides.forEach((s, n) => {
+      const current = n === step;
+      s.classList.toggle("current", current);
+      s.inert = !current;
     });
+    $("#step-name").textContent = slides[step].dataset.title;
+    $("#step-count").textContent = `${step + 1} of ${slides.length}`;
+    $("#progress").style.width = `${((step + 1) / slides.length) * 100}%`;
     backBtn.disabled = step === 0;
-    nextBtn.textContent = step === 3 ? "Finish" : step === 4 ? "Start a new post" : "Next";
-    $("#stage-hint").textContent = step === 4
+    backBtn.parentElement.classList.toggle("solo", step === 0);
+    nextBtn.textContent = NEXT_LABELS[step];
+    $("#stage-hint").textContent = step === SAVE_STEP || !photos.length
       ? ""
-      : photos.some(Boolean) ? "Drag a photo in the preview to reposition it." : "";
-    if (step === 4) {
+      : "Drag a photo to move it. Pinch or scroll to zoom.";
+    if (step === SAVE_STEP) {
       scheduleExport(0);
     } else {
       exportImg.hidden = true;
       canvas.hidden = false;
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  $$(".steps button").forEach((b) => b.addEventListener("click", () => showStep(Number(b.dataset.step))));
+  function photosReady() {
+    if (state.mode === "showcase") {
+      if (photos.length) return true;
+      toast("Add at least one photo first.");
+      return false;
+    }
+    const roles = new Set(photos.map((p) => p.role));
+    if (photos.length >= 2 && roles.size === 2) return true;
+    toast(photos.length < 2 ? "Add a Before and an After photo first." : "Mark at least one photo as Before and one as After.");
+    return false;
+  }
+
   backBtn.addEventListener("click", () => showStep(step - 1));
   nextBtn.addEventListener("click", () => {
-    if (step === 0 && !photos.every(Boolean)) {
-      toast("Add both a Before and an After photo first.");
-      return;
-    }
-    if (step === 4) {
-      photos[0] = photos[1] = null;
-      syncPhotoPickers();
-      update();
+    haptic();
+    if (step === 1 && !photosReady()) return;
+    if (step === SAVE_STEP) {
+      if (photos.length && !confirm("Start a new post? Your photos will be cleared. Your style and text stay.")) return;
+      photos.length = 0;
+      transition(false);
+      photosChanged();
       showStep(0);
       return;
     }
@@ -1305,7 +1745,7 @@
 
   function fileName() {
     const [w, h] = SIZES[state.ratio];
-    return `before-after-${w}x${h}.jpg`;
+    return `${state.mode === "ba" ? "before-after" : "showcase"}-${w}x${h}.jpg`;
   }
 
   // Build the JPEG ahead of time so Save and Share can run straight from the tap,
@@ -1323,7 +1763,7 @@
     if (exportUrl) URL.revokeObjectURL(exportUrl);
     exportUrl = URL.createObjectURL(blob);
     exportBlob = blob;
-    if (step === 4) {
+    if (step === SAVE_STEP) {
       exportImg.src = exportUrl;
       exportImg.hidden = false;
       canvas.hidden = true;
@@ -1390,6 +1830,7 @@
 
   const shareBtn = $("#share-btn");
   shareBtn.hidden = !canShareFiles(new File([new Blob(["x"], { type: "image/jpeg" })], "test.jpg", { type: "image/jpeg" }));
+  shareBtn.parentElement.classList.toggle("no-share", shareBtn.hidden);
   shareBtn.addEventListener("click", async () => {
     const blob = exportBlob || await toBlob("image/jpeg", 0.95);
     if (!(await share(exportFile(blob)))) toast("Sharing didn't work here. Use Save instead.");
@@ -1409,7 +1850,7 @@
   // ---------- Start ----------
 
   syncControls();
-  syncPhotoPickers();
+  renderTray();
   paintSwatches();
   renderPresets();
   showStep(0);
