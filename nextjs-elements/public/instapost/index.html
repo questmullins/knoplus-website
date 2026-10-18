@@ -6,228 +6,261 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#f3eee4">
-  <title>Before &amp; After · Insta-Post Maker</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Insta-Post">
+  <title>Insta-Post Maker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Courier+Prime&family=Great+Vibes&family=Inter:wght@400;500;600&family=Montserrat:wght@500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="top">
-    <h1>Before <span>&amp;</span> After</h1>
-    <p>Insta-post maker</p>
-  </header>
+  <div class="app">
+    <header class="bar">
+      <div class="brand">
+        <h1>Insta<span>-</span>Post</h1>
+        <p id="step-name">Choose a post type</p>
+      </div>
+      <span class="step-count" id="step-count">1 of 6</span>
+      <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+    </header>
 
-  <main class="layout">
     <section class="stage" aria-label="Preview">
-      <div class="stage-frame">
+      <div class="frame" id="frame">
         <canvas id="canvas" width="1080" height="1350" aria-label="Post preview"></canvas>
+        <canvas id="fade" class="fade" aria-hidden="true"></canvas>
         <img id="export-img" alt="Finished post. Press and hold to save." hidden>
       </div>
       <p class="stage-hint" id="stage-hint"></p>
     </section>
 
     <section class="panel">
-      <nav class="steps" aria-label="Steps">
-        <button type="button" data-step="0" class="active"><b>1</b>Photos</button>
-        <button type="button" data-step="1"><b>2</b>Caption</button>
-        <button type="button" data-step="2"><b>3</b>Handle</button>
-        <button type="button" data-step="3"><b>4</b>Style</button>
-        <button type="button" data-step="4"><b>5</b>Save</button>
-      </nav>
+      <div class="track" id="track">
 
-      <!-- Step 1: photos -->
-      <div class="step" data-panel="0">
-        <div class="presets-block" data-presets-block hidden>
-          <span class="field-label">Start from a preset</span>
-          <div class="presets" data-presets></div>
-        </div>
-
-        <h2>Add your photos</h2>
-        <div class="pickers">
-          <div class="picker" data-photo="0">
-            <label class="drop">
-              <input type="file" accept="image/*" data-file="0">
-              <span class="thumb" data-thumb="0"></span>
-              <span class="drop-label">Before</span>
-            </label>
-            <label class="slider">Zoom <input type="range" min="1" max="3" step="0.01" value="1" data-zoom="0" disabled></label>
+        <!-- 1. Post type -->
+        <div class="slide" data-panel="0" data-title="Choose a post type">
+          <h2>What are you posting?</h2>
+          <div class="modes">
+            <button type="button" class="mode" data-mode="ba">
+              <span class="mode-art mode-art-ba"><i>B</i><i>A</i></span>
+              <span class="mode-text"><b>Before &amp; After</b><small>2 to 4 photos, befores and afters side by side or in rows</small></span>
+            </button>
+            <button type="button" class="mode" data-mode="showcase">
+              <span class="mode-art mode-art-show"><i></i><i></i><i></i></span>
+              <span class="mode-text"><b>Showcase</b><small>1 to 4 photos of your work, no labels</small></span>
+            </button>
           </div>
-          <div class="picker" data-photo="1">
-            <label class="drop">
-              <input type="file" accept="image/*" data-file="1">
-              <span class="thumb" data-thumb="1"></span>
-              <span class="drop-label">After</span>
-            </label>
-            <label class="slider">Zoom <input type="range" min="1" max="3" step="0.01" value="1" data-zoom="1" disabled></label>
-          </div>
-        </div>
-        <button type="button" class="link-btn" id="swap">⇄ Swap photos</button>
-
-        <div class="field">
-          <span class="field-label">Size</span>
-          <div class="seg" data-bind="ratio">
-            <button type="button" data-value="1:1">1:1<small>Square</small></button>
-            <button type="button" data-value="5:4">5:4<small>Portrait</small></button>
-            <button type="button" data-value="16:9">16:9<small>Story</small></button>
-          </div>
-          <p class="note">Height to width. 5:4 is Instagram's tall feed post, 16:9 fills Stories and Reels.</p>
-        </div>
-
-        <div class="field">
-          <span class="field-label">Photo layout</span>
-          <div class="seg" data-bind="layout">
-            <button type="button" data-value="side">Side by side</button>
-            <button type="button" data-value="stack">Stacked</button>
+          <div class="presets-block" data-presets-block hidden>
+            <span class="field-label">Or start from a preset</span>
+            <div class="presets" data-presets></div>
           </div>
         </div>
 
-        <label class="toggle"><input type="checkbox" data-bind="rounded"> Rounded corners</label>
+        <!-- 2. Photos and layout -->
+        <div class="slide" data-panel="1" data-title="Photos and layout">
+          <h2 id="photos-title">Add your photos</h2>
+          <div class="tray" id="tray"></div>
+          <input type="file" accept="image/*" multiple id="add-files" hidden>
+          <input type="file" accept="image/*" id="replace-file" hidden>
+          <p class="note" id="tray-note"></p>
 
-        <div class="field">
-          <span class="field-label">Before &amp; After labels</span>
-          <div class="seg seg-wrap" data-bind="labelStyle">
-            <button type="button" data-value="none">None</button>
-            <button type="button" data-value="vertical">Vertical</button>
-            <button type="button" data-value="overlay">Over photo</button>
-            <button type="button" data-value="corner">Corner</button>
-            <button type="button" data-value="below">Underneath</button>
-            <button type="button" data-value="badge">Badge</button>
+          <div class="field" id="ba-arrange">
+            <span class="field-label">Where the photos sit</span>
+            <div class="arrange" data-bind="baArrange"></div>
+            <button type="button" class="swap-btn" id="ba-swap">⇄ <span id="ba-swap-label">Put afters first</span></button>
           </div>
-        </div>
-        <div class="label-options" id="label-options">
-          <div class="label-texts">
-            <input type="text" maxlength="24" data-bind="labelBefore" aria-label="Before label text">
-            <input type="text" maxlength="24" data-bind="labelAfter" aria-label="After label text">
+
+          <div class="field" id="show-layouts">
+            <span class="field-label">Layout</span>
+            <div class="arrange" id="layout-options"></div>
           </div>
-          <label class="slider wide">Label size <input type="range" min="18" max="110" step="1" data-bind="labelSize"></label>
+
           <div class="field">
-            <span class="field-label">Label font</span>
-            <div class="seg seg-wrap font-seg" data-bind="labelFont" data-fonts></div>
-          </div>
-          <div class="color-row">
-            <span>Label color</span>
-            <button type="button" class="color-btn" data-color="labelColor"><i></i><em></em></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: caption -->
-      <div class="step" data-panel="1" hidden>
-        <h2>Add your text</h2>
-        <div class="field">
-          <textarea id="caption" rows="2" maxlength="120" placeholder="Brow Lam ✨"></textarea>
-          <div class="emoji-bar" id="emoji-bar" aria-label="Quick emojis"></div>
-        </div>
-        <div class="field">
-          <span class="field-label">Placement</span>
-          <div class="seg" data-bind="placement">
-            <button type="button" data-value="above">Above</button>
-            <button type="button" data-value="between">Between</button>
-            <button type="button" data-value="below">Below</button>
+            <span class="field-label">Size</span>
+            <div class="seg" data-bind="ratio">
+              <button type="button" data-value="1:1">1:1<small>Square</small></button>
+              <button type="button" data-value="5:4">5:4<small>Portrait</small></button>
+              <button type="button" data-value="16:9">16:9<small>Story</small></button>
+            </div>
+            <p class="note">Height to width. 5:4 is Instagram's tall feed post, 16:9 fills Stories and Reels.</p>
           </div>
         </div>
-        <div class="field">
-          <span class="field-label">Font</span>
-          <div class="seg seg-wrap font-seg" data-bind="captionFont" data-fonts></div>
-        </div>
-        <label class="slider wide">Text size <input type="range" min="36" max="140" step="1" data-bind="captionSize"></label>
-        <div class="color-row">
-          <span>Text color</span>
-          <button type="button" class="color-btn" data-color="captionColor"><i></i><em></em></button>
-        </div>
-      </div>
 
-      <!-- Step 3: handle -->
-      <div class="step" data-panel="2" hidden>
-        <h2>Your Instagram handle</h2>
-        <div class="field handle-field">
-          <span>@</span>
-          <input id="handle" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="yourhandle">
-        </div>
-        <p class="note">Saved on this phone, so it's filled in next time.</p>
-        <label class="toggle"><input type="checkbox" data-bind="showHandle"> Show handle on the image</label>
-        <div class="field">
-          <span class="field-label">Font <button type="button" class="mini-btn" id="match-font">Match my text</button></span>
-          <div class="seg seg-wrap font-seg" data-bind="handleFont" data-fonts></div>
-        </div>
-        <label class="slider wide">Handle size <input type="range" min="18" max="64" step="1" data-bind="handleSize"></label>
-        <div class="color-row">
-          <span>Handle color</span>
-          <button type="button" class="color-btn" data-color="handleColor"><i></i><em></em></button>
-        </div>
-      </div>
-
-      <!-- Step 4: style -->
-      <div class="step" data-panel="3" hidden>
-        <div class="presets-block" data-presets-block hidden>
-          <span class="field-label">Your presets</span>
-          <div class="presets" data-presets></div>
-        </div>
-        <h2>Pick a style</h2>
-        <div class="styles" id="styles"></div>
-        <div class="custom" id="custom-panel" hidden>
-          <div class="color-row">
-            <span>Background color</span>
-            <button type="button" class="color-btn" data-color="customBg"><i></i><em></em></button>
+        <!-- 3. Text and labels -->
+        <div class="slide" data-panel="2" data-title="Text and labels">
+          <h2>Add your text</h2>
+          <div class="field">
+            <textarea id="caption" rows="2" maxlength="120" placeholder="Brow Lam ✨"></textarea>
+            <div class="emoji-bar" id="emoji-bar" aria-label="Quick emojis"></div>
           </div>
           <div class="field">
-            <span class="field-label">Texture</span>
-            <div class="seg seg-wrap" data-bind="customTexture">
-              <button type="button" data-value="none">None</button>
-              <button type="button" data-value="paper">Paper</button>
-              <button type="button" data-value="linen">Linen</button>
-              <button type="button" data-value="grain">Grain</button>
-              <button type="button" data-value="speckle">Speckle</button>
-              <button type="button" data-value="image">My photo</button>
+            <span class="field-label">Placement</span>
+            <div class="seg" data-bind="placement">
+              <button type="button" data-value="above">Top</button>
+              <button type="button" data-value="between">Middle</button>
+              <button type="button" data-value="below">Bottom</button>
             </div>
           </div>
-          <label class="upload" id="texture-upload" hidden>
-            <input type="file" accept="image/*" id="texture-file">
-            <span id="texture-label">Choose a texture photo</span>
-          </label>
+          <div class="field">
+            <span class="field-label">Font</span>
+            <div class="seg seg-wrap font-seg" data-bind="captionFont" data-fonts></div>
+          </div>
+          <label class="slider wide">Text size <input type="range" min="36" max="140" step="1" data-bind="captionSize"></label>
+          <div class="color-row">
+            <span>Text color</span>
+            <button type="button" class="color-btn" data-color="captionColor"><i></i><em></em></button>
+          </div>
+
+          <div class="labels-section" id="labels-section">
+            <h3>Before &amp; After labels</h3>
+            <div class="seg seg-wrap" data-bind="labelStyle">
+              <button type="button" data-value="none">None</button>
+              <button type="button" data-value="vertical">Vertical</button>
+              <button type="button" data-value="overlay">Over photo</button>
+              <button type="button" data-value="corner">Corner</button>
+              <button type="button" data-value="below">Underneath</button>
+              <button type="button" data-value="badge">Badge</button>
+            </div>
+            <div class="label-options" id="label-options">
+              <div class="label-texts">
+                <input type="text" maxlength="24" data-bind="labelBefore" aria-label="Before label text">
+                <input type="text" maxlength="24" data-bind="labelAfter" aria-label="After label text">
+              </div>
+              <label class="slider wide">Label size <input type="range" min="18" max="110" step="1" data-bind="labelSize"></label>
+              <div class="field">
+                <span class="field-label">Label font</span>
+                <div class="seg seg-wrap font-seg" data-bind="labelFont" data-fonts></div>
+              </div>
+              <div class="color-row">
+                <span>Label color</span>
+                <button type="button" class="color-btn" data-color="labelColor"><i></i><em></em></button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="preset-save">
-          <span class="field-label">Save this look as a preset</span>
-          <div class="preset-form">
-            <input type="text" maxlength="30" placeholder="Name it, like Brow Lam" data-preset-name>
-            <button type="button" data-preset-save>Save</button>
+
+        <!-- 4. Handle -->
+        <div class="slide" data-panel="3" data-title="Your handle">
+          <h2>Your Instagram handle</h2>
+          <div class="field handle-field">
+            <span>@</span>
+            <input id="handle" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="yourhandle">
+          </div>
+          <p class="note">Saved on this phone, so it's filled in next time.</p>
+          <label class="toggle"><input type="checkbox" data-bind="showHandle"> Show handle on the image</label>
+          <div class="field">
+            <span class="field-label">Font <button type="button" class="mini-btn" id="match-font">Match my text</button></span>
+            <div class="seg seg-wrap font-seg" data-bind="handleFont" data-fonts></div>
+          </div>
+          <label class="slider wide">Handle size <input type="range" min="18" max="64" step="1" data-bind="handleSize"></label>
+          <div class="color-row">
+            <span>Handle color</span>
+            <button type="button" class="color-btn" data-color="handleColor"><i></i><em></em></button>
+          </div>
+        </div>
+
+        <!-- 5. Style -->
+        <div class="slide" data-panel="4" data-title="Style">
+          <h2>Pick a style</h2>
+          <div class="styles" id="styles"></div>
+          <div class="custom" id="custom-panel" hidden>
+            <div class="color-row">
+              <span>Background color</span>
+              <button type="button" class="color-btn" data-color="customBg"><i></i><em></em></button>
+            </div>
+            <div class="field">
+              <span class="field-label">Texture</span>
+              <div class="seg seg-wrap" data-bind="customTexture">
+                <button type="button" data-value="none">None</button>
+                <button type="button" data-value="paper">Paper</button>
+                <button type="button" data-value="linen">Linen</button>
+                <button type="button" data-value="grain">Grain</button>
+                <button type="button" data-value="speckle">Speckle</button>
+                <button type="button" data-value="image">My photo</button>
+              </div>
+            </div>
+            <label class="upload" id="texture-upload" hidden>
+              <input type="file" accept="image/*" id="texture-file">
+              <span id="texture-label">Choose a texture photo</span>
+            </label>
+          </div>
+          <div class="field photo-frame-field">
+            <span class="field-label">Photo frames</span>
+            <label class="slider wide">Spacing <input type="range" min="0" max="60" step="1" data-bind="gap"></label>
+            <label class="toggle"><input type="checkbox" data-bind="rounded"> Rounded corners</label>
+          </div>
+          <div class="preset-save">
+            <span class="field-label">Save this look as a preset</span>
+            <div class="preset-form">
+              <input type="text" maxlength="30" placeholder="Name it, like Brow Lam" data-preset-name>
+              <button type="button" data-preset-save>Save</button>
+            </div>
+            <div class="presets-block" data-presets-block hidden>
+              <div class="presets" data-presets></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Save -->
+        <div class="slide" data-panel="5" data-title="Save and share">
+          <h2>Your post is ready</h2>
+          <div class="actions">
+            <button type="button" class="primary" id="save-btn">Save image</button>
+            <button type="button" id="copy-btn">Copy image</button>
+            <button type="button" id="share-btn" hidden>Share…</button>
+          </div>
+          <p class="note">On a phone you can also press and hold the image above, then tap Save.</p>
+          <div class="field">
+            <span class="field-label">Size</span>
+            <div class="seg" data-bind="ratio">
+              <button type="button" data-value="1:1">1:1<small>Square</small></button>
+              <button type="button" data-value="5:4">5:4<small>Portrait</small></button>
+              <button type="button" data-value="16:9">16:9<small>Story</small></button>
+            </div>
+          </div>
+          <div class="preset-save">
+            <span class="field-label">Save this look as a preset</span>
+            <div class="preset-form">
+              <input type="text" maxlength="30" placeholder="Name it, like Brow Lam" data-preset-name>
+              <button type="button" data-preset-save>Save</button>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Step 5: save -->
-      <div class="step" data-panel="4" hidden>
-        <h2>Your post is ready</h2>
-        <div class="field">
-          <span class="field-label">Size</span>
-          <div class="seg" data-bind="ratio">
-            <button type="button" data-value="1:1">1:1<small>Square</small></button>
-            <button type="button" data-value="5:4">5:4<small>Portrait</small></button>
-            <button type="button" data-value="16:9">16:9<small>Story</small></button>
-          </div>
-        </div>
-        <div class="actions">
-          <button type="button" class="primary" id="save-btn">Save image</button>
-          <button type="button" id="copy-btn">Copy image</button>
-          <button type="button" id="share-btn" hidden>Share…</button>
-        </div>
-        <p class="note">On a phone you can also press and hold the image above, then tap Save.</p>
-        <div class="preset-save">
-          <span class="field-label">Save this look as a preset</span>
-          <div class="preset-form">
-            <input type="text" maxlength="30" placeholder="Name it, like Brow Lam" data-preset-name>
-            <button type="button" data-preset-save>Save</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="nav">
-        <button type="button" id="back">Back</button>
+      <nav class="nav">
+        <button type="button" id="back" aria-label="Back">‹ Back</button>
         <button type="button" id="next" class="primary">Next</button>
-      </div>
+      </nav>
     </section>
-  </main>
+  </div>
+
+  <!-- Photo editor sheet -->
+  <div class="sheet-backdrop" id="photo-sheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="photo-title">
+      <div class="sheet-head">
+        <h3 id="photo-title">Photo</h3>
+        <button type="button" class="mini-btn" id="photo-done">Done</button>
+      </div>
+      <div class="field" id="photo-role-field">
+        <span class="field-label">This photo is a</span>
+        <div class="seg" id="photo-role">
+          <button type="button" data-value="before">Before</button>
+          <button type="button" data-value="after">After</button>
+        </div>
+      </div>
+      <label class="slider wide">Zoom <input type="range" min="1" max="4" step="0.01" id="photo-zoom"></label>
+      <p class="note">Tip: drag a photo in the preview to move it, and pinch to zoom.</p>
+      <div class="sheet-actions">
+        <button type="button" id="photo-earlier">‹ Move earlier</button>
+        <button type="button" id="photo-later">Move later ›</button>
+        <button type="button" id="photo-replace">Replace</button>
+        <button type="button" id="photo-reset">Reset framing</button>
+        <button type="button" class="danger" id="photo-remove">Remove photo</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Color picker sheet -->
   <div class="sheet-backdrop" id="color-sheet" hidden>
