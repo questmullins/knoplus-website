@@ -1,5 +1,5 @@
 .main {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: auto;
   padding: 55px 7% 35px;
 }
@@ -20,33 +20,86 @@
   color: var(--quiet);
   max-width: 650px;
 }
-.chapters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 32px 0 40px;
+.storyLayout {
+  display: grid;
+  grid-template-columns: 165px minmax(0, 1fr);
+  gap: 45px;
+  align-items: start;
+  margin-top: 35px;
 }
-.chapters button {
-  background: transparent;
-  color: inherit;
-  border: 1px solid #8b927e66;
-  border-radius: 24px;
-  padding: 9px 14px;
-  font-size: 10px;
-  cursor: pointer;
+.index {
+  position: sticky;
+  top: clamp(24px, 12vh, 120px);
+  padding: 16px 0;
 }
-.chapters button[aria-pressed="true"] {
+.indexHeading {
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  color: var(--quiet);
+  margin-bottom: 22px !important;
+}
+.indexList {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  border-left: 1px solid #8b927e55;
+}
+.indexList li {
+  position: relative;
+  padding: 12px 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--quiet);
+  transform-origin: left center;
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
+}
+.indexList li[aria-current="step"] {
+  color: var(--ink);
+  font-weight: 600;
+  transform: translateX(3px) scale(1.1);
+}
+.indexDot {
+  position: absolute;
+  left: -19px;
+  top: calc(50% - 3px);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid #8b927e99;
+}
+.indexList li[data-passed="true"] .indexDot {
+  background: var(--quiet);
+}
+.indexList li[aria-current="step"] .indexDot {
   background: var(--ink);
   border-color: var(--ink);
-  color: var(--paper);
+  box-shadow: 0 0 0 3px var(--paper);
+}
+.scrollHint {
+  font-size: 9px;
+  color: var(--quiet);
+  margin-top: 22px !important;
+}
+.scenes {
+  min-width: 0;
 }
 .stage {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 10%;
-  padding-bottom: 45px;
-  min-height: 660px;
+  gap: 35px;
+  padding: 55px 0 75px;
+  min-height: max(720px, 90dvh);
+  border-bottom: 1px solid #8b927e33;
+}
+.stage:first-child {
+  padding-top: 0;
+}
+.stage:last-child {
+  border-bottom: 0;
 }
 .copy h2 {
   margin: 18px 0 22px;
@@ -62,26 +115,6 @@
   font-size: 11px;
   border-left: 2px solid #8b927e88;
   padding-left: 15px;
-}
-.controls {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 32px;
-  padding-top: 22px;
-  border-top: 1px solid #8b927e55;
-}
-.controls button {
-  background: none;
-  color: inherit;
-  border: 0;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 8px 0;
-}
-.controls button:disabled {
-  opacity: 0.35;
-  cursor: default;
 }
 .videoToggle {
   padding: 11px 15px;
@@ -103,7 +136,7 @@
   padding-bottom: 5px;
 }
 .phone {
-  width: min(100%, 280px);
+  width: min(100%, 260px);
   margin: 0 auto;
 }
 .phone img,
@@ -157,22 +190,52 @@
   }
   .stage {
     grid-template-columns: 1fr;
-    gap: 35px;
+    gap: 28px;
+    min-height: 0;
+    padding: 40px 0 55px;
   }
   .phone {
     order: -1;
-    width: min(72vw, 260px);
+    width: min(100%, 240px);
   }
-  .chapters {
-    gap: 7px;
-    margin: 25px 0 30px;
+  .storyLayout {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 20px;
   }
-  .chapters button {
+  .index {
+    top: 20px;
+    padding-top: 0;
+  }
+  .indexHeading {
+    font-size: 7px;
+    letter-spacing: 0.1em;
+  }
+  .indexList {
+    padding-left: 12px;
+  }
+  .indexList li {
+    padding: 10px 0;
     font-size: 9px;
-    padding: 9px 11px;
+    overflow-wrap: break-word;
+  }
+  .indexDot {
+    left: -15px;
+  }
+  .indexList li[aria-current="step"] {
+    transform: translateX(1px) scale(1.08);
+  }
+  .scrollHint {
+    font-size: 8px;
+    line-height: 1.6;
   }
   .copy h2 {
-    font-size: 34px;
+    font-size: 28px;
+  }
+  .copy > p:not(:first-child) {
+    font-size: 12px;
+  }
+  .copy > p:first-child {
+    font-size: 8px;
   }
   .captureNote {
     grid-template-columns: 1fr;
@@ -180,5 +243,10 @@
   }
   .intro > p:last-child {
     font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .indexList li {
+    transition: none;
   }
 }
