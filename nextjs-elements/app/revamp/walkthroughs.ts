@@ -4,7 +4,6 @@ export type AppChapter = {
   title: string;
   text: string;
   note?: string;
-  video?: string;
 };
 
 export type AppStory = {
@@ -41,19 +40,19 @@ export const updateStory: AppStory = {
       name: "Who you’re meeting",
       image: "plan-a-date-who",
       title: "Start with who.",
-      text: "Date planning opens with the person you’re meeting. This capture shows the empty form, ready for someone new.",
+      text: "Date planning opens with the person you’re meeting. Here, a fictional Alex gives the example plan someone to start with.",
     },
     {
       name: "Where you’re going",
       image: "plan-a-date-where",
       title: "Give the plan a place.",
-      text: "The location screen brings together a venue, city and state, an optional address, and a place-search option. No real location was supplied for this capture.",
+      text: "The location screen brings together a venue, city and state, an optional address, and a place-search option. Sample Cafe is a fictional place entered just for this walkthrough.",
     },
     {
       name: "When you’ll be there",
       image: "plan-a-date-when",
       title: "Make room for the evening.",
-      text: "Choose a day, a start time, and an expected duration. This is the current date-and-time form as it appears in the emulator.",
+      text: "Choose a day, a start time, and an expected duration. The loop tries different lengths for the evening in the current date-and-time form.",
     },
     {
       name: "Getting there",
@@ -71,7 +70,7 @@ export const updateStory: AppStory = {
       name: "Before sharing",
       image: "plan-a-date-review",
       title: "A moment to review the message.",
-      text: "The confirmation screen brings recipients and the editable message together. This empty example has no trusted contacts, and no message was shared.",
+      text: "The confirmation screen brings recipients and the editable message together. Scroll through the fictional plan for Alex at Sample Cafe. This emulator has no trusted contacts, and no message was shared.",
     },
     {
       name: "An easier exit",
@@ -85,7 +84,6 @@ export const updateStory: AppStory = {
       title: "A clear view of an urgent moment.",
       text: "The built-in design preview shows the pulsing emergency symbol and status panels together. The short clip captures the animation in the running app.",
       note: "Visual preview only. The status text is fixture data; no emergency session, recording, alert, or call was started.",
-      video: "/revamp/apps/update/emergency-preview.mp4",
     },
   ],
 };
@@ -141,7 +139,8 @@ export const rosewaveStory: AppStory = {
       name: "A little more control",
       image: "rotation",
       title: "A place for the wallpaper to change with you.",
-      text: "The Rotation screen separates Home, Lock, and Both. These controls were inspected in the test build; rotation schedules and member access were not validated.",
+      text: "The Rotation screen separates Home, Lock, and Both. Turning on Home reveals a choice of collections and when the photograph should change.",
+      note: "Recorded using the test build’s simulated member mode. No purchase was made; scheduled rotation and billing were not tested.",
     },
     {
       name: "Around the app",

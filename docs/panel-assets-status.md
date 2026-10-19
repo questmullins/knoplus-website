@@ -13,4 +13,6 @@ The warm cream-and-green consulting concept remains the default. The alternate O
 
 Each project would also benefit from the owner's own short version of why it exists and the result they want to highlight. Screens demonstrate interface behavior; they do not establish production readiness or prove customer outcomes.
 
+The UpDate and RoseWave walkthroughs now include a 4.5-second recorded loop and GIF download for every chapter (18 total). See `walkthrough-motion.md` for actions and capture limits. No additional owner material is needed for those loops.
+
 No passwords, tokens, private customer data, or app source files belong in the public walkthrough assets. See the app-specific `project-screens/*/notes.md` for exact capture provenance and limits.

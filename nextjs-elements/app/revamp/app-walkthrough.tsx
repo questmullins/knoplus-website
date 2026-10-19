@@ -1,18 +1,26 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { AppStory } from "./walkthroughs";
 import base from "./revamp.module.css";
 import styles from "./walkthrough.module.css";
+import { AppLoop } from "./app-loop";
 
 export function AppWalkthrough({ story }: { story: AppStory }) {
   const [current, setCurrent] = useState(0);
   const [originalStyle, setOriginalStyle] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const scrollRoot = useRef<HTMLDivElement>(null);
   const scenes = useRef<Array<HTMLElement | null>>([]);
+
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPlaying(!preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const root = scrollRoot.current;
@@ -93,6 +101,10 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
           </p>
           <h1>{story.title}</h1>
           <p>{story.intro}</p>
+          <button className={styles.videoToggle} type="button"
+            aria-pressed={playing} onClick={() => setPlaying(value => !value)}>
+            {playing ? "Pause the loops" : "Play the loops"}
+          </button>
         </div>
         <div className={styles.storyLayout}>
           <div
@@ -118,6 +130,7 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
           <div className={styles.scenes}>
             {story.chapters.map((chapter, index) => {
               const image = `/revamp/apps/${story.slug}/${chapter.image}.webp`;
+              const media = `/revamp/apps/${story.slug}/${chapter.image}`;
               return (
                 <section
                   key={chapter.image}
@@ -134,54 +147,20 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
                     {chapter.note && (
                       <p className={styles.note}>{chapter.note}</p>
                     )}
-                    {chapter.video && (
-                      <button
-                        className={styles.videoToggle}
-                        type="button"
-                        aria-pressed={showVideo}
-                        onClick={() => setShowVideo((value) => !value)}
-                      >
-                        {showVideo
-                          ? "Show the still image"
-                          : "Watch the pulse · silent preview"}
-                      </button>
-                    )}
                     <a
                       className={styles.fullImage}
-                      href={image}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={`${media}.gif`}
+                      download
                     >
-                      Open this screenshot ↗
+                      Download this GIF ↓
                     </a>
                   </div>
                   <figure className={styles.phone}>
-                    {showVideo && chapter.video ? (
-                      <video
-                        key={chapter.video}
-                        controls
-                        playsInline
-                        preload="metadata"
-                        poster={image}
-                        aria-label="Silent emergency design preview"
-                      >
-                        <source src={chapter.video} type="video/mp4" />
-                      </video>
-                    ) : (
-                      <Image
-                        key={image}
-                        src={image}
-                        alt={`${story.name}: ${chapter.name}, captured from the running Android app`}
-                        width={720}
-                        height={1600}
-                        unoptimized
-                        loading={index === 0 ? "eager" : "lazy"}
-                      />
-                    )}
+                    <AppLoop src={`${media}-loop.mp4`} poster={image}
+                      label={`${story.name}: ${chapter.name}, a silent recording from the Android app`}
+                      playing={playing && current === index} />
                     <figcaption>
-                      {showVideo && chapter.video
-                        ? "A silent visual preview from the app"
-                        : "Captured in the Android emulator"}
+                      4.5 second loop · Recorded in the Android emulator
                     </figcaption>
                   </figure>
                 </section>
