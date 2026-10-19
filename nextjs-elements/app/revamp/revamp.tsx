@@ -11,7 +11,6 @@ type Project = {
   kind: string;
   description: string;
   theme: string;
-  detail: string;
   href?: string;
   screenshot?: string;
 };
@@ -26,8 +25,6 @@ const projects: Project[] = [
     theme: "date",
     href: "/revamp/update",
     screenshot: "/revamp/apps/update/home.webp",
-    detail:
-      "A mobile project exploring date planning, check-ins, and quick access to support. The question behind it: how can something as familiar as a phone make an unfamiliar moment feel more manageable?",
   },
   {
     name: "RoseWave",
@@ -38,8 +35,6 @@ const projects: Project[] = [
     theme: "rose",
     href: "/revamp/rosewave",
     screenshot: "/revamp/apps/rosewave/main.webp",
-    detail:
-      "Explore the running Android test app through real emulator captures: the free-photo viewer, release galleries, and a wallpaper applied to the emulator's home screen.",
   },
   {
     name: "Insta-Post Maker",
@@ -48,9 +43,7 @@ const projects: Project[] = [
     description:
       "A small browser tool for turning photos into a post, with more attention left for the story you want to share.",
     theme: "post",
-    href: "/instapost/",
-    detail:
-      "An existing browser tool for choosing a post format, adding photos, and arranging a finished post. A focused example of removing friction from a recurring creative task.",
+    href: "/instapost/index.html",
   },
   {
     name: "Website building",
@@ -60,8 +53,15 @@ const projects: Project[] = [
       "Websites for independent businesses, with room for their character and a clear way for people to get in touch.",
     theme: "web",
     href: "/",
-    detail:
-      "Explore the current Kno.plus website collection: templates and custom website options for independent businesses. This is where the work began, and remains part of the wider practice.",
+  },
+  {
+    name: "Freestyle",
+    category: "Web tools",
+    kind: "Sketch a process. See the bigger picture.",
+    description:
+      "Draw a process on a free board and turn it into a swimlane diagram. Arrange steps, connect decisions, and take the finished map with you.",
+    theme: "flow",
+    href: "/webtools/freestyle/index.html",
   },
   {
     name: "Prepress Assistant",
@@ -70,8 +70,6 @@ const projects: Project[] = [
     description:
       "Exploring practical tools for the production tasks that interrupt a designer’s concentration.",
     theme: "press",
-    detail:
-      "A project exploring barcode and annotation tools for prepress work. This concept uses an illustrative panel rather than private production screens or customer information.",
   },
 ];
 
@@ -119,6 +117,14 @@ function ProjectArt({
           </div>
           <div className={styles.phoneBottom}>
             A little backup. Wherever you go.
+          </div>
+        </div>
+      ) : theme === "flow" ? (
+        <div className={styles.flowBoard}>
+          <div className={styles.browserBar}><i /><i /><i /><span>Freestyle</span></div>
+          <div className={styles.flowMap}>
+            <span>An idea</span><b>↓</b><span>A decision</span><b>↙　↘</b>
+            <div><span>Make it</span><span>Refine it</span></div>
           </div>
         </div>
       ) : theme === "post" ? (
@@ -174,8 +180,6 @@ function ProjectArt({
 export function Revamp() {
   const [originalStyle, setOriginalStyle] = useState(false);
   const [filter, setFilter] = useState("Everything");
-  const [selected, setSelected] = useState<string | null>(null);
-  const activeProject = projects.find((project) => project.name === selected);
 
   return (
     <div
@@ -331,7 +335,6 @@ export function Revamp() {
                 aria-pressed={filter === item}
                 onClick={() => {
                   setFilter(item);
-                  setSelected(null);
                 }}
                 className={filter === item ? styles.activeFilter : ""}
               >
@@ -345,78 +348,29 @@ export function Revamp() {
                 (project) =>
                   filter === "Everything" || project.category === filter,
               )
-              .map((project) => (
-                <article className={styles.project} key={project.name}>
-                  <button
-                    className={styles.projectButton}
-                    type="button"
-                    onClick={() =>
-                      setSelected(
-                        selected === project.name ? null : project.name,
-                      )
-                    }
-                    aria-expanded={selected === project.name}
-                    aria-controls={
-                      selected === project.name ? "project-detail" : undefined
-                    }
-                  >
-                    <ProjectArt
-                      theme={project.theme}
-                      screenshot={project.screenshot}
-                    />
-                    <div className={styles.projectMeta}>
-                      <span>{project.category}</span>
-                      <span>Explore the idea ↗</span>
-                    </div>
-                    <h3>{project.name}</h3>
-                    <h4>{project.kind}</h4>
-                    <p>{project.description}</p>
-                  </button>
-                  {project.screenshot && project.href && (
-                    <Link
-                      className={styles.walkthroughLink}
-                      href={project.href}
-                    >
-                      Walk through the app <span>↗</span>
-                    </Link>
-                  )}
-                </article>
-              ))}
+              .map((project) => {
+                const content = <>
+                  <ProjectArt theme={project.theme} screenshot={project.screenshot} />
+                  <div className={styles.projectMeta}>
+                    <span>{project.category}</span>
+                    <span>{project.href ? "Open the project ↗" : "In development"}</span>
+                  </div>
+                  <h3>{project.name}</h3>
+                  <h4>{project.kind}</h4>
+                  <p>{project.description}</p>
+                </>;
+                return (
+                  <article className={styles.project} key={project.name}>
+                    {project.href ? (
+                      <a className={styles.projectButton} href={project.href}
+                        aria-label={`Open ${project.name}`}>
+                        {content}
+                      </a>
+                    ) : <div className={styles.projectButton}>{content}</div>}
+                  </article>
+                );
+              })}
           </div>
-          {activeProject && (
-            <div
-              id="project-detail"
-              className={styles.detail}
-              role="region"
-              aria-label={`${activeProject.name} project details`}
-            >
-              <div>
-                <p className={styles.eyebrow}>BEHIND THE PROJECT</p>
-                <h3>{activeProject.name}</h3>
-                <p>{activeProject.detail}</p>
-                {activeProject.href && (
-                  <a className={styles.textLink} href={activeProject.href}>
-                    {activeProject.screenshot
-                      ? "Walk through the app"
-                      : "Open the current experience"}{" "}
-                    <span>↗</span>
-                  </a>
-                )}
-                <small>
-                  {activeProject.screenshot
-                    ? "Real Android emulator screenshots. The walkthrough identifies the build and any preview-only screens."
-                    : "Project artwork above is an illustrative concept, rather than a screenshot of the current product."}
-                </small>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                aria-label="Close project details"
-              >
-                ×
-              </button>
-            </div>
-          )}
         </section>
         <section className={styles.belief}>
           <span className={styles.asterisk} aria-hidden="true">

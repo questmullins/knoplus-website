@@ -1,7 +1,7 @@
 .main {
-  max-width: 1600px;
+  max-width: 1280px;
   margin: auto;
-  padding: 55px 7% 35px;
+  padding: 32px 5% 28px;
 }
 .intro {
   max-width: 770px;
@@ -22,8 +22,8 @@
 }
 .storyLayout {
   display: grid;
-  grid-template-columns: 165px minmax(0, 1fr);
-  gap: 45px;
+  grid-template-columns: 145px minmax(0, 1fr);
+  gap: 30px;
   align-items: start;
   margin-top: 35px;
 }
@@ -88,11 +88,10 @@
 }
 .stage {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 220px);
   align-items: center;
   gap: 35px;
-  padding: 55px 0 75px;
-  min-height: max(720px, 90dvh);
+  padding: 24px 0;
   border-bottom: 1px solid #8b927e33;
 }
 .stage:first-child {
@@ -136,7 +135,7 @@
   padding-bottom: 5px;
 }
 .phone {
-  width: min(100%, 260px);
+  width: min(100%, 220px);
   margin: 0 auto;
 }
 .phone img,

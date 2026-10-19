@@ -22,7 +22,7 @@ export const updateStory: AppStory = {
   intro:
     "Before you head out, while you’re there, and when you need a way home. A look inside the current Android app.",
   context:
-    "Captured in an Android 15 emulator from the current local development build on October 19, 2026. This clean install has no real contacts or date records. Safety messages and calls were not sent; the Emergency screen uses the app’s visual preview.",
+    "The example plan uses fictional details. No safety messages or calls were sent. The Emergency screen uses the app’s visual preview.",
   chapters: [
     {
       name: "A place to begin",
@@ -70,13 +70,13 @@ export const updateStory: AppStory = {
       name: "Before sharing",
       image: "plan-a-date-review",
       title: "A moment to review the message.",
-      text: "The confirmation screen brings recipients and the editable message together. Scroll through the fictional plan for Alex at Sample Cafe. This emulator has no trusted contacts, and no message was shared.",
+      text: "The confirmation screen brings recipients and the editable message together. Scroll through the fictional plan for Alex at Sample Cafe. This example has no trusted contacts, and no message was shared.",
     },
     {
       name: "An easier exit",
       image: "get-me-out",
       title: "Sometimes you just want a way out.",
-      text: "Get Me Out offers Call Me, Come Get Me, and Urgent Excuse. The clean emulator has no contacts assigned to these requests, so sending remains unavailable.",
+      text: "Get Me Out offers Call Me, Come Get Me, and Urgent Excuse. This example has no contacts assigned to these requests, so sending remains unavailable.",
     },
     {
       name: "When it’s urgent",
@@ -95,7 +95,7 @@ export const rosewaveStory: AppStory = {
   intro:
     "A full-screen image, a release to wander through, and a way to make a photograph feel at home on your phone.",
   context:
-    "Captured in an Android 15 emulator using RoseWave test build 38 on October 19, 2026. The main photograph is marked free in the app. Gallery and release-grid images are reduced previews. Membership and purchases were not tested.",
+    "The main photograph is marked free in the app. Gallery and release-grid images are reduced previews.",
   chapters: [
     {
       name: "Meet a photograph",
@@ -121,7 +121,7 @@ export const rosewaveStory: AppStory = {
       name: "Make it yours",
       image: "set",
       title: "Home, lock, or both.",
-      text: "The wallpaper control opens a choice of where the image should appear. The walkthrough uses the free photograph and the emulator’s own wallpaper settings.",
+      text: "The wallpaper control opens a choice of where the image should appear. The walkthrough uses the free photograph and Android’s wallpaper settings.",
     },
     {
       name: "The Android preview",
@@ -133,7 +133,7 @@ export const rosewaveStory: AppStory = {
       name: "Out in the everyday",
       image: "wallpaper-home",
       title: "From an app to the background of your day.",
-      text: "The free photograph is now the emulator’s wallpaper. This capture shows it behind the Android home screen after the system confirmed the change.",
+      text: "The free photograph is now the wallpaper. Open the app drawer and see it settle into the background of the Android home screen.",
     },
     {
       name: "A little more control",

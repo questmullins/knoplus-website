@@ -5,7 +5,7 @@ import { rosewaveStory } from "../walkthroughs";
 export const metadata: Metadata = {
   title: "Inside RoseWave — A real-screen walkthrough",
   description:
-    "Explore RoseWave through real Android emulator screenshots: free photography, release galleries, wallpaper selection, and the Android wallpaper handoff.",
+    "Explore RoseWave through the app in action: free photography, release galleries, wallpaper selection, and the Android wallpaper handoff.",
   alternates: { canonical: "/revamp/rosewave" },
   robots: { index: false, follow: false },
   openGraph: {

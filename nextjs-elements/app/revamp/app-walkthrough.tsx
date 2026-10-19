@@ -159,9 +159,6 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
                     <AppLoop src={`${media}-loop.mp4`} poster={image}
                       label={`${story.name}: ${chapter.name}, a silent recording from the Android app`}
                       playing={playing && current === index} />
-                    <figcaption>
-                      Short loop · Recorded in the Android emulator
-                    </figcaption>
                   </figure>
                 </section>
               );
@@ -169,7 +166,7 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
           </div>
         </div>
         <section className={styles.captureNote}>
-          <p className={base.eyebrow}>ABOUT THESE CAPTURES</p>
+          <p className={base.eyebrow}>ABOUT THIS PREVIEW</p>
           <p>{story.context}</p>
         </section>
         <div className={styles.invitation}>

@@ -400,6 +400,38 @@
 .projectButton:hover .art {
   transform: translateY(-4px);
 }
+.projectButton:not(a) {
+  cursor: default;
+}
+.flow {
+  background: #e4e4da;
+}
+.flowBoard {
+  width: 82%;
+  background: #2d2a32;
+  color: #f1fffa;
+  transform: rotate(-3deg) translateY(20px);
+}
+.flowMap {
+  display: grid;
+  justify-items: center;
+  padding: 20px 25px 38px;
+  gap: 8px;
+  font-size: 12px;
+}
+.flowMap span {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 1px solid #ffbf46;
+  border-radius: 4px;
+}
+.flowMap b {
+  color: #ffbf46;
+}
+.flowMap > div {
+  display: flex;
+  gap: 22px;
+}
 .art {
   height: 300px;
   position: relative;
