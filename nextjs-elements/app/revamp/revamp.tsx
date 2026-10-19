@@ -131,15 +131,35 @@ function ProjectArt({ theme }: { theme: string }) {
 }
 
 export function Revamp() {
+  const [originalStyle, setOriginalStyle] = useState(false);
   const [filter, setFilter] = useState("Everything");
   const [selected, setSelected] = useState<string | null>(null);
   const activeProject = projects.find((project) => project.name === selected);
 
   return (
-    <div className={styles.page}>
+    <div
+      className={`${styles.page} ${originalStyle ? styles.original : ""}`}
+      data-style={originalStyle ? "original" : "concept"}
+    >
       <div className={styles.conceptBar}>
         A NEW DIRECTION FOR KNO.PLUS{" "}
-        <span>Working concept · open for conversation</span>
+        <div className={styles.styleControls}>
+          <span className={styles.conceptStatus}>
+            Working concept · open for conversation
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={originalStyle}
+            className={styles.styleToggle}
+            onClick={() => setOriginalStyle((current) => !current)}
+          >
+            Original style
+            <span className={styles.switchTrack} aria-hidden="true">
+              <span />
+            </span>
+          </button>
+        </div>
       </div>
       <header className={styles.header}>
         <Link

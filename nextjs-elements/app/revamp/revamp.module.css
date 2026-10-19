@@ -51,6 +51,45 @@
 .conceptBar span {
   letter-spacing: 0.03em;
 }
+.conceptBar {
+  align-items: center;
+  gap: 14px;
+}
+.styleControls {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.styleToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.switchTrack {
+  display: inline-flex;
+  align-items: center;
+  width: 34px;
+  height: 20px;
+  padding: 3px;
+  border: 1px solid currentColor;
+  border-radius: 20px;
+}
+.switchTrack > span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.styleToggle[aria-checked="true"] .switchTrack > span {
+  transform: translateX(14px);
+}
 .header {
   padding: 25px 5.5%;
   display: flex;
@@ -711,6 +750,184 @@
 }
 .page a:hover {
   color: #5d7849;
+}
+/* Original homepage palette and typography, scoped to this review route. */
+.original {
+  --paper: var(--black);
+  --ink: var(--white);
+  --green: var(--accent);
+  --quiet: var(--muted);
+  font-family: var(--font-body);
+  scrollbar-color: #555557 var(--black);
+}
+.original :is(h1, h2, h3, h4, .logo) {
+  font-family: var(--font-display);
+  font-weight: 300;
+}
+.original em,
+.original .note p {
+  font-family: var(--font-script);
+  font-weight: 500;
+  color: var(--white);
+}
+.original .logo {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.original :is(.conceptBar, .perspective, .belief, .detail) {
+  background: #101012;
+  color: var(--white);
+  border-color: var(--line);
+}
+.original
+  :is(
+    .header,
+    .footer,
+    .heroBoard,
+    .browser,
+    .browserBar,
+    .textLink,
+    .contactLink
+  ) {
+  border-color: var(--line);
+}
+.original
+  :is(
+    .intro,
+    .introSmall,
+    .perspectiveCopy p,
+    .workHeading > p,
+    .project p,
+    .projectMeta,
+    .detail small,
+    .belief p:last-child,
+    .conversation > p:not(.eyebrow),
+    .email,
+    .footer p,
+    .footer > span
+  ) {
+  color: var(--muted);
+  font-weight: 300;
+}
+.original .eyebrow {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.22em;
+}
+.original :is(.logo span, .asterisk, .contactLink > span) {
+  color: var(--accent);
+}
+.original .heroText > .eyebrow span {
+  background: var(--white);
+}
+.original .heroBoard {
+  background-color: #111113;
+  background-image: radial-gradient(#f6f3ec20 0.8px, transparent 0.8px);
+  box-shadow: 8px 16px 0 #ffffff04;
+}
+.original :is(.boardHeading, .boardFooter, .orbit) {
+  color: var(--muted);
+}
+.original .orbit i {
+  border-color: #f6f3ec66;
+}
+.original :is(.note, .miniWindow) {
+  background: #202023;
+  color: var(--white);
+  border: 1px solid var(--line);
+  box-shadow: 0 15px 25px #0006;
+}
+.original .note::before {
+  background: #f6f3ec33;
+}
+.original :is(.note small, .note > span, .miniWindow p) {
+  color: var(--muted);
+}
+.original .miniWindow i {
+  background: var(--white);
+}
+.original .filters button {
+  border-color: var(--line);
+  color: var(--muted);
+}
+.original .filters .activeFilter {
+  background: var(--white);
+  border-color: var(--white);
+  color: var(--black);
+}
+.original .art {
+  background: #161618;
+}
+.original :is(.phone, .browser, .pressPanel) {
+  background: #242427;
+  border-color: #77777c;
+  box-shadow: 12px 12px 0 #ffffff08;
+}
+.original
+  :is(
+    .phoneTop,
+    .phone > p,
+    .phoneBottom,
+    .pressTitle,
+    .pressPanel p,
+    .pressPanel small,
+    .browserBar > span
+  ) {
+  color: var(--muted);
+}
+.original .phoneTile {
+  color: var(--white);
+  background: #38383c;
+}
+.original .browserBar i,
+.original .pressRule {
+  background: #77777c;
+}
+.original .websitePreview {
+  color: var(--white);
+  background:
+    radial-gradient(ellipse at 110% 100%, #444449 0 30%, transparent 30%),
+    #242427;
+}
+.original .websitePreview > span {
+  border-color: var(--line);
+}
+.original .photoBack {
+  background: #444449;
+  border-color: #77777c;
+}
+.original .photoFront {
+  border-color: #ddd9d0;
+  background: linear-gradient(
+    155deg,
+    #89898b 20%,
+    #66666a 20%,
+    #444449 55%,
+    #29292d 55%
+  );
+}
+.original .sun {
+  background: var(--white);
+}
+.original .photoLabel {
+  background: #ddd9d0;
+  color: var(--black);
+}
+.original .barcode {
+  filter: invert(1);
+}
+.original a:hover {
+  color: #fff;
+}
+.original :is(a, button):focus-visible {
+  outline-color: var(--white);
+}
+@media (max-width: 900px) {
+  .conceptStatus {
+    display: none;
+  }
 }
 @media (min-width: 1600px) {
   .perspective {
