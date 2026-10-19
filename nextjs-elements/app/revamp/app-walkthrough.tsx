@@ -160,7 +160,7 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
                       label={`${story.name}: ${chapter.name}, a silent recording from the Android app`}
                       playing={playing && current === index} />
                     <figcaption>
-                      4.5 second loop · Recorded in the Android emulator
+                      Short loop · Recorded in the Android emulator
                     </figcaption>
                   </figure>
                 </section>
