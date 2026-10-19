@@ -2,9 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./revamp.module.css";
 
-const projects = [
+type Project = {
+  name: string;
+  category: string;
+  kind: string;
+  description: string;
+  theme: string;
+  detail: string;
+  href?: string;
+  screenshot?: string;
+};
+
+const projects: Project[] = [
   {
     name: "UpDate",
     category: "Mobile apps",
@@ -12,8 +24,22 @@ const projects = [
     description:
       "Exploring the moments before, during, and after a date — and how a phone can offer a little support along the way.",
     theme: "date",
+    href: "/revamp/update",
+    screenshot: "/revamp/apps/update/home.webp",
     detail:
       "A mobile project exploring date planning, check-ins, and quick access to support. The question behind it: how can something as familiar as a phone make an unfamiliar moment feel more manageable?",
+  },
+  {
+    name: "RoseWave",
+    category: "Mobile apps",
+    kind: "A photograph becomes part of your day.",
+    description:
+      "A photography-led wallpaper app, from full-screen images and release galleries to the photograph on your home screen.",
+    theme: "rose",
+    href: "/revamp/rosewave",
+    screenshot: "/revamp/apps/rosewave/main.webp",
+    detail:
+      "Explore the running Android test app through real emulator captures: the free-photo viewer, release galleries, and a wallpaper applied to the emulator's home screen.",
   },
   {
     name: "Insta-Post Maker",
@@ -57,10 +83,25 @@ const filters = [
   "Workflow",
 ];
 
-function ProjectArt({ theme }: { theme: string }) {
+function ProjectArt({
+  theme,
+  screenshot,
+}: {
+  theme: string;
+  screenshot?: string;
+}) {
   return (
     <div className={`${styles.art} ${styles[theme]}`} aria-hidden="true">
-      {theme === "date" ? (
+      {screenshot ? (
+        <Image
+          className={styles.realScreen}
+          src={screenshot}
+          alt=""
+          width={720}
+          height={1600}
+          unoptimized
+        />
+      ) : theme === "date" ? (
         <div className={styles.phone}>
           <div className={styles.phoneTop}>
             UpDate <span>✦</span>
@@ -315,9 +356,14 @@ export function Revamp() {
                       )
                     }
                     aria-expanded={selected === project.name}
-                    aria-controls="project-detail"
+                    aria-controls={
+                      selected === project.name ? "project-detail" : undefined
+                    }
                   >
-                    <ProjectArt theme={project.theme} />
+                    <ProjectArt
+                      theme={project.theme}
+                      screenshot={project.screenshot}
+                    />
                     <div className={styles.projectMeta}>
                       <span>{project.category}</span>
                       <span>Explore the idea ↗</span>
@@ -326,6 +372,14 @@ export function Revamp() {
                     <h4>{project.kind}</h4>
                     <p>{project.description}</p>
                   </button>
+                  {project.screenshot && project.href && (
+                    <Link
+                      className={styles.walkthroughLink}
+                      href={project.href}
+                    >
+                      Walk through the app <span>↗</span>
+                    </Link>
+                  )}
                 </article>
               ))}
           </div>
@@ -342,12 +396,16 @@ export function Revamp() {
                 <p>{activeProject.detail}</p>
                 {activeProject.href && (
                   <a className={styles.textLink} href={activeProject.href}>
-                    Open the current experience <span>↗</span>
+                    {activeProject.screenshot
+                      ? "Walk through the app"
+                      : "Open the current experience"}{" "}
+                    <span>↗</span>
                   </a>
                 )}
                 <small>
-                  Project artwork above is an illustrative concept, rather than
-                  a screenshot of the current product.
+                  {activeProject.screenshot
+                    ? "Real Android emulator screenshots. The walkthrough identifies the build and any preview-only screens."
+                    : "Project artwork above is an illustrative concept, rather than a screenshot of the current product."}
                 </small>
               </div>
               <button
