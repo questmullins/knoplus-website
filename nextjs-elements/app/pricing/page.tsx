@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Compare Knoplus template website pricing, custom website pricing, care plans, launch essentials, add-ons, redesigns, booking systems, e-commerce, and custom functionality.",
   alternates: {
-    canonical: "/websites/pricing"
+    canonical: "/pricing"
   }
 };
 

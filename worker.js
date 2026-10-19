@@ -4,45 +4,9 @@ const CONTACT_TO_FALLBACK = "info@kno.plus";
 const CONTACT_FROM_FALLBACK = "Knoplus <info@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
 
-// The website service moved under /websites when kno.plus became the project hub; old links redirect permanently.
-const MOVED_PAGES = new Map([
-  ["/about", "/websites/about"],
-  ["/process", "/websites/process"],
-  ["/pricing", "/websites/pricing"],
-  ["/small-business-websites", "/websites/small-business-websites"],
-  ["/automotive-website-templates", "/websites/automotive-website-templates"],
-  ["/home-services-website-templates", "/websites/home-services-website-templates"],
-  ["/website-care-plans", "/websites/website-care-plans"]
-]);
-
-function movedLocation(url) {
-  const path = url.pathname.replace(/\/+$/, "").replace(/\.html$/, "") || "/";
-  const target = MOVED_PAGES.get(path);
-
-  if (target) {
-    return target + url.search;
-  }
-
-  if (url.pathname === "/instapost" || url.pathname.startsWith("/instapost/")) {
-    return "/webtools" + url.pathname + url.search;
-  }
-
-  // The old homepage opened the contact form from template previews with ?contact=template.
-  if (url.pathname === "/" && url.searchParams.has("contact")) {
-    return "/websites" + url.search;
-  }
-
-  return null;
-}
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const moved = movedLocation(url);
-
-    if (moved) {
-      return Response.redirect(new URL(moved, url).toString(), 301);
-    }
 
     if (url.pathname === "/update-config" || url.pathname === "/update-config/") {
       if (request.method !== "GET" && request.method !== "HEAD") {

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "See the Knoplus website design process for template websites, custom websites, content planning, mobile-friendly builds, Cloudflare deployment, and launch support.",
   alternates: {
-    canonical: "/websites/process"
+    canonical: "/process"
   }
 };
 

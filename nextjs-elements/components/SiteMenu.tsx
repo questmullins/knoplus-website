@@ -12,11 +12,10 @@ type SiteMenuProps = {
 };
 
 const menuItems = [
-  { label: "Projects", href: "/" },
-  { label: "Websites", href: "/websites" },
-  { label: "Pricing", href: "/websites/pricing" },
-  { label: "Our Process", href: "/websites/process" },
-  { label: "About Us", href: "/websites/about" }
+  { label: "Home", href: "/" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Our Process", href: "/process" },
+  { label: "About Us", href: "/about" }
 ];
 
 export function SiteMenu({ className = "", hideIcon = false, onContact, onNavigate, showLabel = false }: SiteMenuProps) {
