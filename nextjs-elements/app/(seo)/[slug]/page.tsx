@@ -24,12 +24,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.description,
     keywords: page.keywords,
     alternates: {
-      canonical: `/websites/${page.slug}`
+      canonical: `/${page.slug}`
     },
     openGraph: {
       title: page.title,
       description: page.description,
-      url: `https://kno.plus/websites/${page.slug}`
+      url: `https://kno.plus/${page.slug}`
     }
   };
 }

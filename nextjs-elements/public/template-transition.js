@@ -91,7 +91,7 @@
       window.sessionStorage.setItem("knoplus:selected-template", getTemplateName());
     } catch {}
 
-    exitToKnoplus("/websites?contact=template");
+    exitToKnoplus("/?contact=template");
   }
 
   function addTemplateActions() {
@@ -105,12 +105,12 @@
 
     wrapper.className = "knoplus-template-actions";
     link.className = "knoplus-template-home";
-    link.href = "/websites";
+    link.href = "/";
     link.setAttribute("aria-label", "Return to Knoplus");
     link.textContent = "KNOPLUS";
     link.addEventListener("click", function (event) {
       event.preventDefault();
-      exitToKnoplus("/websites");
+      exitToKnoplus("/");
     });
     choose.className = "knoplus-template-choose";
     choose.type = "button";

@@ -8,7 +8,7 @@
   "assets": {
     "directory": "./nextjs-elements/out",
     "binding": "ASSETS",
-    "run_worker_first": ["/", "/update-config", "/update-config/"]
+    "run_worker_first": ["/update-config", "/update-config/"]
   },
   "send_email": [
     {

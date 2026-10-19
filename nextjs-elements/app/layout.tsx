@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
-import "./hub.css";
-import "./studio.css";
 
 const structuredData = [
   {
@@ -61,19 +59,17 @@ const structuredData = [
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
     name: [
-      "Projects",
-      "Websites",
       "About Us",
+      "Home",
       "Our Process",
       "Pricing",
       "Sitemap"
     ],
     url: [
+      "https://kno.plus/about",
       "https://kno.plus",
-      "https://kno.plus/websites",
-      "https://kno.plus/websites/about",
-      "https://kno.plus/websites/process",
-      "https://kno.plus/websites/pricing",
+      "https://kno.plus/process",
+      "https://kno.plus/pricing",
       "https://kno.plus/sitemap"
     ]
   }
@@ -82,11 +78,11 @@ const structuredData = [
 export const metadata: Metadata = {
   metadataBase: new URL("https://kno.plus"),
   title: {
-    default: "Knoplus | Apps, Web Tools and Websites",
+    default: "Knoplus | Website Templates and Custom Websites for Independent Businesses",
     template: "%s | Knoplus"
   },
   description:
-    "Knoplus is a hub for apps, browser tools, design automation and a website service for independent businesses that need fast launch timelines and simple management.",
+    "Knoplus builds modern website templates and service websites for independent companies, local businesses, automotive shops, home service companies, and growing brands that need fast launch timelines and simple management.",
   keywords: [
     "website templates",
     "custom websites",
@@ -104,9 +100,9 @@ export const metadata: Metadata = {
     "Knoplus"
   ],
   openGraph: {
-    title: "Knoplus | Apps, Web Tools and Websites",
+    title: "Knoplus | Website Templates and Custom Websites",
     description:
-      "Phone apps, browser tools, design automation and a website service, all in one place.",
+      "Modern, professional websites starting at $500 with templates, custom builds, mobile-friendly design, basic SEO setup, and launch support.",
     url: "https://kno.plus",
     siteName: "Knoplus",
     type: "website"
@@ -124,7 +120,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&family=Montserrat:wght@400;500;600;700;800;900&family=Stack+Sans+Text:wght@200..700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&family=Stack+Sans+Text:wght@200..700&display=swap"
           rel="stylesheet"
         />
         <script
