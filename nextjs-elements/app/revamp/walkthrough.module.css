@@ -125,15 +125,6 @@
   margin-top: 20px;
   cursor: pointer;
 }
-.fullImage {
-  display: block;
-  width: fit-content;
-  font-size: 10px;
-  color: var(--quiet);
-  margin-top: 20px;
-  border-bottom: 1px solid #8b927e55;
-  padding-bottom: 5px;
-}
 .phone {
   width: min(100%, 220px);
   margin: 0 auto;
