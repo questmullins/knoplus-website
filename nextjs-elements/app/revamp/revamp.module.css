@@ -418,10 +418,10 @@
 .realScreen {
   width: 155px;
   height: auto;
-  border: 5px solid #33323a;
-  border-radius: 23px 23px 0 0;
+  border: 0;
+  border-radius: 0;
   transform: rotate(-5deg) translateY(30px);
-  box-shadow: 15px 12px 0 #7a6f8530;
+  box-shadow: none;
 }
 .walkthroughLink {
   display: inline-flex;
