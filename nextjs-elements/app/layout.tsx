@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./hub.css";
+import "./studio.css";
 
 const structuredData = [
   {
