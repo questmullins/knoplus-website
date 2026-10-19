@@ -147,13 +147,6 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
                     {chapter.note && (
                       <p className={styles.note}>{chapter.note}</p>
                     )}
-                    <a
-                      className={styles.fullImage}
-                      href={`${media}.gif`}
-                      download
-                    >
-                      Download this GIF ↓
-                    </a>
                   </div>
                   <figure className={styles.phone}>
                     <AppLoop src={`${media}-loop.mp4`} poster={image}
