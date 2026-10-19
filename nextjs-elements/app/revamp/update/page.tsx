@@ -5,7 +5,7 @@ import { updateStory } from "../walkthroughs";
 export const metadata: Metadata = {
   title: "Inside UpDate — A real-screen walkthrough",
   description:
-    "Explore UpDate through real Android emulator screenshots: planning a date, check-in choices, Get Me Out, and the emergency visual preview.",
+    "Explore UpDate through the app in action: planning a date, check-in choices, Get Me Out, and the emergency visual preview.",
   alternates: { canonical: "/revamp/update" },
   robots: { index: false, follow: false },
   openGraph: {
