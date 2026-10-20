@@ -13,6 +13,7 @@ type Project = {
   theme: string;
   href?: string;
   screenshot?: string;
+  toolHref?: string;
 };
 
 const projects: Project[] = [
@@ -43,7 +44,9 @@ const projects: Project[] = [
     description:
       "You have the photographs and something you want to share. Insta-Post Maker exists so arranging them into a post feels quick and enjoyable.",
     theme: "post",
-    href: "/instapost/index.html",
+    screenshot: "/revamp/projects/instapost/finished.webp",
+    href: "/revamp/instapost",
+    toolHref: "/instapost/index.html",
   },
   {
     name: "Website building",
@@ -52,7 +55,9 @@ const projects: Project[] = [
     description:
       "I enjoy making websites, and I want you to feel excited about yours. Templates, AI, and a little curation help me create something with character, with reasonable expectations and a reasonable turnaround.",
     theme: "web",
-    href: "/",
+    screenshot: "/revamp/projects/websites/coffee.webp",
+    href: "/revamp/websites",
+    toolHref: "/",
   },
   {
     name: "Freestyle",
@@ -61,7 +66,9 @@ const projects: Project[] = [
     description:
       "I needed a swimlane diagram for work and kept finding services that wanted payment. Freestyle grew from finding a way around that. You can finish the diagram you need and export it without reaching for a credit card.",
     theme: "flow",
-    href: "/webtools/freestyle/index.html",
+    screenshot: "/revamp/projects/freestyle/both.webp",
+    href: "/revamp/freestyle",
+    toolHref: "/webtools/freestyle/index.html",
   },
   {
     name: "Prepress Assistant",
@@ -70,6 +77,8 @@ const projects: Project[] = [
     description:
       "Exploring practical tools for the production tasks that interrupt a designer’s concentration.",
     theme: "press",
+    screenshot: "/revamp/projects/prepress-concept.svg",
+    href: "/revamp/prepress-assistant",
   },
 ];
 
@@ -95,8 +104,8 @@ function ProjectArt({
           className={styles.realScreen}
           src={screenshot}
           alt=""
-          width={720}
-          height={1600}
+          width={theme === "date" || theme === "rose" ? 720 : theme === "press" ? 900 : 1440}
+          height={theme === "date" || theme === "rose" ? 1600 : theme === "press" ? 700 : 900}
           unoptimized
         />
       ) : theme === "date" ? (
@@ -367,6 +376,9 @@ export function Revamp() {
                         {content}
                       </a>
                     ) : <div className={styles.projectButton}>{content}</div>}
+                    {project.toolHref && <a className={styles.walkthroughLink} href={project.toolHref}>
+                      {project.category === "Websites" ? "View the websites" : "Open the tool"} <span>↗</span>
+                    </a>}
                   </article>
                 );
               })}

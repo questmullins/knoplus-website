@@ -13,6 +13,6 @@ The warm cream-and-green consulting concept remains the default. The alternate O
 
 Each project would also benefit from the owner's own short version of why it exists and the result they want to highlight. Screens demonstrate interface behavior; they do not establish production readiness or prove customer outcomes.
 
-The current app pages use still photographs. RoseWave has a photograph-led introduction plus browsing and wallpaper cards; UpDate keeps four narrative sections. The earlier 18 recordings are retained as reference for Claude's animation work. GIF downloads and published GIF assets remain removed. See `walkthrough-motion.md` for capture limits.
+All six canonical project pages now use the approved horizontal presentation, with still screenshots and persistent relevant actions. UpDate and RoseWave show store placeholders; web tools and Website building open their working destinations. Prepress Assistant remains an illustrative concept pending owner screenshots. The earlier 18 app recordings are retained as reference for Claude's animation work. GIF downloads and published GIF assets remain removed. See `walkthrough-motion.md` for capture limits.
 
 No passwords, tokens, private customer data, or app source files belong in the public walkthrough assets. See the app-specific `project-screens/*/notes.md` for exact capture provenance and limits.

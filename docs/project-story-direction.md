@@ -18,3 +18,11 @@ The owner is handing animation creation to Claude. The current revision returns 
 The owner requested a side-to-side version with the same presentation for both apps. `/revamp/rosewave/horizontal` and `/revamp/update/horizontal` use one shared pane renderer. The opening photograph is part of the first pane rather than a separate hero. RoseWave has three panes; UpDate has five, retaining its fuller story. Each pane fits the viewport with no vertical page scrolling. Navigation supports native horizontal scroll, ordinary mouse-wheel input, arrow buttons, and keyboard arrows/Home/End. A reduced-motion preference disables smooth transitions.
 
 The existing vertical pages remain available for comparison and link to the horizontal version. Both versions include a disabled Coming soon to Google Play placeholder, ready for a real store destination later. No app listing URL is invented. Photos remain still, and no GIF downloads return.
+
+## Approved rollout to all projects
+
+The owner approved the horizontal style for every project. The canonical project URLs now use one shared renderer: `/revamp/update`, `/revamp/rosewave`, `/revamp/instapost`, `/revamp/websites`, `/revamp/freestyle`, and `/revamp/prepress-assistant`. The earlier `/horizontal` app links remain compatible aliases. Project navigation cycles through the entire collection.
+
+Web tools and website services have persistent working-destination links instead of app-store placeholders. The project index also offers direct tool/website shortcuts. Only the two mobile apps show Coming soon to Google Play. Prepress uses a single illustrative pane until owner screenshots and its personal origin are available.
+
+New stills show Freestyle's fictional coffee-shop example, Insta-Post Maker with public template photos and fictional copy, and existing website templates. Browser captures are stored as visually lossless WebP; original PNG captures remain in the ignored local preview workspace. Standalone web-tool interfaces were not restyled, and their save/export features continue to work independently of the no-download project previews.

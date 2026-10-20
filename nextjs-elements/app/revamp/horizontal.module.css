@@ -152,6 +152,21 @@
 .playStore svg { width: 22px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .playStore small { display: block; font-size: 8px; letter-spacing: 0.1em; line-height: 1.5; }
 .playStore strong { display: block; font-size: 18px; font-weight: 500; line-height: 1.2; }
+.projectAction.projectAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 52px;
+  padding: 10px 18px;
+  border: 1px solid #8b927e66;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.shortLabel { display: none; }
 @media (max-width: 800px) {
   .hint { display: none; }
   .header { gap: 14px; }
@@ -160,6 +175,10 @@
   .styleLabel { display: none; }
 }
 @media (max-width: 600px) {
+  .allProjects { display: none; }
+  .fullLabel { display: none; }
+  .shortLabel { display: inline; }
+  .projectAction.projectAction { min-height: 44px; font-size: 11px; padding: 8px 12px; gap: 8px; }
   .header { padding: 12px 5%; }
   .header > a { font-size: 28px; }
   .header nav { gap: 12px; font-size: 10px; }
