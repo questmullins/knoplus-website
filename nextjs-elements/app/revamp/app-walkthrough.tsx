@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AppStory } from "./walkthroughs";
 import base from "./revamp.module.css";
 import styles from "./walkthrough.module.css";
+import { PlayStoreComingSoon } from "./play-store-coming-soon";
 
 function Photo({ slug, image, label, eager = false }: {
   slug: string; image: string; label: string; eager?: boolean;
@@ -110,8 +111,9 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
         >
           kno<span>+</span>
         </Link>
-        <nav aria-label="Walkthrough navigation">
+        <nav className={styles.pageNavigation} aria-label="Walkthrough navigation">
           <Link href="/revamp#work">Back to the work ↖</Link>
+          <Link href={`/revamp/${story.slug}/horizontal`}>Horizontal view ↔</Link>
           <Link
             href={
               story.slug === "update" ? "/revamp/rosewave" : "/revamp/update"
@@ -192,6 +194,7 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
           <p>{story.context}</p>
         </section>
         <div className={styles.invitation}>
+          <div className={styles.storePlaceholder}><PlayStoreComingSoon /></div>
           <p>Have something you’d like to bring to life?</p>
           <Link href="/revamp#conversation">Let’s talk about it. ↗</Link>
         </div>
