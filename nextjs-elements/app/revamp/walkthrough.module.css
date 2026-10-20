@@ -20,6 +20,82 @@
   color: var(--quiet);
   max-width: 650px;
 }
+.projectIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: clamp(30px, 6vw, 85px);
+  align-items: center;
+  margin: 12px 0 48px;
+}
+.heroPhoto {
+  width: 100%;
+  margin: 0;
+}
+.heroPhoto img,
+.photoPair img,
+.showcaseGrid img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.showcaseGrid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.galleryCard,
+.wallpaperCard {
+  padding: 30px;
+  min-width: 0;
+}
+.galleryCard {
+  background: color-mix(in srgb, var(--paper) 85%, #849974);
+}
+.wallpaperCard {
+  background: color-mix(in srgb, var(--paper) 85%, #bc8e70);
+}
+.cardCopy h2 {
+  font-size: clamp(25px, 2.8vw, 35px);
+  line-height: 1.15;
+  margin: 14px 0;
+}
+.cardCopy > p:last-child {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--quiet);
+  max-width: 380px;
+}
+.galleryPhotos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 28px 0 20px;
+}
+.galleryPhotos img {
+  width: min(44%, 170px);
+}
+.galleryPhotos img:last-child {
+  margin-top: 20px;
+}
+.homePhoto {
+  width: min(100%, 170px);
+  margin: 28px auto 0;
+}
+.pairedStage {
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+}
+.photoPair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 0;
+}
 .storyLayout {
   display: grid;
   grid-template-columns: 145px minmax(0, 1fr);
@@ -115,16 +191,6 @@
   border-left: 2px solid #8b927e88;
   padding-left: 15px;
 }
-.videoToggle {
-  padding: 11px 15px;
-  border: 1px solid #8b927e88;
-  border-radius: 5px;
-  background: transparent;
-  color: inherit;
-  font-size: 11px;
-  margin-top: 20px;
-  cursor: pointer;
-}
 .phone {
   width: min(100%, 220px);
   margin: 0 auto;
@@ -175,6 +241,32 @@
   border-bottom: 1px solid #8b927e88;
 }
 @media (max-width: 700px) {
+  .projectIntro {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-bottom: 32px;
+  }
+  .heroPhoto {
+    width: min(65%, 230px);
+    margin: 0 auto;
+  }
+  .showcaseGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .galleryCard,
+  .wallpaperCard {
+    padding: 24px;
+  }
+  .photoPair {
+    order: -1;
+    grid-template-columns: 1fr;
+    width: min(100%, 240px);
+    margin: 0 auto;
+  }
+  .photoPair img:first-child {
+    display: none;
+  }
   .main {
     padding: 35px 6% 25px;
   }

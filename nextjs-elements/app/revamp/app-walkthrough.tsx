@@ -1,26 +1,53 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { AppStory } from "./walkthroughs";
 import base from "./revamp.module.css";
 import styles from "./walkthrough.module.css";
-import { AppLoop } from "./app-loop";
+
+function Photo({ slug, image, label, eager = false }: {
+  slug: string; image: string; label: string; eager?: boolean;
+}) {
+  return <Image src={`/revamp/apps/${slug}/${image}.webp`} alt={label}
+    width={720} height={1600} unoptimized loading={eager ? "eager" : "lazy"} />;
+}
+
+function RosewaveShowcase() {
+  return <div className={styles.showcaseGrid}>
+    <section className={styles.galleryCard} aria-label="Browse the photographs">
+      <div className={styles.cardCopy}>
+        <p className={base.eyebrow}>FIND YOUR PHOTOGRAPH</p>
+        <h2>A collection to explore.</h2>
+        <p>Browse a release, look through its photographs, and keep your favourites close.</p>
+      </div>
+      <div className={styles.galleryPhotos}>
+        <Photo slug="rosewave" image="gallery" label="RoseWave’s photography releases" />
+        <Photo slug="rosewave" image="set-tiles" label="Photographs within The Blush of Autumn release" />
+      </div>
+    </section>
+    <section className={styles.wallpaperCard} aria-label="Make it your wallpaper">
+      <div className={styles.cardCopy}>
+        <p className={base.eyebrow}>MAKE IT YOURS</p>
+        <h2>Part of your everyday.</h2>
+        <p>Choose a photograph for your home screen, lock screen, or both.</p>
+      </div>
+      <div className={styles.homePhoto}>
+        <Photo slug="rosewave" image="wallpaper-home" label="The free Blush of Autumn photograph on an Android home screen" />
+      </div>
+    </section>
+  </div>;
+}
+
 
 export function AppWalkthrough({ story }: { story: AppStory }) {
   const [current, setCurrent] = useState(0);
   const [originalStyle, setOriginalStyle] = useState(false);
-  const [playing, setPlaying] = useState(false);
+  const isRosewave = story.slug === "rosewave";
   const scrollRoot = useRef<HTMLDivElement>(null);
   const scenes = useRef<Array<HTMLElement | null>>([]);
 
-  useEffect(() => {
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setPlaying(!preference.matches);
-    update();
-    preference.addEventListener("change", update);
-    return () => preference.removeEventListener("change", update);
-  }, []);
 
   useEffect(() => {
     const root = scrollRoot.current;
@@ -95,17 +122,20 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
         </nav>
       </header>
       <main className={styles.main}>
+        <div className={styles.projectIntro}>
         <div className={styles.intro}>
           <p className={base.eyebrow}>
             A LOOK INSIDE · {story.name.toUpperCase()}
           </p>
           <h1>{story.title}</h1>
           <p>{story.intro}</p>
-          <button className={styles.videoToggle} type="button"
-            aria-pressed={playing} onClick={() => setPlaying(value => !value)}>
-            {playing ? "Pause the loops" : "Play the loops"}
-          </button>
         </div>
+        <figure className={styles.heroPhoto}>
+          <Photo slug={story.slug} image={isRosewave ? "main" : "home"}
+            label={isRosewave ? "RoseWave’s full-screen photograph viewer" : "UpDate’s home screen with planning and support options"} eager />
+        </figure>
+        </div>
+        {isRosewave ? <RosewaveShowcase /> : (
         <div className={styles.storyLayout}>
           <div
             className={styles.index}
@@ -129,15 +159,13 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
           </div>
           <div className={styles.scenes}>
             {story.chapters.map((chapter, index) => {
-              const image = `/revamp/apps/${story.slug}/${chapter.image}.webp`;
-              const media = `/revamp/apps/${story.slug}/${chapter.image}`;
               return (
                 <section
                   key={chapter.image}
                   ref={(element) => {
                     scenes.current[index] = element;
                   }}
-                  className={styles.stage}
+                  className={`${styles.stage} ${chapter.secondImage ? styles.pairedStage : ""}`}
                   aria-label={chapter.name}
                 >
                   <div className={styles.copy}>
@@ -148,16 +176,17 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
                       <p className={styles.note}>{chapter.note}</p>
                     )}
                   </div>
-                  <figure className={styles.phone}>
-                    <AppLoop src={`${media}-loop.mp4`} poster={image}
-                      label={`${story.name}: ${chapter.name}, a silent recording from the Android app`}
-                      playing={playing && current === index} />
+                  <figure className={chapter.secondImage ? styles.photoPair : styles.phone}>
+                    <Photo slug={story.slug} image={chapter.image} label={`${story.name}: ${chapter.name}`} />
+                    {chapter.secondImage && <Photo slug={story.slug} image={chapter.secondImage}
+                      label="Review the plan before sharing" />}
                   </figure>
                 </section>
               );
             })}
           </div>
         </div>
+        )}
         <section className={styles.captureNote}>
           <p className={base.eyebrow}>ABOUT THIS PREVIEW</p>
           <p>{story.context}</p>
@@ -171,7 +200,7 @@ export function AppWalkthrough({ story }: { story: AppStory }) {
         <Link href="/revamp" className={base.logo}>
           kno<span>+</span>
         </Link>
-        <p>Real screens. A project taking shape.</p>
+        <p>Useful things, made for a reason.</p>
         <span>Concept preview · Kno.plus</span>
       </footer>
     </div>
