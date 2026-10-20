@@ -20,7 +20,7 @@ export const updateStory: AppStory = {
   slug: "update",
   title: "A little backup. A little more confidence.",
   intro:
-    "Before you head out, while you’re there, and when you need a way home. A look inside the current Android app.",
+    "Going on a date means stepping into something unfamiliar. Having a plan, someone who knows where you are, and a way to ask for support can make that feel more manageable. UpDate brings those things together so there’s a little more room to enjoy the evening.",
   context:
     "The example plan uses fictional details. No safety messages or calls were sent. The Emergency screen uses the app’s visual preview.",
   chapters: [
@@ -93,7 +93,7 @@ export const rosewaveStory: AppStory = {
   slug: "rosewave",
   title: "A photograph becomes part of your day.",
   intro:
-    "A full-screen image, a release to wander through, and a way to make a photograph feel at home on your phone.",
+    "A photograph can become part of somewhere you spend time every day. RoseWave gives photography that place on your phone—a way to keep an image you connect with close, and let it become part of the everyday.",
   context:
     "The main photograph is marked free in the app. Gallery and release-grid images are reduced previews.",
   chapters: [

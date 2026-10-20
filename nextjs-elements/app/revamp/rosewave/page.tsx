@@ -3,14 +3,14 @@ import { AppWalkthrough } from "../app-walkthrough";
 import { rosewaveStory } from "../walkthroughs";
 
 export const metadata: Metadata = {
-  title: "Inside RoseWave — A real-screen walkthrough",
+  title: "RoseWave — A photograph becomes part of your day.",
   description:
-    "Explore RoseWave through the app in action: free photography, release galleries, wallpaper selection, and the Android wallpaper handoff.",
+    "Give a photograph you connect with a place in your everyday. The reason behind RoseWave.",
   alternates: { canonical: "/revamp/rosewave" },
   robots: { index: false, follow: false },
   openGraph: {
     title: "Inside RoseWave",
-    description: "A real-screen walkthrough of the Android test app.",
+    description: "Give a photograph you connect with a place in your everyday.",
     url: "https://kno.plus/revamp/rosewave",
   },
 };
