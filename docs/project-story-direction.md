@@ -1,0 +1,14 @@
+# Project stories — owner conversation, October 19, 2026
+
+The owner wants a simple story about why each project exists, without planning/process stages or an exhaustive feature tour. Approved story lines are now on the five project cards, with the UpDate and RoseWave story openings carried onto their pages. Prepress Assistant's personal origin remains uncollected; do not invent it.
+
+## Presentation considerations
+
+- UpDate: open with the unfamiliar feeling of a date and the reassurance of a plan and support. A few selected screens should support that story; showing every form field makes the page read like instructions. Keep safety preview labeling accurate.
+- RoseWave: give the photograph the strongest visual presence. The story is its move into everyday life, best supported by a viewer and a home-screen example. Gallery/settings coverage should be secondary. Retain the restriction on full-quality members' photography.
+- Insta-Post Maker: keep the working tool one click away. Any supporting story should follow photographs becoming a finished post, with a useful example instead of a long tour of controls.
+- Website building: foreground finished websites and the owner's care, curation, and turnaround. Keep the promise scoped to simple websites made well and quickly. Do not imply complex technical projects are the service being offered here.
+- Freestyle: foreground the owner's real frustration with paid diagram tools and the relief of finishing and exporting freely. Board and swimlane views can demonstrate that freedom; keep the usable tool directly accessible.
+- Prepress Assistant: wait for the owner's account of why it exists and the supplied screenshots before shaping its story.
+
+The owner is handing animation creation to Claude. This change does not create or revise recordings. Future animations should support the story's meaningful moments rather than determine the page structure. GIF downloads remain removed.

@@ -21,7 +21,7 @@ const projects: Project[] = [
     category: "Mobile apps",
     kind: "A little more peace of mind.",
     description:
-      "Exploring the moments before, during, and after a date — and how a phone can offer a little support along the way.",
+      "UpDate exists so you can step into a date with a plan and some backup, leaving more room to actually enjoy it.",
     theme: "date",
     href: "/revamp/update",
     screenshot: "/revamp/apps/update/home.webp",
@@ -31,7 +31,7 @@ const projects: Project[] = [
     category: "Mobile apps",
     kind: "A photograph becomes part of your day.",
     description:
-      "A photography-led wallpaper app, from full-screen images and release galleries to the photograph on your home screen.",
+      "A photograph can become part of somewhere you spend time every day. RoseWave gives a photo you connect with that place on your phone.",
     theme: "rose",
     href: "/revamp/rosewave",
     screenshot: "/revamp/apps/rosewave/main.webp",
@@ -41,25 +41,25 @@ const projects: Project[] = [
     category: "Web tools",
     kind: "More making. Less arranging.",
     description:
-      "A small browser tool for turning photos into a post, with more attention left for the story you want to share.",
+      "You have the photographs and something you want to share. Insta-Post Maker exists so arranging them into a post feels quick and enjoyable.",
     theme: "post",
     href: "/instapost/index.html",
   },
   {
     name: "Website building",
     category: "Websites",
-    kind: "A place that feels like yours.",
+    kind: "Simple, well made, and ready when you need it.",
     description:
-      "Websites for independent businesses, with room for their character and a clear way for people to get in touch.",
+      "I enjoy making websites, and I want you to feel excited about yours. Templates, AI, and a little curation help me create something with character, with reasonable expectations and a reasonable turnaround.",
     theme: "web",
     href: "/",
   },
   {
     name: "Freestyle",
     category: "Web tools",
-    kind: "Sketch a process. See the bigger picture.",
+    kind: "Finish your diagram without reaching for a credit card.",
     description:
-      "Draw a process on a free board and turn it into a swimlane diagram. Arrange steps, connect decisions, and take the finished map with you.",
+      "I needed a swimlane diagram for work and kept finding services that wanted payment. Freestyle grew from finding a way around that. You can finish the diagram you need and export it without reaching for a credit card.",
     theme: "flow",
     href: "/webtools/freestyle/index.html",
   },
@@ -314,11 +314,11 @@ export function Revamp() {
                 DIFFERENT QUESTIONS. DIFFERENT POSSIBILITIES.
               </p>
               <h2>
-                A few things <em>taking shape.</em>
+                A reason behind <em>everything here.</em>
               </h2>
             </div>
             <p>
-              A working collection of projects and ideas.
+              Useful things, made for a reason.
               <br />
               Different forms. The same curiosity.
             </p>

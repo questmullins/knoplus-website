@@ -3,15 +3,15 @@ import { AppWalkthrough } from "../app-walkthrough";
 import { updateStory } from "../walkthroughs";
 
 export const metadata: Metadata = {
-  title: "Inside UpDate — A real-screen walkthrough",
+  title: "UpDate — A little backup. A little more confidence.",
   description:
-    "Explore UpDate through the app in action: planning a date, check-in choices, Get Me Out, and the emergency visual preview.",
+    "A plan and a little backup, so there’s more room to enjoy the evening. The reason behind UpDate.",
   alternates: { canonical: "/revamp/update" },
   robots: { index: false, follow: false },
   openGraph: {
     title: "Inside UpDate",
     description:
-      "A real-screen walkthrough of the current Android development build.",
+      "A plan and a little backup, so there’s more room to enjoy the evening.",
     url: "https://kno.plus/revamp/update",
   },
 };
