@@ -229,6 +229,11 @@
   text-align: center;
   padding: 55px 0 30px;
 }
+.storePlaceholder {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
 .invitation p {
   color: var(--quiet);
   font-size: 12px;
@@ -241,6 +246,12 @@
   border-bottom: 1px solid #8b927e88;
 }
 @media (max-width: 700px) {
+  .pageNavigation {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px 16px !important;
+    max-width: 72%;
+  }
   .projectIntro {
     grid-template-columns: 1fr;
     gap: 28px;
