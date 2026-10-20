@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppWalkthrough } from "../app-walkthrough";
+import { AppHorizontal } from "../app-horizontal";
 import { rosewaveStory } from "../walkthroughs";
 
 export const metadata: Metadata = {
@@ -16,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function RosewaveWalkthrough() {
-  return <AppWalkthrough story={rosewaveStory} />;
+  return <AppHorizontal story={rosewaveStory} />;
 }

@@ -462,6 +462,16 @@
   transform: rotate(-5deg) translateY(30px);
   box-shadow: none;
 }
+.post .realScreen,
+.web .realScreen,
+.flow .realScreen,
+.press .realScreen {
+  width: 90%;
+  height: auto;
+  max-height: 92%;
+  object-fit: contain;
+  transform: rotate(-3deg) translateY(12px);
+}
 .walkthroughLink {
   display: inline-flex;
   justify-content: space-between;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppWalkthrough } from "../app-walkthrough";
+import { AppHorizontal } from "../app-horizontal";
 import { updateStory } from "../walkthroughs";
 
 export const metadata: Metadata = {
@@ -17,5 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function UpdateWalkthrough() {
-  return <AppWalkthrough story={updateStory} />;
+  return <AppHorizontal story={updateStory} />;
 }
