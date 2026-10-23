@@ -1,5 +1,7 @@
 # Main-site style trial on /revamp
 
+This records the initial folder trial. The current scrolling, banner, platform-badge and linked-project behavior is documented in [scrolling-project-banners.md](scrolling-project-banners.md).
+
 The `/revamp` landing page now uses the existing homepage's `app`, sidebar, template buttons, stage, photographic background, typography, menu and button styles. The original `/` page, `TemplateShowcase`, template data and shared global styles are unchanged. Scoped additions provide the nested service navigation and responsive project previews.
 
 Navigation:

@@ -22,6 +22,14 @@ const screen = (slug: string, image: string, alt: string): ProjectPhoto => ({
 });
 
 export const projectCatalog: ProjectPresentation[] = [
+  {
+    name: "Textualize", slug: "textualize", action: { kind: "store" },
+    panes: [
+      { name: "In your own words", title: "Your phone, in your own words.", text: "Textualize turns app actions into styled text shortcuts and home-screen boards. Keep the things you use close, in a form that feels like you.", photos: [], note: "Android app in development." },
+      { name: "The actions you use", title: "Less looking. More doing.", text: "Bring the actions you use into a shortcut board. The app looks for supported Android actions you can put within reach.", photos: [] },
+      { name: "Make it feel yours", title: "A little room for your type.", text: "Choose the type, spacing, colour, and arrangement of your text shortcuts. Shape a home-screen board around the way you like to use your phone.", photos: [] },
+    ],
+  },
   ...[updateStory, rosewaveStory].map(story => ({
     name: story.name,
     slug: story.slug,

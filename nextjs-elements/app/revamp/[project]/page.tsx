@@ -4,7 +4,7 @@ import { ProjectHorizontal } from "../app-horizontal";
 import { projectCatalog } from "../project-catalog";
 
 export function generateStaticParams() {
-  return projectCatalog.filter(project => !["update", "rosewave"].includes(project.slug))
+  return projectCatalog.filter(project => !["update", "rosewave", "textualize"].includes(project.slug))
     .map(project => ({ project: project.slug }));
 }
 
