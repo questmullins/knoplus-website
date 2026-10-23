@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import data from "./catalog.json";
 import s from "./gallery.module.css";
+import t from "./template.module.css";
 
 type Photo = (typeof data.collections)[number]["photos"][number];
 type Collection = (typeof data.collections)[number];
@@ -30,12 +31,6 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 }
 function WaveMark() {
   return <svg width="35" height="35" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="23" cy="13" r="7" fill="#EB8070" /><path d="M3 24c8-9 14 9 23 0s10-1 12 0M3 30c8-9 14 9 23 0s10-1 12 0" stroke="currentColor" strokeWidth="1.2" /></svg>;
-}
-function Artwork({ className = "" }: { className?: string }) {
-  return <div className={`${s.artwork} ${className}`} aria-hidden="true">
-    <Image src={`${root}/ui/sun_menu.webp`} width={360} height={360} alt="" className={s.sun} unoptimized />
-    {["a", "b", "c", "d", "e"].map((layer, i) => <Image key={layer} src={`${root}/ui/wave_menu_${layer}.webp`} width={780} height={400} alt="" unoptimized style={{ zIndex: i + 1 }} />)}
-  </div>;
 }
 function PhotoImage({ photo, className = "", eager = false }: { photo: Photo; className?: string; eager?: boolean }) {
   return <Image src={photo.src} alt={photo.title} width={photo.width} height={photo.height} unoptimized draggable={false} loading={eager ? "eager" : "lazy"} className={className} />;
@@ -72,7 +67,7 @@ function PrintScene({ photo, typeId = "framed", sizeId = "16x24", finish = "natu
 }
 
 export default function RosewaveGallery() {
-  const [collection, setCollection] = useState<Collection | null>(null);
+  const [collection, setCollection] = useState<Collection>(data.collections[0]);
   const [photo, setPhoto] = useState<Photo>(allPhotos[0]);
   const [printType, setPrintType] = useState("framed");
   const [sizeId, setSizeId] = useState("16x24");
@@ -82,7 +77,10 @@ export default function RosewaveGallery() {
   const [bag, setBag] = useState<BagItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState("");
-  const galleryDialog = useRef<HTMLDialogElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const portfolioRef = useRef<HTMLElement>(null);
+  const panelRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const printDialog = useRef<HTMLDialogElement>(null);
   const bagDialog = useRef<HTMLDialogElement>(null);
   const selectedType = types.find(type => type.id === printType)!;
@@ -106,9 +104,30 @@ export default function RosewaveGallery() {
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      panelRefs.current.forEach((panel, index) => {
+        if (!panel) return;
+        const rect = panel.getBoundingClientRect();
+        const distance = (rect.top + rect.height / 2 - page.clientHeight / 2) / page.clientHeight;
+        panel.style.setProperty("--panel-y", `${Math.max(-22, Math.min(22, distance * -34)) + index * 1.5}px`);
+      });
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    update();
+    page.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => { page.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); cancelAnimationFrame(frame); };
+  }, []);
+
   function openCollection(item: Collection) {
     setCollection(item);
-    galleryDialog.current?.showModal();
+    portfolioRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   }
   function openPrint(item: Photo) {
     setPhoto(item);
@@ -138,70 +157,50 @@ export default function RosewaveGallery() {
     }).join("\n") + `\n\nPreview subtotal: ${money(subtotal)} (before shipping and tax). Please let me know about availability and final pricing.`)}`;
   }
 
-  return <div className={s.page}>
-    <a className={s.skip} href="#collections">Skip to collections</a>
-    <header className={s.header}>
-      <a href="#top" className={s.brand} aria-label="Rose Wave home"><WaveMark /><span>ROSE WAVE</span></a>
-      <nav aria-label="Rose Wave navigation">
-        <a href="#collections">Collections</a><a href="#prints">Prints</a><a href="#app">The app</a>
+  return <div ref={pageRef} className={`${t.page} ${s.page}`}>
+    <a className={t.skip} href="#portfolio">Skip to photographs</a>
+    <header className={`${t["photo-header"]} ${menuOpen ? t["is-menu-open"] : ""}`}>
+      <a href="#top" className={t.brand} aria-label="Rose Wave Photography home"><strong>Rose Wave</strong><span>Photography</span></a>
+      <button className={t["menu-toggle"]} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="rosewave-menu" onClick={() => setMenuOpen(!menuOpen)}><span /><span /></button>
+      <nav className={t["photo-nav"]} id="rosewave-menu" aria-label="Rose Wave navigation">
+        <a href="#portfolio" onClick={() => setMenuOpen(false)}>Portfolio</a><a href="#about" onClick={() => setMenuOpen(false)}>About</a><a href="#prints" onClick={() => setMenuOpen(false)}>Prints</a><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+        <button onClick={() => { setMenuOpen(false); bagDialog.current?.showModal(); }} aria-label={`Open bag, ${count} ${count === 1 ? "item" : "items"}`}>Bag ({count})</button>
       </nav>
-      <button className={s.bagButton} onClick={() => bagDialog.current?.showModal()} aria-label={`Open bag, ${count} ${count === 1 ? "item" : "items"}`}>
-        <svg width="20" height="23" viewBox="0 0 24 26" fill="none" aria-hidden="true"><path d="M4 8h16l1 16H3L4 8Zm4 0V5a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.2" /></svg><span>Bag</span><span className={s.bagCount}>{count}</span>
-      </button>
     </header>
-
-    <main id="top">
-      <section className={s.intro} aria-labelledby="intro-heading">
-        <div className={s.introCopy}>
-          <p className={s.eyebrow}>Original photography · A different perspective</p>
-          <h1 id="intro-heading">A different way to see <br />the everyday.</h1>
-          <p>Something familiar. Something unexpected.<br />Find a photograph that feels like you.</p>
-        </div>
-        <div className={s.introArt}><Artwork /><span>Find your quiet.</span></div>
+    <main>
+      <section className={t["category-stack"]} id="top" aria-label="Photography collections">
+        {data.collections.map((item, index) => <button key={item.id} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${collection.id === item.id ? t["is-active"] : ""}`} style={{ "--image": `url("${item.photos[0].src}")` } as CSSProperties} onClick={() => openCollection(item)} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
+          <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")}</span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery</span>
+        </button>)}
       </section>
-
-      <section id="collections" className={s.collections} aria-labelledby="collection-heading">
-        <div className={s.sectionLine}><h2 id="collection-heading">The collections</h2><span>Four ways of looking at the world <span aria-hidden="true">↓</span></span></div>
-        <div className={s.bands}>
-          {data.collections.map((item, index) => <button key={item.id} className={`${s.band} ${s[item.id.replaceAll("-", "") as keyof typeof s] || ""}`} onClick={() => openCollection(item)} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
-            <PhotoImage photo={item.photos[0]} eager={index < 2} />
-            <span className={s.bandShade} />
-            <span className={s.bandIndex}>0{index + 1} / COLLECTION</span>
-            <span className={s.bandText}><strong>{item.name}</strong><span>{item.description}</span></span>
-            <span className={s.bandEnd}><small>{item.photos.length} photographs</small><span className={s.circle}><Arrow diagonal /></span></span>
-          </button>)}
+      <section className={t["portfolio-section"]} id="portfolio" ref={portfolioRef} aria-labelledby="collection-title">
+        <aside className={t["portfolio-sidebar"]}>
+          <a className={t["back-link"]} href="#top">Back to collections</a>
+          <p className={t.eyebrow}>Selected work</p><h1 id="collection-title">{collection.name}</h1>
+          <p className={t["gallery-description"]}>{collection.description}</p>
+          <ol className={t["filter-list"]} aria-label="Collection filters">{data.collections.map(item => <li key={item.id}><button className={`${t["filter-button"]} ${collection.id === item.id ? t["is-active"] : ""}`} aria-pressed={collection.id === item.id} onClick={() => setCollection(item)}>{item.name}</button></li>)}</ol>
+          <p className={t["gallery-hint"]}>{collection.photos.length} photographs.<br />Select one to explore prints.</p>
+        </aside>
+        <div className={t["gallery-grid"]} aria-live="polite" aria-label={`${collection.name} photographs`}>
+          {collection.photos.map((item, index) => <figure key={item.id} className={`${t["gallery-item"]} ${index === 0 ? t.wide : index % 4 === 1 ? t.tall : ""}`}>
+            <button onClick={() => openPrint(item)} aria-label={`Preview print of ${item.title}`}><PhotoImage photo={item} /></button><figcaption>{String(index + 1).padStart(2, "0")} / Explore print</figcaption>
+          </figure>)}
         </div>
       </section>
-
-      <section id="prints" className={s.printSection} aria-labelledby="print-heading">
-        <button className={s.featureScene} onClick={() => openPrint(allPhotos[0])} aria-label="Preview The Blush of Autumn as a print">
-          <PrintScene photo={allPhotos[0]} />
-          <span className={s.sceneExplore}>See it in your space <Arrow diagonal /></span>
-        </button>
-        <div className={s.printCopy}>
-          <p className={s.eyebrow}>From your screen to your space</p>
-          <h2 id="print-heading">Some photographs<br />deserve a wall.</h2>
-          <p>The same photograph. A different place in your day. Find a finish, choose a size, and see how it feels at home.</p>
-          <div className={s.materials} aria-label="Available print materials">
-            <span><i className={s.paperDot} />Fine art paper</span><span><i className={s.frameDot} />Framed</span><span><i className={s.metalDot} />Metal & acrylic</span><span><i className={s.canvasDot} />Canvas</span>
-          </div>
-          <button className={s.primary} onClick={() => openPrint(allPhotos[0])}>Find your print <Arrow /></button>
-          <p className={s.small}>Shop preview · Print orders opening soon</p>
-        </div>
+      <section className={t["about-section"]} id="about" aria-labelledby="about-title">
+        <p className={t.eyebrow}>About Rose Wave</p><h2 id="about-title">A different way to see the everyday.</h2><p>Something familiar. Something unexpected. Rose Wave gives a photograph you connect with a place in your everyday — on your phone, on your wall, or somewhere in between.</p>
       </section>
-
-      <section id="app" className={s.appSection} aria-labelledby="app-heading">
-        <div className={s.appCopy}><p className={s.eyebrow}>A little Rose Wave, wherever you are</p><h2 id="app-heading">Make the everyday<br />a little more yours.</h2><p>Keep a photograph close. Rose Wave brings the collection to your phone, with wallpapers you can make your own.</p><Link href="/revamp/rosewave" className={s.textLink}>Meet the app <Arrow diagonal /></Link><span className={s.comingSoon}><svg width="19" height="22" viewBox="0 0 24 28" fill="none" aria-hidden="true"><path d="m3 2 19 12L3 26V2Z" stroke="currentColor" /></svg><span><small>COMING SOON TO</small>Google Play</span></span></div>
-        <div className={s.appVisual}><Artwork /><Image src="/revamp/apps/rosewave/main.webp" width={720} height={1600} alt="Rose Wave wallpaper app showing The Blush of Autumn" unoptimized className={s.phone} /></div>
+      <section className={t["print-section"]} id="prints" aria-labelledby="print-heading">
+        <button onClick={() => openPrint(allPhotos[0])} aria-label="Preview The Blush of Autumn as a print"><PrintScene photo={allPhotos[0]} /></button>
+        <div><p className={t.eyebrow}>From your screen to your space</p><h2 id="print-heading">Some photographs deserve a wall.</h2><p>Find a finish, choose a size, and see how it feels at home. Explore fine art paper, framed prints, metal, acrylic, and canvas.</p><button className={t["text-link"]} onClick={() => openPrint(allPhotos[0])}>Find your print ↗</button><p>Shop preview · Print orders opening soon.</p></div>
+      </section>
+      <section className={t["journal-section"]} aria-label="Explore more">
+        <article><span>The app</span><h3><Link href="/revamp/rosewave">Keep a photograph close. ↗</Link></h3><p>Explore Rose Wave for your phone.<br />Coming soon to Google Play.</p></article>
+        <article><span>The website</span><h3><Link href="/templates/photo-portfolio/">A template, in its element. ↗</Link></h3><p>This gallery uses the Kno.plus Photography template. See the original, then imagine your own photographs here.</p></article>
+        <article id="contact"><span>Contact</span><h3><a href="mailto:info@kno.plus?subject=Rose%20Wave%20photography">Something caught your eye? ↗</a></h3><p>Ask about a photograph or a print.</p></article>
       </section>
     </main>
-
-    <footer className={s.footer}><a href="#top" className={s.brand}><WaveMark /><span>ROSE WAVE</span></a><span>Photography for the places you live.</span><Link href="/revamp/rosewave">A Kno.plus project ↗</Link></footer>
-
-    <dialog ref={galleryDialog} className={`${s.dialog} ${s.galleryDialog}`} aria-labelledby="gallery-title" onClick={event => { if (event.target === event.currentTarget) galleryDialog.current?.close(); }}>
-      <div className={s.dialogTop}><span className={s.eyebrow}>ROSE WAVE / THE COLLECTION</span><button className={s.close} aria-label="Close collection" onClick={() => galleryDialog.current?.close()}>×</button></div>
-      {collection && <><div className={s.galleryIntro}><h2 id="gallery-title">{collection.name}</h2><p>{collection.description}</p><span className={s.small}>{collection.photos.length} photographs · Select a photograph to explore prints</span></div><div className={s.photoGrid}>{collection.photos.map((item, index) => <button key={item.id} onClick={() => openPrint(item)} aria-label={`Preview print of ${item.title}`}><PhotoImage photo={item} /><span><span>{String(index + 1).padStart(2, "0")}</span><span>Explore print <Arrow diagonal /></span></span></button>)}</div><p className={s.galleryNote}>Browse the collection here. Enjoy the wallpapers in the Rose Wave app.</p></>}
-    </dialog>
+    <footer className={t["photo-footer"]}><span>© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><Link href="/templates/photo-portfolio/">Photography template</Link><Link href="/revamp">Kno.plus</Link></nav></footer>
 
     <dialog ref={printDialog} className={`${s.dialog} ${s.printDialog}`} aria-labelledby="product-title" onClose={() => setNotice("")} onClick={event => { if (event.target === event.currentTarget) printDialog.current?.close(); }}>
       <div className={s.dialogTop}><span className={s.eyebrow}>ROSE WAVE / FIND YOUR PRINT</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
