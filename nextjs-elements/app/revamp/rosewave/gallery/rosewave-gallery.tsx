@@ -196,11 +196,11 @@ export default function RosewaveGallery() {
       </section>
       <section className={t["journal-section"]} aria-label="Explore more">
         <article><span>The app</span><h3><Link href="/revamp/rosewave">Keep a photograph close. ↗</Link></h3><p>Explore Rose Wave for your phone.<br />Coming soon to Google Play.</p></article>
-        <article><span>The website</span><h3><Link href="/templates/photo-portfolio/">A template, in its element. ↗</Link></h3><p>This gallery uses the Kno.plus Photography template. See the original, then imagine your own photographs here.</p></article>
+        <article><span>The website</span><h3><a href="/templates/photo-portfolio/index.html">A template, in its element. ↗</a></h3><p>This gallery uses the Kno.plus Photography template. See the original, then imagine your own photographs here.</p></article>
         <article id="contact"><span>Contact</span><h3><a href="mailto:info@kno.plus?subject=Rose%20Wave%20photography">Something caught your eye? ↗</a></h3><p>Ask about a photograph or a print.</p></article>
       </section>
     </main>
-    <footer className={t["photo-footer"]}><span>© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><Link href="/templates/photo-portfolio/">Photography template</Link><Link href="/revamp">Kno.plus</Link></nav></footer>
+    <footer className={t["photo-footer"]}><span>© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><a href="/templates/photo-portfolio/index.html">Photography template</a><Link href="/revamp">Kno.plus</Link></nav></footer>
 
     <dialog ref={printDialog} className={`${s.dialog} ${s.printDialog}`} aria-labelledby="product-title" onClose={() => setNotice("")} onClick={event => { if (event.target === event.currentTarget) printDialog.current?.close(); }}>
       <div className={s.dialogTop}><span className={s.eyebrow}>ROSE WAVE / FIND YOUR PRINT</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
