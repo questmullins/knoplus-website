@@ -26,6 +26,12 @@ const validItem = (item: BagItem) => !!item && allPhotos.some(p => p.id === item
   (!t.finish || t.finish.choices.some(f => f.id === item.finish))) &&
   Number.isInteger(item.quantity) && item.quantity > 0 && item.quantity <= 20;
 
+function TemplateLink({ children }: { children: string }) {
+  // This template is a standalone public HTML document, outside the Next.js router.
+  // eslint-disable-next-line @next/next/no-html-link-for-pages
+  return <a href="/templates/photo-portfolio/index.html">{children}</a>;
+}
+
 function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d={diagonal ? "M5 19 19 5M5 5h14v14" : "M4 12h16m-6-6 6 6-6 6"} stroke="currentColor" strokeWidth="1.2" /></svg>;
 }
@@ -196,11 +202,11 @@ export default function RosewaveGallery() {
       </section>
       <section className={t["journal-section"]} aria-label="Explore more">
         <article><span>The app</span><h3><Link href="/revamp/rosewave">Keep a photograph close. ↗</Link></h3><p>Explore Rose Wave for your phone.<br />Coming soon to Google Play.</p></article>
-        <article><span>The website</span><h3><a href="/templates/photo-portfolio/index.html">A template, in its element. ↗</a></h3><p>This gallery uses the Kno.plus Photography template. See the original, then imagine your own photographs here.</p></article>
+        <article><span>The website</span><h3><TemplateLink>A template, in its element. ↗</TemplateLink></h3><p>This gallery uses the Kno.plus Photography template. See the original, then imagine your own photographs here.</p></article>
         <article id="contact"><span>Contact</span><h3><a href="mailto:info@kno.plus?subject=Rose%20Wave%20photography">Something caught your eye? ↗</a></h3><p>Ask about a photograph or a print.</p></article>
       </section>
     </main>
-    <footer className={t["photo-footer"]}><span>© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><a href="/templates/photo-portfolio/index.html">Photography template</a><Link href="/revamp">Kno.plus</Link></nav></footer>
+    <footer className={t["photo-footer"]}><span>© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><TemplateLink>Photography template</TemplateLink><Link href="/revamp">Kno.plus</Link></nav></footer>
 
     <dialog ref={printDialog} className={`${s.dialog} ${s.printDialog}`} aria-labelledby="product-title" onClose={() => setNotice("")} onClick={event => { if (event.target === event.currentTarget) printDialog.current?.close(); }}>
       <div className={s.dialogTop}><span className={s.eyebrow}>ROSE WAVE / FIND YOUR PRINT</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
