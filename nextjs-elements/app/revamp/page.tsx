@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Revamp } from "./revamp";
+import { ServicesShowcase } from "./services-showcase";
 
 export const metadata: Metadata = {
-  title: "Ideas into useful things — Consulting concept",
+  title: "Web Services, App Services & Consulting",
   description:
     "A new direction for Kno.plus: thoughtful consulting, websites, web tools, and mobile apps, shaped around the thing you want to change.",
   alternates: { canonical: "/revamp" },
@@ -16,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function RevampPage() {
-  return <Revamp />;
+  return <ServicesShowcase />;
 }
