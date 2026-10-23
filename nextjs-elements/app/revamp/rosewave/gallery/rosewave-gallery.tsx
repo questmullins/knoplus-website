@@ -38,6 +38,15 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 function WaveMark() {
   return <svg width="35" height="35" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="23" cy="13" r="7" fill="#EB8070" /><path d="M3 24c8-9 14 9 23 0s10-1 12 0M3 30c8-9 14 9 23 0s10-1 12 0" stroke="currentColor" strokeWidth="1.2" /></svg>;
 }
+function AppIcon({ name, className = "" }: { name: "gallery" | "print" | "grid" | "menu" | "close" | "arrow_right"; className?: string }) {
+  return <Image src={`${root}/icons/icon_${name}.png`} width={64} height={64} alt="" aria-hidden="true" unoptimized className={`${t["app-icon"]} ${className}`} />;
+}
+function AppArtwork({ className = "" }: { className?: string }) {
+  return <div className={`${t.artwork} ${className}`} aria-hidden="true">
+    <Image src={`${root}/ui/sun_menu.webp`} width={328} height={328} alt="" className={t["artwork-sun"]} unoptimized />
+    {["a", "b", "c", "d", "e"].map((layer, index) => <Image key={layer} src={`${root}/ui/wave_menu_${layer}.webp`} width={908} height={400} alt="" unoptimized style={{ zIndex: index + 1 }} />)}
+  </div>;
+}
 function PhotoImage({ photo, className = "", eager = false }: { photo: Photo; className?: string; eager?: boolean }) {
   return <Image src={photo.src} alt={photo.title} width={photo.width} height={photo.height} unoptimized draggable={false} loading={eager ? "eager" : "lazy"} className={className} />;
 }
@@ -166,26 +175,30 @@ export default function RosewaveGallery() {
   return <div ref={pageRef} className={`${t.page} ${s.page}`}>
     <a className={t.skip} href="#portfolio">Skip to photographs</a>
     <header className={`${t["photo-header"]} ${menuOpen ? t["is-menu-open"] : ""}`}>
-      <a href="#top" className={t.brand} aria-label="Rose Wave Photography home"><strong>Rose Wave</strong><span>Photography</span></a>
-      <button className={t["menu-toggle"]} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="rosewave-menu" onClick={() => setMenuOpen(!menuOpen)}><span /><span /></button>
+      <a href="#top" className={t.brand} aria-label="Rose Wave Photography home"><span className={t["brand-mark"]}><WaveMark /></span><span className={t["brand-type"]}><strong>Rose Wave</strong><span>Photography</span></span></a>
+      <button className={t["menu-toggle"]} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="rosewave-menu" onClick={() => setMenuOpen(!menuOpen)}><AppIcon name={menuOpen ? "close" : "menu"} /></button>
       <nav className={t["photo-nav"]} id="rosewave-menu" aria-label="Rose Wave navigation">
-        <a href="#portfolio" onClick={() => setMenuOpen(false)}>Portfolio</a><a href="#about" onClick={() => setMenuOpen(false)}>About</a><a href="#prints" onClick={() => setMenuOpen(false)}>Prints</a><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-        <button onClick={() => { setMenuOpen(false); bagDialog.current?.showModal(); }} aria-label={`Open bag, ${count} ${count === 1 ? "item" : "items"}`}>Bag ({count})</button>
+        <a href="#portfolio" onClick={() => setMenuOpen(false)}><AppIcon name="gallery" />Portfolio</a><a href="#about" onClick={() => setMenuOpen(false)}>About</a><a href="#prints" onClick={() => setMenuOpen(false)}><AppIcon name="print" />Prints</a><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+        <button onClick={() => { setMenuOpen(false); bagDialog.current?.showModal(); }} aria-label={`Open bag, ${count} ${count === 1 ? "item" : "items"}`}><svg width="18" height="21" viewBox="0 0 24 26" fill="none" aria-hidden="true"><path d="M4 8h16l1 16H3L4 8Zm4 0V5a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.4" /></svg>Bag ({count})</button>
       </nav>
     </header>
-    <main>
-      <section className={t["category-stack"]} id="top" aria-label="Photography collections">
+    <main id="top">
+      <section className={t["collection-intro"]} aria-label="Rose Wave photography">
+        <div className={t["intro-copy"]}><p className={t.eyebrow}>Original photography · A different perspective</p><p className={t["intro-title"]}>Find a photograph<br />that feels like you.</p></div>
+        <AppArtwork className={t["intro-art"]} />
+      </section>
+      <section className={t["category-stack"]} aria-label="Photography collections">
         {data.collections.map((item, index) => <button key={item.id} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${collection.id === item.id ? t["is-active"] : ""}`} style={{ "--image": `url("${item.photos[0].src}")` } as CSSProperties} onClick={() => openCollection(item)} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
-          <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")}</span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery</span>
+          <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")} <span className={t["collection-count"]}>{item.photos.length} photographs</span></span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery <AppIcon name="arrow_right" /></span>
         </button>)}
       </section>
       <section className={t["portfolio-section"]} id="portfolio" ref={portfolioRef} aria-labelledby="collection-title">
         <aside className={t["portfolio-sidebar"]}>
           <a className={t["back-link"]} href="#top">Back to collections</a>
-          <p className={t.eyebrow}>Selected work</p><h1 id="collection-title">{collection.name}</h1>
+          <p className={t.eyebrow}><AppIcon name="grid" />The collections</p><h1 id="collection-title">{collection.name}</h1>
           <p className={t["gallery-description"]}>{collection.description}</p>
           <ol className={t["filter-list"]} aria-label="Collection filters">{data.collections.map(item => <li key={item.id}><button className={`${t["filter-button"]} ${collection.id === item.id ? t["is-active"] : ""}`} aria-pressed={collection.id === item.id} onClick={() => setCollection(item)}>{item.name}</button></li>)}</ol>
-          <p className={t["gallery-hint"]}>{collection.photos.length} photographs.<br />Select one to explore prints.</p>
+          <p className={t["gallery-hint"]}>{collection.photos.length} photographs.<br />Select one to explore prints.</p><div className={t["sidebar-mark"]} aria-hidden="true"><WaveMark /></div>
         </aside>
         <div className={t["gallery-grid"]} aria-live="polite" aria-label={`${collection.name} photographs`}>
           {collection.photos.map((item, index) => <figure key={item.id} className={`${t["gallery-item"]} ${index === 0 ? t.wide : index % 4 === 1 ? t.tall : ""}`}>
@@ -194,11 +207,11 @@ export default function RosewaveGallery() {
         </div>
       </section>
       <section className={t["about-section"]} id="about" aria-labelledby="about-title">
-        <p className={t.eyebrow}>About Rose Wave</p><h2 id="about-title">A different way to see the everyday.</h2><p>Something familiar. Something unexpected. Rose Wave gives a photograph you connect with a place in your everyday — on your phone, on your wall, or somewhere in between.</p>
+        <AppArtwork className={t["about-art"]} /><p className={t.eyebrow}>About Rose Wave</p><h2 id="about-title">A different way to see the everyday.</h2><p>Something familiar. Something unexpected. Rose Wave gives a photograph you connect with a place in your everyday — on your phone, on your wall, or somewhere in between.</p>
       </section>
       <section className={t["print-section"]} id="prints" aria-labelledby="print-heading">
         <button onClick={() => openPrint(allPhotos[0])} aria-label="Preview The Blush of Autumn as a print"><PrintScene photo={allPhotos[0]} /></button>
-        <div><p className={t.eyebrow}>From your screen to your space</p><h2 id="print-heading">Some photographs deserve a wall.</h2><p>Find a finish, choose a size, and see how it feels at home. Explore fine art paper, framed prints, metal, acrylic, and canvas.</p><button className={t["text-link"]} onClick={() => openPrint(allPhotos[0])}>Find your print ↗</button><p>Shop preview · Print orders opening soon.</p></div>
+        <div><p className={t.eyebrow}><AppIcon name="print" />From your screen to your space</p><h2 id="print-heading">Some photographs deserve a wall.</h2><p>Find a finish, choose a size, and see how it feels at home. Explore fine art paper, framed prints, metal, acrylic, and canvas.</p><button className={t["text-link"]} onClick={() => openPrint(allPhotos[0])}>Find your print <AppIcon name="arrow_right" /></button><p>Shop preview · Print orders opening soon.</p></div>
       </section>
       <section className={t["journal-section"]} aria-label="Explore more">
         <article><span>The app</span><h3><Link href="/revamp/rosewave">Keep a photograph close. ↗</Link></h3><p>Explore Rose Wave for your phone.<br />Coming soon to Google Play.</p></article>
@@ -206,7 +219,8 @@ export default function RosewaveGallery() {
         <article id="contact"><span>Contact</span><h3><a href="mailto:info@kno.plus?subject=Rose%20Wave%20photography">Something caught your eye? ↗</a></h3><p>Ask about a photograph or a print.</p></article>
       </section>
     </main>
-    <footer className={t["photo-footer"]}><span>© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><TemplateLink>Photography template</TemplateLink><Link href="/revamp">Kno.plus</Link></nav></footer>
+    <div className={t["footer-art"]}><AppArtwork /></div>
+    <footer className={t["photo-footer"]}><span className={t["footer-brand"]}><WaveMark />© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><TemplateLink>Photography template</TemplateLink><Link href="/revamp">Kno.plus</Link></nav></footer>
 
     <dialog ref={printDialog} className={`${s.dialog} ${s.printDialog}`} aria-labelledby="product-title" onClose={() => setNotice("")} onClick={event => { if (event.target === event.currentTarget) printDialog.current?.close(); }}>
       <div className={s.dialogTop}><span className={s.eyebrow}>ROSE WAVE / FIND YOUR PRINT</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
