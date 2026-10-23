@@ -81,6 +81,24 @@ function PrintScene({ photo, typeId = "framed", sizeId = "16x24", finish = "natu
   </div>;
 }
 
+function StudioPrint({ photo, typeId, sizeId, finish }: { photo: Photo; typeId: string; sizeId: string; finish: string }) {
+  const [short, long] = sizeId.split("x").map(Number);
+  const landscape = photo.width > photo.height;
+  const width = landscape ? long : short;
+  const height = landscape ? short : long;
+  const framed = typeId === "framed";
+  const paper = typeId === "paper";
+  const outsideWidth = width + (framed ? 6 : paper ? width * .14 : 0);
+  const outsideHeight = height + (framed ? 6 : paper ? width * .14 : 0);
+  return <div className={s.studio} aria-label={`${photo.title}, ${typeId} print${framed ? ` with a ${finish} frame` : ""}`}>
+    <div className={s.studioFit} style={{ "--art-ratio": outsideWidth / outsideHeight, aspectRatio: `${outsideWidth} / ${outsideHeight}` } as CSSProperties}>
+      <div className={`${s.studioPrint} ${typeId === "canvas" ? s.canvas : ""}`} style={{ borderWidth: framed ? `${100 / outsideWidth}cqw` : 0, borderImageSource: framed ? `url(${root}/frames/${finish}.webp)` : undefined }}>
+        <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}><PhotoImage photo={photo} eager /></div>
+      </div>
+    </div>
+  </div>;
+}
+
 export default function RosewaveGallery() {
   const [collection, setCollection] = useState<Collection>(data.collections[0]);
   const [photo, setPhoto] = useState<Photo>(allPhotos[0]);
@@ -88,7 +106,7 @@ export default function RosewaveGallery() {
   const [sizeId, setSizeId] = useState("16x24");
   const [finish, setFinish] = useState("natural");
   const [room, setRoom] = useState("sideboard");
-  const [view, setView] = useState("room");
+  const [view, setView] = useState("photo");
   const [bag, setBag] = useState<BagItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState("");
@@ -146,11 +164,12 @@ export default function RosewaveGallery() {
   }
   function openPrint(item: Photo) {
     setPhoto(item);
-    setView("room");
+    setView("photo");
     printDialog.current?.showModal();
   }
   function changeType(id: string) {
     setPrintType(id);
+    if (view === "photo") setView("print");
     const next = types.find(type => type.id === id)!;
     if (!next.sizes.some(size => size.id === sizeId)) setSizeId(next.sizes[0].id);
   }
@@ -223,24 +242,26 @@ export default function RosewaveGallery() {
     <footer className={t["photo-footer"]}><span className={t["footer-brand"]}><WaveMark />© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><TemplateLink>Photography template</TemplateLink><Link href="/revamp">Kno.plus</Link></nav></footer>
 
     <dialog ref={printDialog} className={`${s.dialog} ${s.printDialog}`} aria-labelledby="product-title" onClose={() => setNotice("")} onClick={event => { if (event.target === event.currentTarget) printDialog.current?.close(); }}>
-      <div className={s.dialogTop}><span className={s.eyebrow}>ROSE WAVE / FIND YOUR PRINT</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
+      <div className={`${s.dialogTop} ${s.productHeader}`}><button className={s.backToGallery} onClick={() => printDialog.current?.close()}><span aria-hidden="true">←</span> Back to gallery</button><span className={s.productWordmark}><WaveMark />Rose Wave</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
       <div className={s.product}>
         <div className={s.productVisual}>
-          <div className={s.viewSwitch} role="group" aria-label="Preview view"><button aria-pressed={view === "room"} onClick={() => setView("room")}>In a room</button><button aria-pressed={view === "photo"} onClick={() => setView("photo")}>The photograph</button></div>
-          {view === "room" ? <PrintScene photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} roomId={room} /> : <div className={s.photoOnly}><PhotoImage photo={photo} eager /></div>}
+          <div className={s.viewSwitch} role="group" aria-label="Preview view"><button aria-pressed={view === "photo"} onClick={() => setView("photo")}>Photograph</button><button aria-pressed={view === "print"} onClick={() => setView("print")}>Print preview</button><button aria-pressed={view === "room"} onClick={() => setView("room")}>In a room</button></div>
+          {view === "room" ? <div className={s.roomStage}><PrintScene photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} roomId={room} /></div> : view === "print" ? <StudioPrint photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} /> : <div className={s.photoOnly}><PhotoImage photo={photo} eager /></div>}
+          {view !== "room" && <p className={s.visualCaption}>{view === "photo" ? "The photograph, uncropped" : `${selectedType.name} · ${selectedSize.name}${selectedType.finish ? ` · ${selectedType.finish.choices.find(item => item.id === finish)?.name} frame` : ""}`}</p>}
           {view === "room" && <div className={s.roomOptions} role="group" aria-label="Room"><span>Try a space</span>{rooms.map(item => <button key={item.id} aria-pressed={room === item.id} onClick={() => setRoom(item.id)}>{item.name}</button>)}</div>}
         </div>
         <div className={s.productCopy}>
-          <p className={s.eyebrow}>Original photography / Print preview</p><h2 id="product-title">{photo.title.split(" · ")[0]}<span>Photograph {photo.title.split(" · ")[1]}</span></h2>
+          <div className={s.productDetails}><p className={s.eyebrow}>Original photography / Print preview</p><h2 id="product-title">{photo.title.split(" · ")[0]}<span>Photograph {photo.title.split(" · ")[1]}</span></h2>
           <fieldset><legend>Find your finish</legend><div className={s.typeOptions}>{types.map(type => <button key={type.id} aria-pressed={printType === type.id} onClick={() => changeType(type.id)}>{type.name}</button>)}</div></fieldset>
           <p className={s.materialNote}>{selectedType.about}</p>
-          <label className={s.sizeLabel}>Print size <select value={selectedSize.id} onChange={event => setSizeId(event.target.value)}>{selectedType.sizes.map(size => <option key={size.id} value={size.id}>{size.name}</option>)}</select></label>
-          {selectedType.finish && <fieldset><legend>Frame <span>{selectedType.finish.choices.find(item => item.id === finish)?.name}</span></legend><div className={s.swatches}>{selectedType.finish.choices.map(item => <button key={item.id} aria-label={`${item.name} frame`} aria-pressed={finish === item.id} onClick={() => setFinish(item.id)} style={{ backgroundColor: frameColors[item.id] }} />)}</div></fieldset>}
-          <div className={s.priceLine}><strong>{money(selectedSize.cents)}</strong><span>USD · Before shipping & tax</span></div>
+          <label className={s.sizeLabel}>Print size <select value={selectedSize.id} onChange={event => { setSizeId(event.target.value); if (view === "photo") setView("print"); }}>{selectedType.sizes.map(size => <option key={size.id} value={size.id}>{size.name}</option>)}</select></label>
+          {selectedType.finish && <fieldset><legend>Frame <span>{selectedType.finish.choices.find(item => item.id === finish)?.name}</span></legend><div className={s.swatches}>{selectedType.finish.choices.map(item => <button key={item.id} aria-label={`${item.name} frame`} aria-pressed={finish === item.id} onClick={() => { setFinish(item.id); if (view === "photo") setView("print"); }}><span className={s.frameChip} style={{ backgroundColor: frameColors[item.id], backgroundImage: `url(${root}/frames/${item.id}.webp)` }} /><span>{item.name}</span></button>)}</div></fieldset>}
+          <p className={s.previewNote}>Print previews illustrate the selected size and finish. Room views offer a sense of scale.{!photo.free && " This photograph is shown at preview resolution."}</p></div>
+          <div className={s.purchaseFooter}><div className={s.priceLine}><strong>{money(selectedSize.cents)}</strong><span>USD · Before shipping & tax</span></div>
           <button className={s.primary} onClick={addToBag}>Add to bag <Arrow /></button>
           <div className={s.addNotice} role="status" aria-live="polite">{notice && <span>{notice} <button onClick={() => bagDialog.current?.showModal()}>View bag →</button></span>}</div>
           <p className={s.small}>Shop preview. Save your choices in the bag; online ordering is coming soon.</p>
-          <p className={s.previewNote}>Room views illustrate the size and finish. The photograph is fitted to the selected print size.{!photo.free && " This photograph is shown at preview resolution."}</p>
+          </div>
         </div>
       </div>
     </dialog>
