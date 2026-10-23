@@ -2,7 +2,7 @@
 
 The standalone concept lives at `/revamp/rosewave/gallery`, linked from both the RoseWave project opening and its card on `/revamp`. The project walkthrough and Google Play placeholder stay available.
 
-The wide collection strips take their cue from the photography template. The typography, palette, sun, waves, room photographs, and frame textures come from the RoseWave app and UI kit. Nothing new needed to be rendered in Blender: the existing kit already supplies editable Blender sources and the artwork used here.
+The gallery now uses the actual Kno.plus Photography template: expanding collection strips, Kanit typography, paper/ink palette, a sticky collection filter, an asymmetric photo grid, the dark about section, and the editorial footer. `template.module.css` is adapted directly from `public/templates/photo-portfolio/styles.css`, scoped to this route so the original homepage and template demo remain unchanged. RoseWave supplies the photographs, room scenes, frame textures, and print options. A visible credit links to the original template as a working portfolio example.
 
 ## Asset provenance
 
@@ -17,7 +17,7 @@ Source: `questmullins/rosewave`, main commit `9341d5f` (2026-10-23). That reposi
 
 ## What works
 
-Each collection opens its photographs. Selecting one opens a print preview with paper, framed, metal, acrylic, and canvas choices, supported sizes, eight frame finishes, three room scenes, and a photograph-only view. Keyboard focus and Escape use native modal dialogs; closing a print returns to the collection beneath it.
+Each collection opens its photographs. Selecting one opens a print preview with paper, framed, metal, acrylic, and canvas choices, supported sizes, eight frame finishes, three room scenes, and a photograph-only view. Collection filters stay on the page. Keyboard focus and Escape use native print/bag modal dialogs; closing a print returns to the photo grid.
 
 The bag supports quantities, removal, current catalog subtotals, and optional browser storage. “Ask about these prints” opens an email draft to the existing public Kno.plus address with the selections. It does not send email or place an order automatically.
 
