@@ -17,7 +17,7 @@ Source: `questmullins/rosewave`, main commit `9341d5f` (2026-10-23). That reposi
 
 ## What works
 
-Each collection opens its photographs. Selecting one opens a print preview with paper, framed, metal, acrylic, and canvas choices, supported sizes, eight frame finishes, three room scenes, and a photograph-only view. Collection filters stay on the page. Keyboard focus and Escape use native print/bag modal dialogs; closing a print returns to the photo grid.
+Each collection opens its photographs. Selecting one opens a full-screen product view, initially showing the uncropped photograph. Photograph / Print preview / In a room controls switch between the original image, an isolated textured-frame preview, and three measured room scenes. Paper, framed, metal, acrylic, and canvas choices, supported sizes, and eight named frame finishes remain available. Choosing a material, size, or frame from the photograph view switches to the print preview. On desktop the artwork stays visible beside independently scrolling product options and a fixed price/add-to-bag area; phones use one vertical product view beneath the persistent gallery-return header. Collection filters stay on the page. Keyboard focus and Escape use native print/bag modal dialogs; closing a print returns to the photo grid.
 
 The bag supports quantities, removal, current catalog subtotals, and optional browser storage. “Ask about these prints” opens an email draft to the existing public Kno.plus address with the selections. It does not send email or place an order automatically.
 

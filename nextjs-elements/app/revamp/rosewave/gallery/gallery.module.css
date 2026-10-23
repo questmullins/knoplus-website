@@ -104,3 +104,72 @@
 @media (prefers-reduced-motion: reduce) { .primary { transition: none; } }
 
 .eyebrow { font-size: 10px !important; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--quiet); }
+
+/* Full-screen product browsing, with the artwork and purchase choices side by side. */
+.dialog.printDialog { inset: 0; margin: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; border-radius: 0; overflow: hidden; }
+.printDialog[open] { display: grid; grid-template-rows: 72px minmax(0, 1fr); }
+.productHeader { position: relative; padding: 12px 28px; min-height: 0; }
+.backToGallery { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; background: none; border: 0; font-size: 12px !important; }
+.backToGallery > span { font-size: 24px; line-height: 1; }
+.productWordmark { display: inline-flex; align-items: center; gap: 10px; font: 300 24px/1 "Rose Gallery Jost", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.productHeader .close { width: 42px; height: 42px; }
+.printDialog .product { display: grid; grid-template-columns: minmax(0, 1fr) clamp(360px, 33vw, 510px); height: 100%; min-height: 0; overflow: hidden; }
+.printDialog .productVisual { width: 100%; height: 100%; min-height: 0; aspect-ratio: auto; align-self: stretch; background: radial-gradient(ellipse at 50% 38%, #fff7ee, #f0dccb); overflow: hidden; }
+.printDialog .viewSwitch { top: 20px; padding: 4px; background: #fff1e1ee; box-shadow: 0 3px 14px #5d3c4912; }
+.printDialog .viewSwitch button { padding: 10px 17px; min-height: 42px; font-size: 11px; }
+.printDialog .photoOnly { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; padding: 90px clamp(25px, 5vw, 95px) 68px; background: transparent; }
+.printDialog .photoOnly img { width: 100%; height: 100%; min-height: 0; max-height: 100%; object-fit: contain; }
+.visualCaption { position: absolute; bottom: 22px; left: 20px; right: 20px; margin: 0; text-align: center; color: var(--quiet); font-size: 10px !important; letter-spacing: .04em; pointer-events: none; }
+.studio { position: absolute; inset: 0; display: grid; place-items: center; container-type: size; }
+.studioFit { position: relative; container-type: inline-size; width: min(80cqw, calc((100cqh - 150px) * var(--art-ratio))); }
+.studioPrint { position: absolute; inset: 0; background: #fffaf1; border-style: solid; border-color: #ae8b66; border-image-slice: 40; border-image-repeat: stretch; box-shadow: 6px 10px 24px #5d3c4930; }
+.studioPrint img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.roomStage { display: grid; place-items: center; width: 100%; height: 100%; container-type: size; background: #e3d9c9; }
+.roomStage .scene { position: relative; top: auto; width: min(100cqw, calc(100cqh * 2 / 3)); height: auto; max-height: none; aspect-ratio: 2 / 3; }
+.roomStage .roomPhoto { width: 100%; height: auto; }
+.printDialog .roomOptions { bottom: 20px; left: 50%; right: auto; transform: translateX(-50%); width: max-content; max-width: calc(100% - 28px); padding: 5px; }
+.printDialog .roomOptions button { min-height: 40px; font-size: 10px; padding: 8px 13px; }
+.printDialog .roomOptions > span { display: none; }
+.printDialog .productCopy { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; border-left: 1px solid var(--rule); }
+.productDetails { flex: 1; overflow: auto; padding: 28px 30px 24px; overscroll-behavior: contain; }
+.productDetails h2 { font-size: clamp(30px, 3vw, 42px); margin: 12px 0 24px; }
+.productDetails fieldset { margin: 20px 0; }
+.productDetails .materialNote { font-size: 12px; line-height: 1.7; min-height: 0; }
+.productDetails .typeOptions button { min-height: 40px; padding: 9px 13px; font-size: 11px; }
+.productDetails .sizeLabel { font-size: 12px; }
+.productDetails .sizeLabel select { min-height: 44px; font-size: 12px; }
+.productDetails legend { font-size: 12px; }
+.productDetails .swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.productDetails .swatches button { display: grid; justify-items: center; align-content: center; gap: 7px; width: auto; height: auto; min-height: 70px; padding: 8px 4px; border: 1px solid var(--rule); border-radius: 8px; background: transparent; box-shadow: none; font-size: 9px; }
+.productDetails .swatches button[aria-pressed="true"] { outline: none; border-color: var(--rosewood); background: var(--paper); }
+.frameChip { display: block; width: 30px; height: 24px; border-radius: 3px; background-size: cover; box-shadow: inset 0 0 0 1px #5d3c4922; }
+.productDetails .previewNote { padding-top: 4px; font-size: 10px; line-height: 1.7; }
+.purchaseFooter { flex-shrink: 0; padding: 18px 30px 20px; border-top: 1px solid var(--rule); background: var(--ivory); box-shadow: 0 -8px 20px #5d3c4908; }
+.purchaseFooter .priceLine { border: 0; padding: 0; margin: 0 0 14px; }
+.purchaseFooter .priceLine strong { font-size: 32px; }
+.purchaseFooter .primary { width: 100%; }
+.purchaseFooter .small { font-size: 10px; line-height: 1.6; }
+.purchaseFooter .addNotice { min-height: 26px; }
+@media (max-width: 900px) {
+  .printDialog[open] { grid-template-rows: 64px minmax(0, 1fr); }
+  .productHeader { padding: 8px 18px; }
+  .productWordmark { font-size: 19px; }
+  .productWordmark svg { width: 28px; height: 28px; }
+  .printDialog .product { display: block; overflow: auto; overscroll-behavior: contain; }
+  .printDialog .productVisual { height: clamp(330px, 58dvh, 560px); }
+  .printDialog .productCopy { display: block; min-height: auto; overflow: visible; border-left: 0; border-top: 1px solid var(--rule); }
+  .productDetails { overflow: visible; padding: 25px; }
+  .productDetails h2 { font-size: 36px; }
+  .purchaseFooter { padding: 20px 25px 28px; }
+}
+@media (max-width: 650px) {
+  .productWordmark { display: none; }
+  .productHeader { padding-inline: 16px; }
+  .productHeader .dialogActions { gap: 16px; }
+  .backToGallery { font-size: 11px !important; gap: 8px; }
+  .printDialog .viewSwitch { top: 14px; }
+  .printDialog .viewSwitch button { padding: 8px 12px; font-size: 10px; }
+  .printDialog .photoOnly { padding: 78px 22px 48px; }
+  .visualCaption { bottom: 16px; font-size: 9px !important; }
+  .printDialog .roomOptions { bottom: 14px; }
+}
