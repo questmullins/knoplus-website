@@ -116,6 +116,8 @@ export default function RosewaveGallery() {
   const panelRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const printDialog = useRef<HTMLDialogElement>(null);
   const bagDialog = useRef<HTMLDialogElement>(null);
+  const sizeControlRef = useRef<HTMLLabelElement>(null);
+  const sizeWheelRef = useRef({ distance: 0, lastStep: 0 });
   const selectedType = types.find(type => type.id === printType)!;
   const selectedSize = selectedType.sizes.find(size => size.id === sizeId) || selectedType.sizes[0];
   const count = bag.reduce((sum, item) => sum + item.quantity, 0);
@@ -157,6 +159,32 @@ export default function RosewaveGallery() {
     window.addEventListener("resize", schedule);
     return () => { page.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); cancelAnimationFrame(frame); };
   }, []);
+
+  useEffect(() => {
+    const control = sizeControlRef.current;
+    if (!control) return;
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || !event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !printDialog.current?.open || bagDialog.current?.open) return;
+      event.preventDefault();
+      const wheel = sizeWheelRef.current;
+      const now = performance.now();
+      // Keep high-resolution trackpad gestures from racing through every size.
+      if (now - wheel.lastStep < 150) return;
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? control.clientHeight : 1);
+      if (Math.sign(delta) !== Math.sign(wheel.distance)) wheel.distance = 0;
+      wheel.distance += delta;
+      if (Math.abs(wheel.distance) < 24) return;
+      const index = selectedType.sizes.findIndex(size => size.id === selectedSize.id);
+      const next = Math.max(0, Math.min(selectedType.sizes.length - 1, index + Math.sign(wheel.distance)));
+      wheel.distance = 0;
+      wheel.lastStep = now;
+      if (next === index) return;
+      setSizeId(selectedType.sizes[next].id);
+      if (view === "photo") setView("print");
+    };
+    control.addEventListener("wheel", onWheel, { passive: false });
+    return () => control.removeEventListener("wheel", onWheel);
+  }, [selectedType, selectedSize.id, view]);
 
   function openCollection(item: Collection) {
     setCollection(item);
@@ -254,7 +282,7 @@ export default function RosewaveGallery() {
           <div className={s.productDetails}><p className={s.eyebrow}>Original photography / Print preview</p><h2 id="product-title">{photo.title.split(" · ")[0]}<span>Photograph {photo.title.split(" · ")[1]}</span></h2>
           <fieldset><legend>Find your finish</legend><div className={s.typeOptions}>{types.map(type => <button key={type.id} aria-pressed={printType === type.id} onClick={() => changeType(type.id)}>{type.name}</button>)}</div></fieldset>
           <p className={s.materialNote}>{selectedType.about}</p>
-          <label className={s.sizeLabel}>Print size <select value={selectedSize.id} onChange={event => { setSizeId(event.target.value); if (view === "photo") setView("print"); }}>{selectedType.sizes.map(size => <option key={size.id} value={size.id}>{size.name}</option>)}</select></label>
+          <label ref={sizeControlRef} className={s.sizeLabel}><span>Print size<small className={s.sizeHint}>Scroll to change</small></span><select aria-label="Print size" value={selectedSize.id} onChange={event => { setSizeId(event.target.value); if (view === "photo") setView("print"); }}>{selectedType.sizes.map(size => <option key={size.id} value={size.id}>{size.name}</option>)}</select></label>
           {selectedType.finish && <fieldset><legend>Frame <span>{selectedType.finish.choices.find(item => item.id === finish)?.name}</span></legend><div className={s.swatches}>{selectedType.finish.choices.map(item => <button key={item.id} aria-label={`${item.name} frame`} aria-pressed={finish === item.id} onClick={() => { setFinish(item.id); if (view === "photo") setView("print"); }}><span className={s.frameChip} style={{ backgroundColor: frameColors[item.id], backgroundImage: `url(${root}/frames/${item.id}.webp)` }} /><span>{item.name}</span></button>)}</div></fieldset>}
           <p className={s.previewNote}>Print previews illustrate the selected size and finish. Room views offer a sense of scale.{!photo.free && " This photograph is shown at preview resolution."}</p></div>
           <div className={s.purchaseFooter}><div className={s.priceLine}><strong>{money(selectedSize.cents)}</strong><span>USD · Before shipping & tax</span></div>
