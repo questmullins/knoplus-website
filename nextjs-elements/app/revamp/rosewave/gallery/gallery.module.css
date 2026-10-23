@@ -173,3 +173,6 @@
   .visualCaption { bottom: 16px; font-size: 9px !important; }
   .printDialog .roomOptions { bottom: 14px; }
 }
+
+.sizeHint { display: block; margin-top: 3px; color: var(--quiet); font-size: 9px; font-weight: 400; }
+@media (hover: none) { .sizeHint { display: none; } }
