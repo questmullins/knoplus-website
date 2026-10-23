@@ -3,8 +3,9 @@ import { AppHorizontal } from "../../app-horizontal";
 import { rosewaveStory } from "../../walkthroughs";
 
 export const metadata: Metadata = {
-  title: "RoseWave — Horizontal preview",
-  description: "A photograph becomes part of your day. Explore RoseWave, one pane at a time.",
+  title: "RoseWave — A photograph becomes part of your day",
+  description: "Explore RoseWave in the Kno.plus project showcase.",
+  alternates: { canonical: "/revamp/rosewave" },
   robots: { index: false, follow: false },
 };
 

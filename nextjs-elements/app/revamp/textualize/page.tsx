@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function TextualizePage() {
-  return <ServicesShowcase initialId="textualize" />;
+  return <ServicesShowcase projectSlug="textualize" />;
 }
