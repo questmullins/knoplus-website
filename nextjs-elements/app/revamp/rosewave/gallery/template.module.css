@@ -637,3 +637,111 @@
  .page *, .page *::before, .page *::after { transition: none !important; }
  .category-panel::before { transform: scale(1.08) !important; }
 }
+
+/* RoseWave's app identity, over the Photography template's layout and behavior. */
+@font-face { font-family: "Rose Gallery Jost"; src: url("/revamp/rosewave-gallery/fonts/Jost-Light.ttf") format("truetype"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Rose Gallery DM"; src: url("/revamp/rosewave-gallery/fonts/DMSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Rose Gallery DM"; src: url("/revamp/rosewave-gallery/fonts/DMSans-Medium.ttf") format("truetype"); font-weight: 500 700; font-display: swap; }
+.page {
+  --ink: #5d3c49; --paper: #fff1e1; --soft: #f5e0d1; --muted: #795860;
+  --white: #fff1e1; --line: #e9c4b6; --body: "Rose Gallery DM", sans-serif;
+  font-weight: 400; background: var(--paper); scroll-padding-top: 95px;
+}
+.page :where(h1, h2, h3) { font-family: "Rose Gallery Jost", sans-serif; }
+.page .app-icon { width: 20px; height: 20px; object-fit: contain; flex: 0 0 auto; }
+.photo-header {
+  align-items: center; padding-block: 17px; color: var(--ink); mix-blend-mode: normal;
+  background: #fff1e1f0; border-bottom: 1px solid #e9c4b680; backdrop-filter: blur(18px);
+}
+.brand { display: flex; align-items: center; gap: 13px; }
+.brand .brand-mark { display: grid; place-items: center; width: 46px; height: 46px; background: #f5e0d1; border-radius: 50%; }
+.brand-mark svg { width: 34px; height: 34px; }
+.brand .brand-type { display: grid; gap: 6px; }
+.brand strong { font-family: "Rose Gallery Jost", sans-serif; font-size: 25px; font-weight: 300; letter-spacing: .2em; }
+.brand-type > span { font-size: 8px; letter-spacing: .3em; }
+.photo-nav { gap: clamp(22px, 2.7vw, 44px); }
+.photo-nav a, .photo-nav button { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .12em; }
+.photo-nav a:hover, .photo-nav button:hover { color: #9c5361; }
+.photo-nav button { padding: 10px 17px; background: #f5e0d1; border-radius: 24px; }
+.collection-intro { position: relative; padding: 127px var(--hero-pad-x) 38px; overflow: hidden; background: linear-gradient(120deg, #fff1e1 40%, #f5e0d1); }
+.intro-copy { position: relative; z-index: 8; max-width: 65%; }
+.page .intro-title { margin: 0; font: 300 clamp(36px, 4.2vw, 62px)/1.06 "Rose Gallery Jost", sans-serif; letter-spacing: -.025em; color: var(--ink); }
+.artwork { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.artwork > img { position: absolute; bottom: 0; left: 0; width: 100%; height: 55%; object-fit: fill; }
+.artwork > .artwork-sun { left: auto; right: 17%; bottom: 32%; width: 35%; height: auto; }
+.intro-art { inset: auto 0 0 auto; width: 43%; max-width: 680px; height: 230px; opacity: .9; mask-image: linear-gradient(90deg, transparent, #000 22%); }
+.intro-art > .artwork-sun { width: 120px; bottom: 20%; }
+.category-stack { min-height: 0; padding-block: 0 36px; }
+.category-panel { gap: 15px; }
+.category-panel::before { background: linear-gradient(90deg, #291e30a8, #291e3010 65%, #291e303d), var(--image); background-size: cover; background-position: center; filter: none; }
+.category-panel:first-child { border-radius: 12px 12px 0 0; }
+.category-panel:last-child { border-radius: 0 0 12px 12px; }
+.category-title { font-family: "Rose Gallery Jost", sans-serif; letter-spacing: .075em; }
+.category-number { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 20px; color: #fff1e1df; }
+.collection-count { font-size: 10px; letter-spacing: .12em; }
+.category-action { display: inline-flex; align-items: center; gap: 15px; padding-bottom: 0; border: 0; font-size: 10px; }
+.category-action .app-icon { filter: brightness(0) invert(1); width: 19px; height: 19px; transition: transform .3s ease; }
+.category-panel:hover .category-action .app-icon { transform: translateX(5px); }
+.portfolio-section { padding-top: 85px; }
+.portfolio-sidebar h1 { font-size: clamp(36px, 3.5vw, 56px); letter-spacing: .045em; line-height: 1.05; }
+.eyebrow { display: flex; align-items: center; gap: 10px; font-size: 9px; letter-spacing: .18em; }
+.filter-list { gap: 6px; }
+.filter-button { margin-left: 10px; padding: 9px 12px; border-radius: 24px; font-family: var(--body); font-size: 11px; letter-spacing: 0; text-align: left; }
+.filter-button.is-active { color: #5d3c49; background: #f5e0d1; font-weight: 500; }
+.filter-button:hover, .filter-button:focus-visible { background: #f5e0d180; }
+.sidebar-mark { margin-top: 35px; color: #99646c; opacity: .7; }
+.gallery-item { border-radius: 3px; }
+.gallery-item figcaption { color: #fff1e1; font-size: 9px; letter-spacing: .1em; }
+.about-section { position: relative; overflow: hidden; isolation: isolate; padding-bottom: clamp(140px, 14vw, 210px); background: #5d3c49; color: #fff1e1; }
+.about-section > :not(.artwork) { position: relative; z-index: 8; }
+.about-section .eyebrow { color: #efc2b3; }
+.about-section h2 { max-width: 850px; font-size: clamp(42px, 6.5vw, 94px); letter-spacing: -.015em; }
+.about-section p:last-child { color: #fff1e1d9; max-width: 620px; font-size: 15px; }
+.about-art { inset: auto -6% 0 28%; height: 100%; opacity: .5; mask-image: linear-gradient(90deg, transparent, #000 18%); }
+.about-art > .artwork-sun { width: 28%; right: 13%; bottom: 40%; }
+.print-section { background: radial-gradient(ellipse at 20% 55%, #f5e0d1, #fff1e1 65%); }
+.print-section > button { border-radius: 12px; overflow: hidden; }
+.print-section h2 { letter-spacing: -.02em; }
+.text-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 38px; padding: 15px 22px; min-height: 50px; background: #7c4e5c; color: #fff1e1; border: 0; border-radius: 28px; font-size: 10px; letter-spacing: .1em; }
+.text-link .app-icon { filter: brightness(0) invert(1); }
+.text-link:hover { background: #5d3c49; }
+.journal-section { border-top: 1px solid var(--line); }
+.journal-section article { padding-inline: clamp(26px, 3vw, 55px); }
+.journal-section article h3 { font-size: clamp(28px, 2.7vw, 42px); letter-spacing: -.015em; }
+.journal-section article:last-child { border-right: 0; }
+.footer-art { height: clamp(100px, 12vw, 180px); position: relative; background: #fff1e1; }
+.footer-art .artwork > img { height: 100%; }
+.footer-art .artwork > .artwork-sun { width: 100px; height: auto; bottom: 25%; right: 14%; }
+.photo-footer { background: #5d3c49; border: 0; color: #fff1e1; }
+.photo-footer .footer-brand { display: flex; align-items: center; gap: 12px; }
+.photo-footer a { font-size: 9px; letter-spacing: .1em; }
+@media (max-width: 900px) {
+  .photo-header { padding: 14px 18px; background: #fff1e1f5; }
+  .brand strong { font-size: 22px; }
+  .brand .brand-mark { width: 40px; height: 40px; }
+  .menu-toggle { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f5e0d1; color: #5d3c49; }
+  .menu-toggle .app-icon { width: 24px; height: 24px; }
+  .photo-nav { color: #5d3c49; background: #fff1e1fa; box-shadow: 0 16px 40px #5d3c4926; border: 1px solid #e9c4b6; border-radius: 14px; gap: 0; }
+  .photo-nav a { border-color: #e9c4b6; }
+  .photo-nav button { margin-top: 12px; }
+  .collection-intro { padding: 112px 22px 32px; min-height: 275px; }
+  .intro-copy { max-width: 85%; }
+  .intro-copy .eyebrow { font-size: 8px; max-width: 210px; line-height: 1.6; }
+  .page .intro-title { font-size: clamp(35px, 8vw, 52px); }
+  .intro-art { width: 60%; height: 175px; right: -15%; opacity: .32; }
+  .category-stack { padding: 0 12px 28px; }
+  .category-panel { padding: 32px 24px; min-height: 45vh; }
+  .category-panel + .category-panel, .category-panel:hover, .category-panel:focus-visible, .category-panel.is-centered, .category-panel.is-pressed { min-height: 45vh; padding-top: 32px; }
+  .category-title { letter-spacing: .05em; font-size: clamp(32px, 10vw, 58px); }
+  .collection-count { font-size: 8px; }
+  .portfolio-sidebar h1 { font-size: 42px; max-width: 350px; }
+  .portfolio-section { padding-top: 60px; }
+  .filter-button { margin-left: 4px; padding-inline: 8px; font-size: 10px; }
+  .sidebar-mark { display: none; }
+  .about-section { padding-bottom: 150px; }
+  .about-art { left: 0; right: -35%; height: 65%; opacity: .3; }
+  .about-section p:last-child { font-size: 14px; }
+  .journal-section article { min-height: 240px; padding: 35px 26px; }
+  .footer-art { height: 110px; }
+  .photo-footer { padding: 24px 22px; gap: 24px; }
+}

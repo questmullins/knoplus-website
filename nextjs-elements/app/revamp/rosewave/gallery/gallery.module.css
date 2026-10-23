@@ -1,9 +1,9 @@
-.page { --ivory: #f5f3ef; --rosewood: #11110f; --quiet: #66645f; }
+.page { --ivory: #fff1e1; --rosewood: #7c4e5c; --quiet: #795860; }
 .dialog * { box-sizing: border-box; }
 .dialog :where(p) { font-family: inherit; max-width: none; }
-.dialog :where(h2, h3) { font-family: Kanit, sans-serif; font-weight: 300; text-transform: none; }
+.dialog :where(h2, h3) { font-family: "Rose Gallery Jost", sans-serif; font-weight: 300; text-transform: none; }
 .dialog :where(button, select) { font: inherit; color: inherit; cursor: pointer; }
-.dialog :where(button, a, select):focus-visible { outline: 2px solid #11110f; outline-offset: 4px; }
+.dialog :where(button, a, select):focus-visible { outline: 2px solid #5d3c49; outline-offset: 4px; }
 .dialog a { color: inherit; }
 .scene { width: 100%; position: relative; overflow: hidden; container-type: inline-size; background: #e3d9c9; line-height: 0; }
 .roomPhoto { width: 100%; height: auto; display: block; }
@@ -11,36 +11,36 @@
 .mat { width: 100%; height: 100%; }
 .print img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .canvas { box-shadow: .5cqw .4cqw 0 #6a5252, 1cqw 1.6cqw 1.6cqw #372f2440; }
-.sceneCaption { position: absolute; bottom: 14px; left: 20px; color: #513c37; font-size: 8px; letter-spacing: .06em; line-height: 1.5; background: #f5f3efc9; padding: 5px 8px; border-radius: 2px; }
-.sceneExplore { position: absolute; display: flex; align-items: center; justify-content: space-between; gap: 20px; left: 24px; right: 24px; bottom: 24px; padding: 14px 18px; background: #f5f3efeb; backdrop-filter: blur(8px); font-size: 11px; }
+.sceneCaption { position: absolute; bottom: 14px; left: 20px; color: #513c37; font-size: 8px; letter-spacing: .06em; line-height: 1.5; background: #fff1e1c9; padding: 5px 8px; border-radius: 2px; }
+.sceneExplore { position: absolute; display: flex; align-items: center; justify-content: space-between; gap: 20px; left: 24px; right: 24px; bottom: 24px; padding: 14px 18px; background: #fff1e1eb; backdrop-filter: blur(8px); font-size: 11px; }
 .featureScene .sceneCaption { display: none; }
 .primary { border: 0; background: var(--rosewood); color: var(--ivory) !important; display: inline-flex; align-items: center; justify-content: space-between; gap: 50px; padding: 16px 24px; border-radius: 30px; font-size: 12px !important; min-height: 52px; transition: background .2s; }
-.primary:hover { background: #11110f; }
+.primary:hover { background: #5d3c49; }
 .small { font-size: 10px; color: var(--quiet); line-height: 1.7; }
 .printCopy > .small { margin-top: 15px; }
 .textLink { display: inline-flex; align-items: center; gap: 20px; border: 0; background: transparent; font-size: 11px !important; }
-.dialog { --ivory: #f5f3ef; --paper: #e8e4dc; --plum: #11110f; --rosewood: #11110f; --quiet: #66645f; --rule: #d5d1c9; margin: auto; padding: 0; border: 0; border-radius: 8px; background: var(--ivory); color: var(--plum); font: 400 13px/1.6 "Kanit", sans-serif; width: min(1200px, calc(100% - 64px)); max-height: calc(100dvh - 64px); overflow: auto; overscroll-behavior: contain; }
-.dialog::backdrop { background: #11110fc9; backdrop-filter: blur(7px); }
-.dialogTop { position: sticky; top: 0; z-index: 8; background: #f5f3eff5; backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); padding: 16px 26px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.dialog { --ivory: #fff1e1; --paper: #f5e0d1; --plum: #5d3c49; --rosewood: #7c4e5c; --quiet: #795860; --rule: #e9c4b6; margin: auto; padding: 0; border: 0; border-radius: 8px; background: var(--ivory); color: var(--plum); font: 400 13px/1.6 "Rose Gallery DM", sans-serif; width: min(1200px, calc(100% - 64px)); max-height: calc(100dvh - 64px); overflow: auto; overscroll-behavior: contain; }
+.dialog::backdrop { background: #35242bc9; backdrop-filter: blur(7px); }
+.dialogTop { position: sticky; top: 0; z-index: 8; background: #fff1e1f5; backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); padding: 16px 26px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .dialogActions { display: flex; align-items: center; gap: 24px; }
 .close { display: grid; place-items: center; background: transparent; border: 1px solid var(--rule); border-radius: 50%; width: 38px; height: 38px; font-size: 26px !important; line-height: 1; }
 .close:hover { background: var(--paper); }
 .product { display: grid; grid-template-columns: 1.15fr 1fr; }
 .productVisual { position: relative; background: #e3d9c9; align-self: stretch; display: grid; place-items: center; }
 .productVisual > .scene { aspect-ratio: 2 / 3; height: auto; min-height: 0; }
-.viewSwitch { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; background: #f5f3efe0; border-radius: 30px; padding: 4px; z-index: 5; backdrop-filter: blur(10px); white-space: nowrap; }
+.viewSwitch { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; background: #fff1e1e0; border-radius: 30px; padding: 4px; z-index: 5; backdrop-filter: blur(10px); white-space: nowrap; }
 .viewSwitch button { background: none; border: 0; border-radius: 30px; padding: 8px 14px; font-size: 10px; }
 .viewSwitch button[aria-pressed="true"] { background: var(--rosewood); color: var(--ivory); }
-.roomOptions { position: absolute; bottom: 30px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; background: #f5f3efe8; padding: 9px; border-radius: 30px; backdrop-filter: blur(8px); }
+.roomOptions { position: absolute; bottom: 30px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; background: #fff1e1e8; padding: 9px; border-radius: 30px; backdrop-filter: blur(8px); }
 .roomOptions > span { font-size: 8px; margin-right: 5px; }
 .roomOptions button { border: 1px solid transparent; padding: 7px 10px; border-radius: 25px; font-size: 9px; background: transparent; }
 .roomOptions button[aria-pressed="true"] { border-color: var(--rosewood); }
 .productVisual .sceneCaption { display: none; }
-.photoOnly { display: grid; place-items: center; padding: 70px 30px; min-height: 100%; background: #e8e4dc; }
+.photoOnly { display: grid; place-items: center; padding: 70px 30px; min-height: 100%; background: #f5e0d1; }
 .photoOnly img { width: 100%; height: auto; max-height: 600px; object-fit: contain; }
 .productCopy { padding: 35px 38px; }
-.productCopy h2 { font-size: 36px; letter-spacing: -.025em; line-height: 1.2; margin: 14px 0 28px; }
-.productCopy h2 > span { display: block; font: 10px/1.5 "Kanit", sans-serif; letter-spacing: .05em; margin-top: 10px; color: var(--quiet); }
+.productCopy h2 { font-family: "Rose Gallery Jost", sans-serif; font-size: 36px; letter-spacing: -.025em; line-height: 1.2; margin: 14px 0 28px; }
+.productCopy h2 > span { display: block; font: 10px/1.5 "Rose Gallery DM", sans-serif; letter-spacing: .05em; margin-top: 10px; color: var(--quiet); }
 .productCopy fieldset { border: 0; padding: 0; margin: 22px 0; min-width: 0; }
 .productCopy legend { width: 100%; font-size: 11px; font-weight: 500; margin-bottom: 10px; }
 .productCopy legend > span { float: right; font-weight: 400; color: var(--quiet); }
@@ -51,10 +51,10 @@
 .sizeLabel { display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 11px; font-weight: 500; margin-top: 22px; }
 .sizeLabel select { background: transparent; border: 1px solid var(--rule); border-radius: 4px; padding: 10px; min-width: 55%; font-size: 11px; }
 .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
-.swatches button { width: 28px; height: 28px; border: 0; border-radius: 50%; background-size: 300%; background-position: 10% 1%; box-shadow: inset 0 0 0 1px #11110f22; }
+.swatches button { width: 28px; height: 28px; border: 0; border-radius: 50%; background-size: 300%; background-position: 10% 1%; box-shadow: inset 0 0 0 1px #5d3c4922; }
 .swatches button[aria-pressed="true"] { outline: 1px solid var(--rosewood); outline-offset: 4px; }
 .priceLine { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--rule); padding-top: 20px; margin: 26px 0 18px; gap: 10px; }
-.priceLine strong { font: 300 32px/1 "Kanit", sans-serif; }
+.priceLine strong { font: 300 32px/1 "Rose Gallery Jost", sans-serif; }
 .priceLine span { font-size: 9px; color: var(--quiet); }
 .productCopy > .primary { width: 100%; }
 .productCopy > .small { margin-top: 14px; }
@@ -64,7 +64,7 @@
 .bagItems { padding: 10px 26px; }
 .bagItem { display: grid; grid-template-columns: 72px 1fr auto; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--rule); }
 .bagItem > img { width: 72px; height: 100px; object-fit: cover; }
-.bagItem h3 { font-family: "Kanit", sans-serif; font-size: 12px; font-weight: 500; }
+.bagItem h3 { font-family: "Rose Gallery DM", sans-serif; font-size: 12px; font-weight: 500; }
 .bagItem p { color: var(--quiet); font-size: 10px; margin-top: 4px; }
 .bagItem label { font-size: 9px; margin: 14px 14px 0 0; display: inline-flex; align-items: center; gap: 8px; }
 .bagItem select { font-size: 10px; padding: 4px; border: 1px solid var(--rule); background: transparent; }
@@ -83,13 +83,13 @@
   .productVisual > .scene { height: 100%; width: auto; max-width: 100%; }
   .productVisual .roomPhoto { height: 100%; width: 100%; }
   .productCopy { padding: 26px 32px; }
-  .productCopy h2 { margin-bottom: 20px; }
+  .productCopy h2 { font-family: "Rose Gallery Jost", sans-serif; margin-bottom: 20px; }
   .productCopy fieldset { margin: 18px 0; }
   .productCopy .priceLine { margin-top: 20px; }
 }
 @media (max-width: 900px) {
   .dialog { width: calc(100% - 32px); max-height: calc(100dvh - 32px); }
-  .productCopy { padding: 26px 24px; }.productCopy h2 { font-size: 30px; }
+  .productCopy { padding: 26px 24px; }.productCopy h2 { font-family: "Rose Gallery Jost", sans-serif; font-size: 30px; }
   .roomOptions { left: 10px; right: 10px; bottom: 15px; }.roomOptions > span { display: none; }
 }
 @media (max-width: 650px) {
@@ -97,7 +97,7 @@
   .product { grid-template-columns: 1fr; }.productVisual > .scene { width: 100%; height: auto; max-height: none; }.productVisual { aspect-ratio: 1 / 1.12; overflow: hidden; }
   .productVisual > .scene { position: absolute; top: -18%; }.productVisual .roomPhoto { min-height: 0; }.viewSwitch { top: 14px; }.roomOptions { bottom: 15px; left: 30px; right: 30px; }
   .photoOnly { height: 100%; min-height: 0; padding: 65px 35px 30px; }.photoOnly img { width: 100%; height: 100%; object-fit: contain; }
-  .productCopy { padding: 28px 24px; }.productCopy h2 { font-size: 35px; }.productCopy fieldset { margin: 22px 0; }.previewNote { font-size: 9px; }
+  .productCopy { padding: 28px 24px; }.productCopy h2 { font-family: "Rose Gallery Jost", sans-serif; font-size: 35px; }.productCopy fieldset { margin: 22px 0; }.previewNote { font-size: 9px; }
   .bagItem { grid-template-columns: 55px 1fr auto; gap: 12px; }.bagItem > img { width: 55px; height: 85px; }.bagItem h3 { font-size: 10px; }.bagItem p { font-size: 9px; }.bagItem strong { font-size: 11px; }.bagItems { padding: 0 18px; }.bagDialog > .primary { margin: 10px 18px; gap: 20px; }
   .bagItem label { margin-right: 7px; }.bagDialog > .small { margin-left: 18px; margin-right: 18px; }.subtotal { padding-left: 18px; padding-right: 18px; }
 }
