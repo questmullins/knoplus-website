@@ -110,6 +110,7 @@ export function ProjectHorizontal({ project }: { project: ProjectPresentation })
                   {index === 0 ? <h1>{pane.title}</h1> : <h2>{pane.title}</h2>}
                   <p className={styles.description}>{pane.text}</p>
                   {pane.note && <p className={styles.note}>{pane.note}</p>}
+                  {index === 0 && project.relatedLink && <Link className={styles.relatedLink} href={project.relatedLink.href}>{project.relatedLink.label} <span aria-hidden="true">↗</span></Link>}
                 </div>
                 <figure className={`${styles.photos} ${pane.photos.length > 1 ? styles.pair : ""}`}>
                   {pane.photos.map(photo => (

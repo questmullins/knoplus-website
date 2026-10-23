@@ -58,6 +58,7 @@
   min-height: 0;
 }
 .copy { min-width: 0; }
+.relatedLink { display: inline-flex; align-items: center; gap: 20px; font-size: 12px; line-height: 1.7; padding: 12px 0 5px; margin-top: 18px; border-bottom: 1px solid currentColor; }
 .eyebrow {
   color: var(--quiet);
   font-size: 10px;

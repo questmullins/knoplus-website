@@ -13,6 +13,7 @@ export type ProjectPresentation = {
   name: string;
   slug: string;
   panes: ProjectPane[];
+  relatedLink?: { href: string; label: string };
   action: { kind: "store" } | { kind: "link"; href: string; label: string; shortLabel: string };
 };
 
@@ -24,6 +25,7 @@ export const projectCatalog: ProjectPresentation[] = [
   ...[updateStory, rosewaveStory].map(story => ({
     name: story.name,
     slug: story.slug,
+    ...(story.slug === "rosewave" ? { relatedLink: { href: "/revamp/rosewave/gallery", label: "Explore the gallery & print shop" } } : {}),
     action: { kind: "store" as const },
     panes: appPanes(story).map(pane => ({
       ...pane,

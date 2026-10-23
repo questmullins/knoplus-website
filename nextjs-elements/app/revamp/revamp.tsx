@@ -14,6 +14,7 @@ type Project = {
   href?: string;
   screenshot?: string;
   toolHref?: string;
+  toolLabel?: string;
 };
 
 const projects: Project[] = [
@@ -35,6 +36,8 @@ const projects: Project[] = [
       "A photograph can become part of somewhere you spend time every day. RoseWave gives a photo you connect with that place on your phone.",
     theme: "rose",
     href: "/revamp/rosewave",
+    toolHref: "/revamp/rosewave/gallery",
+    toolLabel: "Explore the gallery & print shop",
     screenshot: "/revamp/apps/rosewave/main.webp",
   },
   {
@@ -377,7 +380,7 @@ export function Revamp() {
                       </a>
                     ) : <div className={styles.projectButton}>{content}</div>}
                     {project.toolHref && <a className={styles.walkthroughLink} href={project.toolHref}>
-                      {project.category === "Websites" ? "View the websites" : "Open the tool"} <span>↗</span>
+                        {project.toolLabel || (project.category === "Websites" ? "View the websites" : "Open the tool")} <span>↗</span>
                     </a>}
                   </article>
                 );

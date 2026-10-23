@@ -1,0 +1,589 @@
+{
+  "collections": [
+    {
+      "id": "blush-of-autumn",
+      "name": "The Blush of Autumn",
+      "description": "Pink forests. Snow-capped peaks. A familiar world, a little less familiar.",
+      "photos": [
+        {
+          "id": "blush-of-autumn-01",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp",
+          "title": "The Blush of Autumn · 01",
+          "free": true,
+          "width": 1200,
+          "height": 1200
+        },
+        {
+          "id": "blush-of-autumn-02",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-02.webp",
+          "title": "The Blush of Autumn · 02",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-03",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-03.webp",
+          "title": "The Blush of Autumn · 03",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-04",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-04.webp",
+          "title": "The Blush of Autumn · 04",
+          "free": false,
+          "width": 171,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-05",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-05.webp",
+          "title": "The Blush of Autumn · 05",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-06",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-06.webp",
+          "title": "The Blush of Autumn · 06",
+          "free": false,
+          "width": 172,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-07",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-07.webp",
+          "title": "The Blush of Autumn · 07",
+          "free": false,
+          "width": 171,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-08",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-08.webp",
+          "title": "The Blush of Autumn · 08",
+          "free": false,
+          "width": 171,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-09",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-09.webp",
+          "title": "The Blush of Autumn · 09",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-10",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-10.webp",
+          "title": "The Blush of Autumn · 10",
+          "free": false,
+          "width": 171,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-11",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-11.webp",
+          "title": "The Blush of Autumn · 11",
+          "free": false,
+          "width": 79,
+          "height": 240
+        },
+        {
+          "id": "blush-of-autumn-12",
+          "src": "/revamp/rosewave-gallery/photos/blush-of-autumn-12.webp",
+          "title": "The Blush of Autumn · 12",
+          "free": false,
+          "width": 240,
+          "height": 224
+        }
+      ]
+    },
+    {
+      "id": "nyc550",
+      "name": "NYC550",
+      "description": "The city through a different spectrum.",
+      "photos": [
+        {
+          "id": "nyc550-01",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-01.webp",
+          "title": "NYC550 · 01",
+          "free": true,
+          "width": 1200,
+          "height": 857
+        },
+        {
+          "id": "nyc550-02",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-02.webp",
+          "title": "NYC550 · 02",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "nyc550-03",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-03.webp",
+          "title": "NYC550 · 03",
+          "free": false,
+          "width": 240,
+          "height": 160
+        },
+        {
+          "id": "nyc550-04",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-04.webp",
+          "title": "NYC550 · 04",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "nyc550-05",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-05.webp",
+          "title": "NYC550 · 05",
+          "free": false,
+          "width": 171,
+          "height": 240
+        },
+        {
+          "id": "nyc550-06",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-06.webp",
+          "title": "NYC550 · 06",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "nyc550-07",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-07.webp",
+          "title": "NYC550 · 07",
+          "free": false,
+          "width": 171,
+          "height": 240
+        },
+        {
+          "id": "nyc550-08",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-08.webp",
+          "title": "NYC550 · 08",
+          "free": false,
+          "width": 240,
+          "height": 205
+        },
+        {
+          "id": "nyc550-09",
+          "src": "/revamp/rosewave-gallery/photos/nyc550-09.webp",
+          "title": "NYC550 · 09",
+          "free": false,
+          "width": 171,
+          "height": 240
+        }
+      ]
+    },
+    {
+      "id": "dreaming-of-a-wave",
+      "name": "Dreaming of a Wave",
+      "description": "Salt in the air. Gold on the water.",
+      "photos": [
+        {
+          "id": "dreaming-of-a-wave-01",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-01.webp",
+          "title": "Dreaming of a Wave · 01",
+          "free": true,
+          "width": 800,
+          "height": 1200
+        },
+        {
+          "id": "dreaming-of-a-wave-02",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-02.webp",
+          "title": "Dreaming of a Wave · 02",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-03",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-03.webp",
+          "title": "Dreaming of a Wave · 03",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-04",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-04.webp",
+          "title": "Dreaming of a Wave · 04",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-05",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-05.webp",
+          "title": "Dreaming of a Wave · 05",
+          "free": false,
+          "width": 240,
+          "height": 120
+        },
+        {
+          "id": "dreaming-of-a-wave-06",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-06.webp",
+          "title": "Dreaming of a Wave · 06",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-07",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-07.webp",
+          "title": "Dreaming of a Wave · 07",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-08",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-08.webp",
+          "title": "Dreaming of a Wave · 08",
+          "free": false,
+          "width": 192,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-09",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-09.webp",
+          "title": "Dreaming of a Wave · 09",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-10",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-10.webp",
+          "title": "Dreaming of a Wave · 10",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-11",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-11.webp",
+          "title": "Dreaming of a Wave · 11",
+          "free": false,
+          "width": 160,
+          "height": 240
+        },
+        {
+          "id": "dreaming-of-a-wave-12",
+          "src": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-12.webp",
+          "title": "Dreaming of a Wave · 12",
+          "free": false,
+          "width": 160,
+          "height": 240
+        }
+      ]
+    },
+    {
+      "id": "urban-thrill",
+      "name": "Urban Thrill",
+      "description": "After dark, everything moves.",
+      "photos": [
+        {
+          "id": "urban-thrill-01",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-01.webp",
+          "title": "Urban Thrill · 01",
+          "free": true,
+          "width": 960,
+          "height": 1200
+        },
+        {
+          "id": "urban-thrill-02",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-02.webp",
+          "title": "Urban Thrill · 02",
+          "free": false,
+          "width": 192,
+          "height": 240
+        },
+        {
+          "id": "urban-thrill-03",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-03.webp",
+          "title": "Urban Thrill · 03",
+          "free": false,
+          "width": 240,
+          "height": 160
+        },
+        {
+          "id": "urban-thrill-04",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-04.webp",
+          "title": "Urban Thrill · 04",
+          "free": false,
+          "width": 135,
+          "height": 240
+        },
+        {
+          "id": "urban-thrill-05",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-05.webp",
+          "title": "Urban Thrill · 05",
+          "free": false,
+          "width": 240,
+          "height": 192
+        },
+        {
+          "id": "urban-thrill-06",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-06.webp",
+          "title": "Urban Thrill · 06",
+          "free": false,
+          "width": 192,
+          "height": 240
+        },
+        {
+          "id": "urban-thrill-07",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-07.webp",
+          "title": "Urban Thrill · 07",
+          "free": false,
+          "width": 240,
+          "height": 240
+        },
+        {
+          "id": "urban-thrill-08",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-08.webp",
+          "title": "Urban Thrill · 08",
+          "free": false,
+          "width": 192,
+          "height": 240
+        },
+        {
+          "id": "urban-thrill-09",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-09.webp",
+          "title": "Urban Thrill · 09",
+          "free": false,
+          "width": 240,
+          "height": 192
+        },
+        {
+          "id": "urban-thrill-10",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-10.webp",
+          "title": "Urban Thrill · 10",
+          "free": false,
+          "width": 240,
+          "height": 160
+        },
+        {
+          "id": "urban-thrill-11",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-11.webp",
+          "title": "Urban Thrill · 11",
+          "free": false,
+          "width": 240,
+          "height": 135
+        },
+        {
+          "id": "urban-thrill-12",
+          "src": "/revamp/rosewave-gallery/photos/urban-thrill-12.webp",
+          "title": "Urban Thrill · 12",
+          "free": false,
+          "width": 240,
+          "height": 240
+        }
+      ]
+    }
+  ],
+  "prints": {
+    "currency": "USD",
+    "types": [
+      {
+        "id": "paper",
+        "name": "Fine art paper",
+        "about": "Hahnemühle Photo Rag, a soft matte cotton paper with a white border. Unframed.",
+        "sizes": [
+          {
+            "id": "8x12",
+            "name": "8 × 12 in",
+            "cents": 3500
+          },
+          {
+            "id": "12x18",
+            "name": "12 × 18 in",
+            "cents": 6000
+          },
+          {
+            "id": "16x24",
+            "name": "16 × 24 in",
+            "cents": 9500
+          },
+          {
+            "id": "20x30",
+            "name": "20 × 30 in",
+            "cents": 14000
+          },
+          {
+            "id": "24x36",
+            "name": "24 × 36 in",
+            "cents": 18000
+          }
+        ]
+      },
+      {
+        "id": "framed",
+        "name": "Framed",
+        "about": "Fine art paper behind glazing, in a wood frame with a white mat.",
+        "finish": {
+          "name": "Frame",
+          "choices": [
+            {
+              "id": "black",
+              "name": "Black"
+            },
+            {
+              "id": "white",
+              "name": "White"
+            },
+            {
+              "id": "natural",
+              "name": "Natural"
+            },
+            {
+              "id": "brown",
+              "name": "Brown"
+            },
+            {
+              "id": "darkgrey",
+              "name": "Dark grey"
+            },
+            {
+              "id": "lightgrey",
+              "name": "Light grey"
+            },
+            {
+              "id": "gold",
+              "name": "Gold"
+            },
+            {
+              "id": "silver",
+              "name": "Silver"
+            }
+          ]
+        },
+        "sizes": [
+          {
+            "id": "8x12",
+            "name": "8 × 12 in",
+            "cents": 8500
+          },
+          {
+            "id": "12x18",
+            "name": "12 × 18 in",
+            "cents": 12500
+          },
+          {
+            "id": "16x24",
+            "name": "16 × 24 in",
+            "cents": 18500
+          },
+          {
+            "id": "20x30",
+            "name": "20 × 30 in",
+            "cents": 26000
+          },
+          {
+            "id": "24x36",
+            "name": "24 × 36 in",
+            "cents": 32000
+          }
+        ]
+      },
+      {
+        "id": "metal",
+        "name": "Metal",
+        "about": "Printed straight onto aluminium: deep colour and a glossy finish, ready to hang.",
+        "sizes": [
+          {
+            "id": "8x12",
+            "name": "8 × 12 in",
+            "cents": 7500
+          },
+          {
+            "id": "12x18",
+            "name": "12 × 18 in",
+            "cents": 12000
+          },
+          {
+            "id": "16x24",
+            "name": "16 × 24 in",
+            "cents": 16500
+          },
+          {
+            "id": "20x30",
+            "name": "20 × 30 in",
+            "cents": 24500
+          },
+          {
+            "id": "24x36",
+            "name": "24 × 36 in",
+            "cents": 31500
+          }
+        ]
+      },
+      {
+        "id": "acrylic",
+        "name": "Acrylic",
+        "about": "Behind clear acrylic for depth and shine, ready to hang.",
+        "sizes": [
+          {
+            "id": "8x12",
+            "name": "8 × 12 in",
+            "cents": 8500
+          },
+          {
+            "id": "12x18",
+            "name": "12 × 18 in",
+            "cents": 13500
+          },
+          {
+            "id": "16x24",
+            "name": "16 × 24 in",
+            "cents": 19500
+          },
+          {
+            "id": "20x30",
+            "name": "20 × 30 in",
+            "cents": 29000
+          },
+          {
+            "id": "24x36",
+            "name": "24 × 36 in",
+            "cents": 37000
+          }
+        ]
+      },
+      {
+        "id": "canvas",
+        "name": "Canvas",
+        "about": "Stretched over a wooden frame, wrapping round the edges.",
+        "sizes": [
+          {
+            "id": "12x18",
+            "name": "12 × 18 in",
+            "cents": 9500
+          },
+          {
+            "id": "16x24",
+            "name": "16 × 24 in",
+            "cents": 13500
+          },
+          {
+            "id": "20x30",
+            "name": "20 × 30 in",
+            "cents": 17500
+          },
+          {
+            "id": "24x36",
+            "name": "24 × 36 in",
+            "cents": 21000
+          }
+        ]
+      }
+    ]
+  }
+}
