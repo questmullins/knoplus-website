@@ -328,8 +328,8 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
           <p className={t["gallery-hint"]}>{collection.photos.length} photographs.<br />Select one to explore prints.</p><div className={t["sidebar-mark"]} aria-hidden="true"><WaveMark /></div>
         </aside>
         <div className={t["gallery-grid"]} aria-live="polite" aria-label={`${collection.name} photographs`}>
-          {collection.photos.map((item, index) => <figure key={item.id} className={`${t["gallery-item"]} ${index === 0 ? t.wide : index % 4 === 1 ? t.tall : ""}`}>
-            <button onClick={() => openPrint(item)} aria-label={`Preview print of ${item.title}`}><PhotoImage photo={item} /></button><figcaption>{String(index + 1).padStart(2, "0")} / Explore print</figcaption>
+          {collection.photos.map((item, index) => <figure key={item.id} className={t["gallery-item"]}>
+            <button onClick={() => openPrint(item)} aria-label={`Preview print of ${item.title}`}><PhotoImage photo={item} full /></button><figcaption>{String(index + 1).padStart(2, "0")} / Explore print</figcaption>
           </figure>)}
         </div>
       </section>}
