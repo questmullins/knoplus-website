@@ -11,7 +11,7 @@
   --hero-pad-x: clamp(46px, 8vw, 132px);
   --content-pad-x: clamp(38px, 9vw, 150px);
   --content-max: 1680px;
-  --hero-expand-duration: 1.62s;
+  --hero-expand-duration: .7s;
   --hero-expand-ease: cubic-bezier(0.16, 1, 0.28, 1);
 }
 
@@ -157,16 +157,13 @@
   will-change: transform;
 }
 
-.category-panel:hover::before,
-.category-panel:focus-visible::before,
-.category-panel.is-active::before {
+.category-panel.is-centered::before {
   filter: grayscale(0) saturate(1);
   transform: translateY(var(--panel-y, 0px)) scale(1.13);
   opacity: 0.96;
 }
 
-.category-panel:hover,
-.category-panel:focus-visible {
+.category-panel.is-centered {
   z-index: 2;
   min-height: clamp(450px, 47.5vh, 650px);
 }
@@ -525,10 +522,7 @@
     padding-top: 42px;
   }
 
-  .category-panel:hover,
-  .category-panel:focus-visible,
-  .category-panel.is-centered,
-  .category-panel.is-pressed {
+  .category-panel.is-centered {
     min-height: 56vh;
   }
 
@@ -645,7 +639,7 @@
 .page {
   --ink: #5d3c49; --paper: #fff1e1; --soft: #f5e0d1; --muted: #795860;
   --white: #fff1e1; --line: #e9c4b6; --body: "Rose Gallery DM", sans-serif;
-  font-weight: 400; background: var(--paper); scroll-padding-top: 95px;
+  font-weight: 400; background: var(--paper); scroll-padding-top: 95px; overflow-anchor: none;
 }
 .page :where(h1, h2, h3) { font-family: "Rose Gallery Jost", sans-serif; }
 .page .app-icon { width: 20px; height: 20px; object-fit: contain; flex: 0 0 auto; }
@@ -663,22 +657,23 @@
 .photo-nav a, .photo-nav button { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .12em; }
 .photo-nav a:hover, .photo-nav button:hover { color: #9c5361; }
 .photo-nav button { padding: 10px 17px; background: #f5e0d1; border-radius: 24px; }
-.collection-intro { position: relative; padding: 127px var(--hero-pad-x) 38px; overflow: hidden; background: linear-gradient(120deg, #fff1e1 40%, #f5e0d1); }
+.collection-intro { position: relative; padding: 142px var(--hero-pad-x) 80px; min-height: 365px; overflow: hidden; background: var(--paper); }
 .intro-copy { position: relative; z-index: 8; max-width: 65%; }
 .page .intro-title { margin: 0; font: 300 clamp(36px, 4.2vw, 62px)/1.06 "Rose Gallery Jost", sans-serif; letter-spacing: -.025em; color: var(--ink); }
 .artwork { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.artwork > img { position: absolute; bottom: 0; left: 0; width: 100%; height: 55%; object-fit: fill; }
-.artwork > .artwork-sun { left: auto; right: 17%; bottom: 32%; width: 35%; height: auto; }
-.intro-art { inset: auto 0 0 auto; width: 43%; max-width: 680px; height: 230px; opacity: .9; mask-image: linear-gradient(90deg, transparent, #000 22%); }
-.intro-art > .artwork-sun { width: 120px; bottom: 20%; }
+.artwork picture, .artwork picture img { display: block; width: 100%; height: 100%; }
+.artwork picture img { object-fit: cover; }
+.intro-art { inset: 0; }
 .category-stack { width: min(100%, 1920px); margin-inline: auto; min-height: 0; padding: 0 clamp(28px, 10vw, 144px) 36px; }
-.category-panel { gap: 15px; min-height: clamp(240px, 26vh, 340px); text-decoration: none; }
-.category-panel:hover, .category-panel:focus-visible { min-height: clamp(470px, 55vh, 720px); }
-.category-panel::before { background: linear-gradient(90deg, #291e30a8, #291e3010 65%, #291e303d), var(--image); background-size: cover; background-position: center; filter: none; }
+.page .category-panel { color: #fff; text-shadow: 0 2px 18px #190e19a6; }
+.category-panel { gap: 18px; min-height: clamp(240px, 30svh, 340px); text-decoration: none; }
+.category-panel.is-centered { min-height: clamp(460px, 64svh, 760px); }
+.page[data-section-jump="true"] .category-panel { transition: none; }
+.category-panel::before { background: linear-gradient(90deg, #23162399, #23162326 70%, #23162340), var(--image); background-size: cover; background-position: center; filter: none; }
 .category-panel:first-child { border-radius: 12px 12px 0 0; }
 .category-panel:last-child { border-radius: 0 0 12px 12px; }
 .category-title { font-family: "Rose Gallery Jost", sans-serif; letter-spacing: .075em; }
-.category-number { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 20px; color: #fff1e1df; }
+.category-number { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 20px; color: #fff; }
 .collection-count { font-size: 10px; letter-spacing: .12em; }
 .category-action { display: inline-flex; align-items: center; gap: 15px; padding-bottom: 0; border: 0; font-size: 10px; }
 .category-action .app-icon { filter: brightness(0) invert(1); width: 19px; height: 19px; transition: transform .3s ease; }
@@ -695,14 +690,13 @@
 .filter-button:hover, .filter-button:focus-visible { background: #f5e0d180; }
 .sidebar-mark { margin-top: 35px; color: #99646c; opacity: .7; }
 .gallery-item { border-radius: 3px; }
-.gallery-item figcaption { color: #fff1e1; font-size: 9px; letter-spacing: .1em; }
+.gallery-item figcaption { color: #fff; font-size: 9px; letter-spacing: .1em; }
 .about-section { position: relative; overflow: hidden; isolation: isolate; padding-bottom: clamp(140px, 14vw, 210px); background: #5d3c49; color: #fff1e1; }
 .about-section > :not(.artwork) { position: relative; z-index: 8; }
 .about-section .eyebrow { color: #efc2b3; }
 .about-section h2 { max-width: 850px; font-size: clamp(42px, 6.5vw, 94px); letter-spacing: -.015em; }
 .about-section p:last-child { color: #fff1e1d9; max-width: 620px; font-size: 15px; }
-.about-art { inset: auto -6% 0 28%; height: 100%; opacity: .5; mask-image: linear-gradient(90deg, transparent, #000 18%); }
-.about-art > .artwork-sun { width: 28%; right: 13%; bottom: 40%; }
+.about-art { inset: 0; }
 .print-section { background: radial-gradient(ellipse at 20% 55%, #f5e0d1, #fff1e1 65%); }
 .print-section > button { border-radius: 12px; overflow: hidden; }
 .print-section h2 { letter-spacing: -.02em; }
@@ -713,39 +707,42 @@
 .journal-section article { padding-inline: clamp(26px, 3vw, 55px); }
 .journal-section article h3 { font-size: clamp(28px, 2.7vw, 42px); letter-spacing: -.015em; }
 .journal-section article:last-child { border-right: 0; }
-.footer-art { height: clamp(100px, 12vw, 180px); position: relative; background: #fff1e1; }
-.footer-art .artwork > img { height: 100%; }
-.footer-art .artwork > .artwork-sun { width: 100px; height: auto; bottom: 25%; right: 14%; }
+.footer-art { height: clamp(120px, 16.67vw, 240px); position: relative; background: #fff1e1; }
 .photo-footer { background: #5d3c49; border: 0; color: #fff1e1; }
 .photo-footer .footer-brand { display: flex; align-items: center; gap: 12px; }
 .photo-footer a { font-size: 9px; letter-spacing: .1em; }
 @media (max-width: 900px) {
-  .photo-header { padding: 14px 18px; background: #fff1e1f5; }
-  .brand strong { font-size: 22px; }
+  .photo-header { padding: 14px 18px; gap: 14px; background: #fff1e1f5; }
+  .brand strong { font-size: clamp(17px, 5.4vw, 22px); }
+  .brand { gap: 10px; }
   .brand .brand-mark { width: 40px; height: 40px; }
   .menu-toggle { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f5e0d1; color: #5d3c49; }
   .menu-toggle .app-icon { width: 24px; height: 24px; }
   .photo-nav { color: #5d3c49; background: #fff1e1fa; box-shadow: 0 16px 40px #5d3c4926; border: 1px solid #e9c4b6; border-radius: 14px; gap: 0; }
   .photo-nav a { border-color: #e9c4b6; }
   .photo-nav button { margin-top: 12px; }
-  .collection-intro { padding: 112px 22px 32px; min-height: 275px; }
-  .intro-copy { max-width: 85%; }
+  .collection-intro { padding: 118px 22px 105px; min-height: 340px; }
+  .intro-copy { max-width: 100%; }
   .intro-copy .eyebrow { font-size: 8px; max-width: 210px; line-height: 1.6; }
   .page .intro-title { font-size: clamp(35px, 8vw, 52px); }
-  .intro-art { width: 60%; height: 175px; right: -15%; opacity: .32; }
-  .category-stack { padding: 0 18px 28px; }
-  .category-panel { padding: 32px 24px; min-height: clamp(360px, 50svh, 560px); }
-  .category-panel + .category-panel, .category-panel:hover, .category-panel:focus-visible, .category-panel.is-centered, .category-panel.is-pressed { min-height: clamp(360px, 50svh, 560px); padding-top: 32px; }
+  .category-stack { padding: 0; }
+  .category-panel, .category-panel + .category-panel { padding: 30px 24px; min-height: clamp(260px, 34svh, 360px); }
+  .category-panel.is-centered { min-height: clamp(460px, 66svh, 680px); }
+  .category-panel:first-child, .category-panel:last-child { border-radius: 0; }
   .category-title { letter-spacing: .05em; font-size: clamp(32px, 10vw, 58px); }
-  .collection-count { font-size: 8px; }
+  .collection-count { font-size: 10px; }
   .portfolio-sidebar h1 { font-size: 42px; max-width: 350px; }
-  .portfolio-section { padding-top: 60px; }
+  .portfolio-section { padding: 60px 0 0; }
+  .portfolio-sidebar { padding-inline: 22px; }
+  .gallery-grid { width: 100%; gap: 4px; }
+  .gallery-item { border-radius: 0; }
+  .gallery-item figcaption { opacity: 1; transform: none; text-shadow: 0 1px 8px #000; }
+  .gallery-item::after { opacity: 1; background: linear-gradient(0deg, #21142280, transparent 24%); }
   .filter-button { margin-left: 4px; padding-inline: 8px; font-size: 10px; }
   .sidebar-mark { display: none; }
-  .about-section { padding-bottom: 150px; }
-  .about-art { left: 0; right: -35%; height: 65%; opacity: .3; }
+  .about-section { padding-bottom: 180px; }
   .about-section p:last-child { font-size: 14px; }
   .journal-section article { min-height: 240px; padding: 35px 26px; }
-  .footer-art { height: 110px; }
+  .footer-art { height: 40vw; max-height: 250px; }
   .photo-footer { padding: 24px 22px; gap: 24px; }
 }
