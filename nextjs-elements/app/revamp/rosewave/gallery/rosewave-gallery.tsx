@@ -219,7 +219,7 @@ export default function RosewaveGallery() {
     }).join("\n") + `\n\nPreview subtotal: ${money(subtotal)} (before shipping and tax). Please let me know about availability and final pricing.`)}`;
   }
 
-  return <div ref={pageRef} className={`${t.page} ${s.page}`}>
+  return <div ref={pageRef} className={`${t.page} ${s.page}`} onContextMenu={event => event.preventDefault()}>
     <a className={t.skip} href="#portfolio">Skip to photographs</a>
     <header className={`${t["photo-header"]} ${menuOpen ? t["is-menu-open"] : ""}`}>
       <a href="#top" className={t.brand} aria-label="Rose Wave Photography home"><span className={t["brand-mark"]}><WaveMark /></span><span className={t["brand-type"]}><strong>Rose Wave</strong><span>Photography</span></span></a>
@@ -235,7 +235,7 @@ export default function RosewaveGallery() {
         <AppArtwork className={t["intro-art"]} />
       </section>
       <section className={t["category-stack"]} aria-label="Photography collections">
-        {data.collections.map((item, index) => <button key={item.id} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${collection.id === item.id ? t["is-active"] : ""}`} style={{ "--image": `url("${item.photos[0].src}")` } as CSSProperties} onClick={() => openCollection(item)} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
+        {data.collections.map((item, index) => <button key={item.id} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${collection.id === item.id ? t["is-active"] : ""}`} style={{ "--image": `url("${item.photos[0].fullSrc}")` } as CSSProperties} onClick={() => openCollection(item)} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
           <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")} <span className={t["collection-count"]}>{item.photos.length} photographs</span></span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery <AppIcon name="arrow_right" /></span>
         </button>)}
       </section>
