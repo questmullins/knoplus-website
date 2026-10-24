@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import data from "./catalog.json";
+import { LiveSourcesProvider, useLiveSource, useLiveSources } from "./live";
 import s from "./gallery.module.css";
 import t from "./template.module.css";
 
@@ -53,7 +54,8 @@ function AppArtwork({ className = "", scene = "footer" }: { className?: string; 
   </div>;
 }
 function PhotoImage({ photo, className = "", eager = false, full = false }: { photo: Photo; className?: string; eager?: boolean; full?: boolean }) {
-  return <Image src={full ? photo.fullSrc : photo.src} alt={photo.title} width={full ? photo.fullWidth : photo.width} height={full ? photo.fullHeight : photo.height} unoptimized draggable={false} loading={eager ? "eager" : "lazy"} className={className} />;
+  const live = useLiveSource(photo.id);
+  return <Image src={full ? live || photo.fullSrc : photo.src} alt={photo.title} width={full ? photo.fullWidth : photo.width} height={full ? photo.fullHeight : photo.height} unoptimized draggable={false} loading={eager ? "eager" : "lazy"} className={className} />;
 }
 
 function PrintScene({ photo, typeId = "framed", sizeId = "16x24", finish = "natural", roomId = "sideboard" }: {
@@ -163,6 +165,7 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
   const subtotal = bag.reduce((sum, item) => sum + priceOf(item) * item.quantity, 0);
   const photoCollection = data.collections.find(item => item.photos.some(p => p.id === photo.id)) || collection;
   const photoIndex = photoCollection.photos.findIndex(item => item.id === photo.id);
+  const liveSources = useLiveSources();
 
   useEffect(() => {
     try {
@@ -299,7 +302,7 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
     }).join("\n") + `\n\nPreview subtotal: ${money(subtotal)} (before shipping and tax). Please let me know about availability and final pricing.`)}`;
   }
 
-  return <div ref={pageRef} className={`${t.page} ${s.page}`} onContextMenu={event => event.preventDefault()}>
+  return <LiveSourcesProvider value={liveSources}><div ref={pageRef} className={`${t.page} ${s.page}`} onContextMenu={event => event.preventDefault()}>
     <a className={t.skip} href={isCollection ? "#portfolio" : "#collections"}>Skip to {isCollection ? "photographs" : "collections"}</a>
     <header className={`${t["photo-header"]} ${menuOpen ? t["is-menu-open"] : ""}`}>
       <Link href={isCollection ? galleryPath : "#top"} className={t.brand} aria-label="Rose Wave Photography home"><span className={t["brand-mark"]}><WaveMark /></span><span className={t["brand-type"]}><strong>Rose Wave</strong><span>Photography</span></span></Link>
@@ -315,7 +318,7 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
         <AppArtwork className={t["intro-art"]} scene="intro" />
       </section>
       <section id="collections" className={t["category-stack"]} aria-label="Photography collections">
-        {data.collections.map((item, index) => <Link key={item.id} href={collectionPath(item.id)} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${centeredPanel === index ? t["is-centered"] : ""}`} data-centered={centeredPanel === index} style={{ "--image": `url("${item.photos[0].fullSrc}")` } as CSSProperties} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
+        {data.collections.map((item, index) => <Link key={item.id} href={collectionPath(item.id)} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${centeredPanel === index ? t["is-centered"] : ""}`} data-centered={centeredPanel === index} style={{ "--image": `url("${liveSources[item.photos[0].id] || item.photos[0].fullSrc}")` } as CSSProperties} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
           <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")} <span className={t["collection-count"]}>{item.photos.length} photographs</span></span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery <AppIcon name="arrow_right" /></span>
         </Link>)}
       </section></>}
@@ -383,5 +386,5 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
         return <div className={s.bagItem} key={item.key}><PhotoImage photo={p} /><div><h3>{p.title}</h3><p>{type.name} · {item.size.replace("x", " × ")} in{item.finish ? ` · ${item.finish}` : ""}</p><label>Quantity <select value={item.quantity} onChange={event => setBag(items => items.map(b => b.key === item.key ? { ...b, quantity: Number(event.target.value) } : b))}>{Array.from({ length: 20 }, (_, i) => <option key={i + 1}>{i + 1}</option>)}</select></label><button className={s.remove} aria-label={`Remove ${p.title}`} onClick={() => setBag(items => items.filter(b => b.key !== item.key))}>Remove</button></div><strong>{money(priceOf(item) * item.quantity)}</strong></div>;
       })}</div><div className={s.subtotal}><span>Subtotal</span><strong>{money(subtotal)}</strong></div><p className={s.small}>USD, before shipping and tax. This is a shop preview; checkout is not open yet.</p><a className={s.primary} href={inquiry()}>Ask about these prints <Arrow /></a><p className={s.small}>Opens an email with your selections. No order is placed.</p></> : <div className={s.empty}><WaveMark /><h3>A little room for something you love.</h3><p>Find a photograph, try a finish, and keep your choices here.</p><button className={s.primary} onClick={() => bagDialog.current?.close()}>Keep exploring <Arrow /></button></div>}
     </dialog>
-  </div>;
+  </div></LiveSourcesProvider>;
 }
