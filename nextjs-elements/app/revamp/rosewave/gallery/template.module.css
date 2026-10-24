@@ -11,8 +11,6 @@
   --hero-pad-x: clamp(46px, 8vw, 132px);
   --content-pad-x: clamp(38px, 9vw, 150px);
   --content-max: 1680px;
-  --hero-expand-duration: .7s;
-  --hero-expand-ease: cubic-bezier(0.16, 1, 0.28, 1);
 }
 
 .page * {
@@ -118,6 +116,8 @@
 }
 
 .category-panel {
+  --hero-expand-duration: 1.4s;
+  --hero-expand-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   width: 100%;
   min-height: clamp(180px, 19vh, 260px);
   border: 0;
