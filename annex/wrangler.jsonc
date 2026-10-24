@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Annex: its own Worker, separate from the kno.plus site's. It answers only /annex on account subdomains.
+  "name": "annex",
+  "main": "./src/index.js",
+  "compatibility_date": "2026-06-05",
+  "workers_dev": false,
+  "routes": [{ "pattern": "*.kno.plus/annex*", "zone_name": "kno.plus" }],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/annex", "/annex/api/*", "/annex/hooks/*"]
+  },
+  "rules": [{ "type": "Text", "globs": ["**/*.sql"], "fallthrough": true }],
+  "vars": {
+    "ANNEX_DOMAIN": "kno.plus"
+  },
+  // ANNEX holds sign-ins and accounts only; each seller account gets its own database, bound as DB_<ACCOUNT>.
+  // Fill in the database_id values Cloudflare gives when the databases are made (see README.md).
+  "d1_databases": [
+    { "binding": "ANNEX", "database_name": "annex", "database_id": "REPLACE-WITH-ANNEX-DATABASE-ID" },
+    { "binding": "DB_ROSEWAVE", "database_name": "annex-rosewave", "database_id": "REPLACE-WITH-ROSEWAVE-DATABASE-ID" }
+  ],
+  "triggers": { "crons": ["17 8 * * *"] },
+  "observability": { "enabled": true }
+}
