@@ -47,8 +47,8 @@ function AppArtwork({ className = "" }: { className?: string }) {
     {["a", "b", "c", "d", "e"].map((layer, index) => <Image key={layer} src={`${root}/ui/wave_menu_${layer}.webp`} width={908} height={400} alt="" unoptimized style={{ zIndex: index + 1 }} />)}
   </div>;
 }
-function PhotoImage({ photo, className = "", eager = false }: { photo: Photo; className?: string; eager?: boolean }) {
-  return <Image src={photo.src} alt={photo.title} width={photo.width} height={photo.height} unoptimized draggable={false} loading={eager ? "eager" : "lazy"} className={className} />;
+function PhotoImage({ photo, className = "", eager = false, full = false }: { photo: Photo; className?: string; eager?: boolean; full?: boolean }) {
+  return <Image src={full ? photo.fullSrc : photo.src} alt={photo.title} width={full ? photo.fullWidth : photo.width} height={full ? photo.fullHeight : photo.height} unoptimized draggable={false} loading={eager ? "eager" : "lazy"} className={className} />;
 }
 
 function PrintScene({ photo, typeId = "framed", sizeId = "16x24", finish = "natural", roomId = "sideboard" }: {
@@ -74,7 +74,7 @@ function PrintScene({ photo, typeId = "framed", sizeId = "16x24", finish = "natu
     <Image src={`${root}/rooms/${room.id}.webp`} width={1024} height={1536} alt="" unoptimized className={s.roomPhoto} />
     <div className={`${s.print} ${typeId === "canvas" ? s.canvas : ""}`} style={style}>
       <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}>
-        <PhotoImage photo={photo} eager />
+        <PhotoImage photo={photo} eager full />
       </div>
     </div>
     <span className={s.sceneCaption}>A little perspective · Room preview</span>
@@ -93,7 +93,7 @@ function StudioPrint({ photo, typeId, sizeId, finish }: { photo: Photo; typeId: 
   return <div className={s.studio} aria-label={`${photo.title}, ${typeId} print${framed ? ` with a ${finish} frame` : ""}`}>
     <div className={s.studioFit} style={{ "--art-ratio": outsideWidth / outsideHeight, aspectRatio: `${outsideWidth} / ${outsideHeight}` } as CSSProperties}>
       <div className={`${s.studioPrint} ${typeId === "canvas" ? s.canvas : ""}`} style={{ borderWidth: framed ? `${100 / outsideWidth}cqw` : 0, borderImageSource: framed ? `url(${root}/frames/${finish}.webp)` : undefined }}>
-        <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}><PhotoImage photo={photo} eager /></div>
+        <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}><PhotoImage photo={photo} eager full /></div>
       </div>
     </div>
   </div>;
@@ -274,7 +274,7 @@ export default function RosewaveGallery() {
       <div className={s.product}>
         <div className={s.productVisual}>
           <div className={s.viewSwitch} role="group" aria-label="Preview view"><button aria-pressed={view === "photo"} onClick={() => setView("photo")}>Photograph</button><button aria-pressed={view === "print"} onClick={() => setView("print")}>Print preview</button><button aria-pressed={view === "room"} onClick={() => setView("room")}>In a room</button></div>
-          {view === "room" ? <div className={s.roomStage}><PrintScene photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} roomId={room} /></div> : view === "print" ? <StudioPrint photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} /> : <div className={s.photoOnly}><PhotoImage photo={photo} eager /></div>}
+          {view === "room" ? <div className={s.roomStage}><PrintScene photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} roomId={room} /></div> : view === "print" ? <StudioPrint photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} /> : <div className={s.photoOnly}><PhotoImage photo={photo} eager full /></div>}
           {view !== "room" && <p className={s.visualCaption}>{view === "photo" ? "The photograph, uncropped" : `${selectedType.name} · ${selectedSize.name}${selectedType.finish ? ` · ${selectedType.finish.choices.find(item => item.id === finish)?.name} frame` : ""}`}</p>}
           {view === "room" && <div className={s.roomOptions} role="group" aria-label="Room"><span>Try a space</span>{rooms.map(item => <button key={item.id} aria-pressed={room === item.id} onClick={() => setRoom(item.id)}>{item.name}</button>)}</div>}
         </div>
@@ -284,7 +284,7 @@ export default function RosewaveGallery() {
           <p className={s.materialNote}>{selectedType.about}</p>
           <label ref={sizeControlRef} className={s.sizeLabel}><span>Print size<small className={s.sizeHint}>Scroll to change</small></span><select aria-label="Print size" value={selectedSize.id} onChange={event => { setSizeId(event.target.value); if (view === "photo") setView("print"); }}>{selectedType.sizes.map(size => <option key={size.id} value={size.id}>{size.name}</option>)}</select></label>
           {selectedType.finish && <fieldset><legend>Frame <span>{selectedType.finish.choices.find(item => item.id === finish)?.name}</span></legend><div className={s.swatches}>{selectedType.finish.choices.map(item => <button key={item.id} aria-label={`${item.name} frame`} aria-pressed={finish === item.id} onClick={() => { setFinish(item.id); if (view === "photo") setView("print"); }}><span className={s.frameChip} style={{ backgroundColor: frameColors[item.id], backgroundImage: `url(${root}/frames/${item.id}.webp)` }} /><span>{item.name}</span></button>)}</div></fieldset>}
-          <p className={s.previewNote}>Print previews illustrate the selected size and finish. Room views offer a sense of scale.{!photo.free && " This photograph is shown at preview resolution."}</p></div>
+          <p className={s.previewNote}>Print previews illustrate the selected size and finish. Room views offer a sense of scale.</p></div>
           <div className={s.purchaseFooter}><div className={s.priceLine}><strong>{money(selectedSize.cents)}</strong><span>USD · Before shipping & tax</span></div>
           <button className={s.primary} onClick={addToBag}>Add to bag <Arrow /></button>
           <div className={s.addNotice} role="status" aria-live="polite">{notice && <span>{notice} <button onClick={() => bagDialog.current?.showModal()}>View bag →</button></span>}</div>
