@@ -13,7 +13,8 @@ type BagItem = { key: string; photo: string; type: string; size: string; finish:
 const root = "/revamp/rosewave-gallery";
 const allPhotos = data.collections.flatMap(collection => collection.photos);
 const types = data.prints.types;
-const frameColors: Record<string, string> = { black: "#292929", white: "#f9f6ef", natural: "#ba9870", brown: "#72533d", darkgrey: "#555555", lightgrey: "#bcb9b2", gold: "#b6995b", silver: "#b7b9b8" };
+const galleryPath = "/revamp/rosewave/gallery";
+const collectionPath = (id: string) => `${galleryPath}/collections/${id}`;
 const rooms = [
   { id: "sideboard", name: "Living room", x: 512, y: 811, ppi: 12.42 },
   { id: "sofa", name: "Sofa", x: 489, y: 679, ppi: 9.8 },
@@ -72,9 +73,9 @@ function PrintScene({ photo, typeId = "framed", sizeId = "16x24", finish = "natu
   } as CSSProperties;
   return <div className={s.scene} aria-label={`${photo.title}, ${typeId} print in the ${room.name.toLowerCase()}`}>
     <Image src={`${root}/rooms/${room.id}.webp`} width={1024} height={1536} alt="" unoptimized className={s.roomPhoto} />
-    <div className={`${s.print} ${typeId === "canvas" ? s.canvas : ""}`} style={style}>
+    <div className={s.print} data-material={typeId} style={style}>
       <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}>
-        <PhotoImage photo={photo} eager full />
+        <div className={s.printSurface} data-material={typeId}><PhotoImage photo={photo} eager full /><span className={s.surfaceTexture} aria-hidden="true" /></div>
       </div>
     </div>
     <span className={s.sceneCaption}>A little perspective · Room preview</span>
@@ -92,15 +93,49 @@ function StudioPrint({ photo, typeId, sizeId, finish }: { photo: Photo; typeId: 
   const outsideHeight = height + (framed ? 6 : paper ? width * .14 : 0);
   return <div className={s.studio} aria-label={`${photo.title}, ${typeId} print${framed ? ` with a ${finish} frame` : ""}`}>
     <div className={s.studioFit} style={{ "--art-ratio": outsideWidth / outsideHeight, aspectRatio: `${outsideWidth} / ${outsideHeight}` } as CSSProperties}>
-      <div className={`${s.studioPrint} ${typeId === "canvas" ? s.canvas : ""}`} style={{ borderWidth: framed ? `${100 / outsideWidth}cqw` : 0, borderImageSource: framed ? `url(${root}/frames/${finish}.webp)` : undefined }}>
-        <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}><PhotoImage photo={photo} eager full /></div>
+      <div className={s.studioPrint} data-material={typeId} style={{ borderWidth: framed ? `${100 / outsideWidth}cqw` : 0, borderImageSource: framed ? `url(${root}/frames/${finish}.webp)` : undefined }}>
+        <div className={s.mat} style={{ padding: framed ? `${2 / (width + 4) * 100}%` : paper ? "6.15%" : 0 }}><div className={s.printSurface} data-material={typeId}><PhotoImage photo={photo} eager full /><span className={s.surfaceTexture} aria-hidden="true" /></div></div>
       </div>
     </div>
   </div>;
 }
 
-export default function RosewaveGallery() {
-  const [collection, setCollection] = useState<Collection>(data.collections[0]);
+type PreviewSnapshot = { photo: Photo; view: string; room: string; typeId: string; sizeId: string; finish: string };
+const previewKey = (frame: PreviewSnapshot) => `${frame.photo.id}:${frame.view}:${frame.view === "room" ? frame.room : ""}`;
+const previewConfig = (frame: PreviewSnapshot) => `${previewKey(frame)}:${frame.typeId}:${frame.sizeId}:${frame.finish}`;
+function PreviewContent({ photo, view, room, typeId, sizeId, finish }: PreviewSnapshot) {
+  if (view === "room") return <div className={s.roomStage}><PrintScene photo={photo} typeId={typeId} sizeId={sizeId} finish={finish} roomId={room} /></div>;
+  if (view === "print") return <StudioPrint photo={photo} typeId={typeId} sizeId={sizeId} finish={finish} />;
+  return <div className={s.photoOnly}><PhotoImage photo={photo} eager full /></div>;
+}
+function SlidingPreview(frame: PreviewSnapshot) {
+  const [slides, setSlides] = useState({ active: frame, leaving: null as PreviewSnapshot | null, serial: 0, direction: 1 });
+  if (previewConfig(frame) !== previewConfig(slides.active)) {
+    if (previewKey(frame) !== previewKey(slides.active)) {
+      const old = slides.active;
+      const direction = frame.photo.id !== old.photo.id
+        ? Math.sign(allPhotos.indexOf(frame.photo) - allPhotos.indexOf(old.photo))
+        : frame.view !== old.view
+          ? Math.sign(["photo", "print", "room"].indexOf(frame.view) - ["photo", "print", "room"].indexOf(old.view))
+          : Math.sign(rooms.findIndex(item => item.id === frame.room) - rooms.findIndex(item => item.id === old.room));
+      // Keep the outgoing scene intact while the next distinct scene slides past it.
+      setSlides({ active: frame, leaving: old, serial: slides.serial + 1, direction: direction || 1 });
+    } else setSlides({ ...slides, active: frame });
+  }
+  useEffect(() => {
+    if (!slides.leaving) return;
+    const timeout = window.setTimeout(() => setSlides(current => current.serial === slides.serial ? { ...current, leaving: null } : current), 600);
+    return () => window.clearTimeout(timeout);
+  }, [slides.serial, slides.leaving]);
+  return <div className={s.previewDeck} style={{ "--slide-direction": slides.direction } as CSSProperties}>
+    {slides.leaving && <div key={`out-${slides.serial}`} className={`${s.previewSlide} ${s.slideOut}`} aria-hidden="true" inert><PreviewContent {...slides.leaving} /></div>}
+    <div key={`in-${slides.serial}`} className={`${s.previewSlide} ${slides.leaving ? s.slideIn : ""}`} onAnimationEnd={() => setSlides(current => current.serial === slides.serial ? { ...current, leaving: null } : current)}><PreviewContent {...slides.active} /></div>
+  </div>;
+}
+
+export default function RosewaveGallery({ collectionId }: { collectionId?: string }) {
+  const collection: Collection = data.collections.find(item => item.id === collectionId) || data.collections[0];
+  const isCollection = !!collectionId;
   const [photo, setPhoto] = useState<Photo>(allPhotos[0]);
   const [printType, setPrintType] = useState("framed");
   const [sizeId, setSizeId] = useState("16x24");
@@ -112,8 +147,7 @@ export default function RosewaveGallery() {
   const [notice, setNotice] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
-  const portfolioRef = useRef<HTMLElement>(null);
-  const panelRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const panelRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const printDialog = useRef<HTMLDialogElement>(null);
   const bagDialog = useRef<HTMLDialogElement>(null);
   const sizeControlRef = useRef<HTMLLabelElement>(null);
@@ -122,6 +156,8 @@ export default function RosewaveGallery() {
   const selectedSize = selectedType.sizes.find(size => size.id === sizeId) || selectedType.sizes[0];
   const count = bag.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = bag.reduce((sum, item) => sum + priceOf(item) * item.quantity, 0);
+  const photoCollection = data.collections.find(item => item.photos.some(p => p.id === photo.id)) || collection;
+  const photoIndex = photoCollection.photos.findIndex(item => item.id === photo.id);
 
   useEffect(() => {
     try {
@@ -186,10 +222,6 @@ export default function RosewaveGallery() {
     return () => control.removeEventListener("wheel", onWheel);
   }, [selectedType, selectedSize.id, view]);
 
-  function openCollection(item: Collection) {
-    setCollection(item);
-    portfolioRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
-  }
   function openPrint(item: Photo) {
     setPhoto(item);
     setView("photo");
@@ -220,31 +252,31 @@ export default function RosewaveGallery() {
   }
 
   return <div ref={pageRef} className={`${t.page} ${s.page}`} onContextMenu={event => event.preventDefault()}>
-    <a className={t.skip} href="#portfolio">Skip to photographs</a>
+    <a className={t.skip} href={isCollection ? "#portfolio" : "#collections"}>Skip to {isCollection ? "photographs" : "collections"}</a>
     <header className={`${t["photo-header"]} ${menuOpen ? t["is-menu-open"] : ""}`}>
-      <a href="#top" className={t.brand} aria-label="Rose Wave Photography home"><span className={t["brand-mark"]}><WaveMark /></span><span className={t["brand-type"]}><strong>Rose Wave</strong><span>Photography</span></span></a>
+      <Link href={isCollection ? galleryPath : "#top"} className={t.brand} aria-label="Rose Wave Photography home"><span className={t["brand-mark"]}><WaveMark /></span><span className={t["brand-type"]}><strong>Rose Wave</strong><span>Photography</span></span></Link>
       <button className={t["menu-toggle"]} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="rosewave-menu" onClick={() => setMenuOpen(!menuOpen)}><AppIcon name={menuOpen ? "close" : "menu"} /></button>
       <nav className={t["photo-nav"]} id="rosewave-menu" aria-label="Rose Wave navigation">
-        <a href="#portfolio" onClick={() => setMenuOpen(false)}><AppIcon name="gallery" />Portfolio</a><a href="#about" onClick={() => setMenuOpen(false)}>About</a><a href="#prints" onClick={() => setMenuOpen(false)}><AppIcon name="print" />Prints</a><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+        <Link href={collectionPath(collection.id)} onClick={() => setMenuOpen(false)}><AppIcon name="gallery" />Portfolio</Link><Link href={`${galleryPath}#about`} onClick={() => setMenuOpen(false)}>About</Link><Link href={`${galleryPath}#prints`} onClick={() => setMenuOpen(false)}><AppIcon name="print" />Prints</Link><Link href={`${galleryPath}#contact`} onClick={() => setMenuOpen(false)}>Contact</Link>
         <button onClick={() => { setMenuOpen(false); bagDialog.current?.showModal(); }} aria-label={`Open bag, ${count} ${count === 1 ? "item" : "items"}`}><svg width="18" height="21" viewBox="0 0 24 26" fill="none" aria-hidden="true"><path d="M4 8h16l1 16H3L4 8Zm4 0V5a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.4" /></svg>Bag ({count})</button>
       </nav>
     </header>
     <main id="top">
-      <section className={t["collection-intro"]} aria-label="Rose Wave photography">
+      {!isCollection && <><section className={t["collection-intro"]} aria-label="Rose Wave photography">
         <div className={t["intro-copy"]}><p className={t.eyebrow}>Original photography · A different perspective</p><p className={t["intro-title"]}>Find a photograph<br />that feels like you.</p></div>
         <AppArtwork className={t["intro-art"]} />
       </section>
-      <section className={t["category-stack"]} aria-label="Photography collections">
-        {data.collections.map((item, index) => <button key={item.id} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${collection.id === item.id ? t["is-active"] : ""}`} style={{ "--image": `url("${item.photos[0].fullSrc}")` } as CSSProperties} onClick={() => openCollection(item)} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
+      <section id="collections" className={t["category-stack"]} aria-label="Photography collections">
+        {data.collections.map((item, index) => <Link key={item.id} href={collectionPath(item.id)} ref={element => { panelRefs.current[index] = element; }} className={t["category-panel"]} style={{ "--image": `url("${item.photos[0].fullSrc}")` } as CSSProperties} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
           <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")} <span className={t["collection-count"]}>{item.photos.length} photographs</span></span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery <AppIcon name="arrow_right" /></span>
-        </button>)}
-      </section>
-      <section className={t["portfolio-section"]} id="portfolio" ref={portfolioRef} aria-labelledby="collection-title">
+        </Link>)}
+      </section></>}
+      {isCollection && <section className={`${t["portfolio-section"]} ${s.collectionPortfolio}`} id="portfolio" aria-labelledby="collection-title">
         <aside className={t["portfolio-sidebar"]}>
-          <a className={t["back-link"]} href="#top">Back to collections</a>
+          <Link className={t["back-link"]} href={`${galleryPath}#collections`}>Back to collections</Link>
           <p className={t.eyebrow}><AppIcon name="grid" />The collections</p><h1 id="collection-title">{collection.name}</h1>
           <p className={t["gallery-description"]}>{collection.description}</p>
-          <ol className={t["filter-list"]} aria-label="Collection filters">{data.collections.map(item => <li key={item.id}><button className={`${t["filter-button"]} ${collection.id === item.id ? t["is-active"] : ""}`} aria-pressed={collection.id === item.id} onClick={() => setCollection(item)}>{item.name}</button></li>)}</ol>
+          <ol className={t["filter-list"]} aria-label="Collection filters">{data.collections.map(item => <li key={item.id}><Link href={collectionPath(item.id)} className={`${t["filter-button"]} ${collection.id === item.id ? t["is-active"] : ""}`} aria-current={collection.id === item.id ? "page" : undefined}>{item.name}</Link></li>)}</ol>
           <p className={t["gallery-hint"]}>{collection.photos.length} photographs.<br />Select one to explore prints.</p><div className={t["sidebar-mark"]} aria-hidden="true"><WaveMark /></div>
         </aside>
         <div className={t["gallery-grid"]} aria-live="polite" aria-label={`${collection.name} photographs`}>
@@ -252,8 +284,8 @@ export default function RosewaveGallery() {
             <button onClick={() => openPrint(item)} aria-label={`Preview print of ${item.title}`}><PhotoImage photo={item} /></button><figcaption>{String(index + 1).padStart(2, "0")} / Explore print</figcaption>
           </figure>)}
         </div>
-      </section>
-      <section className={t["about-section"]} id="about" aria-labelledby="about-title">
+      </section>}
+      {!isCollection && <><section className={t["about-section"]} id="about" aria-labelledby="about-title">
         <AppArtwork className={t["about-art"]} /><p className={t.eyebrow}>About Rose Wave</p><h2 id="about-title">A different way to see the everyday.</h2><p>Something familiar. Something unexpected. Rose Wave gives a photograph you connect with a place in your everyday — on your phone, on your wall, or somewhere in between.</p>
       </section>
       <section className={t["print-section"]} id="prints" aria-labelledby="print-heading">
@@ -264,26 +296,27 @@ export default function RosewaveGallery() {
         <article><span>The app</span><h3><Link href="/revamp/rosewave">Keep a photograph close. ↗</Link></h3><p>Explore Rose Wave for your phone.<br />Coming soon to Google Play.</p></article>
         <article><span>The website</span><h3><TemplateLink>A template, in its element. ↗</TemplateLink></h3><p>This gallery uses the Kno.plus Photography template. See the original, then imagine your own photographs here.</p></article>
         <article id="contact"><span>Contact</span><h3><a href="mailto:info@kno.plus?subject=Rose%20Wave%20photography">Something caught your eye? ↗</a></h3><p>Ask about a photograph or a print.</p></article>
-      </section>
+      </section></>}
     </main>
     <div className={t["footer-art"]}><AppArtwork /></div>
-    <footer className={t["photo-footer"]}><span className={t["footer-brand"]}><WaveMark />© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><a href="#top">Collections</a><TemplateLink>Photography template</TemplateLink><Link href="/revamp">Kno.plus</Link></nav></footer>
+    <footer className={t["photo-footer"]}><span className={t["footer-brand"]}><WaveMark />© {new Date().getFullYear()} Rose Wave Photography</span><nav aria-label="Footer navigation"><Link href={`${galleryPath}#collections`}>Collections</Link><TemplateLink>Photography template</TemplateLink><Link href="/revamp">Kno.plus</Link></nav></footer>
 
     <dialog ref={printDialog} className={`${s.dialog} ${s.printDialog}`} aria-labelledby="product-title" onClose={() => setNotice("")} onClick={event => { if (event.target === event.currentTarget) printDialog.current?.close(); }}>
       <div className={`${s.dialogTop} ${s.productHeader}`}><button className={s.backToGallery} onClick={() => printDialog.current?.close()}><span aria-hidden="true">←</span> Back to gallery</button><span className={s.productWordmark}><WaveMark />Rose Wave</span><div className={s.dialogActions}><button className={s.textLink} onClick={() => bagDialog.current?.showModal()}>Bag ({count})</button><button className={s.close} aria-label="Close print preview" onClick={() => printDialog.current?.close()}>×</button></div></div>
       <div className={s.product}>
         <div className={s.productVisual}>
           <div className={s.viewSwitch} role="group" aria-label="Preview view"><button aria-pressed={view === "photo"} onClick={() => setView("photo")}>Photograph</button><button aria-pressed={view === "print"} onClick={() => setView("print")}>Print preview</button><button aria-pressed={view === "room"} onClick={() => setView("room")}>In a room</button></div>
-          {view === "room" ? <div className={s.roomStage}><PrintScene photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} roomId={room} /></div> : view === "print" ? <StudioPrint photo={photo} typeId={printType} sizeId={selectedSize.id} finish={finish} /> : <div className={s.photoOnly}><PhotoImage photo={photo} eager full /></div>}
+          <SlidingPreview photo={photo} view={view} typeId={printType} sizeId={selectedSize.id} finish={finish} room={room} />
+          <div className={s.photoNavigation} role="group" aria-label="Browse photographs"><button aria-label="Previous photograph" disabled={photoIndex === 0} onClick={() => setPhoto(photoCollection.photos[photoIndex - 1])}>←</button><button aria-label="Next photograph" disabled={photoIndex === photoCollection.photos.length - 1} onClick={() => setPhoto(photoCollection.photos[photoIndex + 1])}>→</button></div>
           {view !== "room" && <p className={s.visualCaption}>{view === "photo" ? "The photograph, uncropped" : `${selectedType.name} · ${selectedSize.name}${selectedType.finish ? ` · ${selectedType.finish.choices.find(item => item.id === finish)?.name} frame` : ""}`}</p>}
           {view === "room" && <div className={s.roomOptions} role="group" aria-label="Room"><span>Try a space</span>{rooms.map(item => <button key={item.id} aria-pressed={room === item.id} onClick={() => setRoom(item.id)}>{item.name}</button>)}</div>}
         </div>
         <div className={s.productCopy}>
           <div className={s.productDetails}><p className={s.eyebrow}>Original photography / Print preview</p><h2 id="product-title">{photo.title.split(" · ")[0]}<span>Photograph {photo.title.split(" · ")[1]}</span></h2>
-          <fieldset><legend>Find your finish</legend><div className={s.typeOptions}>{types.map(type => <button key={type.id} aria-pressed={printType === type.id} onClick={() => changeType(type.id)}>{type.name}</button>)}</div></fieldset>
+          <label className={s.optionLabel}>Finish<select value={printType} onChange={event => changeType(event.target.value)}>{types.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
           <p className={s.materialNote}>{selectedType.about}</p>
+          <label className={s.optionLabel}>Frame<select value={selectedType.finish ? finish : "none"} disabled={!selectedType.finish} onChange={event => { setFinish(event.target.value); if (view === "photo") setView("print"); }}>{selectedType.finish ? selectedType.finish.choices.map(item => <option key={item.id} value={item.id}>{item.name}</option>) : <option value="none">Not used for this finish</option>}</select></label>
           <label ref={sizeControlRef} className={s.sizeLabel}><span>Print size<small className={s.sizeHint}>Scroll to change</small></span><select aria-label="Print size" value={selectedSize.id} onChange={event => { setSizeId(event.target.value); if (view === "photo") setView("print"); }}>{selectedType.sizes.map(size => <option key={size.id} value={size.id}>{size.name}</option>)}</select></label>
-          {selectedType.finish && <fieldset><legend>Frame <span>{selectedType.finish.choices.find(item => item.id === finish)?.name}</span></legend><div className={s.swatches}>{selectedType.finish.choices.map(item => <button key={item.id} aria-label={`${item.name} frame`} aria-pressed={finish === item.id} onClick={() => { setFinish(item.id); if (view === "photo") setView("print"); }}><span className={s.frameChip} style={{ backgroundColor: frameColors[item.id], backgroundImage: `url(${root}/frames/${item.id}.webp)` }} /><span>{item.name}</span></button>)}</div></fieldset>}
           <p className={s.previewNote}>Print previews illustrate the selected size and finish. Room views offer a sense of scale.</p></div>
           <div className={s.purchaseFooter}><div className={s.priceLine}><strong>{money(selectedSize.cents)}</strong><span>USD · Before shipping & tax</span></div>
           <button className={s.primary} onClick={addToBag}>Add to bag <Arrow /></button>
