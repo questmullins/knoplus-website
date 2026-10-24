@@ -22,3 +22,7 @@ To turn on email delivery, configure one of these provider paths:
 - Or add a Cloudflare Email Sending binding named `EMAIL` and set `CONTACT_FROM` to a verified sender.
 
 Without one of those configured, the form stays visible but returns a setup message instead of sending mail.
+
+## Rose Wave photos
+
+The Rose Wave gallery (`/revamp/rosewave/gallery`) loads its larger photos from the RoseWave worker's public `web/` routes. Set a build variable `NEXT_PUBLIC_ROSEWAVE_API` to the worker's address (for example `https://<worker>.workers.dev`) and add this site's address to the worker's `SITE_ORIGIN` variable. Without them the gallery uses the 1200-pixel copies in `nextjs-elements/public/revamp/rosewave-gallery/photos/`. Full-size photos are never kept in this repository.

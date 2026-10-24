@@ -12,9 +12,9 @@
           "free": true,
           "width": 1200,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-01.jpg",
-          "fullWidth": 2400,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp",
+          "fullWidth": 1200,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-02",
@@ -23,9 +23,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-02.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-02.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-03",
@@ -34,9 +34,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-03.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-03.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-04",
@@ -45,9 +45,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-04.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-04.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-05",
@@ -56,9 +56,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-05.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-05.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-06",
@@ -67,9 +67,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-06.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-06.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-07",
@@ -78,9 +78,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-07.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-07.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-08",
@@ -89,9 +89,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-08.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-08.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-09",
@@ -100,9 +100,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-09.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-09.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-10",
@@ -111,9 +111,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-10.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-10.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-11",
@@ -122,9 +122,9 @@
           "free": false,
           "width": 394,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-11.jpg",
-          "fullWidth": 787,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-11.webp",
+          "fullWidth": 394,
+          "fullHeight": 1200
         },
         {
           "id": "blush-of-autumn-12",
@@ -133,9 +133,9 @@
           "free": false,
           "width": 1200,
           "height": 1121,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/blush-of-autumn-12.jpg",
-          "fullWidth": 2569,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/blush-of-autumn-12.webp",
+          "fullWidth": 1200,
+          "fullHeight": 1121
         }
       ]
     },
@@ -151,9 +151,9 @@
           "free": true,
           "width": 1200,
           "height": 857,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-01.jpg",
-          "fullWidth": 3360,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-01.webp",
+          "fullWidth": 1200,
+          "fullHeight": 857
         },
         {
           "id": "nyc550-02",
@@ -162,9 +162,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-02.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-02.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "nyc550-03",
@@ -173,9 +173,9 @@
           "free": false,
           "width": 1200,
           "height": 800,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-03.jpg",
-          "fullWidth": 3600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-03.webp",
+          "fullWidth": 1200,
+          "fullHeight": 800
         },
         {
           "id": "nyc550-04",
@@ -184,9 +184,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-04.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-04.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "nyc550-05",
@@ -195,9 +195,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-05.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-05.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "nyc550-06",
@@ -206,9 +206,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-06.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-06.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "nyc550-07",
@@ -217,9 +217,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-07.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-07.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         },
         {
           "id": "nyc550-08",
@@ -228,9 +228,9 @@
           "free": false,
           "width": 1200,
           "height": 1027,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-08.jpg",
-          "fullWidth": 2804,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-08.webp",
+          "fullWidth": 1200,
+          "fullHeight": 1027
         },
         {
           "id": "nyc550-09",
@@ -239,9 +239,9 @@
           "free": false,
           "width": 857,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/nyc550-09.jpg",
-          "fullWidth": 1714,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/nyc550-09.webp",
+          "fullWidth": 857,
+          "fullHeight": 1200
         }
       ]
     },
@@ -257,9 +257,9 @@
           "free": true,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-01.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-01.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-02",
@@ -268,9 +268,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-02.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-02.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-03",
@@ -279,9 +279,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-03.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-03.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-04",
@@ -290,9 +290,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-04.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-04.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-05",
@@ -301,9 +301,9 @@
           "free": false,
           "width": 1200,
           "height": 600,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-05.jpg",
-          "fullWidth": 4799,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-05.webp",
+          "fullWidth": 1200,
+          "fullHeight": 600
         },
         {
           "id": "dreaming-of-a-wave-06",
@@ -312,9 +312,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-06.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-06.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-07",
@@ -323,9 +323,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-07.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-07.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-08",
@@ -334,9 +334,9 @@
           "free": false,
           "width": 960,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-08.jpg",
-          "fullWidth": 1920,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-08.webp",
+          "fullWidth": 960,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-09",
@@ -345,9 +345,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-09.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-09.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-10",
@@ -356,9 +356,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-10.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-10.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-11",
@@ -367,9 +367,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-11.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-11.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         },
         {
           "id": "dreaming-of-a-wave-12",
@@ -378,9 +378,9 @@
           "free": false,
           "width": 800,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/dreaming-of-a-wave-12.jpg",
-          "fullWidth": 1600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/dreaming-of-a-wave-12.webp",
+          "fullWidth": 800,
+          "fullHeight": 1200
         }
       ]
     },
@@ -396,9 +396,9 @@
           "free": true,
           "width": 960,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-01.jpg",
-          "fullWidth": 1920,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-01.webp",
+          "fullWidth": 960,
+          "fullHeight": 1200
         },
         {
           "id": "urban-thrill-02",
@@ -407,9 +407,9 @@
           "free": false,
           "width": 960,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-02.jpg",
-          "fullWidth": 1920,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-02.webp",
+          "fullWidth": 960,
+          "fullHeight": 1200
         },
         {
           "id": "urban-thrill-03",
@@ -418,9 +418,9 @@
           "free": false,
           "width": 1200,
           "height": 800,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-03.jpg",
-          "fullWidth": 3600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-03.webp",
+          "fullWidth": 1200,
+          "fullHeight": 800
         },
         {
           "id": "urban-thrill-04",
@@ -429,9 +429,9 @@
           "free": false,
           "width": 675,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-04.jpg",
-          "fullWidth": 1350,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-04.webp",
+          "fullWidth": 675,
+          "fullHeight": 1200
         },
         {
           "id": "urban-thrill-05",
@@ -440,9 +440,9 @@
           "free": false,
           "width": 1200,
           "height": 960,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-05.jpg",
-          "fullWidth": 3000,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-05.webp",
+          "fullWidth": 1200,
+          "fullHeight": 960
         },
         {
           "id": "urban-thrill-06",
@@ -451,9 +451,9 @@
           "free": false,
           "width": 960,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-06.jpg",
-          "fullWidth": 1920,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-06.webp",
+          "fullWidth": 960,
+          "fullHeight": 1200
         },
         {
           "id": "urban-thrill-07",
@@ -462,9 +462,9 @@
           "free": false,
           "width": 1200,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-07.jpg",
-          "fullWidth": 2400,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-07.webp",
+          "fullWidth": 1200,
+          "fullHeight": 1200
         },
         {
           "id": "urban-thrill-08",
@@ -473,9 +473,9 @@
           "free": false,
           "width": 960,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-08.jpg",
-          "fullWidth": 1920,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-08.webp",
+          "fullWidth": 960,
+          "fullHeight": 1200
         },
         {
           "id": "urban-thrill-09",
@@ -484,9 +484,9 @@
           "free": false,
           "width": 1200,
           "height": 960,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-09.jpg",
-          "fullWidth": 3000,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-09.webp",
+          "fullWidth": 1200,
+          "fullHeight": 960
         },
         {
           "id": "urban-thrill-10",
@@ -495,9 +495,9 @@
           "free": false,
           "width": 1200,
           "height": 800,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-10.jpg",
-          "fullWidth": 3600,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-10.webp",
+          "fullWidth": 1200,
+          "fullHeight": 800
         },
         {
           "id": "urban-thrill-11",
@@ -506,9 +506,9 @@
           "free": false,
           "width": 1200,
           "height": 675,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-11.jpg",
-          "fullWidth": 3967,
-          "fullHeight": 2231
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-11.webp",
+          "fullWidth": 1200,
+          "fullHeight": 675
         },
         {
           "id": "urban-thrill-12",
@@ -517,9 +517,9 @@
           "free": false,
           "width": 1200,
           "height": 1200,
-          "fullSrc": "/revamp/rosewave-gallery/photos/full/urban-thrill-12.jpg",
-          "fullWidth": 2400,
-          "fullHeight": 2400
+          "fullSrc": "/revamp/rosewave-gallery/photos/urban-thrill-12.webp",
+          "fullWidth": 1200,
+          "fullHeight": 1200
         }
       ]
     }
