@@ -29,6 +29,10 @@ The bag supports quantities, removal, current catalog subtotals, and optional br
 
 This is a published design concept with an explicitly labeled shop preview. Payments, shipping, tax, account membership, print fulfillment, and stock checks are not connected. No credentials or private app endpoints are copied into the site. The app's Square/Prodigi integration remains in its own repository. Connecting web ordering requires a separate server-side integration and final price/shipping verification.
 
-The opening collection bands are narrower and taller, with a centered maximum width on large displays, while retaining hover/focus expansion and mobile scrolling. The browser context menu is suppressed within this gallery, including its print and bag dialogs.
+The opening collection bands retain a centered maximum width on large displays. On phones, both the bands and the collection photo grids extend to the edges of the page; text on photography is white with a contrast scrim. The introductory headline has its own space below the fixed navigation.
+
+Collection expansion follows the middle 20% of the visible viewport (40–60% from the top), on both desktop and mobile. When two bands intersect that region, the incoming band wins in the scroll direction; only one is expanded. Selection is evaluated on scrolling and viewport resizing, not on the expansion animation, and scroll anchoring is disabled to prevent layout changes from causing oscillation. Reduced-motion preferences remove transitions and parallax. Links still open their collection normally and retain visible keyboard focus. The browser context menu remains suppressed within the gallery and its dialogs.
+
+Website-specific Blender artwork replaces the stretched app layers in the intro, about section, and footer. Each has independent mobile and desktop compositions with the original watercolor textures, undistorted circular sun, and space reserved for HTML text. The packed Blender scenes and reproducible render script are in `design/rosewave-web/`.
 
 This route is marked noindex while the concept is under review. It has no photo download links, GIFs, playback controls, or generic template-picker overlays.

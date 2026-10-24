@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { flushSync } from "react-dom";
 import data from "./catalog.json";
 import s from "./gallery.module.css";
 import t from "./template.module.css";
@@ -42,10 +43,13 @@ function WaveMark() {
 function AppIcon({ name, className = "" }: { name: "gallery" | "print" | "grid" | "menu" | "close" | "arrow_right"; className?: string }) {
   return <Image src={`${root}/icons/icon_${name}.png`} width={64} height={64} alt="" aria-hidden="true" unoptimized className={`${t["app-icon"]} ${className}`} />;
 }
-function AppArtwork({ className = "" }: { className?: string }) {
+function AppArtwork({ className = "", scene = "footer" }: { className?: string; scene?: "intro" | "about" | "footer" }) {
   return <div className={`${t.artwork} ${className}`} aria-hidden="true">
-    <Image src={`${root}/ui/sun_menu.webp`} width={328} height={328} alt="" className={t["artwork-sun"]} unoptimized />
-    {["a", "b", "c", "d", "e"].map((layer, index) => <Image key={layer} src={`${root}/ui/wave_menu_${layer}.webp`} width={908} height={400} alt="" unoptimized style={{ zIndex: index + 1 }} />)}
+    <picture>
+      <source media="(max-width: 900px)" srcSet={`${root}/artwork/${scene}-mobile.webp`} />
+      {/* Art-directed Blender renders have different compositions, not stretched app layers. */}
+      <img src={`${root}/artwork/${scene}-desktop.webp`} alt="" loading={scene === "intro" ? "eager" : "lazy"} draggable={false} />
+    </picture>
   </div>;
 }
 function PhotoImage({ photo, className = "", eager = false, full = false }: { photo: Photo; className?: string; eager?: boolean; full?: boolean }) {
@@ -146,6 +150,7 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
   const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [centeredPanel, setCenteredPanel] = useState<number | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const printDialog = useRef<HTMLDialogElement>(null);
@@ -177,24 +182,67 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
 
   useEffect(() => {
     const page = pageRef.current;
-    if (!page) return;
+    if (!page || isCollection) return;
     let frame = 0;
+    let lastScroll = page.scrollTop;
+    let direction = 0;
+    let jumpingToSection = false;
+    let jumpTimer = 0;
     const update = () => {
       frame = 0;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (jumpingToSection) return;
+      const delta = page.scrollTop - lastScroll;
+      if (Math.abs(delta) > 1) direction = Math.sign(delta);
+      lastScroll = page.scrollTop;
+      const height = window.visualViewport?.height || page.clientHeight;
+      const top = window.visualViewport?.offsetTop || 0;
+      const candidates: { index: number; distance: number }[] = [];
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       panelRefs.current.forEach((panel, index) => {
         if (!panel) return;
         const rect = panel.getBoundingClientRect();
-        const distance = (rect.top + rect.height / 2 - page.clientHeight / 2) / page.clientHeight;
-        panel.style.setProperty("--panel-y", `${Math.max(-22, Math.min(22, distance * -34)) + index * 1.5}px`);
+        const distance = (rect.top + rect.height / 2 - top - height / 2) / height;
+        if (rect.bottom > top + height * .4 && rect.top < top + height * .6) candidates.push({ index, distance: Math.abs(distance) });
+        if (!reducedMotion) panel.style.setProperty("--panel-y", `${Math.max(-22, Math.min(22, distance * -34)) + index * 1.5}px`);
       });
+      // At a boundary, the incoming panel wins in the direction of travel.
+      // Only scrolling/viewport changes trigger selection; resizing the panels cannot retrigger it.
+      const next = direction > 0 ? candidates.at(-1) : direction < 0 ? candidates[0] : candidates.sort((a, b) => a.distance - b.distance)[0];
+      setCenteredPanel(next?.index ?? null);
     };
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const finishJump = () => {
+      jumpingToSection = false;
+      delete page.dataset.sectionJump;
+      lastScroll = page.scrollTop;
+      direction = 0;
+      schedule();
+    };
+    const schedule = () => {
+      if (jumpingToSection) {
+        window.clearTimeout(jumpTimer);
+        jumpTimer = window.setTimeout(finishJump, 150);
+      } else if (!frame) frame = requestAnimationFrame(update);
+    };
+    const prepareAnchor = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest("a") : null;
+      if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const url = new URL(link.href);
+      if (url.origin !== location.origin || url.pathname !== location.pathname || !url.hash) return;
+      // Settle panel heights before native anchor navigation measures its destination.
+      // Otherwise an outgoing panel's collapse can pull the target under the header.
+      jumpingToSection = true;
+      page.dataset.sectionJump = "true";
+      flushSync(() => setCenteredPanel(null));
+      window.clearTimeout(jumpTimer);
+      jumpTimer = window.setTimeout(finishJump, 150);
+    };
     update();
+    page.addEventListener("click", prepareAnchor, true);
     page.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
-    return () => { page.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); cancelAnimationFrame(frame); };
-  }, []);
+    window.visualViewport?.addEventListener("resize", schedule);
+    return () => { page.removeEventListener("click", prepareAnchor, true); page.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); window.visualViewport?.removeEventListener("resize", schedule); cancelAnimationFrame(frame); window.clearTimeout(jumpTimer); delete page.dataset.sectionJump; };
+  }, [isCollection]);
 
   useEffect(() => {
     const control = sizeControlRef.current;
@@ -264,10 +312,10 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
     <main id="top">
       {!isCollection && <><section className={t["collection-intro"]} aria-label="Rose Wave photography">
         <div className={t["intro-copy"]}><p className={t.eyebrow}>Original photography · A different perspective</p><p className={t["intro-title"]}>Find a photograph<br />that feels like you.</p></div>
-        <AppArtwork className={t["intro-art"]} />
+        <AppArtwork className={t["intro-art"]} scene="intro" />
       </section>
       <section id="collections" className={t["category-stack"]} aria-label="Photography collections">
-        {data.collections.map((item, index) => <Link key={item.id} href={collectionPath(item.id)} ref={element => { panelRefs.current[index] = element; }} className={t["category-panel"]} style={{ "--image": `url("${item.photos[0].fullSrc}")` } as CSSProperties} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
+        {data.collections.map((item, index) => <Link key={item.id} href={collectionPath(item.id)} ref={element => { panelRefs.current[index] = element; }} className={`${t["category-panel"]} ${centeredPanel === index ? t["is-centered"] : ""}`} data-centered={centeredPanel === index} style={{ "--image": `url("${item.photos[0].fullSrc}")` } as CSSProperties} aria-label={`Explore ${item.name}, ${item.photos.length} photographs`}>
           <span className={t["category-number"]}>{String(index + 1).padStart(2, "0")} <span className={t["collection-count"]}>{item.photos.length} photographs</span></span><span className={t["category-title"]}>{item.name}</span><span className={t["category-action"]}>View gallery <AppIcon name="arrow_right" /></span>
         </Link>)}
       </section></>}
@@ -286,7 +334,7 @@ export default function RosewaveGallery({ collectionId }: { collectionId?: strin
         </div>
       </section>}
       {!isCollection && <><section className={t["about-section"]} id="about" aria-labelledby="about-title">
-        <AppArtwork className={t["about-art"]} /><p className={t.eyebrow}>About Rose Wave</p><h2 id="about-title">A different way to see the everyday.</h2><p>Something familiar. Something unexpected. Rose Wave gives a photograph you connect with a place in your everyday — on your phone, on your wall, or somewhere in between.</p>
+        <AppArtwork className={t["about-art"]} scene="about" /><p className={t.eyebrow}>About Rose Wave</p><h2 id="about-title">A different way to see the everyday.</h2><p>Something familiar. Something unexpected. Rose Wave gives a photograph you connect with a place in your everyday — on your phone, on your wall, or somewhere in between.</p>
       </section>
       <section className={t["print-section"]} id="prints" aria-labelledby="print-heading">
         <button onClick={() => openPrint(allPhotos[0])} aria-label="Preview The Blush of Autumn as a print"><PrintScene photo={allPhotos[0]} /></button>
