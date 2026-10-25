@@ -1,4 +1,5 @@
 import { EmailMessage } from "cloudflare:email";
+import { handleAnalytics, recordAnalytics } from './server/analytics.js';
 import { handleClients } from "./server/clients.js";
 
 const CONTACT_TO_FALLBACK = "info@kno.plus";
@@ -6,9 +7,11 @@ const CONTACT_FROM_FALLBACK = "Knoplus <info@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    // Public, fictional-data concept only; it does not expose the client database.
+    const analyticsResponse = await handleAnalytics(request, env);
+    if (analyticsResponse) return analyticsResponse;
+    // Dashboard shell is public; analytics are administrator-only.
     if ((url.hostname === "manage.kno.plus" && url.pathname === "/") || url.pathname === "/manage" || url.pathname === "/manage/") {
       const assetUrl = new URL("/manage/",url);
       const response = await env.ASSETS.fetch(new Request(assetUrl,request));
@@ -41,10 +44,14 @@ export default {
         return jsonResponse({ message: "Method not allowed." }, 405, request);
       }
 
-      return handleContact(request, env);
+      const response = await handleContact(request, env);
+      if (response.status === 200) ctx.waitUntil(recordAnalytics(request, env, response, "contact").catch(() => console.error("analytics_write_failed")));
+      return response;
     }
 
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    ctx.waitUntil(recordAnalytics(request, env, response).catch(() => console.error("analytics_write_failed")));
+    return response;
   }
 };
 
