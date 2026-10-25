@@ -31,3 +31,4 @@ h2{font-size:clamp(42px,5.1vw,76px);line-height:1.03}h2 em,h3 em{font-weight:600
 .story-band#events>img{height:clamp(380px,37vw,550px);aspect-ratio:auto;object-fit:cover;object-position:center 60%}
 @media(max-width:860px){.story-band#events{grid-template-columns:1fr;gap:38px}.story-band#events>img{height:auto;aspect-ratio:4/3;max-height:440px}}
 @media(prefers-reduced-motion:reduce){.hero[data-parallax]::before{transform:none;will-change:auto}}
+.visit-map{transform:none}.visit-map iframe{display:block;width:100%;height:clamp(320px,32vw,460px);border:0;background:#e4e7d7}
