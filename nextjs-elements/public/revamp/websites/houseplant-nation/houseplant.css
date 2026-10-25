@@ -38,3 +38,4 @@ h2{font-size:clamp(42px,5.1vw,76px);line-height:1.03}h2 em,h3 em{font-weight:600
 .hero#top .hero-copy>p:last-child{margin-top:18px}
 .hero#top .hero-footnote{bottom:18px}
 @media(max-width:860px){.hero#top{min-height:44svh;padding:100px 24px 46px}.hero#top h1{font-size:clamp(42px,8vw,62px)}.hero#top .hero-copy>p:last-child{font-size:16px}}
+.full-menu .menu-entry dt span,.full-menu .category-note{color:#50633c}
