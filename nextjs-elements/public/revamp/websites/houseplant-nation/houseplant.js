@@ -3,6 +3,7 @@
   const toggle = document.querySelector('.mobile-toggle');
   const panel = document.querySelector('.mobile-panel');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const parallaxImages = [...document.querySelectorAll('[data-parallax]')];
   function setMenu(open, restoreFocus = false) {
     panel.classList.toggle('open', open);
     panel.inert = !open;
@@ -24,11 +25,17 @@
   });
   function update() {
     header.classList.toggle('is-solid', window.scrollY > 30);
-    document.querySelectorAll('[data-parallax]').forEach(el => el.style.setProperty('--parallax-y', reduced.matches ? '0px' : `${Math.min(30, window.scrollY * .08)}px`));
+    parallaxImages.forEach(el => {
+      const height = el.offsetHeight;
+      const progress = Math.max(0, -el.getBoundingClientRect().top);
+      const offset = reduced.matches ? 0 : Math.min(height * .12, progress * .18);
+      el.style.setProperty('--parallax-y', `${offset}px`);
+    });
   }
   let queued = false;
   window.addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(() => { update(); queued = false; }); } }, { passive: true });
   window.addEventListener('resize', () => { if (window.innerWidth > 860) setMenu(false); update(); });
+  reduced.addEventListener('change', update);
   if ('IntersectionObserver' in window && !reduced.matches) {
     document.documentElement.classList.add('js-motion');
     const observer = new IntersectionObserver(entries => entries.forEach(entry => {
