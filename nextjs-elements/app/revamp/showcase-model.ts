@@ -42,8 +42,7 @@ export function buildShowcase(slug?: string) {
   }
   const navigation = replace(services);
   if (!found) {
-    const consulting = navigation.find(item => item.id === "consulting")!;
-    consulting.children = [...(consulting.children || []), parent];
+    navigation.push(parent);
   }
   return { navigation, entries: indexServices(navigation), overview: panels[0], panels, mobilePanels: panels, project };
 }

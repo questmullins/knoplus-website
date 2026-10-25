@@ -31,10 +31,10 @@ const websiteItems: ServiceItem[] = [...templates.map(template => ({
 }))];
 
 export const serviceOverview: ServiceItem = {
-  id: "work", name: "All services", label: "Design, development & consulting",
+  id: "work", name: "All services", label: "Websites, apps & useful things",
   title: "Websites.<br />Apps.<br /><em>Useful things.</em>",
   description: "A website that feels yours. An app you enjoy using. A tool that makes work easier. Explore what I make, and find a starting point for what you have in mind.",
-  image: architecture, highlights: ["Web Services", "App Services", "Consulting"],
+  image: architecture, highlights: ["Web Services", "App Services"],
 };
 
 export const services: ServiceItem[] = [
@@ -106,12 +106,7 @@ export const services: ServiceItem[] = [
       },
     ],
   },
-  {
-    id: "consulting", name: "Consulting", label: "Consulting",
-    title: "Know the work.<br />Find the friction.<br /><em>Make it easier.</em>",
-    description: "Practical improvements start with the work itself. Selected projects will have a home here.",
-    image: "url('/revamp/banners/consulting.webp')", children: [],
-  },
+
 ];
 
 // Shared by the folder buttons, project actions, and mobile section dividers.

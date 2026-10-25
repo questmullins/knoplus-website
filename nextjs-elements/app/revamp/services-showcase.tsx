@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ContactModal } from "@/components/ContactModal";
 import { SiteMenu } from "@/components/SiteMenu";
 import { buildShowcase } from "./showcase-model";
@@ -18,7 +18,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const [displayId, setDisplayId] = useState(model.overview.id);
   const [crossfade, setCrossfade] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileFolders, setMobileFolders] = useState<string[]>([]);
+  const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [contactTemplate, setContactTemplate] = useState<string | null>(null);
   const stage = useRef<HTMLElement>(null);
@@ -49,7 +49,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     setSelectedId(item.id);
     if (scroll) {
       const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
-      setMobileFolders([...ancestors, ...(item.children ? [item.id] : [])]);
+      setMobileSection(item.id === "work" ? null : ancestors[0] || item.id);
     }
     setExpanded(value => {
       const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
@@ -72,8 +72,8 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       window.clearTimeout(mobileScrollTimer.current);
       mobileScrollTimer.current = window.setTimeout(() => {
         const target = mobileSections.current.get(item.id);
-        if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 56, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-      }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 560);
+        window.scrollTo({ top: target ? target.getBoundingClientRect().top + window.scrollY - 104 : 0, behavior: "instant" });
+      }, 0);
     }
     if (closeMenu && !item.children) {
       setMobileOpen(false);
@@ -148,7 +148,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     }, { root: null, threshold: [.2, .45, .65, .85] });
     mobileSections.current.forEach(section => observer.observe(section));
     return () => observer.disconnect();
-  }, [commit, mobileOpen, model]);
+  }, [commit, mobileOpen, model, mobileSection]);
 
   useEffect(() => {
     document.body.classList.add("revamp-showcase");
@@ -253,28 +253,17 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     </section>;
   }
 
-  function mobileFoldersList(items: ServiceItem[]) {
-    return items.map(item => {
-      if (!item.children) return mobilePanel(item);
-      const open = mobileFolders.includes(item.id);
-      return <Fragment key={item.id}>
-        <div className={`${s.folderBreak} ${open ? s.activeBreak : ""}`} style={{ "--panel-accent":serviceAccent(item) } as CSSProperties}
-          ref={node => { if(node) mobileSections.current.set(item.id,node); else mobileSections.current.delete(item.id); }}>
-          <span className={s.breakLabel}>{open ? "You’re exploring" : "Choose a section"}</span>
-          <h2>{item.name}</h2>
-          <p>{item.children.length ? item.children.map(child=>child.name).join(" / ") : "Projects coming soon"}</p>
-          <button type="button" aria-expanded={open} aria-controls={`mobile-folder-${item.id}`} onClick={() => {
-            if(open) {
-              const ancestors=model.entries.find(e=>e.item.id===item.id)?.ancestors || [];
-              setMobileFolders(ancestors);
-            } else commit(item);
-          }}>{open ? `Close ${item.name}` : `Explore ${item.name}`} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
-        </div>
-        <div id={`mobile-folder-${item.id}`} className={`${s.mobileFolder} ${open ? s.mobileFolderOpen : ""}`} inert={!open} aria-hidden={!open}>
-          <div>{mobileFoldersList(item.children)}</div>
-        </div>
-      </Fragment>;
-    });
+  const mobileCategory = model.navigation.find(item => item.id === mobileSection);
+  const mobileFeed = model.entries.filter(entry => !entry.item.children && entry.ancestors.includes(mobileSection || "")).map(entry => entry.item);
+
+  function mobileHome() {
+    return <div className={s.mobileHome}>
+      <div className={s.mobileIntro}><span>MADE BY KNOPLUS</span><h1>What brings<br />you here?</h1><p>Choose a section. Find something worth exploring.</p></div>
+      {model.navigation.map(item => <button key={item.id} type="button" className={s.sectionCard} style={{ "--bg":item.image } as CSSProperties} onClick={() => { commit(item); setMobileOpen(false); }}>
+        <span className={s.sectionCardLabel}>{item.id === "web-services" ? "WEBSITES & USEFUL TOOLS" : "MADE FOR YOUR EVERYDAY"}</span>
+        <span className={s.sectionCardTitle}>{item.name}</span><span className={s.sectionCardDescription}>{item.children?.map(child=>child.name).join(" / ")}</span><span className={s.sectionCardArrow} aria-hidden="true">↗</span>
+      </button>)}
+    </div>;
   }
 
   useEffect(() => () => window.clearTimeout(mobileScrollTimer.current), []);
@@ -302,10 +291,12 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={`preview-bg-next ${s.background} ${s.desktopBackground} ${crossfade ? "show" : ""}`} style={{ "--bg": selected.image } as CSSProperties} />
         <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent} ${crossfade ? s.fading : ""}`}>{panelCopy(displayed)}</div>
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
-          {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : <>
-            <div hidden={mobileFolders.length > 0}>{mobilePanel(model.overview,0)}</div>
-            {mobileFoldersList(model.navigation)}
-          </>}
+          {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : mobileCategory ? <>
+            <div className={s.feedBar}><button type="button" onClick={() => commit(model.overview)}>← All sections</button><span>{mobileCategory.name}</span></div>
+            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.length} projects. Scroll to take a look.</p></div>
+            {mobileFeed.map((item,index)=>mobilePanel(item,index+1))}
+            <div className={s.feedEnd}><p>You’ve reached the end of {mobileCategory.name}.</p><button type="button" onClick={() => commit(model.overview)}>Explore another section ↗</button></div>
+          </> : mobileHome()}
         </div>
         <div className={s.stageFooter}>
           <span className={s.scrollHint}>Scroll to explore</span>
