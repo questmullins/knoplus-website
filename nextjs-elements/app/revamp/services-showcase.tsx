@@ -15,6 +15,8 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const [selectedId, setSelectedId] = useState(model.overview.id);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(projectSlug
     ? model.entries.find(e => e.item.id === model.overview.id)?.ancestors : ["web-services"]));
+  const [displayId, setDisplayId] = useState(model.overview.id);
+  const [crossfade, setCrossfade] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [contactTemplate, setContactTemplate] = useState<string | null>(null);
@@ -28,6 +30,14 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const navigation = useRef<HTMLElement>(null);
   const screens = useRef<HTMLDialogElement>(null);
   const selected = model.entries.find(e => e.item.id === selectedId)?.item || model.overview;
+  const displayed = model.entries.find(e => e.item.id === displayId)?.item || model.overview;
+  useEffect(() => {
+    if (selectedId === displayId) { setCrossfade(false); return; }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setDisplayId(selectedId); setCrossfade(false); return; }
+    setCrossfade(true);
+    const timer = window.setTimeout(() => { setDisplayId(selectedId); setCrossfade(false); }, 420);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, displayId]);
   const panelIndex = model.panels.findIndex(item => item.id === selectedId);
   const mobileIndex = model.mobilePanels.findIndex(item => item.id === selectedId);
   const adjacent = (direction: number) => isMobile ? model.mobilePanels[mobileIndex + direction] : nextPanel(direction);
@@ -54,7 +64,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     if (scroll && window.matchMedia("(max-width: 760px)").matches) {
       mobileLock.current = performance.now() + 900;
       const target = mobileSections.current.get(item.id);
-      if (target) mobileTrack.current?.scrollTo({ top: target.offsetTop, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 56, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     }
     if (closeMenu && !item.children) {
       setMobileOpen(false);
@@ -68,7 +78,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       return;
     }
     if (projectSlug && !model.panels.some(p => p.id === item.id)) {
-      window.location.assign(`/revamp#${item.id}`);
+      window.dispatchEvent(new CustomEvent("knoplus:navigate", { detail: `/revamp#${item.id}` }));
       return;
     }
     commit(item, "push", true, true, toggle);
@@ -126,12 +136,13 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         const item = model.mobilePanels.find(p => p.id === best[0]);
         if (item) commit(item, "replace", false, false);
       }
-    }, { root: track, threshold: [.2, .45, .65, .85] });
+    }, { root: null, threshold: [.2, .45, .65, .85] });
     mobileSections.current.forEach(section => observer.observe(section));
     return () => observer.disconnect();
   }, [commit, mobileOpen, model]);
 
   useEffect(() => {
+    document.body.classList.add("revamp-showcase");
     const viewport = window.matchMedia("(max-width: 760px)");
     setIsMobile(viewport.matches);
     const resize = () => {
@@ -141,12 +152,12 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         mobileLock.current = performance.now() + 500;
         requestAnimationFrame(() => {
           const target = mobileSections.current.get(selectedId);
-          if (target) mobileTrack.current?.scrollTo({ top: target.offsetTop, behavior: "instant" });
+          if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 56, behavior: "instant" });
         });
       }
     };
     viewport.addEventListener("change", resize);
-    return () => viewport.removeEventListener("change", resize);
+    return () => { viewport.removeEventListener("change", resize); document.body.classList.remove("revamp-showcase"); };
   }, [selectedId]);
 
   useEffect(() => {
@@ -164,10 +175,27 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
 
   useEffect(() => {
     if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setMobileOpen(false); browse.current?.focus(); } };
     window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
+    return () => { window.removeEventListener("keydown", close); document.body.style.overflow = previous; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      if (!window.matchMedia("(max-width: 760px)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      mobileSections.current.forEach(section => {
+        const progress = (section.getBoundingClientRect().top - window.innerHeight / 2) / window.innerHeight;
+        section.style.setProperty("--parallax-y", `${Math.max(-34, Math.min(34, progress * -42))}px`);
+      });
+    };
+    const scroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    update(); window.addEventListener("scroll", scroll, { passive: true });
+    return () => { window.removeEventListener("scroll", scroll); cancelAnimationFrame(frame); };
+  }, []);
 
   function rows(items: ServiceItem[], depth = 0) {
     const ancestors = model.entries.find(e => e.item.id === selectedId)?.ancestors || [];
@@ -175,7 +203,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       <button type="button" className={`template-btn ${s.row} ${expanded.has(item.id) && item.children ? s.open : ""} ${selectedId === item.id ? s.current : ""} ${ancestors.includes(item.id) ? s.inPath : ""}`}
         style={{ "--depth": depth } as CSSProperties} data-depth={depth} aria-expanded={item.children ? expanded.has(item.id) : undefined}
         aria-controls={item.children ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, true)}>
-        <span>{item.name}</span>{item.children ? <span className="plus" aria-hidden="true" /> : <span className={s.itemArrow} aria-hidden="true">↗</span>}
+        <span>{item.name}</span><span className="plus" aria-hidden="true" />
       </button>
       {item.children && <div id={`folder-${item.id}`} hidden={!expanded.has(item.id)}>{rows(item.children, depth + 1)}</div>}
     </li>)}</ul>;
@@ -184,15 +212,17 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
     const Heading = mobile && index > 0 ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
-    return <div className={`copy ${s.copy}`} key={item.id}><div className={`copy-anchor ${s.anchor}`}>
+    return <div className={`copy ${s.copy}`} ><div className={`copy-anchor ${s.anchor}`}>
       <div className={`eyebrow ${s.eyebrow}`}>{item.label}</div>
-      <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{item.titleText || (item.title ? <span dangerouslySetInnerHTML={{ __html: item.title }} /> : item.name)}</Heading>
+      <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>
+      <div className={s.changingDetails}>
+      {model.project && <h2 className={s.paneTitle}>{item.titleText || item.name}</h2>}
       <p className={s.description}>{item.description}</p>
       {item.platform === "android" && <StoreBadges />}
       <div className={`actions template-actions ${s.actions}`}>
         {item.href ? <Link className="cta-button explore-button" href={item.href}>{item.action || "Explore"}</Link>
           : model.project ? next ? <button className="cta-button explore-button" onClick={() => commit(next)} type="button">Keep exploring</button> : <a className="cta-button explore-button" href={contactFor(item)}>Let’s talk</a>
-            : item.children || item.id === "work" ? <button className="cta-button explore-button" type="button" onClick={() => {
+            : item.children?.length || item.id === "work" ? <button className="cta-button explore-button" type="button" onClick={() => {
               select(item.children?.[0] || model.navigation[0]);
               if (window.matchMedia("(max-width: 760px)").matches) setMobileOpen(true);
             }}>{item.id === "work" ? "Explore Services" : item.id === "websites" ? "Explore Websites" : "Explore the folder"}</button>
@@ -201,8 +231,9 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         {!!item.photos?.length && <button className="cta-button inquire-button" type="button" onClick={() => { commit(item, "none", false, false); screens.current?.showModal(); }}>View {item.platform ? "app screens" : "screens"}</button>}
         {item.template && <button className="cta-button inquire-button" type="button" onClick={() => setContactTemplate(item.name)}>Inquire</button>}
       </div>
-      {item.highlights && <div className={s.highlights}>{item.highlights.map(text => <span key={text}>{text}</span>)}</div>}
+      {!!item.highlights?.length && <div className={s.details}><div><span>Features</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>Made for</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {item.note && <p className={s.note}>{item.note}</p>}
+      </div>
     </div></div>;
   }
 
@@ -210,13 +241,13 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   return <>
     <div className={`app ${s.shell}`}>
       <a href="#service-stage" className={s.skip}>Skip to project preview</a>
-      <header className={s.mobileBar}>{logo}<button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Browse services"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
+      <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Browse services"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
       <aside className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
         <div className={`sidebar-brand ${s.desktopBrand}`}>{logo}</div>
         <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Services and projects">
           <Link className={`nav-label ${s.navLabel}`} href="/revamp#work">Services</Link>{rows(model.navigation)}
         </nav>
-        <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><a href={contactFor(selected)} className="cta-button">Let’s talk</a><Link href="/" className={s.mainSite}>Main website ↗</Link></div>
+        <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><a href={contactFor(selected)} className="cta-button">Let’s talk</a><Link href="/clients/" prefetch={false} className={s.clientLink}>Are we working with you?<br /><strong>Check here for updates ↗</strong></Link><Link href="/" className={s.mainSite}>Main website ↗</Link></div>
       </aside>
       <main ref={stage} id="service-stage" tabIndex={0} className={`stage ${s.stage}`} data-theme={selected.theme || "service"} inert={mobileOpen} onKeyDown={event => {
         if (window.matchMedia("(max-width: 760px)").matches || (event.target as Element).closest("button,a,input,select,textarea")) return;
@@ -224,11 +255,12 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         const target = event.key === "Home" ? model.panels[0] : event.key === "End" ? model.panels.at(-1) : direction ? nextPanel(direction) : undefined;
         if (target) { event.preventDefault(); commit(target, "replace"); }
       }}>
-        <SiteMenu className={`stage-menu-control ${s.siteMenu}`} hideIcon showLabel onNavigate={href => window.location.assign(href === "/" ? "/revamp" : href)} />
-        <div key={selected.image} className={`preview-bg ${s.background} ${s.desktopBackground}`} style={{ "--bg": selected.image } as CSSProperties} />
-        <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent}`}>{panelCopy(selected)}</div>
+        <SiteMenu className={`stage-menu-control ${s.siteMenu}`} hideIcon showLabel onNavigate={href => window.dispatchEvent(new CustomEvent("knoplus:navigate", { detail: href === "/" ? "/revamp" : href }))} />
+        <div className={`preview-bg ${s.background} ${s.desktopBackground}`} style={{ "--bg": displayed.image } as CSSProperties} />
+        <div className={`preview-bg-next ${s.background} ${s.desktopBackground} ${crossfade ? "show" : ""}`} style={{ "--bg": selected.image } as CSSProperties} />
+        <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent} ${crossfade ? s.fading : ""}`}>{panelCopy(displayed)}</div>
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
-          {model.mobilePanels.map((item, index) => <section className={s.mobilePanel} key={item.id} data-panel={item.id} aria-label={item.name}
+          {model.mobilePanels.map((item, index) => <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} aria-label={item.name}
             ref={node => { if (node) mobileSections.current.set(item.id, node); else mobileSections.current.delete(item.id); }}>
             <div className={`preview-bg ${s.background}`} style={{ "--bg": item.image } as CSSProperties} />{panelCopy(item, true, index)}
           </section>)}

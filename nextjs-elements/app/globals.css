@@ -2756,3 +2756,4 @@ p {
     flex-direction: column;
   }
 }
+@media(max-width:760px){body.revamp-showcase{overflow:auto}}

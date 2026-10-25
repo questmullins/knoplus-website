@@ -64,6 +64,14 @@
   }
 
   function exitToKnoplus(destination) {
+    try {
+      const back = window.sessionStorage.getItem("knoplus:template-return");
+      if (back && destination === "/" && new URL(back, location.origin).origin === location.origin) {
+        destination = back;
+        window.sessionStorage.removeItem("knoplus:template-return");
+        window.sessionStorage.setItem("knoplus:route-reveal", "yes");
+      }
+    } catch {}
     var screen = document.querySelector(".knoplus-exit-transition");
 
     try {

@@ -10,3 +10,8 @@ if (existsSync(templateSource)) {
   rmSync(templateOutput, { force: true, recursive: true });
   cpSync(templateSource, templateOutput, { recursive: true });
 }
+
+// Trial files are served only after the Worker checks project access.
+const trialSource = join(process.cwd(), "trial-websites");
+const trialOutput = join(appDir, "out", "trials");
+if (existsSync(trialSource)) cpSync(trialSource, trialOutput, { recursive: true });

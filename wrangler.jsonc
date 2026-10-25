@@ -8,8 +8,9 @@
   "assets": {
     "directory": "./nextjs-elements/out",
     "binding": "ASSETS",
-    "run_worker_first": ["/update-config", "/update-config/"]
+    "run_worker_first": true
   },
+  "d1_databases": [{"binding":"CLIENT_DB","database_name":"knoplus-clients","database_id":"9c723a22-a9bc-4104-92d7-a933d9dcb145"}],
   "send_email": [
     {
       "name": "EMAIL",
