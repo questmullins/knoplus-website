@@ -205,7 +205,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         aria-controls={item.children ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, true)}>
         <span>{item.name}</span><span className="plus" aria-hidden="true" />
       </button>
-      {item.children && <div id={`folder-${item.id}`} hidden={!expanded.has(item.id)}>{rows(item.children, depth + 1)}</div>}
+      {item.children && <div id={`folder-${item.id}`} className={`${s.folder} ${expanded.has(item.id) ? s.folderOpen : ""}`} inert={!expanded.has(item.id)} aria-hidden={!expanded.has(item.id)}><div className={s.folderInner}>{rows(item.children, depth + 1)}</div></div>}
     </li>)}</ul>;
   }
 

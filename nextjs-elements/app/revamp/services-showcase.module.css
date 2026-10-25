@@ -138,3 +138,30 @@
  .shell .details{margin-top:34px}
 }
 @media(prefers-reduced-motion:reduce){.changingDetails{transition:none}.fading .changingDetails{opacity:1;transform:none}}
+/* Center the title consistently while supporting information changes. */
+.shell .content { justify-content:center; padding:clamp(90px,15vh,160px) 6% 100px; }
+.shell .copy, .shell .anchor { max-width:820px; width:100%; }
+.shell .anchor { align-items:center; text-align:center; }
+.shell .title { width:100%; justify-content:center; align-items:center; min-height:1.9em; }
+.shell .eyebrow { text-align:center; font-size:12px; }
+.shell .description { font-size:clamp(18px,1.4vw,21px); line-height:1.65; max-width:640px; margin:24px auto 0; }
+.shell .actions, .shell .storeBadges { justify-content:center; }
+.shell .details { text-align:left; max-width:680px; margin-left:auto; margin-right:auto; }
+.shell .details p { font-size:17px; line-height:1.65; }
+.shell .details span { font-size:11px; }
+.shell .note { font-size:15px; max-width:640px; margin-left:auto; margin-right:auto; }
+.folder { display:grid; grid-template-rows:0fr; opacity:0; visibility:hidden; transition:grid-template-rows .55s cubic-bezier(.22,1,.36,1), opacity .35s ease, visibility .55s; }
+.folderOpen { grid-template-rows:1fr; opacity:1; visibility:visible; }
+.folderInner { min-height:0; overflow:hidden; }
+.shell .row :global(.plus) { transition:transform .55s cubic-bezier(.22,1,.36,1); }
+@media(max-width:760px) {
+ .shell .mobilePanel .copy { width:100%; }
+ .shell .mobilePanel .title { justify-content:center; }
+ .shell .description { font-size:18px; }
+ .shell .details p { font-size:16px; }
+ .shell .eyebrow { font-size:10px; }
+ .shell .details { gap:20px; }
+ .shell .sidebar { display:grid; grid-template-rows:minmax(0,1fr) auto; visibility:hidden; opacity:0; transform:translateY(-12px); pointer-events:none; transition:opacity .35s ease,transform .5s cubic-bezier(.22,1,.36,1),visibility .5s; }
+ .shell .sidebar.mobileOpen { visibility:visible; opacity:1; transform:translateY(0); pointer-events:auto; }
+}
+@media(prefers-reduced-motion:reduce) { .folder,.shell .row :global(.plus),.shell .sidebar { transition:none; } }
