@@ -113,3 +113,15 @@ export const services: ServiceItem[] = [
     image: "url('/revamp/banners/consulting.webp')", children: [],
   },
 ];
+
+// Shared by the folder buttons, project actions, and mobile section dividers.
+export function serviceAccent(item: ServiceItem): string {
+  const colors: Record<string, string> = {
+    work: "#85cfc0", "web-services": "#85cfc0", websites: "#d9b06f", "web-apps": "#9cbff0",
+    "app-services": "#c5aceb", rosewave: "#edb3a4", update: "#b6a1ee", textualize: "#a6c9ed",
+    freestyle: "#8dd7be", instapost: "#edbc8c", consulting: "#c9cf9a",
+    "traditional-auto": "#f4776e", synergy: "#f0ede4", "editorial-local": "#d8c4a3",
+    "photo-portfolio": "#d5ad63", "cleaning-restoration": "#86d5c3", "homey-coffee": "#d9b06f",
+  };
+  return colors[item.theme || item.id.split("--")[0]] || "#85cfc0";
+}

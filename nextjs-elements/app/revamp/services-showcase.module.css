@@ -165,3 +165,22 @@
  .shell .sidebar.mobileOpen { visibility:visible; opacity:1; transform:translateY(0); pointer-events:auto; }
 }
 @media(prefers-reduced-motion:reduce) { .folder,.shell .row :global(.plus),.shell .sidebar { transition:none; } }
+
+/* Center the whole composition vertically, with room to scroll on short screens. */
+.shell .content { align-items: safe center; padding: 80px 6%; }
+.shell .anchor { min-height: 0; }
+.shell .title { min-height: 1.2em; }
+.shell .row { color:var(--item-accent); border-left:2px solid transparent; padding-left:calc(10px + var(--depth) * 20px); transition:background .3s ease,border-color .3s ease,color .3s ease; }
+.shell .row:hover, .shell .row:focus-visible { background:color-mix(in srgb,var(--item-accent) 12%,transparent); }
+.shell .row.current, .shell .row.open { border-left-color:var(--item-accent); background:color-mix(in srgb,var(--item-accent) 10%,transparent); color:var(--item-accent); }
+.shell .row :global(.plus) { color:var(--item-accent); }
+.folderBreak { display:none; }
+@media(max-width:760px) {
+ .shell .mobilePanel { align-items:center; min-height:calc(100svh - 56px); }
+ .folderBreak { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; min-height:55svh; padding:64px 28px; text-align:center; border-top:1px solid color-mix(in srgb,var(--panel-accent) 35%,transparent); border-bottom:1px solid color-mix(in srgb,var(--panel-accent) 35%,transparent); background:linear-gradient(160deg,color-mix(in srgb,var(--panel-accent) 12%,#050506),#050506); }
+ .breakLabel { color:var(--panel-accent); font-size:10px; letter-spacing:.25em; text-transform:uppercase; }
+ .folderBreak h2 { font:300 clamp(34px,9vw,48px)/1.1 var(--font-display); margin:0; }
+ .folderBreak p { font-size:16px; line-height:1.65; margin:0; }
+ .folderBreak button { display:flex; align-items:center; justify-content:space-between; gap:28px; padding:16px 22px; border:1px solid var(--panel-accent); background:var(--panel-accent); color:#101311; font:500 14px/1.4 var(--font-body); cursor:pointer; }
+ .folderBreak button:focus-visible { outline:2px solid white; outline-offset:5px; }
+}

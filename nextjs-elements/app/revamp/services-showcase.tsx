@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ContactModal } from "@/components/ContactModal";
 import { SiteMenu } from "@/components/SiteMenu";
 import { buildShowcase } from "./showcase-model";
-import type { ServiceItem } from "./services";
+import { serviceAccent, type ServiceItem } from "./services";
 import { StoreBadges } from "./store-badges";
 import s from "./services-showcase.module.css";
 
@@ -201,7 +201,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     const ancestors = model.entries.find(e => e.item.id === selectedId)?.ancestors || [];
     return <ul className={s.rows}>{items.map(item => <li key={item.id}>
       <button type="button" className={`template-btn ${s.row} ${expanded.has(item.id) && item.children ? s.open : ""} ${selectedId === item.id ? s.current : ""} ${ancestors.includes(item.id) ? s.inPath : ""}`}
-        style={{ "--depth": depth } as CSSProperties} data-depth={depth} aria-expanded={item.children ? expanded.has(item.id) : undefined}
+        style={{ "--depth": depth, "--item-accent": serviceAccent(item) } as CSSProperties} data-depth={depth} aria-expanded={item.children ? expanded.has(item.id) : undefined}
         aria-controls={item.children ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, true)}>
         <span>{item.name}</span><span className="plus" aria-hidden="true" />
       </button>
@@ -212,7 +212,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
     const Heading = mobile && index > 0 ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
-    return <div className={`copy ${s.copy}`} ><div className={`copy-anchor ${s.anchor}`}>
+    return <div className={`copy ${s.copy}`} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}><div className={`copy-anchor ${s.anchor}`}>
       <div className={`eyebrow ${s.eyebrow}`}>{item.label}</div>
       <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>
       <div className={s.changingDetails}>
@@ -260,10 +260,17 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={`preview-bg-next ${s.background} ${s.desktopBackground} ${crossfade ? "show" : ""}`} style={{ "--bg": selected.image } as CSSProperties} />
         <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent} ${crossfade ? s.fading : ""}`}>{panelCopy(displayed)}</div>
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
-          {model.mobilePanels.map((item, index) => <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} aria-label={item.name}
+          {model.mobilePanels.map((item, index) => <Fragment key={item.id}>
+            {!model.project && item.children && <div className={s.folderBreak} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}>
+              <span className={s.breakLabel}>{model.entries.find(entry => entry.item.id === item.id)?.ancestors.length ? "Inside the folder" : "Next section"}</span>
+              <h2>{item.name}</h2>
+              <p>{item.children.length ? item.children.map(child => child.name).join(" / ") : "Room for future projects"}</p>
+              <button type="button" onClick={() => commit(item.children?.[0] || item)}>{item.children.length ? `Explore ${item.name}` : `About ${item.name}`} <span aria-hidden="true">↓</span></button>
+            </div>}
+            <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} aria-label={item.name}
             ref={node => { if (node) mobileSections.current.set(item.id, node); else mobileSections.current.delete(item.id); }}>
             <div className={`preview-bg ${s.background}`} style={{ "--bg": item.image } as CSSProperties} />{panelCopy(item, true, index)}
-          </section>)}
+          </section></Fragment>)}
         </div>
         <div className={s.stageFooter}>
           <span className={s.scrollHint}>Scroll to explore</span>
