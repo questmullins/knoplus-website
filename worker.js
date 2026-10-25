@@ -1,4 +1,5 @@
 import { EmailMessage } from "cloudflare:email";
+import { handleClients } from "./server/clients.js";
 
 const CONTACT_TO_FALLBACK = "info@kno.plus";
 const CONTACT_FROM_FALLBACK = "Knoplus <info@kno.plus>";
@@ -7,6 +8,8 @@ const MAX_BODY_BYTES = 24 * 1024;
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const clientResponse = await handleClients(request, env);
+    if (clientResponse) return clientResponse;
 
     if (url.pathname === "/update-config" || url.pathname === "/update-config/") {
       if (request.method !== "GET" && request.method !== "HEAD") {

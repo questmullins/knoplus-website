@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE COLLATE NOCASE, password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'client', disabled INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, name TEXT NOT NULL, trial_path TEXT NOT NULL DEFAULT '');
+CREATE TABLE IF NOT EXISTS grants (user_id TEXT NOT NULL, project_id TEXT NOT NULL, PRIMARY KEY(user_id,project_id));
+CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS resets (token TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS reset_requests (user_id TEXT PRIMARY KEY, requested INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS updates (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, created INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS limits (key TEXT PRIMARY KEY, count INTEGER NOT NULL, expires INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS update_project ON updates(project_id,created);
+CREATE INDEX IF NOT EXISTS session_user ON sessions(user_id);
+INSERT OR IGNORE INTO projects(id,name,trial_path) VALUES('houseplant-nation','Houseplant Nation','/trials/houseplant-nation/');

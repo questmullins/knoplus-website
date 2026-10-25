@@ -19,22 +19,15 @@ export type ServiceItem = {
   highlights?: string[];
   note?: string;
   template?: boolean;
+  sellingPoints?: string[];
 };
 
 const architecture = "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')";
 const rose = "url('/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp')";
-const websiteItems: ServiceItem[] = [{
-  id: "houseplant-nation", name: "Houseplant Nation", label: "Web Services / Websites / Houseplant Nation",
-  title: "Plants.<br />Coffee.<br /><em>A little greener.</em>",
-  description: "Houseplant Nation, reimagined with our Homey Coffee template. The Huntington Beach shop’s own photographs, café menu, and event space, brought together in warm greens and cream.",
-  image: "url('/revamp/websites/houseplant-nation/assets/events.jpeg')",
-  href: "/revamp/websites/houseplant-nation/index.html", action: "Explore website",
-  related: { href: "/templates/homey-coffee/index.html", label: "See the original coffee template" },
-  highlights: ["Plants & coffee", "Event space", "Homey Coffee in action"], note: "Website design concept.",
-}, ...templates.map(template => ({
+const websiteItems: ServiceItem[] = [...templates.map(template => ({
   id: `website-${template.theme}`, name: template.navTitle, label: `Web Services / Websites / ${template.navTitle}`,
   description: template.description, image: template.image, theme: template.theme,
-  href: template.link, action: "Explore website", highlights: template.features, template: true,
+  href: template.link, action: "Explore website", highlights: template.features, sellingPoints: template.sellingPoints, template: true,
 }))];
 
 export const serviceOverview: ServiceItem = {
@@ -116,22 +109,7 @@ export const services: ServiceItem[] = [
   {
     id: "consulting", name: "Consulting", label: "Consulting",
     title: "Know the work.<br />Find the friction.<br /><em>Make it easier.</em>",
-    description: "Practical improvements start with the work itself. This is a place for the tools, spreadsheets, and ideas I have made for Cellese and in Excel.",
-    image: "url('/revamp/banners/consulting.webp')", highlights: ["Cellese", "Excel"],
-    related: { href: "/revamp/prepress-assistant", label: "Prepress Assistant concept" },
-    children: [
-      {
-        id: "cellese", name: "Cellese", label: "Consulting / Cellese",
-        title: "Useful changes.<br /><em>In the everyday work.</em>",
-        description: "A place for selected tools and improvements I have made for Cellese. The individual examples and their stories will be added here as we choose what to share.",
-        image: "url('/revamp/banners/cellese.webp')", note: "Project examples are being prepared.",
-      },
-      {
-        id: "excel", name: "Excel", label: "Consulting / Excel",
-        title: "Less repetition.<br /><em>More room for the work.</em>",
-        description: "Spreadsheets and tools made around the way people work. This collection will bring together the Excel projects, with a look at what each one makes easier.",
-        image: "url('/revamp/banners/excel.webp')", note: "Project examples are being prepared.",
-      },
-    ],
+    description: "Practical improvements start with the work itself. Selected projects will have a home here.",
+    image: "url('/revamp/banners/consulting.webp')", children: [],
   },
 ];

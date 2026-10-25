@@ -128,7 +128,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body>{children}</body>
+      <body>{children}<script src="/navigation-transition.js" defer /></body>
     </html>
   );
 }
