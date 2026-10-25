@@ -184,3 +184,9 @@
  .folderBreak button { display:flex; align-items:center; justify-content:space-between; gap:28px; padding:16px 22px; border:1px solid var(--panel-accent); background:var(--panel-accent); color:#101311; font:500 14px/1.4 var(--font-body); cursor:pointer; }
  .folderBreak button:focus-visible { outline:2px solid white; outline-offset:5px; }
 }
+
+.mobileFolder { display:grid; grid-template-rows:0fr; transition:grid-template-rows .55s cubic-bezier(.22,1,.36,1); }
+.mobileFolderOpen { grid-template-rows:1fr; }
+.mobileFolder>div { overflow:hidden; min-height:0; }
+@media(max-width:760px) { .folderBreak { min-height:38svh; scroll-margin-top:56px; } .activeBreak { min-height:30svh; } }
+@media(prefers-reduced-motion:reduce) { .mobileFolder { transition:none; } }

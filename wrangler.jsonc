@@ -5,6 +5,7 @@
   "main": "./worker.js",
   "workers_dev": true,
   "preview_urls": true,
+  "routes": [{"pattern":"kno.plus","custom_domain":true},{"pattern":"manage.kno.plus","custom_domain":true}],
   "assets": {
     "directory": "./nextjs-elements/out",
     "binding": "ASSETS",

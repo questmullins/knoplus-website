@@ -18,6 +18,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const [displayId, setDisplayId] = useState(model.overview.id);
   const [crossfade, setCrossfade] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileFolders, setMobileFolders] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [contactTemplate, setContactTemplate] = useState<string | null>(null);
   const stage = useRef<HTMLElement>(null);
@@ -25,6 +26,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const mobileTrack = useRef<HTMLDivElement>(null);
   const mobileSections = useRef(new Map<string, HTMLElement>());
   const mobileLock = useRef(0);
+  const mobileScrollTimer = useRef<number | undefined>(undefined);
   const wheelLock = useRef(0);
   const browse = useRef<HTMLButtonElement>(null);
   const navigation = useRef<HTMLElement>(null);
@@ -45,6 +47,10 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
 
   const commit = useCallback((item: ServiceItem, history: "push" | "replace" | "none" = "push", scroll = true, closeMenu = true, toggle = false) => {
     setSelectedId(item.id);
+    if (scroll) {
+      const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
+      setMobileFolders([...ancestors, ...(item.children ? [item.id] : [])]);
+    }
     setExpanded(value => {
       const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
       const path = new Set([...ancestors, item.id]);
@@ -62,9 +68,12 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     }
     desktopContent.current?.scrollTo({ top: 0, behavior: "instant" });
     if (scroll && window.matchMedia("(max-width: 760px)").matches) {
-      mobileLock.current = performance.now() + 900;
-      const target = mobileSections.current.get(item.id);
-      if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 56, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      mobileLock.current = performance.now() + 1600;
+      window.clearTimeout(mobileScrollTimer.current);
+      mobileScrollTimer.current = window.setTimeout(() => {
+        const target = mobileSections.current.get(item.id);
+        if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 56, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 560);
     }
     if (closeMenu && !item.children) {
       setMobileOpen(false);
@@ -224,7 +233,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
           : model.project ? next ? <button className="cta-button explore-button" onClick={() => commit(next)} type="button">Keep exploring</button> : <a className="cta-button explore-button" href={contactFor(item)}>Let’s talk</a>
             : item.children?.length || item.id === "work" ? <button className="cta-button explore-button" type="button" onClick={() => {
               select(item.children?.[0] || model.navigation[0]);
-              if (window.matchMedia("(max-width: 760px)").matches) setMobileOpen(true);
+              if (window.matchMedia("(max-width: 760px)").matches) setMobileOpen(false);
             }}>{item.id === "work" ? "Explore Services" : item.id === "websites" ? "Explore Websites" : "Explore the folder"}</button>
               : <a className="cta-button explore-button" href={contactFor(item)}>Let’s talk</a>}
         {item.related && <Link className="cta-button inquire-button" href={item.related.href}>{item.related.label}</Link>}
@@ -237,12 +246,45 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     </div></div>;
   }
 
+  function mobilePanel(item: ServiceItem, index = 1) {
+    return <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} aria-label={item.name}
+      ref={node => { if (node) mobileSections.current.set(item.id,node); else mobileSections.current.delete(item.id); }}>
+      <div className={`preview-bg ${s.background}`} style={{ "--bg": item.image } as CSSProperties} />{panelCopy(item,true,index)}
+    </section>;
+  }
+
+  function mobileFoldersList(items: ServiceItem[]) {
+    return items.map(item => {
+      if (!item.children) return mobilePanel(item);
+      const open = mobileFolders.includes(item.id);
+      return <Fragment key={item.id}>
+        <div className={`${s.folderBreak} ${open ? s.activeBreak : ""}`} style={{ "--panel-accent":serviceAccent(item) } as CSSProperties}
+          ref={node => { if(node) mobileSections.current.set(item.id,node); else mobileSections.current.delete(item.id); }}>
+          <span className={s.breakLabel}>{open ? "You’re exploring" : "Choose a section"}</span>
+          <h2>{item.name}</h2>
+          <p>{item.children.length ? item.children.map(child=>child.name).join(" / ") : "Projects coming soon"}</p>
+          <button type="button" aria-expanded={open} aria-controls={`mobile-folder-${item.id}`} onClick={() => {
+            if(open) {
+              const ancestors=model.entries.find(e=>e.item.id===item.id)?.ancestors || [];
+              setMobileFolders(ancestors);
+            } else commit(item);
+          }}>{open ? `Close ${item.name}` : `Explore ${item.name}`} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
+        </div>
+        <div id={`mobile-folder-${item.id}`} className={`${s.mobileFolder} ${open ? s.mobileFolderOpen : ""}`} inert={!open} aria-hidden={!open}>
+          <div>{mobileFoldersList(item.children)}</div>
+        </div>
+      </Fragment>;
+    });
+  }
+
+  useEffect(() => () => window.clearTimeout(mobileScrollTimer.current), []);
+
   const logo = <Link href="/revamp#work" className="brand brand-logo-link" aria-label="Kno.plus services home">KNOPLUS</Link>;
   return <>
     <div className={`app ${s.shell}`}>
       <a href="#service-stage" className={s.skip}>Skip to project preview</a>
       <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Browse services"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
-      <aside className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
+      <aside inert={isMobile && !mobileOpen} className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
         <div className={`sidebar-brand ${s.desktopBrand}`}>{logo}</div>
         <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Services and projects">
           <Link className={`nav-label ${s.navLabel}`} href="/revamp#work">Services</Link>{rows(model.navigation)}
@@ -260,17 +302,10 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={`preview-bg-next ${s.background} ${s.desktopBackground} ${crossfade ? "show" : ""}`} style={{ "--bg": selected.image } as CSSProperties} />
         <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent} ${crossfade ? s.fading : ""}`}>{panelCopy(displayed)}</div>
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
-          {model.mobilePanels.map((item, index) => <Fragment key={item.id}>
-            {!model.project && item.children && <div className={s.folderBreak} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}>
-              <span className={s.breakLabel}>{model.entries.find(entry => entry.item.id === item.id)?.ancestors.length ? "Inside the folder" : "Next section"}</span>
-              <h2>{item.name}</h2>
-              <p>{item.children.length ? item.children.map(child => child.name).join(" / ") : "Room for future projects"}</p>
-              <button type="button" onClick={() => commit(item.children?.[0] || item)}>{item.children.length ? `Explore ${item.name}` : `About ${item.name}`} <span aria-hidden="true">↓</span></button>
-            </div>}
-            <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} aria-label={item.name}
-            ref={node => { if (node) mobileSections.current.set(item.id, node); else mobileSections.current.delete(item.id); }}>
-            <div className={`preview-bg ${s.background}`} style={{ "--bg": item.image } as CSSProperties} />{panelCopy(item, true, index)}
-          </section></Fragment>)}
+          {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : <>
+            <div hidden={mobileFolders.length > 0}>{mobilePanel(model.overview,0)}</div>
+            {mobileFoldersList(model.navigation)}
+          </>}
         </div>
         <div className={s.stageFooter}>
           <span className={s.scrollHint}>Scroll to explore</span>

@@ -8,6 +8,15 @@ const MAX_BODY_BYTES = 24 * 1024;
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Public, fictional-data concept only; it does not expose the client database.
+    if ((url.hostname === "manage.kno.plus" && url.pathname === "/") || url.pathname === "/manage" || url.pathname === "/manage/") {
+      const assetUrl = new URL("/manage/",url);
+      const response = await env.ASSETS.fetch(new Request(assetUrl,request));
+      const headers = new Headers(response.headers);
+      headers.set("X-Robots-Tag","noindex, nofollow, noarchive");
+      headers.set("Cache-Control","no-store");
+      return new Response(response.body,{status:response.status,headers});
+    }
     const clientResponse = await handleClients(request, env);
     if (clientResponse) return clientResponse;
 
