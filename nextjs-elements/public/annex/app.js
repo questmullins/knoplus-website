@@ -183,7 +183,7 @@ async function load() {
     else if (page === "settings") path = "connections";
     else if (page === "guides") {
       const [list, one] = await Promise.all([get("guides"), state.guide && !["new", "import"].includes(state.guide) ? get("guides/" + encodeURIComponent(state.guide)).catch(() => null) : null]);
-      return done({ guides: list.guides, one });
+      return done({ guides: list.guides, sops: list.sops || [], one });
     } else if (page === "websites") {
       const days = state.days;
       const [web, searchData, site] = await Promise.all([get("websites?days=" + days), get("search?days=" + days), get("site?days=" + days)]);
@@ -503,44 +503,61 @@ function importForm() {
     error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Import" }), h("a", { class: "button secondary", href: "#guides", text: "Cancel" })));
 }
 
+// The built-in SOPs as questions: each opens to its steps and buttons that go straight to the right place.
+function sopCard(item, open) {
+  return h("details", { class: "sop", id: "sop-" + item.id, open: open || null },
+    h("summary", {}, h("span", { text: item.q }), h("span", { class: "nav-plus", "aria-hidden": "true" })),
+    h("div", { class: "sop-body prose" },
+      h("p", {}, inline(item.answer)),
+      item.steps.length ? h("ol", {}, item.steps.map((s) => h("li", {}, inline(s)))) : null,
+      item.go.length ? h("div", { class: "row go" }, item.go.map((g, n) => h("a", {
+        class: "button" + (n ? " secondary" : ""), href: g.href,
+        target: /^https?:/.test(g.href) ? "_blank" : null, rel: /^https?:/.test(g.href) ? "noopener" : null,
+      }, g.label + (/^https?:/.test(g.href) ? " ↗" : " →")))) : null));
+}
+
 function guidesView(d) {
   const editing = state.tab === "edit", making = state.guide === "new", importing = state.guide === "import";
-  const actions = h("div", { class: "row" }, h("a", { class: "button", href: "#guides/new", text: "New guide" }), h("a", { class: "button secondary", href: "#guides/import", text: "Import" }));
-  const head = intro("Your guides", "How everything runs.", "Your SOPs and notes for running kno.plus. Only your owner login can open them.", actions);
   const reload = (id) => { location.hash = id ? "#guides/" + encodeURIComponent(id) : "#guides"; route(); };
-  if (making) return [head, guideForm(null, reload)];
-  if (importing) return [head, importForm()];
-  if (!d.guides.length) return [head, h("div", { class: "panel" }, h("h2", { text: "No guides yet" }),
-    h("p", { text: "Bring in the operations handbook with Import, or write one with New guide." }))];
+  if (making) return [intro("Your guides", "A new guide.", null), guideForm(null, reload)];
+  if (importing) return [intro("Your guides", "Import guides.", null), importForm()];
 
-  const search = h("input", { type: "search", placeholder: "Search guides", "aria-label": "Search guides", value: state.guideSearch || "" });
-  const list = h("nav", { class: "guide-list", "aria-label": "Guides" });
-  const fill = () => {
-    const q = search.value.trim().toLowerCase();
-    state.guideSearch = search.value;
-    const shown = d.guides.filter((g) => !q || (g.title + "\n" + g.body).toLowerCase().includes(q));
-    list.replaceChildren(...shown.map((g) => h("a", { href: "#guides/" + encodeURIComponent(g.id), "aria-current": state.guide === g.id ? "page" : null }, g.title,
-      q && !g.title.toLowerCase().includes(q) ? h("small", { text: "Mentions \"" + search.value.trim() + "\"" }) : null)),
-      shown.length ? "" : h("p", { class: "note", text: "Nothing matches." }));
-  };
-  search.addEventListener("input", fill);
-  fill();
-
-  const g = d.one || (!state.guide ? d.guides[0] : null);
-  let article;
-  if (!g) article = h("div", { class: "panel" }, h("p", { text: "There's no guide called " + state.guide + "." }));
-  else if (editing) article = guideForm(g, reload);
-  else {
+  if (state.guide) {
+    const g = d.one;
+    const back = h("a", { class: "back", href: "#guides", text: "← All guides" });
+    if (!g) return [back, h("div", { class: "panel" }, h("p", { text: "There's no guide called " + state.guide + "." }))];
+    if (editing) return [back, guideForm(g, reload)];
     const steps = markdown(g.body);
     const inside = steps.filter((n) => n.tagName === "H3");
-    article = h("article", { class: "panel prose" },
+    return [back, h("article", { class: "panel prose" },
       h("div", { class: "panel-heading" }, h("div", {}, h("h2", { class: "guide-title", text: g.title }), h("p", { class: "small", text: "Updated " + new Date(g.updated).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) })),
         h("div", { class: "row" }, h("a", { class: "button secondary", href: "#guides/" + encodeURIComponent(g.id) + "/edit", text: "Edit" }),
           h("button", { class: "button secondary", type: "button", text: "Delete", onclick: async () => { if (confirm("Delete \"" + g.title + "\"? This can't be undone.")) { await send("guides/" + encodeURIComponent(g.id), {}, "DELETE"); reload(null); } } }))),
       inside.length > 3 ? h("details", { class: "toc", open: true }, h("summary", { text: "In this guide" }), h("ul", {}, inside.map((n) => h("li", {}, h("a", { href: "#" + n.id, onclick: (e) => { e.preventDefault(); n.scrollIntoView({ behavior: "smooth" }); }, text: n.textContent }))))) : null,
-      steps);
+      steps)];
   }
-  return [head, h("div", { class: "guides" }, h("div", { class: "guide-side" }, search, list), article)];
+
+  // the questions, searchable; your own guides below them
+  const search = h("input", { type: "search", class: "sop-search", placeholder: "What do you need to do? Try \"password\", \"refund\" or \"quote\"", "aria-label": "Search guides", value: state.guideSearch || "" });
+  const results = h("div", { class: "sop-groups" });
+  const words = (item) => [item.q, item.answer, ...item.steps].join(" ").toLowerCase();
+  const fill = () => {
+    const q = search.value.trim().toLowerCase();
+    state.guideSearch = search.value;
+    const groups = d.sops.map((g) => ({ ...g, items: g.items.filter((i) => !q || q.split(/\s+/).every((w) => words(i).includes(w))) })).filter((g) => g.items.length);
+    const own = d.guides.filter((g) => !q || (g.title + "\n" + g.body).toLowerCase().includes(q));
+    results.replaceChildren(
+      ...groups.map((g) => h("section", { class: "sop-group" }, h("h2", { class: "section", text: g.group }), g.items.map((i) => sopCard(i, !!q && groups.length === 1 && g.items.length === 1)))),
+      h("section", { class: "sop-group" }, h("div", { class: "toolbar" }, h("h2", { class: "section", text: "Your own guides" }),
+        h("div", { class: "row" }, h("a", { class: "text-link", href: "#guides/new", text: "New guide" }), h("a", { class: "text-link", href: "#guides/import", text: "Import" }))),
+        own.length ? h("nav", { class: "guide-list", "aria-label": "Your guides" }, own.map((g) => h("a", { href: "#guides/" + encodeURIComponent(g.id) }, g.title,
+          q && !g.title.toLowerCase().includes(q) ? h("small", { text: "Mentions \"" + search.value.trim() + "\"" }) : null)))
+          : h("p", { class: "note", text: q ? "None of your own guides match." : "Write your own notes with New guide, or bring in the handbook doc with Import." })),
+      groups.length || own.length ? "" : h("p", { class: "empty", text: "Nothing matches \"" + search.value.trim() + "\". Try one word, like \"client\" or \"key\"." }));
+  };
+  search.addEventListener("input", fill);
+  fill();
+  return [intro("Your guides", "What do you need to do?", "Pick a question for the steps and a button that takes you there. Only your owner login can see this page."), search, results];
 }
 
 // ---------- Settings ----------

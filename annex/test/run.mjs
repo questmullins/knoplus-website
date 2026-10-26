@@ -131,7 +131,8 @@ check("Search Console click-through rate: " + JSON.stringify(t), t.clicks === 7 
 check("clients list", Array.isArray((await api("clients")).body.projects));
 const overview = (await api("overview")).body;
 check("overview adds up the assets and the web", overview.sales === home.sales.value && overview.web.connected && overview.web.zones === 2 && overview.assets.length >= 3);
-check("guides start empty", (await api("guides")).body.guides.length === 0);
+const firstGuides = (await api("guides")).body;
+check("guides start empty, with the built-in SOPs", firstGuides.guides.length === 0 && firstGuides.sops.some((g) => g.items.some((i) => i.id === "client-password")));
 check("a guide needs a title", (await api("guides", { title: "", body: "x" })).status === 400);
 check("guides import section by section", (await api("guides", { guides: [{ title: "Quick answers", body: "### Reset a password\n\n1. Go" }, { title: "Words you'll see", body: "| a | b |" }] })).body.saved === 2);
 const guides = (await api("guides")).body.guides;

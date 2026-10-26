@@ -1,0 +1,249 @@
+// The built-in SOPs on Annex › Guides: what Quest most often needs to do, in plain words, each with buttons that go
+// straight to the right place. Steps use **bold**, `code` and [links](https://…). Served only to the owner.
+// No keys or passwords belong here: this file is in the public repository.
+const CF = "https://dash.cloudflare.com/?to=/:account/workers/services/view/knoplus-website/production";
+const go = (label, href) => ({ label, href });
+const SECRETS = go("Cloudflare › secrets", CF + "/settings");
+
+export const SOPS = [
+  {
+    group: "Clients",
+    items: [
+      {
+        id: "client-password", q: "Reset a client's password",
+        answer: "kno.plus doesn't email reset links on its own. You make a one-time link and send it yourself.",
+        steps: [
+          "Open **kno.plus/clients** and sign in.",
+          "Find **Clients and password resets**. If the client pressed \"Request a password reset\", their request is waiting here.",
+          "Pick the client and press **Create password-reset link**.",
+          "Copy the link and send it privately, by text or email. It works once and expires in **one hour**.",
+          "They open it and choose a new password. Their old sessions are signed out.",
+        ],
+        go: [go("Open the client page", "/clients/")],
+      },
+      {
+        id: "client-new", q: "Sign up a new client",
+        answer: "Make the project, make their login, then give them access to the project.",
+        steps: [
+          "Open **kno.plus/clients**.",
+          "Under **Add or update a project**, enter the project name and a short slug, like `houseplant-nation`. Add a trial address only if their preview site exists. Press **Save project**.",
+          "Under **Add a client**, enter their email and a starting password (12+ characters). Press **Create client account**.",
+          "Under **Access**, tick their project and press **Save access**.",
+          "Send them **kno.plus/clients** and their login privately. Send the password separately, for example by text.",
+        ],
+        go: [go("Open the client page", "/clients/")],
+      },
+      {
+        id: "client-update", q: "Post an update for a client",
+        answer: "Clients see your updates the next time they sign in.",
+        steps: ["Open **kno.plus/clients** › **Post a project update**.", "Pick the project, write a title and the update, then press **Post update**."],
+        go: [go("Open the client page", "/clients/")],
+      },
+      {
+        id: "client-remove", q: "Stop a client from getting in",
+        answer: "Disabling stops them at once and keeps their history.",
+        steps: ["Open **kno.plus/clients**.", "Press **Disable** next to the client. Press **Enable** to undo it.", "To take away only one project, untick it under **Access** and press **Save access**."],
+        go: [go("Open the client page", "/clients/")],
+      },
+      {
+        id: "client-quote", q: "Send a new client a quote or a contract",
+        answer: "Quotes and contracts aren't built into kno.plus yet; bills and contracts inside the client login are planned. For now, use the contract template.",
+        steps: [
+          "Open the contract template on GitHub and copy it into a Google Doc or Word file.",
+          "Fill in the client, the project and the date.",
+          "Write the quote as its own page: what you'll build, the price and the timeline. The agreement says that page decides the project details.",
+          "Have an attorney look over the template once before you use it for real.",
+          "Send both as a PDF, get it signed with any e-signature app, and keep the signed copy.",
+          "Once it's signed, sign the client up.",
+          "Prices never go on kno.plus itself; only /store shows prices.",
+        ],
+        go: [go("Contract template", "https://github.com/questmullins/knoplus-website/blob/main/contracts/knoplus-website-service-agreement.md")],
+      },
+      {
+        id: "client-trial", q: "Put a client's preview website online",
+        answer: "This adds files to the website code, so ask Claude, or follow the steps on GitHub.",
+        steps: [
+          "The site goes in the code under `trial-websites/<slug>/` and goes live through a pull request.",
+          "Then at **kno.plus/clients**, add the project with the trial address `/trials/<slug>/` and give the client access.",
+          "Only clients with access can open it.",
+        ],
+        go: [go("How trials work", "https://github.com/questmullins/knoplus-website/blob/main/trial-websites/README.md"), go("Open the client page", "/clients/")],
+      },
+    ],
+  },
+  {
+    group: "Money and sales",
+    items: [
+      {
+        id: "money-rosewave", q: "See how much RoseWave made",
+        answer: "Overview shows the last 30 days. RoseWave's own page has every detail for any dates.",
+        steps: ["Open **Assets › RoseWave**.", "Use the tabs: **Sales, Orders, Best sellers, Members, Costs and margin, Trends**.", "Change the dates with the menu under the tabs."],
+        go: [go("Open RoseWave sales", "#asset/rosewave/home"), go("Open Overview", "#overview")],
+      },
+      {
+        id: "money-refund", q: "Refund a print order",
+        answer: "Refunds happen in Square. Annex picks them up within seconds and takes them off your sales.",
+        steps: ["Open the **Square Dashboard › Transactions**.", "Find the payment, open it and press **Refund**.", "If the print hasn't shipped, cancel it with Prodigi too."],
+        go: [go("Square transactions", "https://app.squareup.com/dashboard/sales/transactions"), go("Prodigi dashboard", "https://dashboard.prodigi.com/")],
+      },
+      {
+        id: "money-cost", q: "Add a cost, like a subscription or supplies",
+        answer: "Costs you add take away from profit. A monthly cost is spread across its days.",
+        steps: ["Open **Assets › RoseWave › Costs and margin**.", "Add the cost with its name, amount and date, and whether it repeats monthly."],
+        go: [go("Open costs", "#asset/rosewave/costs")],
+      },
+      {
+        id: "money-stale", q: "Fix sales numbers that look wrong or old",
+        answer: "Most of the time a refresh fixes it. If a connection shows an error, the key behind it has probably expired.",
+        steps: ["Open **Assets › RoseWave › Connections** and press **Refresh now**.", "If a connection shows an error, make a new key where it came from and replace that secret in Cloudflare.", "**Pull all history again** rebuilds everything if numbers are still off."],
+        go: [go("Open connections", "#asset/rosewave/settings"), SECRETS],
+      },
+      {
+        id: "money-asset", q: "Add a new business or app to my dashboard",
+        answer: "Each money-making area is an asset. It shows on Overview and Assets.",
+        steps: [
+          "Open **Assets** and press **Add an asset**.",
+          "Give it a short id (it can't change later), a name, a kind (store, app, service, tool), a status and a one-line note.",
+          "Pick **Sales from** only if it already takes money through Square. Otherwise leave it on Not connected.",
+          "Press **Save**.",
+        ],
+        go: [go("Open Assets", "#assets")],
+      },
+    ],
+  },
+  {
+    group: "Websites and visitors",
+    items: [
+      {
+        id: "web-stats", q: "See how my websites are doing",
+        answer: "Websites shows visitors and page views for every site on Cloudflare, and how often people click you in Google.",
+        steps: [
+          "Open **Websites** and choose 7, 28 or 90 days.",
+          "**Click-through rate** is the share of people who saw you in Google and clicked. Google's numbers run about 2 days behind.",
+          "If a section says Not connected, follow its setup guide below.",
+        ],
+        go: [go("Open Websites", "#websites")],
+      },
+      {
+        id: "web-messages", q: "Read contact-form messages",
+        answer: "Messages from the kno.plus contact form arrive at **info@kno.plus**. Annex › Websites counts how many came in.",
+        steps: ["Check the info@kno.plus inbox.", "If messages stop arriving, check that the `RESEND_API_KEY` secret is still in Cloudflare."],
+        go: [go("Open Websites", "#websites"), SECRETS],
+      },
+      {
+        id: "web-store", q: "Fix the print store if checkout disappears",
+        answer: "If kno.plus/store shows small photos and an email button instead of checkout, it can't reach the RoseWave server.",
+        steps: [
+          "On knoplus-website, the build variable **NEXT_PUBLIC_ROSEWAVE_API** must be the RoseWave server's address.",
+          "On the RoseWave server, the variable **SITE_ORIGIN** must include `https://kno.plus`.",
+          "After changing either one, redeploy.",
+        ],
+        go: [go("Open the store", "/store"), go("Cloudflare › settings", CF + "/settings")],
+      },
+    ],
+  },
+  {
+    group: "Your login and keys",
+    items: [
+      {
+        id: "me-password", q: "Reset my own password, or I'm locked out",
+        answer: "Your setup code lets you set a new password any time it's saved in Cloudflare.",
+        steps: [
+          "In Cloudflare, check that the secret **ANNEX_SETUP_CODE** exists on knoplus-website. If not, add one (any 12+ characters).",
+          "Open **kno.plus/annex#setup**.",
+          "Enter the setup code, your email and a new password (12+ characters).",
+          "Optional: delete the setup code afterwards, and add it again next time.",
+        ],
+        go: [go("Open the setup form", "/annex/#setup"), SECRETS],
+      },
+      {
+        id: "me-secret", q: "Add or replace a secret (a key the site uses)",
+        answer: "Secrets are saved in Cloudflare and never shown again.",
+        steps: [
+          "Open Cloudflare › Workers & Pages › **knoplus-website** › Settings › **Variables and Secrets** › **Add**.",
+          "Choose **Production**, tick **Secret**, type the exact name and paste the value.",
+          "Press **Add and deploy**. To replace one, edit its value the same way.",
+        ],
+        go: [SECRETS],
+      },
+      {
+        id: "me-leak", q: "Deal with a key or password that leaked",
+        answer: "If it was pasted in a chat, an email or code, treat it as leaked.",
+        steps: ["Make a new key where it came from (Cloudflare, Google, Square or Prodigi).", "Replace the secret in Cloudflare.", "Delete the old key where it came from. Change a leaked password straight away."],
+        go: [SECRETS, go("Cloudflare API tokens", "https://dash.cloudflare.com/profile/api-tokens")],
+      },
+    ],
+  },
+  {
+    group: "Changing the website",
+    items: [
+      {
+        id: "site-change", q: "Change something on the website",
+        answer: "Changes are checked on a preview first. kno.plus only changes when you press Merge.",
+        steps: [
+          "Ask Claude for the change. It's made on a branch (a working copy of the code).",
+          "Cloudflare posts a **preview link** on the pull request. Check it on your computer and phone; the preview has its own login.",
+          "Happy with it? On GitHub, open the pull request and press **Merge**. kno.plus updates within a few minutes.",
+        ],
+        go: [go("Pull requests", "https://github.com/questmullins/knoplus-website/pulls")],
+      },
+      {
+        id: "site-undo", q: "Undo a change that went wrong",
+        answer: "Rolling back is instant and changes no code.",
+        steps: [
+          "Open Cloudflare › knoplus-website › **Deployments**.",
+          "Pick the deployment before the bad one and press **Rollback**.",
+          "To undo it for good, open the merged pull request on GitHub, press **Revert**, and merge that.",
+        ],
+        go: [go("Cloudflare deployments", CF + "/deployments"), go("Pull requests", "https://github.com/questmullins/knoplus-website/pulls?q=is%3Apr+is%3Amerged")],
+      },
+    ],
+  },
+  {
+    group: "One-time setup",
+    items: [
+      {
+        id: "setup-cloudflare", q: "Connect Cloudflare (website visitor numbers)",
+        answer: "A read-only key lets Annex show visitors for every site on your Cloudflare account.",
+        steps: [
+          "Cloudflare › My Profile › **API Tokens** › **Create Token** › **Create Custom Token**. Name it \"Annex traffic (read only)\".",
+          "Tick **Read** on two rows only: **Zone** (in DNS & Zones) and **Zone Analytics** (in Analytics & Logs).",
+          "For which websites, choose **All domains**. Create it and copy it; Cloudflare shows it once.",
+          "Save it as the secret **CLOUDFLARE_API_TOKEN**.",
+          "Check: **Settings** here says Cloudflare traffic is Connected.",
+        ],
+        go: [go("Cloudflare API tokens", "https://dash.cloudflare.com/profile/api-tokens"), SECRETS, go("Annex settings", "#settings")],
+      },
+      {
+        id: "setup-google", q: "Connect Google Search (clicks and click-through rate)",
+        answer: "A \"robot\" Google user reads Search Console for you. It can only read.",
+        steps: [
+          "In Google Cloud, switch to the project **Knoplus** and enable the **Google Search Console API**.",
+          "**IAM & Admin › Service Accounts › Create**, name it \"annex\", skip the roles.",
+          "Open it › **Keys › Add key › Create new key › JSON**. Open the file and copy all of it.",
+          "Save it as the secret **GOOGLE_SERVICE_ACCOUNT**.",
+          "In Search Console, open each site › **Settings › Users and permissions › Add user**. Paste the file's `client_email` and choose **Restricted**.",
+          "Delete the downloaded file.",
+          "If Google says key creation is disabled: **Organization Policies** › \"Disable service account key creation\" › Override parent's policy › **Not enforced**.",
+        ],
+        go: [
+          go("Enable the API", "https://console.cloud.google.com/apis/library/searchconsole.googleapis.com"),
+          go("Service accounts", "https://console.cloud.google.com/iam-admin/serviceaccounts"),
+          go("Search Console", "https://search.google.com/search-console"),
+          SECRETS,
+        ],
+      },
+      {
+        id: "setup-rosewave", q: "Connect RoseWave sales (Square, Prodigi, the app)",
+        answer: "Three keys bring RoseWave's sales in. After that it runs on its own, every sale within seconds and a full re-check every night.",
+        steps: [
+          "Make up a long random password (24+ characters). Save it as **ANNEX_KEY** on the RoseWave server and as **ROSEWAVE_ROSEWAVE_KEY** here. They must match.",
+          "Save your Square access token as **ROSEWAVE_SQUARE_TOKEN** and your Prodigi key as **ROSEWAVE_PRODIGI_KEY**.",
+          "In Square Developer › your app › **Webhooks**, add `https://kno.plus/annex/hooks/square` with the payment, refund, subscription, invoice payment and dispute events. Save its **Signature key** as **ROSEWAVE_SQUARE_SIGNATURE**.",
+          "In **Assets › RoseWave › Connections**, enter the RoseWave server's address, press Save, then **Refresh now**.",
+        ],
+        go: [go("Square Developer", "https://developer.squareup.com/apps"), SECRETS, go("Open connections", "#asset/rosewave/settings")],
+      },
+    ],
+  },
+];

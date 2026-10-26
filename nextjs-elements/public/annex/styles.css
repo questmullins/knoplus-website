@@ -252,3 +252,19 @@ textarea { background: var(--field); border: 1px solid var(--line); color: var(-
   .guide-list { max-height: 220px; }
   .toc ul { columns: 1; }
 }
+.sop-search { font-size: 16px; min-height: 54px; padding: 14px 18px; border-color: #85cfc055; }
+.sop-groups { display: grid; gap: 26px; margin-top: 8px; }
+.sop-group { display: grid; gap: 0; }
+.sop-group > h2.section, .sop-group .toolbar { margin: 0 0 10px; }
+.sop { border-top: 1px solid var(--line); }
+.sop:last-child { border-bottom: 1px solid var(--line); }
+.sop summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 64px; padding: 14px 4px; cursor: pointer; font: 300 20px/1.35 "Stack Sans Text", Manrope, sans-serif; color: #f6f3ecd1; }
+.sop summary::-webkit-details-marker { display: none; }
+.sop summary:hover, .sop[open] summary { color: var(--mint); }
+.sop[open] summary .nav-plus { transform: rotate(45deg); }
+.sop-body { padding: 0 4px 22px; max-width: 760px; }
+.sop-body > p:first-child { margin-top: 0; color: var(--paper); }
+.sop .go { margin-top: 14px; gap: 10px; }
+.sop .go .button { white-space: normal; text-align: center; }
+@media (max-width: 760px) { .sop summary { font-size: 18px; } .sop .go .button { flex: 1 1 100%; } }
+.toolbar h2.section { font-size: 11px; font-weight: 500; }
