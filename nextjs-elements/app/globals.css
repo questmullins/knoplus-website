@@ -2869,3 +2869,17 @@ section.stage > .content {
     linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(0.78 * var(--overlay))) 40%, rgb(var(--base-rgb) / calc(0.6 * var(--overlay))) 70%, rgb(var(--base-rgb) / calc(0.5 * var(--overlay)))),
     var(--bg);
 }
+
+/* Rounded buttons (a trial): pills for text buttons, circles for the square icon buttons. Delete this block to go back. */
+:root {
+  --button-radius: 999px;
+}
+
+:is(.cta-button, .top-menu, .scheme-toggle, .sidebar-action-link, .menu-panel button.active, .modal-close) {
+  border-radius: var(--button-radius);
+}
+
+.stage-menu-control .top-menu,
+.sidebar-actions .top-menu {
+  padding-inline: 24px;
+}

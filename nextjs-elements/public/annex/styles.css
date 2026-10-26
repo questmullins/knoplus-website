@@ -337,3 +337,7 @@ select.status option { color: var(--paper); }
 @media (min-width: 761px) { .client-cards { display: none; } .client-tools select { width: auto; flex: 0 0 220px; } }
 /* Light mode: an asset's own colour is mixed toward the ink so its label, figure and pill stay readable on paper. */
 :root[data-scheme="light"] .project { --tone-ink: color-mix(in srgb, var(--tone, var(--mint)) 58%, var(--paper)); }
+/* Rounded buttons (a trial, matching kno.plus). Delete this block to go back. */
+:root { --button-radius: 999px; }
+.button, .primary, .quiet, .scheme-toggle, details.menu > summary, select.status, .pill { border-radius: var(--button-radius); }
+.seg { border-radius: var(--button-radius); overflow: hidden; }
