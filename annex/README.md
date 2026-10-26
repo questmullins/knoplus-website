@@ -12,6 +12,9 @@ needs the kno.plus administrator sign-in (the same account `/clients` uses) and 
 - **Websites**: traffic for every site on the Cloudflare account (visitors, page views, requests, threats, countries),
   Google Search Console (clicks, impressions, click-through rate, position, top searches and pages), and kno.plus page
   counts kept by the Worker without keeping who anyone is (`server/analytics.js`).
+- **Speed**: after the first page shows, Annex loads every other page in the background (and each asset's sales for
+  the saved date range), so switching tabs is instant. A page you open shows what's in memory at once and refreshes
+  quietly, redrawing only if something changed. Any change you save clears the memory.
 - **Clients**: every project and its clients in one table (Project, Client, Email, Domain, Status), with a ⋯ menu on
   each row to send a reset email, copy a reset link, edit, post an update, or turn access off. Adding projects and
   clients happens here too (`server/client-admin.js`). One sign-in serves both sides: the owner lands in Annex › Clients,

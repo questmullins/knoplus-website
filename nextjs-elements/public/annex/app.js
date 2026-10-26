@@ -27,14 +27,22 @@ const plural = (n, one, many = one + "s") => n + " " + (n === 1 ? one : many);
 // Workspace routes are about everything; the rest are about the open asset's sales account.
 const WORKSPACE = /^(me|site|websites|search|assets|clients|guides|overview|setup)\b/;
 const scoped = (path) => (state.account && !WORKSPACE.test(path) ? path + (path.includes("?") ? "&" : "?") + "account=" + encodeURIComponent(state.account) : path);
-async function get(path) {
-  const r = await fetch(API + scoped(path), { credentials: "same-origin" });
+// Every answer is kept in memory, so a page you've seen (or one loaded ahead in the background) shows at once and then
+// refreshes quietly. Any change you make clears it, so nothing stale outlives an edit.
+const cache = new Map();
+const MISS = new Error("not loaded yet");
+const get = (path) => fetchJson(scoped(path));
+const peek = (path) => { const key = scoped(path); if (!cache.has(key)) throw MISS; return cache.get(key); };
+async function fetchJson(key) {
+  const r = await fetch(API + key, { credentials: "same-origin" });
   const body = await r.json().catch(() => ({}));
-  if (r.status === 401) { state.me.user = null; route(); throw new Error("signed out"); }
+  if (r.status === 401) { cache.clear(); state.me.user = null; route(); throw new Error("signed out"); }
   if (!r.ok) throw new Error(body.error || "Something went wrong");
+  cache.set(key, body);
   return body;
 }
 async function send(path, body, method = "POST") {
+  cache.clear();
   const r = await fetch(API + scoped(path), { method, credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
   const said = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(said.error || "Something went wrong");
@@ -49,8 +57,8 @@ const tz = () => (state.acct && state.acct.tz) || (state.me && state.me.account 
 const todayIn = (zone) => new Intl.DateTimeFormat("en-CA", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const addDays = (d, n) => new Date(Date.parse(d + "T00:00:00Z") + n * 86400e3).toISOString().slice(0, 10);
 const PRESETS = [["30", "Last 30 days"], ["today", "Today"], ["week", "This week"], ["month", "This month"], ["year", "This year"], ["90", "Last 90 days"], ["custom", "Custom"]];
-function rangeDays() {
-  const r = state.range, today = todayIn(tz());
+function rangeDays(zone = tz()) {
+  const r = state.range, today = todayIn(zone);
   if (r.preset === "custom" && r.from && r.to) return { from: r.from, to: r.to };
   if (r.preset === "today") return { from: today, to: today };
   if (r.preset === "week") { const wd = (new Date(today + "T00:00:00Z").getUTCDay() + 6) % 7; return { from: addDays(today, -wd), to: today }; }
@@ -59,7 +67,7 @@ function rangeDays() {
   if (r.preset === "90") return { from: addDays(today, -89), to: today };
   return { from: addDays(today, -29), to: today };
 }
-const rangeQuery = () => { const { from, to } = rangeDays(); return `from=${from}&to=${to}`; };
+const rangeQuery = (zone) => { const { from, to } = rangeDays(zone); return `from=${from}&to=${to}`; };
 const prettyDay = (d) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const ago = (iso) => {
   if (!iso) return "never";
@@ -163,46 +171,72 @@ function intro(eyebrow, title, text, action) {
 // ---------- loading a page ----------
 const SALES_TABS = [["home", "Sales"], ["orders", "Orders"], ["best", "Best sellers"], ["members", "Members"], ["costs", "Costs and margin"], ["trends", "Trends"], ["settings", "Connections"]];
 async function openAsset() {
-  const list = await get("assets").catch(() => ({ assets: [] }));
+  const remembered = (path) => { try { return peek(path); } catch { return get(path); } };
+  const list = await Promise.resolve(remembered("assets")).catch(() => ({ assets: [] }));
   state.assetRow = list.assets.find((a) => a.id === state.asset) || null;
   state.accounts = list.accounts || [];
   if (state.assetRow && state.assetRow.account) {
     state.account = state.assetRow.account;
-    state.acct = (await get("me?account=" + encodeURIComponent(state.account)).catch(() => ({}))).account || null;
+    state.acct = (await Promise.resolve(remembered("me?account=" + encodeURIComponent(state.account))).catch(() => ({}))).account || null;
   }
 }
 
 async function load() {
   const view = document.getElementById("view");
   const page = state.page, tab = state.tab, asset = state.asset, guide = state.guide;
-  try {
-    let path;
-    if (page === "overview") path = "overview";
-    else if (page === "assets") path = "assets";
-    else if (page === "clients") path = "clients";
-    else if (page === "settings") path = "connections";
-    else if (page === "guides") {
-      const [list, one] = await Promise.all([get("guides"), state.guide && !["new", "import"].includes(state.guide) ? get("guides/" + encodeURIComponent(state.guide)).catch(() => null) : null]);
-      return done({ guides: list.guides, sops: list.sops || [], one });
-    } else if (page === "websites") {
-      const days = state.days;
-      const [web, searchData, site] = await Promise.all([get("websites?days=" + days), get("search?days=" + days), get("site?days=" + days)]);
-      return done({ web, search: searchData, site });
-    } else if (page === "asset") {
-      if (!state.assetRow) return view.replaceChildren(h("p", { class: "empty", text: "There's no asset called " + asset + "." }));
-      if (!state.account) return done(asset === "websites" ? await get("clients") : null);
-      const q = rangeQuery();
-      path = { home: "home?" + q, orders: "orders?" + q, best: "best?" + q, members: "members?" + q, costs: "costs?" + q, trends: "trends?" + q + "&by=" + (state.by || "day"), settings: "connections" }[tab] || "home?" + q;
+  // what this page needs, read through `ask`: from memory (peek) or from the server (get)
+  const gather = async (ask) => {
+    if (page === "guides") {
+      const [list, one] = await Promise.all([ask("guides"), guide && !["new", "import"].includes(guide) ? Promise.resolve().then(() => ask("guides/" + encodeURIComponent(guide))).catch((e) => { if (e === MISS) throw e; return null; }) : null]);
+      return { guides: list.guides, sops: list.sops || [], one };
     }
-    done(await get(path));
+    if (page === "websites") {
+      const days = state.days;
+      const [web, search, site] = await Promise.all([ask("websites?days=" + days), ask("search?days=" + days), ask("site?days=" + days)]);
+      return { web, search, site };
+    }
+    if (page === "asset") {
+      if (!state.assetRow) return { missing: "There's no asset called " + asset + "." };
+      if (!state.account) return asset === "websites" ? ask("clients") : null;
+      const q = rangeQuery();
+      return ask({ home: "home?" + q, orders: "orders?" + q, best: "best?" + q, members: "members?" + q, costs: "costs?" + q, trends: "trends?" + q + "&by=" + (state.by || "day"), settings: "connections" }[tab] || "home?" + q);
+    }
+    return ask({ overview: "overview", assets: "assets", clients: "clients", settings: "connections" }[page] || "overview");
+  };
+  let shown;
+  try { shown = await gather(peek); done(shown); } catch { shown = undefined; }
+  try {
+    const fresh = await gather(get);
+    // redraw only when something changed, so a quiet refresh never interrupts typing or an open menu
+    if (shown === undefined || JSON.stringify(fresh) !== JSON.stringify(shown)) done(fresh);
   } catch (err) {
-    if (err.message !== "signed out") view.replaceChildren(h("p", { class: "empty", text: err.message }));
+    if (shown === undefined && err.message !== "signed out") view.replaceChildren(h("p", { class: "empty", text: err.message }));
   }
+  setTimeout(warmUp, 300);
   function done(data) {
     if (page !== state.page || tab !== state.tab || asset !== state.asset || guide !== state.guide) return;
+    if (data && data.missing) return view.replaceChildren(h("p", { class: "empty", text: data.missing }));
     state.data = data;
     draw();
   }
+}
+
+// After the first page shows, load every other page in the background, one batch, so switching tabs is instant.
+let warming = null;
+function warmUp() {
+  if (warming || !state.me || !state.me.user) return;
+  warming = (async () => {
+    const days = state.days, quiet = (key) => (cache.has(key) ? null : fetchJson(key).catch(() => null));
+    const assets = await quiet("assets") || cache.get("assets") || { assets: [] };
+    await Promise.all(["overview", "clients", "guides", "connections", "websites?days=" + days, "search?days=" + days, "site?days=" + days].map(quiet));
+    // each asset's sales page for the saved date range, in that account's own time zone
+    await Promise.all((assets.assets || []).filter((a) => a.account).map(async (a) => {
+      const id = encodeURIComponent(a.account);
+      const me = await quiet("me?account=" + id) || cache.get("me?account=" + id) || {};
+      const zone = (me.account && me.account.tz) || tz();
+      await quiet("home?" + rangeQuery(zone) + "&account=" + id);
+    }));
+  })().finally(() => { warming = null; });
 }
 
 // an open ⋯ menu closes when you click anywhere else or press Escape
