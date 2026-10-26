@@ -32,10 +32,14 @@ check("short password refused", (await api("setup", { code: "test-setup-code-123
 const made = await fetch(BASE + "setup", { method: "POST", headers: { "Content-Type": "application/json", Origin: ORIGIN }, body: JSON.stringify({ code: "test-setup-code-123", email: `${run}-first@example.test`, password: "a long password" }) });
 check("setup makes the administrator and signs in", made.status === 200 && /__Host-kno_client=[a-f0-9]{64}/.test(made.headers.get("set-cookie")));
 cookie = made.headers.get("set-cookie").split(";")[0];
+const cookieFirst = cookie;
 check("the new administrator sees Annex", (await api("me")).body.user.role === "owner");
 cookie = "";
-check("second setup refused", (await api("setup", { code: "test-setup-code-123", email: "x@example.test", password: "a long password" })).status === 409);
-check("setup no longer offered", (await api("me")).body.setup === false);
+check("with an administrator, setup is no longer the first screen", (await api("me")).body.firstAdmin === false);
+const again = await fetch(BASE + "setup", { method: "POST", headers: { "Content-Type": "application/json", Origin: ORIGIN }, body: JSON.stringify({ code: "test-setup-code-123", email: `${run}-first@example.test`, password: "another long password" }) });
+check("the setup code resets the administrator's password", again.status === 200);
+check("the old session is signed out by the reset", (await fetch(BASE + "home", { headers: { Cookie: cookieFirst } })).status === 401);
+check("wrong code still refused with an administrator", (await api("setup", { code: "nope", email: "x@example.test", password: "a long password" })).status === 403);
 d1(`DELETE FROM sessions; DELETE FROM users WHERE email = '${run}-first@example.test';`);
 
 // a kno.plus administrator and a client, signed in by writing their sessions straight into the local database

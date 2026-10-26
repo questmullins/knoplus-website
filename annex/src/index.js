@@ -103,7 +103,7 @@ async function api(request, env, ctx, url) {
   if (route === "me") {
     if (!user) {
       const open = !(await hasAdmin(env.CLIENT_DB));
-      return json({ user: null, signIn: "/clients/?next=/annex/", setup: open && !!env.ANNEX_SETUP_CODE, setupCodeMissing: open && !env.ANNEX_SETUP_CODE });
+      return json({ user: null, signIn: "/clients/?next=/annex/", setup: !!env.ANNEX_SETUP_CODE, firstAdmin: open, setupCodeMissing: open && !env.ANNEX_SETUP_CODE });
     }
     if (user.role !== "admin") return json({ user: { email: user.email, role: "" } });
   }
@@ -159,13 +159,13 @@ async function hasAdmin(db) {
   return !!(await db.prepare("SELECT 1 FROM users WHERE role = 'admin' AND disabled = 0 LIMIT 1").first());
 }
 
-// The first administrator: only while there is none, and only with the ANNEX_SETUP_CODE Worker secret.
+// The administrator sign-in, made (or its password replaced) with the ANNEX_SETUP_CODE Worker secret. Only works while
+// that secret is set, so deleting it afterwards closes this door.
 async function setupAdmin(request, env) {
   const db = env.CLIENT_DB;
   const ip = request.headers.get("CF-Connecting-IP") || "local";
   await ensureClientTables(db);
   if (!(await rateLimit(db, "annex-setup:" + ip, 10))) return fail("Too many tries. Wait fifteen minutes and try again.", 429);
-  if (await hasAdmin(db)) return fail("Annex is already set up. Sign in instead.", 409);
   const ask = await readJson(request);
   const code = env.ANNEX_SETUP_CODE || "";
   if (code.length < 12 || !same(String(ask.code || ""), code)) return fail("That setup code isn't right.", 403);
@@ -175,6 +175,7 @@ async function setupAdmin(request, env) {
   const id = crypto.randomUUID(), token = randomToken();
   await db.batch([
     db.prepare("INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, 'admin') ON CONFLICT(email) DO UPDATE SET password = excluded.password, role = 'admin', disabled = 0").bind(id, email, await passwordHash(ask.password)),
+    db.prepare("DELETE FROM sessions WHERE user_id = (SELECT id FROM users WHERE email = ?)").bind(email),
     db.prepare("INSERT INTO sessions (token, user_id, expires) SELECT ?, id, ? FROM users WHERE email = ?").bind(await digest(token), Date.now() + 43200000, email),
   ]);
   return json({ ok: true }, 200, { "Set-Cookie": cookie(token) });

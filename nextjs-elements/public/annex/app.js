@@ -92,10 +92,11 @@ async function boot() {
 }
 
 function render() {
-  if (!state.me.user && state.me.setup) return setupView();
+  if (!state.me.user && state.me.setup && (state.me.firstAdmin || location.hash === "#setup")) return setupView();
   if (!state.me.user && state.me.setupCodeMissing) return gate("Set up Annex", "Annex has no administrator yet. Add a Worker secret named ANNEX_SETUP_CODE (12 or more characters) to knoplus-website in Cloudflare, then reload this page.", null);
   if (!state.me.user) return gate("Annex", "Sign in with your kno.plus administrator account to see your work, your website and your sales.",
-    h("a", { class: "primary", href: state.me.signIn || "/clients/?next=/annex/", text: "Sign in" }));
+    h("div", { class: "stack" }, h("a", { class: "primary", href: state.me.signIn || "/clients/?next=/annex/", text: "Sign in" }),
+      state.me.setup ? h("a", { href: "#setup", text: "Use your setup code to make or reset your sign-in" }) : null));
   if (state.me.user.role !== "owner") return gate("Annex", "Annex is for the kno.plus administrator. Your projects are on your client page.",
     h("a", { class: "primary", href: "/clients/", text: "Go to your projects" }));
   applyBrand();
@@ -121,7 +122,7 @@ function setupView() {
     h("label", {}, "Your email", h("input", { name: "email", type: "email", required: true, autocomplete: "email" })),
     h("label", {}, "Password (12 or more characters)", h("input", { name: "password", type: "password", required: true, minlength: "12", autocomplete: "new-password" })),
     error, h("button", { class: "primary", type: "submit", text: "Create my sign-in" }));
-  gate("Set up Annex", "Create the kno.plus administrator sign-in. It works here and at kno.plus/clients.", form);
+  gate("Set up Annex", "Create the kno.plus administrator sign-in, or give an existing one a new password. It works here and at kno.plus/clients. Delete the ANNEX_SETUP_CODE secret afterwards if you want this form gone.", form);
 }
 
 // ---------- the frame: name, date range, tabs ----------
