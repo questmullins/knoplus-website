@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: {
     title: `${collection?.name || "Collection"} — Rose Wave Photography`,
     description: collection?.description,
     alternates: { canonical: `/store/collections/${id}` },
+    icons: { icon: { url: "/icons/r-plus.svg", type: "image/svg+xml" }, apple: "/icons/k-plus-180.png" },
   };
 }
 
