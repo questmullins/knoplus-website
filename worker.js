@@ -2,10 +2,13 @@ import { EmailMessage } from "cloudflare:email";
 import { recordAnalytics } from './server/analytics.js';
 import { handleClients } from "./server/clients.js";
 import { handleAnnex, scheduledAnnex } from "./annex/src/index.js";
+import offeringGroups from "./nextjs-elements/data/offerings.json";
 
 const CONTACT_TO_FALLBACK = "info@kno.plus";
 const CONTACT_FROM_FALLBACK = "Knoplus <info@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
+const OFFERINGS = offeringGroups.flatMap(group => group.options.map(option => option.label));
+const TEMPLATE_OFFERING = "Website from a template";
 
 // Pages that moved when the project showcase became the home page (assets under /revamp/ stay where they are).
 function movedTo(path) {
@@ -14,6 +17,7 @@ function movedTo(path) {
   if (p === "/revamp" || p === "/work") return "/";
   if (p === "/manage") return "/annex/";
   if (p === "/pricing") return "/websites";
+  if (p === "/about" || p === "/process") return "/";
   const gallery = /^\/revamp\/rosewave\/gallery(\/.*)?$/.exec(p);
   if (gallery) return "/store" + (gallery[1] || "");
   const project = /^\/revamp\/([a-z0-9-]+)(?:\/horizontal)?$/.exec(p);
@@ -115,7 +119,7 @@ function normalizeContact(payload) {
     firstName: clean(payload?.firstName),
     lastName: clean(payload?.lastName),
     email: clean(payload?.email),
-    projectKind: clean(payload?.projectKind),
+    topic: clean(payload?.topic),
     templateName: clean(payload?.templateName),
     subject: clean(payload?.subject),
     body: clean(payload?.body),
@@ -136,11 +140,11 @@ function validateContact(contact) {
     return "Please add a valid email address.";
   }
 
-  if (!["Template", "Custom"].includes(contact.projectKind)) {
-    return "Please choose template or custom.";
+  if (!OFFERINGS.includes(contact.topic)) {
+    return "Please choose what your message is about.";
   }
 
-  if (contact.projectKind === "Template" && !contact.templateName) {
+  if (contact.topic === TEMPLATE_OFFERING && !contact.templateName) {
     return "Please choose a template.";
   }
 
@@ -188,7 +192,7 @@ async function sendWithResend(contact, env) {
       from,
       to,
       reply_to: contact.email,
-      subject: `Knoplus contact: ${contact.subject}`,
+      subject: `Knoplus contact (${contact.topic}): ${contact.subject}`,
       text: buildPlainTextMessage(contact)
     })
   });
@@ -203,7 +207,7 @@ function buildMimeMessage(contact, from, to) {
     `From: ${from}`,
     `To: ${to}`,
     `Reply-To: ${contact.email}`,
-    `Subject: Knoplus contact: ${contact.subject}`,
+    `Subject: Knoplus contact (${contact.topic}): ${contact.subject}`,
     "Content-Type: text/plain; charset=UTF-8",
     "",
     buildPlainTextMessage(contact)
@@ -216,8 +220,8 @@ function buildPlainTextMessage(contact) {
     "",
     `Name: ${contact.firstName} ${contact.lastName}`,
     `Email: ${contact.email}`,
-    `Build Type: ${contact.projectKind}`,
-    `Template: ${contact.projectKind === "Template" ? contact.templateName || "Not provided" : "N/A"}`,
+    `About: ${contact.topic}`,
+    ...(contact.topic === TEMPLATE_OFFERING ? [`Template: ${contact.templateName || "Not provided"}`] : []),
     `Subject: ${contact.subject}`,
     "",
     "Body:",

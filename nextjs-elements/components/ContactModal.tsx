@@ -1,12 +1,14 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { offeringFor, offeringGroups, offeringLabel } from "@/data/offerings";
 import { templates } from "@/data/templates";
 
 type ContactModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedTemplate?: string;
+  selectedTopic?: string;
 };
 
 type FormStatus = {
@@ -19,10 +21,11 @@ const initialStatus: FormStatus = {
   tone: "idle"
 };
 
-export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: ContactModalProps) {
+export function ContactModal({ isOpen, onClose, selectedTemplate = "", selectedTopic = "" }: ContactModalProps) {
+  const startingTopic = selectedTemplate ? "website-template" : offeringFor(selectedTopic);
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
-  const [projectKind, setProjectKind] = useState("Template");
+  const [topic, setTopic] = useState(startingTopic);
   const [templateChoice, setTemplateChoice] = useState(selectedTemplate || templates[0]?.navTitle || "");
   const [status, setStatus] = useState<FormStatus>(initialStatus);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +37,7 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
 
   useEffect(() => {
     if (isOpen) {
-      setProjectKind("Template");
+      setTopic(startingTopic);
       setTemplateChoice(selectedTemplate || templates[0]?.navTitle || "");
       setShouldRender(true);
       const frame = window.requestAnimationFrame(() => setIsVisible(true));
@@ -46,7 +49,7 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
     const timeout = window.setTimeout(() => setShouldRender(false), 360);
 
     return () => window.clearTimeout(timeout);
-  }, [isOpen, selectedTemplate]);
+  }, [isOpen, selectedTemplate, startingTopic]);
 
   useEffect(() => {
     if (!shouldRender) {
@@ -79,7 +82,7 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
       firstName: String(formData.get("firstName") || "").trim(),
       lastName: String(formData.get("lastName") || "").trim(),
       email: String(formData.get("email") || "").trim(),
-      projectKind: String(formData.get("projectKind") || "").trim(),
+      topic: offeringLabel(String(formData.get("topic") || "")),
       templateName: String(formData.get("templateName") || "").trim(),
       subject: String(formData.get("subject") || "").trim(),
       body: String(formData.get("body") || "").trim(),
@@ -100,7 +103,7 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
       }
 
       form.reset();
-      setProjectKind("Template");
+      setTopic(startingTopic);
       setStatus({
         message: "Message received. We will get back to you soon.",
         tone: "success"
@@ -155,19 +158,20 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
             <input name="email" required type="email" />
           </label>
 
-          <label>
-            <span>Build Type</span>
-            <select
-              name="projectKind"
-              value={projectKind}
-              onChange={(event) => setProjectKind(event.target.value)}
-            >
-              <option>Template</option>
-              <option>Custom</option>
+          <label className={topic === "website-template" ? "" : "contact-wide"}>
+            <span>About</span>
+            <select name="topic" value={topic} onChange={(event) => setTopic(event.target.value)}>
+              {offeringGroups.map((group) => (
+                <optgroup key={group.group} label={group.group}>
+                  {group.options.map((option) => (
+                    <option key={option.id} value={option.id}>{option.label}</option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </label>
 
-          {projectKind === "Template" ? (
+          {topic === "website-template" ? (
             <label>
               <span>Template</span>
               <select name="templateName" value={templateChoice} onChange={(event) => setTemplateChoice(event.target.value)}>
@@ -178,13 +182,13 @@ export function ContactModal({ isOpen, onClose, selectedTemplate = "" }: Contact
             </label>
           ) : null}
 
-          <label className={projectKind === "Template" ? "contact-wide" : ""}>
+          <label className="contact-wide">
             <span>Subject</span>
             <input
               name="subject"
               required
               type="text"
-              defaultValue={selectedTemplate ? `Interested in ${selectedTemplate}` : ""}
+              defaultValue={selectedTemplate ? `Interested in ${selectedTemplate}` : startingTopic !== "other" ? `About ${offeringLabel(startingTopic)}` : ""}
             />
           </label>
 

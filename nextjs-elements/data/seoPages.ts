@@ -106,8 +106,7 @@ export const seoPages: SeoPage[] = [
     ],
     links: [
       { label: "Explore Home Service Templates", href: "/" },
-      { label: "Browse Websites", href: "/websites" },
-      { label: "See Our Process", href: "/process" }
+      { label: "Browse Websites", href: "/websites" }
     ]
   },
   {

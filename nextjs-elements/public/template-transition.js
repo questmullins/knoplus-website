@@ -30,9 +30,6 @@
     ".knoplus-template-home:hover,.knoplus-template-home:focus-visible,.knoplus-template-choose:hover,.knoplus-template-choose:focus-visible{",
     "background:#f6f3ec;color:#050506;outline:none;transform:translateX(2px);",
     "}",
-    ".knoplus-exit-transition{position:fixed;inset:0;z-index:2147483646;background:#050506;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;transition:opacity 720ms ease;}",
-    ".knoplus-exit-transition::after{content:\"KNOPLUS\";color:#f6f3ec;font-family:Kanit,Arial,Helvetica,sans-serif;font-size:clamp(32px,4vw,54px);font-weight:500;letter-spacing:.12em;line-height:1;text-transform:uppercase;}",
-    ".knoplus-exit-transition.active{opacity:1;pointer-events:auto;}",
     "@media (max-width:720px){.knoplus-template-actions{left:10px;right:auto;top:auto;bottom:12px;transform:none;width:min(232px,calc(100vw - 20px));padding:11px;}.knoplus-template-actions::before{font-size:8px;}.knoplus-template-home,.knoplus-template-choose{min-height:36px;padding:0 12px;font-size:9px;}}"
   ].join("");
   document.head.appendChild(homeStyle);
@@ -63,35 +60,18 @@
     return "Traditional Auto";
   }
 
+  // Leaving a template goes straight back; the KNOPLUS screen only plays on the way in.
   function exitToKnoplus(destination) {
     try {
       const back = window.sessionStorage.getItem("knoplus:template-return");
       if (back && destination === "/" && new URL(back, location.origin).origin === location.origin) {
         destination = back;
         window.sessionStorage.removeItem("knoplus:template-return");
-        window.sessionStorage.setItem("knoplus:route-reveal", "yes");
       }
-    } catch {}
-    var screen = document.querySelector(".knoplus-exit-transition");
-
-    try {
-      window.sessionStorage.setItem("knoplus:main-transition", "reveal");
       window.sessionStorage.setItem("knoplus:return-template", getTemplateName());
     } catch {}
 
-    if (!screen) {
-      screen = document.createElement("div");
-      screen.className = "knoplus-exit-transition";
-      document.body.appendChild(screen);
-    }
-
-    window.requestAnimationFrame(function () {
-      screen.classList.add("active");
-
-      window.setTimeout(function () {
-        window.location.href = destination;
-      }, 820);
-    });
+    window.location.href = destination;
   }
 
   function chooseTemplate() {

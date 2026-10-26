@@ -21,7 +21,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [contactTemplate, setContactTemplate] = useState<string | null>(null);
+  const [contact, setContact] = useState<{ topic: string; template?: string } | null>(null);
   const stage = useRef<HTMLElement>(null);
   const desktopContent = useRef<HTMLDivElement>(null);
   const mobileTrack = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const panelIndex = model.panels.findIndex(item => item.id === selectedId);
   const mobileIndex = model.mobilePanels.findIndex(item => item.id === selectedId);
   const adjacent = (direction: number) => isMobile ? model.mobilePanels[mobileIndex + direction] : nextPanel(direction);
-  const contactFor = (item: ServiceItem) => `mailto:info@kno.plus?subject=${encodeURIComponent(`Let's talk — ${item.id === "work" ? "Kno.plus" : model.project?.name || item.name}`)}`;
+  const openContact = (item: ServiceItem) => setContact({ topic: model.project?.slug || item.id, template: item.template ? item.name : undefined });
 
   const commit = useCallback((item: ServiceItem, history: "push" | "replace" | "none" = "push", scroll = true, closeMenu = true, toggle = false) => {
     setSelectedId(item.id);
@@ -106,7 +106,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     const element = stage.current;
     if (!element) return;
     const wheel = (event: WheelEvent) => {
-      if (window.matchMedia("(max-width: 760px)").matches || mobileOpen || contactTemplate !== null || screens.current?.open ||
+      if (window.matchMedia("(max-width: 760px)").matches || mobileOpen || contact !== null || screens.current?.open ||
         event.ctrlKey || event.metaKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || Math.abs(event.deltaY) < 24) return;
       if ((event.target as Element).closest(".menu-panel")) return;
       const content = desktopContent.current;
@@ -119,7 +119,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     };
     element.addEventListener("wheel", wheel, { passive: false });
     return () => element.removeEventListener("wheel", wheel);
-  }, [commit, contactTemplate, mobileOpen, nextPanel]);
+  }, [commit, contact, mobileOpen, nextPanel]);
 
   useEffect(() => {
     const fromHash = () => {
@@ -230,16 +230,17 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       <p className={s.description}>{item.description}</p>
       {item.platform === "android" && <StoreBadges />}
       <div className={`actions template-actions ${s.actions}`}>
-        {item.href ? <Link className="cta-button explore-button" href={item.href}>{item.action || "Explore"}</Link>
-          : model.project ? next ? <button className="cta-button explore-button" onClick={() => commit(next)} type="button">Keep exploring</button> : <a className="cta-button explore-button" href={contactFor(item)}>Let’s talk</a>
+        {item.href?.startsWith("mailto:") ? <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>{item.action || "Let’s talk"}</button>
+          : item.href ? <Link className="cta-button explore-button" href={item.href}>{item.action || "Explore"}</Link>
+          : model.project ? next ? <button className="cta-button explore-button" onClick={() => commit(next)} type="button">Keep exploring</button> : <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>Let’s talk</button>
             : item.children?.length || item.id === "work" ? <button className="cta-button explore-button" type="button" onClick={() => {
               select(item.children?.[0] || model.navigation[0]);
               if (window.matchMedia("(max-width: 760px)").matches) setMobileOpen(false);
             }}>{item.id === "work" ? "Explore Services" : item.id === "websites" ? "Explore Websites" : "Explore the folder"}</button>
-              : <a className="cta-button explore-button" href={contactFor(item)}>Let’s talk</a>}
+              : <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>Let’s talk</button>}
         {item.related && <Link className="cta-button inquire-button" href={item.related.href}>{item.related.label}</Link>}
         {!!item.photos?.length && <button className="cta-button inquire-button" type="button" onClick={() => { commit(item, "none", false, false); screens.current?.showModal(); }}>View {item.platform ? "app screens" : "screens"}</button>}
-        {item.template && <button className="cta-button inquire-button" type="button" onClick={() => setContactTemplate(item.name)}>Inquire</button>}
+        {item.template && <button className="cta-button inquire-button" type="button" onClick={() => openContact(item)}>Inquire</button>}
       </div>
       {!!item.highlights?.length && <div className={s.details}><div><span>Features</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>Made for</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {item.note && <p className={s.note}>{item.note}</p>}
@@ -269,6 +270,15 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
 
   useEffect(() => () => window.clearTimeout(mobileScrollTimer.current), []);
 
+  // "Choose This Template" on a website template returns here with ?contact=template.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("contact") !== "template") return;
+    let template = "";
+    try { template = window.sessionStorage.getItem("knoplus:selected-template") || ""; window.sessionStorage.removeItem("knoplus:selected-template"); } catch {}
+    setContact({ topic: "websites", template: template || undefined });
+    window.history.replaceState(null, "", window.location.pathname + window.location.hash);
+  }, []);
+
   const logo = <Link href="/#work" className="brand brand-logo-link" aria-label="Kno.plus services home">KNOPLUS</Link>;
   return <>
     <div className={`app ${s.shell}`}>
@@ -279,7 +289,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Services and projects">
           <Link className={`nav-label ${s.navLabel}`} href="/#work">Services</Link>{rows(model.navigation)}
         </nav>
-        <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><a href={contactFor(selected)} className="cta-button">Let’s talk</a><Link href="/clients/" prefetch={false} className={s.clientLink}>Are we working with you?<br /><strong>Check here for updates ↗</strong></Link><Link href="/websites" className={s.mainSite}>Website collection ↗</Link></div>
+        <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><button type="button" onClick={() => openContact(selected)} className="cta-button">Let’s talk</button><Link href="/clients/" prefetch={false} className={s.clientLink}>Are we working with you?<br /><strong>Check here for updates ↗</strong></Link><Link href="/websites" className={s.mainSite}>Website collection ↗</Link></div>
       </aside>
       <main ref={stage} id="service-stage" tabIndex={0} className={`stage ${s.stage}`} data-theme={selected.theme || "service"} inert={mobileOpen} onKeyDown={event => {
         if (window.matchMedia("(max-width: 760px)").matches || (event.target as Element).closest("button,a,input,select,textarea")) return;
@@ -287,7 +297,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         const target = event.key === "Home" ? model.panels[0] : event.key === "End" ? model.panels.at(-1) : direction ? nextPanel(direction) : undefined;
         if (target) { event.preventDefault(); commit(target, "replace"); }
       }}>
-        <SiteMenu className={`stage-menu-control ${s.siteMenu}`} hideIcon showLabel onNavigate={href => window.dispatchEvent(new CustomEvent("knoplus:navigate", { detail: href }))} />
+        <SiteMenu className={`stage-menu-control ${s.siteMenu}`} hideIcon showLabel onContact={() => openContact(selected)} onNavigate={href => window.dispatchEvent(new CustomEvent("knoplus:navigate", { detail: href }))} />
         <div className={`preview-bg ${s.background} ${s.desktopBackground}`} style={{ "--bg": displayed.image } as CSSProperties} />
         <div className={`preview-bg-next ${s.background} ${s.desktopBackground} ${crossfade ? "show" : ""}`} style={{ "--bg": selected.image } as CSSProperties} />
         <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent} ${crossfade ? s.fading : ""}`}>{panelCopy(displayed)}</div>
@@ -313,6 +323,6 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       <header><h2 id="screens-heading">{model.project?.name} / {selected.name}</h2><button type="button" aria-label="Close screens" onClick={() => screens.current?.close()}>×</button></header>
       <div>{selected.photos?.map(photo => <Image key={photo.src} src={photo.src} width={photo.width} height={photo.height} alt={photo.alt} unoptimized />)}</div>
     </dialog>
-    <ContactModal key={contactTemplate || "closed"} isOpen={contactTemplate !== null} onClose={() => setContactTemplate(null)} selectedTemplate={contactTemplate || ""} />
+    <ContactModal key={contact ? `${contact.topic}:${contact.template || ""}` : "closed"} isOpen={contact !== null} onClose={() => setContact(null)} selectedTemplate={contact?.template || ""} selectedTopic={contact?.topic || ""} />
   </>;
 }

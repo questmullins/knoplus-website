@@ -61,7 +61,6 @@ export function SeoLandingPage({ page }: SeoLandingPageProps) {
             <Link href="/">Template Viewer</Link>
             <Link href="/websites">Websites</Link>
             <Link href="/small-business-websites">Small Business Websites</Link>
-            <Link href="/process">Our Process</Link>
           </nav>
 
           <div className="sidebar-note cta-note">
@@ -112,7 +111,7 @@ export function SeoLandingPage({ page }: SeoLandingPageProps) {
         </section>
       </main>
 
-      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} selectedTopic="websites" />
     </>
   );
 }

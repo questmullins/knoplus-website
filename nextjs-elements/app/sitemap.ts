@@ -9,7 +9,7 @@ const baseUrl = "https://kno.plus";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const corePages = ["", "/websites", "/store", "/about", "/process", "/sitemap"];
+  const corePages = ["", "/websites", "/store", "/sitemap"];
   const workPages = projectCatalog.map((project) => `/work/${project.slug}`);
   const storePages = storeCatalog.collections.map((collection) => `/store/collections/${collection.id}`);
   const servicePages = seoPages.map((page) => `/${page.slug}`);
