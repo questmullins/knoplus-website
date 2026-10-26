@@ -111,6 +111,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Sets light or dark before the page paints, so there is no flash of the wrong scheme. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/scheme.js" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

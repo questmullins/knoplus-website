@@ -17,16 +17,16 @@
 .primary { border: 0; background: var(--rosewood); color: var(--ivory) !important; display: inline-flex; align-items: center; justify-content: space-between; gap: 50px; padding: 16px 24px; border-radius: 30px; font-size: 12px !important; min-height: 52px; transition: background .2s; }
 .primary:hover { background: #5d3c49; }
 .primary:disabled, .textLink:disabled { opacity: .6; cursor: progress; }
-.secondary { border: 1px solid var(--rosewood); background: transparent; color: var(--rosewood); display: inline-flex; align-items: center; justify-content: space-between; gap: 50px; padding: 15px 24px; border-radius: 30px; font-size: 12px !important; min-height: 52px; margin-top: 10px; transition: background .2s; }
+.secondary { border: var(--stroke) solid var(--rosewood); background: transparent; color: var(--rosewood); display: inline-flex; align-items: center; justify-content: space-between; gap: 50px; padding: 15px 24px; border-radius: 30px; font-size: 12px !important; min-height: 52px; margin-top: 10px; transition: background .2s; }
 .secondary:hover { background: color-mix(in srgb, var(--rosewood) 8%, transparent); }
 .small { font-size: 10px; color: var(--quiet); line-height: 1.7; }
 .printCopy > .small { margin-top: 15px; }
 .textLink { display: inline-flex; align-items: center; gap: 20px; border: 0; background: transparent; font-size: 11px !important; }
 .dialog { --ivory: #fff1e1; --paper: #f5e0d1; --plum: #5d3c49; --rosewood: #7c4e5c; --quiet: #795860; --rule: #e9c4b6; margin: auto; padding: 0; border: 0; border-radius: 8px; background: var(--ivory); color: var(--plum); font: 400 13px/1.6 "Rose Gallery DM", sans-serif; width: min(1200px, calc(100% - 64px)); max-height: calc(100dvh - 64px); overflow: auto; overscroll-behavior: contain; }
 .dialog::backdrop { background: #35242bc9; backdrop-filter: blur(7px); }
-.dialogTop { position: sticky; top: 0; z-index: 8; background: #fff1e1f5; backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); padding: 16px 26px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.dialogTop { position: sticky; top: 0; z-index: 8; background: #fff1e1f5; backdrop-filter: blur(10px); border-bottom: var(--stroke) solid var(--rule); padding: 16px 26px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .dialogActions { display: flex; align-items: center; gap: 24px; }
-.close { display: grid; place-items: center; background: transparent; border: 1px solid var(--rule); border-radius: 50%; width: 38px; height: 38px; font-size: 26px !important; line-height: 1; }
+.close { display: grid; place-items: center; background: transparent; border: var(--stroke) solid var(--rule); border-radius: 50%; width: 38px; height: 38px; font-size: 26px !important; line-height: 1; }
 .close:hover { background: var(--paper); }
 .product { display: grid; grid-template-columns: 1.15fr 1fr; }
 .productVisual { position: relative; background: #e3d9c9; align-self: stretch; display: grid; place-items: center; }
@@ -36,7 +36,7 @@
 .viewSwitch button[aria-pressed="true"] { background: var(--rosewood); color: var(--ivory); }
 .roomOptions { position: absolute; bottom: 30px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; background: #fff1e1e8; padding: 9px; border-radius: 30px; backdrop-filter: blur(8px); }
 .roomOptions > span { font-size: 8px; margin-right: 5px; }
-.roomOptions button { border: 1px solid transparent; padding: 7px 10px; border-radius: 25px; font-size: 9px; background: transparent; }
+.roomOptions button { border: var(--stroke) solid transparent; padding: 7px 10px; border-radius: 25px; font-size: 9px; background: transparent; }
 .roomOptions button[aria-pressed="true"] { border-color: var(--rosewood); }
 .productVisual .sceneCaption { display: none; }
 .photoOnly { display: grid; place-items: center; padding: 70px 30px; min-height: 100%; background: #f5e0d1; }
@@ -48,15 +48,15 @@
 .productCopy legend { width: 100%; font-size: 11px; font-weight: 500; margin-bottom: 10px; }
 .productCopy legend > span { float: right; font-weight: 400; color: var(--quiet); }
 .typeOptions { display: flex; flex-wrap: wrap; gap: 7px; }
-.typeOptions button { border: 1px solid var(--rule); background: transparent; border-radius: 20px; padding: 8px 12px; font-size: 10px; }
+.typeOptions button { border: var(--stroke) solid var(--rule); background: transparent; border-radius: 20px; padding: 8px 12px; font-size: 10px; }
 .typeOptions button[aria-pressed="true"] { background: var(--rosewood); border-color: var(--rosewood); color: var(--ivory); }
 .materialNote { font-size: 11px; line-height: 1.8; color: var(--quiet); min-height: 40px; }
 .sizeLabel { display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 11px; font-weight: 500; margin-top: 22px; }
-.sizeLabel select { background: transparent; border: 1px solid var(--rule); border-radius: 4px; padding: 10px; min-width: 55%; font-size: 11px; }
+.sizeLabel select { background: transparent; border: var(--stroke) solid var(--rule); border-radius: 4px; padding: 10px; min-width: 55%; font-size: 11px; }
 .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
 .swatches button { width: 28px; height: 28px; border: 0; border-radius: 50%; background-size: 300%; background-position: 10% 1%; box-shadow: inset 0 0 0 1px #5d3c4922; }
-.swatches button[aria-pressed="true"] { outline: 1px solid var(--rosewood); outline-offset: 4px; }
-.priceLine { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--rule); padding-top: 20px; margin: 26px 0 18px; gap: 10px; }
+.swatches button[aria-pressed="true"] { outline: var(--stroke) solid var(--rosewood); outline-offset: 4px; }
+.priceLine { display: flex; justify-content: space-between; align-items: center; border-top: var(--stroke) solid var(--rule); padding-top: 20px; margin: 26px 0 18px; gap: 10px; }
 .priceLine strong { font: 300 32px/1 "Rose Gallery Jost", sans-serif; }
 .priceLine span { font-size: 9px; color: var(--quiet); }
 .productCopy > .primary { width: 100%; }
@@ -65,12 +65,12 @@
 .bagDialog { width: min(620px, calc(100% - 40px)); padding-bottom: 30px; }
 .bagDialog h2 { font-size: 30px; }.bagDialog h2 span { font-size: 18px; }
 .bagItems { padding: 10px 26px; }
-.bagItem { display: grid; grid-template-columns: 72px 1fr auto; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--rule); }
+.bagItem { display: grid; grid-template-columns: 72px 1fr auto; gap: 16px; padding: 24px 0; border-bottom: var(--stroke) solid var(--rule); }
 .bagItem > img { width: 72px; height: 100px; object-fit: cover; }
 .bagItem h3 { font-family: "Rose Gallery DM", sans-serif; font-size: 12px; font-weight: 500; }
 .bagItem p { color: var(--quiet); font-size: 10px; margin-top: 4px; }
 .bagItem label { font-size: 9px; margin: 14px 14px 0 0; display: inline-flex; align-items: center; gap: 8px; }
-.bagItem select { font-size: 10px; padding: 4px; border: 1px solid var(--rule); background: transparent; }
+.bagItem select { font-size: 10px; padding: 4px; border: var(--stroke) solid var(--rule); background: transparent; }
 .bagItem strong { font-size: 12px; font-weight: 500; }
 .remove { font-size: 9px !important; border: 0; background: transparent; text-decoration: underline; }
 .subtotal { padding: 20px 26px 10px; display: flex; justify-content: space-between; font-size: 15px; }
@@ -133,7 +133,7 @@
 .printDialog .roomOptions { bottom: 20px; left: 50%; right: auto; transform: translateX(-50%); width: max-content; max-width: calc(100% - 28px); padding: 5px; }
 .printDialog .roomOptions button { min-height: 40px; font-size: 10px; padding: 8px 13px; }
 .printDialog .roomOptions > span { display: none; }
-.printDialog .productCopy { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; border-left: 1px solid var(--rule); }
+.printDialog .productCopy { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; border-left: var(--stroke) solid var(--rule); }
 .productDetails { flex: 1; overflow: auto; padding: 28px 30px 24px; overscroll-behavior: contain; }
 .productDetails h2 { font-size: clamp(30px, 3vw, 42px); margin: 12px 0 24px; }
 .productDetails fieldset { margin: 20px 0; }
@@ -143,11 +143,11 @@
 .productDetails .sizeLabel select { min-height: 44px; font-size: 12px; }
 .productDetails legend { font-size: 12px; }
 .productDetails .swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.productDetails .swatches button { display: grid; justify-items: center; align-content: center; gap: 7px; width: auto; height: auto; min-height: 70px; padding: 8px 4px; border: 1px solid var(--rule); border-radius: 8px; background: transparent; box-shadow: none; font-size: 9px; }
+.productDetails .swatches button { display: grid; justify-items: center; align-content: center; gap: 7px; width: auto; height: auto; min-height: 70px; padding: 8px 4px; border: var(--stroke) solid var(--rule); border-radius: 8px; background: transparent; box-shadow: none; font-size: 9px; }
 .productDetails .swatches button[aria-pressed="true"] { outline: none; border-color: var(--rosewood); background: var(--paper); }
 .frameChip { display: block; width: 30px; height: 24px; border-radius: 3px; background-size: cover; box-shadow: inset 0 0 0 1px #5d3c4922; }
 .productDetails .previewNote { padding-top: 4px; font-size: 10px; line-height: 1.7; }
-.purchaseFooter { flex-shrink: 0; padding: 18px 30px 20px; border-top: 1px solid var(--rule); background: var(--ivory); box-shadow: 0 -8px 20px #5d3c4908; }
+.purchaseFooter { flex-shrink: 0; padding: 18px 30px 20px; border-top: var(--stroke) solid var(--rule); background: var(--ivory); box-shadow: 0 -8px 20px #5d3c4908; }
 .purchaseFooter .priceLine { border: 0; padding: 0; margin: 0 0 14px; }
 .purchaseFooter .priceLine strong { font-size: 32px; }
 .purchaseFooter .primary { width: 100%; }
@@ -160,7 +160,7 @@
   .productWordmark svg { width: 28px; height: 28px; }
   .printDialog .product { display: block; overflow: auto; overscroll-behavior: contain; }
   .printDialog .productVisual { height: clamp(330px, 58dvh, 560px); }
-  .printDialog .productCopy { display: block; min-height: auto; overflow: visible; border-left: 0; border-top: 1px solid var(--rule); }
+  .printDialog .productCopy { display: block; min-height: auto; overflow: visible; border-left: 0; border-top: var(--stroke) solid var(--rule); }
   .productDetails { overflow: visible; padding: 25px; }
   .productDetails h2 { font-size: 36px; }
   .purchaseFooter { padding: 20px 25px 28px; }
@@ -182,7 +182,7 @@
 
 .page .collectionPortfolio { padding-top: 135px; min-height: 100dvh; }
 .optionLabel, .productDetails .sizeLabel { display: grid; justify-content: stretch; gap: 8px; margin-top: 22px; font-size: 12px; font-weight: 500; }
-.optionLabel select, .productDetails .sizeLabel select { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid var(--rule); border-radius: 6px; background: #fff7ef; font-size: 12px; font-weight: 400; }
+.optionLabel select, .productDetails .sizeLabel select { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: var(--stroke) solid var(--rule); border-radius: 6px; background: #fff7ef; font-size: 12px; font-weight: 400; }
 .optionLabel select:disabled { color: var(--quiet); opacity: .65; cursor: default; }
 .optionLabel + .materialNote { margin-top: 12px; }
 
@@ -205,7 +205,7 @@
 @keyframes slideIn { from { transform: translateX(calc(var(--slide-direction) * 100%)); } to { transform: translateX(0); } }
 @keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(calc(var(--slide-direction) * -100%)); } }
 .photoNavigation { position: absolute; inset: 50% 20px auto; z-index: 4; display: flex; justify-content: space-between; pointer-events: none; }
-.photoNavigation button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid #e9c4b6aa; background: #fff1e1eb; color: var(--plum); box-shadow: 0 2px 10px #35242b14; font-size: 20px; pointer-events: auto; }
+.photoNavigation button { width: 44px; height: 44px; border-radius: 50%; border: var(--stroke) solid #e9c4b6aa; background: #fff1e1eb; color: var(--plum); box-shadow: 0 2px 10px #35242b14; font-size: 20px; pointer-events: auto; }
 .photoNavigation button:disabled { opacity: .35; cursor: default; }
 .photoNavigation button:not(:disabled):hover { background: var(--ivory); }
 @media (max-width: 900px) { .page .collectionPortfolio { padding-top: 112px; } }

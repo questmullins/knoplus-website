@@ -1,4 +1,13 @@
 (() => {
+  // Light or dark, shared with the rest of kno.plus: /scheme.js remembers the choice and handles the button.
+  if(!window.knoScheme){const script=document.createElement('script');script.src='/scheme.js';document.head.append(script);}
+  const back=document.querySelector('header a:not(.brand)');
+  if(back){
+    const nav=document.createElement('nav');
+    back.replaceWith(nav);
+    nav.innerHTML='<button type="button" class="scheme-toggle" data-scheme-toggle aria-label="Switch between light and dark mode" title="Light or dark"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M10 2.75a7.25 7.25 0 0 1 0 14.5z" fill="currentColor"/></svg></button>';
+    nav.append(back);
+  }
   const root=document.querySelector('#portal'), message=document.querySelector('#message');
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   let state, resetToken=new URLSearchParams(location.hash.slice(1)).get('reset');
