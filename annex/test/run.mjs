@@ -20,7 +20,7 @@ const check = (name, ok) => { assert.ok(ok, name); console.log("ok  " + name); }
 
 // a fresh start: no account, no sales (the local database only; d1 never touches the real one with --local)
 for (const file of ["annex/schema/shared.sql", "annex/schema/account.sql"]) execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--file", file], { stdio: "pipe" });
-d1(["accounts", "connections", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
+d1(["accounts", "assets", "connections", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
 
 const run = "annex-test-" + Date.now();
 
@@ -109,6 +109,31 @@ const trends = (await api("trends?by=week")).body;
 check("trends by week", trends.now.length >= 4 && trends.now.reduce((s, p) => s + p.sales, 0) === withCost.now.sales);
 const conns = (await api("connections")).body;
 check("connections never show keys", !JSON.stringify(conns).includes("sq-token") && conns.connections.every((c) => c.lastOk));
+
+// the workspace around the sales: assets, websites (Cloudflare and Search Console stand-ins), clients, overview
+const assets = (await api("assets")).body;
+check("assets start with RoseWave, UpDate and client websites", ["rosewave", "update", "websites"].every((id) => assets.assets.some((a) => a.id === id)));
+check("RoseWave's asset carries its 30-day sales", assets.assets.find((a) => a.id === "rosewave").numbers.sales === home.sales.value);
+check("client websites carry client numbers", assets.assets.find((a) => a.id === "websites").numbers.kind === "clients");
+check("asset id checked", (await api("assets", { id: "Bad Id!", name: "x" })).status === 400);
+check("asset link checked", (await api("assets", { id: "shop", name: "Shop", link: "javascript:alert(1)" })).status === 400);
+check("asset added", (await api("assets", { id: "shop", name: "Shop", kind: "store", link: "/store", sort: 5 })).status === 200 && (await api("assets")).body.assets.some((a) => a.id === "shop"));
+check("asset removed", (await api("assets/shop", {}, "DELETE")).status === 200 && !(await api("assets")).body.assets.some((a) => a.id === "shop"));
+const web = (await api("websites?days=7")).body;
+check("Cloudflare: both zones, busiest first", web.connected && web.zones.map((z) => z.name).join() === "kno.plus,example-client.com");
+const kp = web.zones[0];
+check("Cloudflare totals add up: " + JSON.stringify(kp.totals), kp.days.length === 7 && kp.totals.visitors === 7 * 120 + 21 && kp.totals.pageViews === 7 * 300 + 21 && kp.countries[0].name === "US");
+check("websites range checked", (await api("websites?days=5")).status === 400);
+const sc = (await api("search?days=7")).body;
+check("Search Console: the verified property only", sc.connected && sc.sites.length === 1 && sc.sites[0].site === "sc-domain:kno.plus");
+const t = sc.sites[0].totals;
+check("Search Console click-through rate: " + JSON.stringify(t), t.clicks === 7 * 3 + 21 && t.impressions === 700 + 210 && Math.abs(t.ctr - 42 / 910) < 1e-9 && sc.sites[0].queries[0].name === "kno plus");
+check("clients list", Array.isArray((await api("clients")).body.projects));
+const overview = (await api("overview")).body;
+check("overview adds up the assets and the web", overview.sales === home.sales.value && overview.web.connected && overview.web.zones === 2 && overview.assets.length >= 3);
+cookie = client;
+check("a client can't see the workspace", (await api("overview")).status === 403 && (await api("websites")).status === 403 && (await api("assets")).status === 403);
+cookie = admin;
 
 // webhook: refused without the right signature
 check("unsigned webhook refused", (await fetch(BASE.replace("api/", "hooks/square"), { method: "POST", body: "{}" })).status === 404);

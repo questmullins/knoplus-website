@@ -16,12 +16,15 @@ import { siteReport } from "../../server/analytics.js";
 import { CONNECTIONS, accountDb, connectionRows, ensureShared, secretName, syncAccount } from "./sync.js";
 import { bestSellers, costSummary, home, memberSummary, orderList, trends } from "./report.js";
 import { verify } from "./connections/square.js";
+import { websites } from "./insights/cloudflare.js";
+import { search } from "./insights/search.js";
+import { assetsWithNumbers, clientList, saveAsset } from "./workspace.js";
 import { addDays, dayOf, daysBetween, fail, json, readJson, same } from "./util.js";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ID = /^[a-z0-9][a-z0-9-]{0,30}$/;
 const HEADERS = {
-  "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+  "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "same-origin",
   "X-Robots-Tag": "noindex, nofollow, noarchive",
@@ -98,6 +101,7 @@ async function api(request, env, ctx, url) {
     if (request.headers.get("Origin") !== url.origin) return fail("Not allowed", 403);
     if (!(request.headers.get("Content-Type") || "").startsWith("application/json")) return fail("Send JSON", 415);
   }
+  await ensureClientTables(env.CLIENT_DB);
   if (route === "setup" && method === "POST") return setupAdmin(request, env);
   const user = await sessionUser(request, env.CLIENT_DB);
   if (route === "me") {
@@ -121,6 +125,38 @@ async function api(request, env, ctx, url) {
     const days = Number(url.searchParams.get("days") || 28);
     if (![7, 28, 90].includes(days)) return fail("Choose 7, 28, or 90 days.");
     return json(await siteReport(env.CLIENT_DB, days));
+  }
+  const ownDb = (a) => accountDb(env, a);
+  const insightEnv = { ...env, fakeBase: fakeBase(env) };
+  if (method === "GET" && (route === "websites" || route === "search")) {
+    const days = Number(url.searchParams.get("days") || 28);
+    if (![7, 28, 90].includes(days)) return fail("Choose 7, 28, or 90 days.");
+    // Search Console's numbers run about two days behind; Cloudflare's include today.
+    const to = new Date(Date.now() - (route === "search" ? 2 : 0) * 86400e3).toISOString().slice(0, 10);
+    const from = addDays(to, -(days - 1));
+    return json({ from, to, ...(route === "websites" ? await websites(insightEnv, from, to) : await search(insightEnv, from, to)) });
+  }
+  if (route === "assets" && method === "GET") return json({ assets: await assetsWithNumbers(env, ownDb), accounts: (await env.ANNEX.prepare("SELECT id, name FROM accounts ORDER BY name").all()).results });
+  if (route === "assets" && method === "POST") return saveAsset(request, env.ANNEX);
+  if (method === "DELETE" && route.startsWith("assets/")) {
+    await env.ANNEX.prepare("DELETE FROM assets WHERE id = ?").bind(decodeURIComponent(route.slice(7))).run();
+    return json({ ok: true });
+  }
+  if (route === "clients" && method === "GET") return json({ projects: await clientList(env.CLIENT_DB) });
+  if (route === "overview" && method === "GET") {
+    const [assets, site, web] = await Promise.all([
+      assetsWithNumbers(env, ownDb),
+      siteReport(env.CLIENT_DB, 28),
+      websites(insightEnv, addDays(new Date().toISOString().slice(0, 10), -27), new Date().toISOString().slice(0, 10)).catch(() => ({ connected: false, zones: [] })),
+    ]);
+    const money = assets.filter((a) => a.numbers && a.numbers.kind === "sales");
+    const clients = (assets.find((a) => a.numbers && a.numbers.kind === "clients") || {}).numbers || { projects: 0, clients: 0, updates: 0 };
+    return json({
+      sales: money.reduce((s, a) => s + a.numbers.sales, 0), profit: money.reduce((s, a) => s + a.numbers.profit, 0),
+      orders: money.reduce((s, a) => s + a.numbers.orders, 0), clients, assets,
+      site: { pageRequests: site.pageRequests, contacts: site.contacts },
+      web: web.connected ? { connected: true, visitors: web.zones.reduce((s, z) => s + ((z.totals || {}).visitors || 0), 0), pageViews: web.zones.reduce((s, z) => s + ((z.totals || {}).pageViews || 0), 0), zones: web.zones.length } : { connected: false },
+    });
   }
   const db = await accountDb(env, account);
   const { from, to } = range(url, account.tz);
@@ -181,6 +217,9 @@ async function setupAdmin(request, env) {
   return json({ ok: true }, 200, { "Set-Cookie": cookie(token) });
 }
 
+// test stand-ins (see sync.js): only ever a local address
+const fakeBase = (env) => (/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/.test(env.ANNEX_FAKE_APIS || "") ? env.ANNEX_FAKE_APIS.replace(/\/+$/, "") : "");
+
 const validZone = (tz) => {
   try {
     return typeof tz === "string" && !!new Intl.DateTimeFormat("en", { timeZone: tz });
@@ -231,6 +270,7 @@ async function configure(request, db, id) {
 async function connectionStatus(env, account, db, url) {
   const rows = await connectionRows(db);
   return {
+    insights: { cloudflare: !!env.CLOUDFLARE_API_TOKEN, google: !!env.GOOGLE_SERVICE_ACCOUNT },
     hook: url.origin + "/annex/hooks/square" + (account.id === (env.ANNEX_ACCOUNT || "rosewave") ? "" : "?account=" + account.id),
     connections: CONNECTIONS.map((c) => {
       const row = rows.get(c.about.id) || { config: {} };

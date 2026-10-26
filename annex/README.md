@@ -1,14 +1,19 @@
 # Annex
 
 Quest's dashboard at `kno.plus/annex`, part of the kno.plus Worker (`worker.js` hands it every `/annex` request). It
-needs the kno.plus administrator sign-in (the same account `/clients` uses) and shows:
+needs the kno.plus administrator sign-in (the same account `/clients` uses) and is styled like the rest of kno.plus
+(the sidebar of the old manage page). Its pages:
 
-- **Sales** for each connected seller account (RoseWave first): Sales and Profit for the chosen dates against the days
-  before, orders, average order, active members, refunds, and how profit is worked out. **Orders, Best sellers,
-  Members, Costs and margin, Trends**, and **Settings** (name, time zone, colors, connections).
-- **Website**: kno.plus page requests by day, top pages, where visitors came from and contact messages, counted by the
-  Worker without keeping who anyone is (`server/analytics.js`).
-- Links to **Clients** (`/clients`, projects, updates and access) and back to kno.plus.
+- **Overview**: the last 30 days of sales and profit across every asset, website visitors, client projects, and a card
+  for each asset.
+- **Assets**: the money-making areas (RoseWave, UpDate and client websites to start; add more on the page). An asset
+  with a sales account opens to its **Sales, Orders, Best sellers, Members, Costs and margin, Trends** and
+  **Connections**; the client websites asset lists the client projects.
+- **Websites**: traffic for every site on the Cloudflare account (visitors, page views, requests, threats, countries),
+  Google Search Console (clicks, impressions, click-through rate, position, top searches and pages), and kno.plus page
+  counts kept by the Worker without keeping who anyone is (`server/analytics.js`).
+- **Clients**: each client project, who can see it, and its latest update (managed at `/clients`).
+- **Settings**: which connections are on.
 
 It installs on a phone as a web app (Add to Home Screen). The page is `nextjs-elements/public/annex/`; the server is
 `annex/src/`.
@@ -37,6 +42,8 @@ dashboard only reads those.
 | Square | Every payment and the fee kept, refunds, subscriptions, chargebacks; sales Square takes on its own (in person) | `ROSEWAVE_SQUARE_TOKEN`, `ROSEWAVE_SQUARE_SIGNATURE` |
 | Prodigi | What the lab invoiced per order, print and shipping apart | `ROSEWAVE_PRODIGI_KEY` (and `ROSEWAVE_PRODIGI_SANDBOX` to see sandbox orders as tests) |
 
+| Cloudflare traffic (Websites) | Every zone's requests, page views, unique visitors, data, threats, countries | `CLOUDFLARE_API_TOKEN`: My Profile › API Tokens › Create Token, with Zone › Zone › Read and Zone › Analytics › Read for all zones |
+| Google Search Console (Websites) | Clicks, impressions, click-through rate, position, top searches and pages | `GOOGLE_SERVICE_ACCOUNT`: a Google Cloud service account's JSON key, with the Search Console API turned on; add its email as a user on each property |
 Keys are Worker secrets and are never stored anywhere else or shown on the page.
 
 ## Turning it on
@@ -68,7 +75,8 @@ From the repository root, with `.dev.vars` copied from `annex/.dev.vars.example`
 ```bash
 npm install --ignore-scripts && npm run build
 node node_modules/wrangler/bin/wrangler.js d1 execute knoplus-clients --local --file server/client-schema.sql
-node annex/test/fakes.mjs ../rosewave/cloud/worker.js &   # stand-ins for RoseWave, Square and Prodigi
+node annex/test/google-key.mjs >> .dev.vars                 # a throwaway key for the Search Console stand-in
+node annex/test/fakes.mjs ../rosewave/cloud/worker.js &   # stand-ins for RoseWave, Square, Prodigi, Cloudflare and Google
 node node_modules/wrangler/bin/wrangler.js dev --port 8787
 node annex/test/run.mjs                                    # signs in, pulls, and checks every number by hand
 ```

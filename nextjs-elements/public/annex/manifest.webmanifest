@@ -5,8 +5,8 @@
   "start_url": "/annex/",
   "scope": "/annex/",
   "display": "standalone",
-  "background_color": "#f6f2ef",
-  "theme_color": "#f6f2ef",
+  "background_color": "#080a0a",
+  "theme_color": "#080a0a",
   "icons": [
     { "src": "/annex/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/annex/icon-512.png", "sizes": "512x512", "type": "image/png" },

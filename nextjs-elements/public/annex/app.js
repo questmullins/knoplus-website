@@ -1,8 +1,9 @@
-// Annex's dashboard: one page, drawn from /annex/api. Text from the server is always set as text, never as HTML.
+// Annex: Quest's Kno.plus workspace. One page, drawn from /annex/api. Text from the server is always set as text,
+// never as HTML.
 const API = "/annex/api/";
 const app = document.getElementById("app");
 const tip = document.getElementById("tip");
-const state = { me: null, tab: "home", range: loadRange(), data: null };
+const state = { me: null, page: "overview", asset: null, account: "", acct: null, tab: "home", range: loadRange(), data: null, days: recall("annex-days") || "28" };
 
 // ---------- small helpers ----------
 function h(tag, props = {}, ...kids) {
@@ -23,15 +24,18 @@ const money = (c, sign) => {
 };
 const pct = (x) => (x === null || x === undefined ? "–" : (x * 100).toFixed(Math.abs(x) < 0.1 ? 1 : 0) + "%");
 const plural = (n, one, many = one + "s") => n + " " + (n === 1 ? one : many);
+// Workspace routes are about everything; the rest are about the open asset's sales account.
+const WORKSPACE = /^(me|site|websites|search|assets|clients|overview|setup)\b/;
+const scoped = (path) => (state.account && !WORKSPACE.test(path) ? path + (path.includes("?") ? "&" : "?") + "account=" + encodeURIComponent(state.account) : path);
 async function get(path) {
-  const r = await fetch(API + path, { credentials: "same-origin" });
+  const r = await fetch(API + scoped(path), { credentials: "same-origin" });
   const body = await r.json().catch(() => ({}));
   if (r.status === 401) { state.me.user = null; render(); throw new Error("signed out"); }
   if (!r.ok) throw new Error(body.error || "Something went wrong");
   return body;
 }
 async function send(path, body, method = "POST") {
-  const r = await fetch(API + path, { method, credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  const r = await fetch(API + scoped(path), { method, credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
   const said = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(said.error || "Something went wrong");
   return said;
@@ -41,7 +45,7 @@ function recall(key) { try { return JSON.parse(localStorage.getItem(key) || "nul
 function loadRange() { return recall("annex-range") || { preset: "30" }; }
 
 // ---------- days, in the account's own time zone ----------
-const tz = () => (state.me && state.me.account.tz) || Intl.DateTimeFormat().resolvedOptions().timeZone;
+const tz = () => (state.acct && state.acct.tz) || (state.me && state.me.account && state.me.account.tz) || Intl.DateTimeFormat().resolvedOptions().timeZone;
 const todayIn = (zone) => new Intl.DateTimeFormat("en-CA", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const addDays = (d, n) => new Date(Date.parse(d + "T00:00:00Z") + n * 86400e3).toISOString().slice(0, 10);
 const PRESETS = [["30", "Last 30 days"], ["today", "Today"], ["week", "This week"], ["month", "This month"], ["year", "This year"], ["90", "Last 90 days"], ["custom", "Custom"]];
@@ -63,17 +67,6 @@ const ago = (iso) => {
   return m < 1 ? "just now" : m < 60 ? plural(m, "minute") + " ago" : m < 1440 ? plural(Math.round(m / 60), "hour") + " ago" : plural(Math.round(m / 1440), "day") + " ago";
 };
 
-// ---------- the account's colors ----------
-function applyBrand() {
-  const colors = (state.me.account.brand || {}).colors || {};
-  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-  for (const k of ["ink", "accent", "surface", "page"]) {
-    // in dark mode only the accent carries over; the rest would be unreadable
-    if (colors[k] && (!dark || k === "accent")) document.documentElement.style.setProperty("--" + k, colors[k]);
-    else document.documentElement.style.removeProperty("--" + k);
-  }
-  document.title = (state.me.account.name || "Annex") + " · Annex";
-}
 
 // ---------- start ----------
 async function boot() {
@@ -84,28 +77,36 @@ async function boot() {
     return;
   }
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/annex/sw.js", { scope: "/annex/" }).catch(() => {});
-  addEventListener("hashchange", () => { state.tab = location.hash.slice(1) || "home"; render(); });
+  addEventListener("hashchange", route);
   let wait;
   addEventListener("resize", () => { clearTimeout(wait); wait = setTimeout(() => state.data && draw(), 150); });
-  state.tab = location.hash.slice(1) || "home";
-  render();
+  route();
 }
 
-function render() {
-  if (!state.me.user && state.me.setup && (state.me.firstAdmin || location.hash === "#setup")) return setupView();
-  if (!state.me.user && state.me.setupCodeMissing) return gate("Set up Annex", "Annex has no administrator yet. Add a Worker secret named ANNEX_SETUP_CODE (12 or more characters) to knoplus-website in Cloudflare, then reload this page.", null);
-  if (!state.me.user) return gate("Annex", "Sign in with your kno.plus administrator account to see your work, your website and your sales.",
-    h("div", { class: "stack" }, h("a", { class: "primary", href: state.me.signIn || "/clients/?next=/annex/", text: "Sign in" }),
-      state.me.setup ? h("a", { href: "#setup", text: "Use your setup code to make or reset your sign-in" }) : null));
-  if (state.me.user.role !== "owner") return gate("Annex", "Annex is for the kno.plus administrator. Your projects are on your client page.",
-    h("a", { class: "primary", href: "/clients/", text: "Go to your projects" }));
-  applyBrand();
+// #overview, #assets, #asset/<id>/<tab>, #websites, #clients, #settings
+const PAGES = [["overview", "Overview"], ["assets", "Assets"], ["websites", "Websites"], ["clients", "Clients"], ["settings", "Settings"]];
+async function route() {
+  const me = state.me;
+  if (!me.user && me.setup && (me.firstAdmin || location.hash === "#setup")) return setupView();
+  if (!me.user && me.setupCodeMissing) return gate("Set up Annex", "Annex has no administrator yet. Add a Worker secret named ANNEX_SETUP_CODE (12 or more characters) to knoplus-website in Cloudflare, then reload this page.", null);
+  if (!me.user) return gate("Annex", "Sign in with your kno.plus administrator account to see your work, your websites and your sales.",
+    h("div", { class: "stack" }, h("a", { class: "button", href: me.signIn || "/clients/?next=/annex/", text: "Sign in" }),
+      me.setup ? h("a", { class: "text-link", href: "#setup", text: "Use your setup code to make or reset your sign-in" }) : null));
+  if (me.user.role !== "owner") return gate("Annex", "Annex is for the kno.plus administrator. Your projects are on your client page.",
+    h("a", { class: "button", href: "/clients/", text: "Go to your projects" }));
+  const [page, id, tab] = location.hash.slice(1).split("/");
+  state.page = PAGES.some(([p]) => p === page) || page === "asset" ? page : "overview";
+  state.asset = state.page === "asset" ? id : null;
+  state.tab = tab || "home";
+  state.account = "";
+  state.acct = null;
   shell();
+  if (state.page === "asset") await openAsset();
   load();
 }
 
 function gate(title, words, action) {
-  app.replaceChildren(h("section", { class: "gate" }, h("h1", { text: title }), h("p", { text: words }), action));
+  app.replaceChildren(h("section", { class: "gate" }, h("div", { class: "brand", text: "KNOPLUS" }), h("h1", { text: title }), h("p", { text: words }), action));
 }
 
 function setupView() {
@@ -115,61 +116,275 @@ function setupView() {
     const f = new FormData(e.target);
     try {
       await send("setup", { code: f.get("code"), email: f.get("email"), password: f.get("password") });
+      location.hash = "";
       location.reload();
     } catch (err) { error.textContent = err.message; }
   } },
     h("label", {}, "Setup code (the ANNEX_SETUP_CODE secret)", h("input", { name: "code", type: "password", required: true, autocomplete: "off" })),
     h("label", {}, "Your email", h("input", { name: "email", type: "email", required: true, autocomplete: "email" })),
     h("label", {}, "Password (12 or more characters)", h("input", { name: "password", type: "password", required: true, minlength: "12", autocomplete: "new-password" })),
-    error, h("button", { class: "primary", type: "submit", text: "Create my sign-in" }));
+    error, h("button", { class: "button", type: "submit", text: "Create my sign-in" }));
   gate("Set up Annex", "Create the kno.plus administrator sign-in, or give an existing one a new password. It works here and at kno.plus/clients. Delete the ANNEX_SETUP_CODE secret afterwards if you want this form gone.", form);
 }
 
-// ---------- the frame: name, date range, tabs ----------
-const TABS = [["home", "Sales"], ["site", "Website"], ["orders", "Orders"], ["best", "Best sellers"], ["members", "Members"], ["costs", "Costs and margin"], ["trends", "Trends"], ["settings", "Settings"]];
+// ---------- the frame: the Kno.plus sidebar and the page ----------
 function shell() {
-  const owner = state.me.user.role === "owner";
-  const tabs = TABS.filter(([id]) => id !== "settings" || owner);
-  if (!tabs.some(([id]) => id === state.tab)) state.tab = "home";
-  const preset = h("select", { "aria-label": "Date range", onchange: (e) => { state.range = { ...state.range, preset: e.target.value }; if (e.target.value === "custom") { const d = rangeDays(); state.range.from = state.range.from || d.from; state.range.to = state.range.to || d.to; } store("annex-range", state.range); render(); } },
-    PRESETS.map(([v, t]) => h("option", { value: v, selected: state.range.preset === v, text: t })));
-  const custom = state.range.preset === "custom" ? [
-    h("input", { type: "date", "aria-label": "From", value: rangeDays().from, onchange: (e) => { state.range.from = e.target.value; store("annex-range", state.range); load(); } }),
-    h("input", { type: "date", "aria-label": "To", value: rangeDays().to, onchange: (e) => { state.range.to = e.target.value; store("annex-range", state.range); load(); } }),
-  ] : [];
+  const open = (on) => {
+    document.body.classList.toggle("menu-open", on);
+    toggle.setAttribute("aria-expanded", String(on));
+    toggle.replaceChildren("Workspace ", h("span", { "aria-hidden": "true", text: on ? "×" : "+" }));
+  };
+  const toggle = h("button", { class: "menu-toggle", "aria-expanded": "false", "aria-controls": "sidebar", onclick: () => open(!document.body.classList.contains("menu-open")) }, "Workspace ", h("span", { "aria-hidden": "true", text: "+" }));
+  const current = state.page === "asset" ? "assets" : state.page;
+  const nav = h("nav", { "aria-label": "Workspace" }, h("div", { class: "nav-label", text: "Workspace" }),
+    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, onclick: () => open(false) }, name, h("span", { class: "nav-plus", "aria-hidden": "true" }))));
+  const signOut = h("button", { class: "text-link", text: "Sign out", onclick: async () => {
+    await fetch("/api/clients/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" });
+    location.reload();
+  } });
+  document.body.classList.remove("menu-open");
   app.replaceChildren(
-    h("header", { class: "top" },
-      h("div", { class: "bar" }, h("span", { class: "mark", "aria-hidden": "true" }), h("h1", { text: state.tab === "site" ? "kno.plus" : state.me.account.name })),
-      state.tab === "settings" ? null : state.tab === "site" ? h("div", { class: "range" }, siteRange()) : h("div", { class: "range" }, preset, custom),
-      h("nav", { class: "tabs", "aria-label": "Sections" }, tabs.map(([id, t]) => h("a", { href: "#" + id, "aria-current": state.tab === id ? "page" : null, text: t })),
-        h("a", { href: "/clients/", text: "Clients ↗" }), h("a", { href: "/", text: "kno.plus ↗" }))),
-    h("section", { class: "view", id: "view" }, h("p", { class: "loading", text: "Loading…" })));
+    h("div", { class: "mobile-bar" }, h("a", { class: "brand", href: "/", text: "KNOPLUS" }), toggle),
+    h("aside", { id: "sidebar" }, h("a", { class: "brand", href: "/", text: "KNOPLUS" }), nav,
+      h("div", { class: "aside-bottom" }, h("div", { class: "motto" }, "Know More.", h("br"), "Know Better.", h("br"), "Knoplus."),
+        h("p", { class: "small", text: state.me.user.email }), h("div", { class: "row" }, h("a", { class: "text-link", href: "/", text: "kno.plus ↗" }), signOut))),
+    h("main", {}, h("header", { class: "crumbs" }, h("span", { id: "crumb", text: crumb() }), h("span", { class: "identity" }, "Owner", h("i"))),
+      h("section", { class: "view", id: "view" }, h("p", { class: "loading", text: "Loading…" }))));
+}
+function crumb() {
+  if (state.page === "asset") return "YOUR WORK / ASSETS / " + String(state.asset).toUpperCase();
+  return "YOUR WORK / " + state.page.toUpperCase();
+}
+function intro(eyebrow, title, text, action) {
+  return h("div", { class: "intro" }, h("div", {}, h("span", { class: "eyebrow", text: eyebrow }), h("h1", { text: title }), text ? h("p", { text }) : null), action || null);
+}
+
+// ---------- loading a page ----------
+const SALES_TABS = [["home", "Sales"], ["orders", "Orders"], ["best", "Best sellers"], ["members", "Members"], ["costs", "Costs and margin"], ["trends", "Trends"], ["settings", "Connections"]];
+async function openAsset() {
+  const list = await get("assets").catch(() => ({ assets: [] }));
+  state.assetRow = list.assets.find((a) => a.id === state.asset) || null;
+  state.accounts = list.accounts || [];
+  if (state.assetRow && state.assetRow.account) {
+    state.account = state.assetRow.account;
+    state.acct = (await get("me?account=" + encodeURIComponent(state.account)).catch(() => ({}))).account || null;
+  }
 }
 
 async function load() {
   const view = document.getElementById("view");
-  const tab = state.tab;
+  const page = state.page, tab = state.tab, asset = state.asset;
   try {
-    const q = rangeQuery();
-    const path = { home: "home?" + q, orders: "orders?" + q, best: "best?" + q, members: "members?" + q, costs: "costs?" + q, trends: "trends?" + q + "&by=" + (state.by || "day"), settings: "connections", site: "site?days=" + (state.siteDays || "28") }[tab];
-    const data = await get(path);
-    if (tab !== state.tab) return;
-    state.data = data;
-    state.dataTab = tab;
-    draw();
+    let path;
+    if (page === "overview") path = "overview";
+    else if (page === "assets") path = "assets";
+    else if (page === "clients") path = "clients";
+    else if (page === "settings") path = "connections";
+    else if (page === "websites") {
+      const days = state.days;
+      const [web, searchData, site] = await Promise.all([get("websites?days=" + days), get("search?days=" + days), get("site?days=" + days)]);
+      return done({ web, search: searchData, site });
+    } else if (page === "asset") {
+      if (!state.assetRow) return view.replaceChildren(h("p", { class: "empty", text: "There's no asset called " + asset + "." }));
+      if (!state.account) return done(asset === "websites" ? await get("clients") : null);
+      const q = rangeQuery();
+      path = { home: "home?" + q, orders: "orders?" + q, best: "best?" + q, members: "members?" + q, costs: "costs?" + q, trends: "trends?" + q + "&by=" + (state.by || "day"), settings: "connections" }[tab] || "home?" + q;
+    }
+    done(await get(path));
   } catch (err) {
     if (err.message !== "signed out") view.replaceChildren(h("p", { class: "empty", text: err.message }));
+  }
+  function done(data) {
+    if (page !== state.page || tab !== state.tab || asset !== state.asset) return;
+    state.data = data;
+    draw();
   }
 }
 
 function draw() {
   const view = document.getElementById("view");
   tip.hidden = true;
-  if (!view || state.dataTab !== state.tab) return;
-  const views = { site: siteView, home: homeView, orders: ordersView, best: bestView, members: membersView, costs: costsView, trends: trendsView, settings: settingsView };
-  view.replaceChildren(...[].concat(views[state.tab](state.data)));
+  if (!view) return;
+  const pages = { overview: overviewView, assets: assetsView, websites: websitesView, clients: clientsView, settings: workspaceSettingsView, asset: assetView };
+  view.replaceChildren(...[].concat(pages[state.page](state.data)));
 }
 
+// ---------- Overview ----------
+const count = (n) => Number(n || 0).toLocaleString("en-US");
+function metric(name, value, note) {
+  return h("div", { class: "metric" }, h("span", { text: name }), h("strong", { text: value }), note ? h("small", { text: note }) : null);
+}
+function overviewView(d) {
+  const web = d.web.connected ? metric("Website visitors", count(d.web.visitors), `Last 28 days · ${plural(d.web.zones, "site")} on Cloudflare`)
+    : metric("kno.plus page views", count(d.site.pageRequests), "Last 28 days · connect Cloudflare in Settings for every site");
+  return [
+    intro("A little clarity", "Everything, in motion.", "Your money-making areas, your websites and your clients, in one place."),
+    h("div", { class: "metric-grid" },
+      metric("Sales", money(d.sales), "Last 30 days, every connected asset"),
+      metric("Profit", money(d.profit), plural(d.orders, "order")),
+      web,
+      metric("Client projects", count(d.clients.projects), `${plural(d.clients.clients, "client")} · ${plural(d.clients.updates, "update")} this month`)),
+    h("div", { class: "toolbar" }, h("h2", { text: "Your assets" }), h("a", { class: "text-link", href: "#assets", text: "Manage assets ↗" })),
+    h("div", { class: "projects" }, d.assets.map(assetCard)),
+  ];
+}
+
+// ---------- Assets ----------
+const KIND = { store: "STORE", app: "APP", service: "SERVICE", tool: "TOOL" };
+function assetCard(a) {
+  const n = a.numbers;
+  const figure = !n ? h("span", { class: "small", text: "No money connected yet" })
+    : n.kind === "sales" ? h("div", { class: "figure" }, h("strong", { text: money(n.sales) }), h("span", { class: "small", text: `30 days · profit ${money(n.profit)} · ${plural(n.orders, "order")}` }))
+      : h("div", { class: "figure" }, h("strong", { text: plural(n.projects, "project") }), h("span", { class: "small", text: `${plural(n.clients, "client")} · ${plural(n.updates, "update")} this month` }));
+  const card = h("a", { class: "project", href: "#asset/" + a.id },
+    h("div", {}, h("span", { class: "eyebrow", text: KIND[a.kind] || "ASSET" }), h("h3", { text: a.name }), h("p", { text: a.note })),
+    h("div", { class: "project-right" }, figure, a.status ? h("span", { class: "pill", text: a.status }) : null, h("span", { class: "arrow", "aria-hidden": "true", text: "↗" })));
+  card.style.setProperty("--tone", a.tone);
+  if (a.image) card.style.setProperty("--image", `url("${a.image.replace(/["\\]/g, "")}")`);
+  return card;
+}
+function assetsView(d) {
+  const form = assetForm(null, d.accounts);
+  form.hidden = true;
+  return [
+    intro("Your assets", "What brings money in.", "Apps, stores, tools and services. Open one to see its sales, its connections and its clients.",
+      h("button", { class: "button", text: "Add an asset", onclick: () => { form.hidden = !form.hidden; } })),
+    form,
+    h("div", { class: "projects" }, d.assets.map(assetCard)),
+  ];
+}
+function assetForm(a, accounts) {
+  const error = h("p", { class: "error", role: "alert" });
+  const v = a || { id: "", name: "", kind: "app", status: "", account: "", link: "", image: "", tone: "#85cfc0", note: "", sort: 10 };
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try { await send("assets", { ...f, id: a ? a.id : f.id }); route(); } catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: a ? "Edit " + a.name : "Add an asset" }),
+    h("div", { class: "split" },
+      a ? null : h("label", {}, "Short id (letters, numbers, dashes)", h("input", { name: "id", required: true, pattern: "[a-z0-9][a-z0-9-]{0,30}", value: v.id })),
+      h("label", {}, "Name", h("input", { name: "name", required: true, value: v.name })),
+      h("label", {}, "Kind", h("select", { name: "kind" }, Object.keys(KIND).map((k) => h("option", { value: k, selected: v.kind === k, text: k[0].toUpperCase() + k.slice(1) })))),
+      h("label", {}, "Status", h("input", { name: "status", value: v.status, placeholder: "Selling, In development…" })),
+      h("label", {}, "Sales from", h("select", { name: "account" }, h("option", { value: "", text: "Not connected" }), (accounts || []).map((c) => h("option", { value: c.id, selected: v.account === c.id, text: c.name })))),
+      h("label", {}, "Link", h("input", { name: "link", value: v.link, placeholder: "/work/update" })),
+      h("label", {}, "Picture", h("input", { name: "image", value: v.image, placeholder: "/revamp/banners/update.webp" })),
+      h("label", {}, "Color", h("input", { name: "tone", type: "color", value: v.tone })),
+      h("label", {}, "Order on the page", h("input", { name: "sort", type: "number", min: "0", max: "999", value: String(v.sort) }))),
+    h("label", {}, "One line about it", h("input", { name: "note", value: v.note, maxlength: "160" })),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Save" }),
+      a ? h("button", { class: "button secondary", type: "button", text: "Remove asset", onclick: async () => { if (confirm("Remove " + a.name + " from Annex? Its sales stay.")) { await send("assets/" + encodeURIComponent(a.id), {}, "DELETE"); location.hash = "#assets"; } } }) : null));
+}
+
+function assetView(d) {
+  const a = state.assetRow;
+  const edit = assetForm(a, state.accounts);
+  edit.hidden = true;
+  const head = [
+    h("a", { class: "back", href: "#assets", text: "← All assets" }),
+    intro(KIND[a.kind] || "ASSET", a.name, a.note, h("div", { class: "row" },
+      a.link ? h("a", { class: "button secondary", href: a.link, text: "Open ↗" }) : null,
+      h("button", { class: "button secondary", text: "Edit", onclick: () => { edit.hidden = !edit.hidden; } }))),
+    edit,
+  ];
+  if (state.account) {
+    const preset = h("select", { "aria-label": "Date range", onchange: (e) => { state.range = { ...state.range, preset: e.target.value }; if (e.target.value === "custom") { const r = rangeDays(); state.range.from = state.range.from || r.from; state.range.to = state.range.to || r.to; } store("annex-range", state.range); route(); } },
+      PRESETS.map(([v, t]) => h("option", { value: v, selected: state.range.preset === v, text: t })));
+    const custom = state.range.preset === "custom" ? [
+      h("input", { type: "date", "aria-label": "From", value: rangeDays().from, onchange: (e) => { state.range.from = e.target.value; store("annex-range", state.range); load(); } }),
+      h("input", { type: "date", "aria-label": "To", value: rangeDays().to, onchange: (e) => { state.range.to = e.target.value; store("annex-range", state.range); load(); } }),
+    ] : [];
+    const tabs = h("nav", { class: "tabs", "aria-label": a.name + " sections" }, SALES_TABS.map(([id, t]) => h("a", { href: `#asset/${a.id}/${id}`, "aria-current": state.tab === id ? "page" : null, text: t })));
+    const views = { home: homeView, orders: ordersView, best: bestView, members: membersView, costs: costsView, trends: trendsView, settings: settingsView };
+    return [...head, tabs, state.tab === "settings" ? null : h("div", { class: "range" }, preset, custom), ...[].concat((views[state.tab] || homeView)(d))];
+  }
+  if (a.id === "websites") return [...head, ...clientsBody(d)];
+  return [...head, h("div", { class: "panel" }, h("h2", { text: "No sales connected yet" }),
+    h("p", { text: "When " + a.name + " starts taking money, connect its sales account under Edit › Sales from. Until then this is a place to keep its status and link." }))];
+}
+
+// ---------- Websites ----------
+const bytes = (n) => (n >= 1e9 ? (n / 1e9).toFixed(1) + " GB" : n >= 1e6 ? (n / 1e6).toFixed(1) + " MB" : Math.round(n / 1e3) + " kB");
+const rate = (x) => (x === null || x === undefined ? "–" : (x * 100).toFixed(1) + "%");
+function daysPicker() {
+  return h("select", { "aria-label": "Period", onchange: (e) => { state.days = e.target.value; store("annex-days", state.days); load(); } },
+    ["7", "28", "90"].map((v) => h("option", { value: v, selected: state.days === v, text: "Last " + v + " days" })));
+}
+function list(title, rows, columns) {
+  return h("div", { class: "panel scroll" }, h("h2", { text: title }), rows.length ? h("table", { class: "table" },
+    h("thead", {}, h("tr", {}, columns.map(([t], i) => h("th", { class: i ? "n" : null, text: t })))),
+    h("tbody", {}, rows.map((r) => h("tr", {}, columns.map(([, f], i) => h("td", { class: i ? "n" : null, text: f(r) }))))))
+    : h("p", { class: "note", text: "Nothing in these days yet." }));
+}
+function websitesView(d) {
+  const { web, search: sc, site } = d;
+  const out = [intro("How your websites are doing", "Seen, searched, visited.", "Traffic from Cloudflare for every site on your account, and how often people click you in Google.", daysPicker())];
+
+  out.push(h("h2", { class: "section", text: "Traffic · Cloudflare" }));
+  if (!web.connected) out.push(h("div", { class: "panel" }, h("p", { text: "Connect Cloudflare to see every site's visitors, page views and countries. In Cloudflare: My Profile › API Tokens › Create Token, with Zone › Zone › Read and Zone › Analytics › Read for all zones. Add it to knoplus-website as the Worker secret CLOUDFLARE_API_TOKEN." })));
+  else if (web.error) out.push(h("p", { class: "error", text: web.error }));
+  for (const z of web.zones || []) {
+    if (!z.totals) continue;
+    out.push(h("div", { class: "panel" },
+      h("div", { class: "panel-heading" }, h("h2", { text: z.name }), h("a", { class: "text-link", href: "https://" + z.name, text: "Visit ↗" })),
+      h("div", { class: "metric-grid" }, metric("Visitors", count(z.totals.visitors), "Daily unique visitors, added up"), metric("Page views", count(z.totals.pageViews)), metric("Requests", count(z.totals.requests), bytes(z.totals.bytes) + " served"), metric("Threats stopped", count(z.totals.threats))),
+      lineChart({ label: z.name + " visitors and page views by day", axis: true, format: count, series: [
+        { name: "Visitors", color: "var(--series-1)", values: z.days.map((p) => ({ key: p.day, value: p.visitors })) },
+        { name: "Page views", color: "var(--series-2)", dash: "dash", values: z.days.map((p) => ({ key: p.day, value: p.pageViews })) }] }),
+      z.countries.length ? h("p", { class: "note", text: "Most requests from: " + z.countries.map((c) => c.name + " " + count(c.count)).join(" · ") }) : null));
+  }
+
+  out.push(h("h2", { class: "section", text: "Search · Google Search Console" }));
+  if (!sc.connected) out.push(h("div", { class: "panel" }, h("p", { text: "Connect Search Console to see clicks, impressions and click-through rate. In Google Cloud: create a project, turn on the Search Console API, make a service account and download its JSON key. Add the key to knoplus-website as the Worker secret GOOGLE_SERVICE_ACCOUNT, then add the service account's email as a user on each Search Console property." })));
+  else if (sc.error) out.push(h("p", { class: "error", text: sc.error }));
+  else if (!sc.sites.length) out.push(h("div", { class: "panel" }, h("p", { text: "Connected, but no properties yet. Add " + sc.serviceEmail + " as a user on each property in Search Console." })));
+  for (const s of sc.sites || []) {
+    out.push(h("div", { class: "panel" },
+      h("div", { class: "panel-heading" }, h("h2", { text: s.site.replace(/^sc-domain:/, "") }), h("span", { class: "small", text: sc.from + " to " + sc.to })),
+      h("div", { class: "metric-grid" }, metric("Clicks", count(s.totals.clicks)), metric("Impressions", count(s.totals.impressions)), metric("Click-through rate", rate(s.totals.ctr)), metric("Average position", s.totals.position ? s.totals.position.toFixed(1) : "–")),
+      lineChart({ label: "Clicks and impressions by day", axis: true, format: count, series: [
+        { name: "Impressions", color: "var(--series-1)", values: s.days.map((p) => ({ key: p.day, value: p.impressions })) },
+        { name: "Clicks", color: "var(--series-2)", dash: "dash", values: s.days.map((p) => ({ key: p.day, value: p.clicks })) }] }),
+      h("div", { class: "split" },
+        list("Top searches", s.queries, [["Search", (r) => r.name], ["Clicks", (r) => count(r.clicks)], ["CTR", (r) => rate(r.ctr)], ["Position", (r) => r.position.toFixed(1)]]),
+        list("Top pages", s.pages, [["Page", (r) => r.name.replace(/^https?:\/\/[^/]+/, "") || "/"], ["Clicks", (r) => count(r.clicks)], ["CTR", (r) => rate(r.ctr)], ["Position", (r) => r.position.toFixed(1)]]))));
+  }
+
+  out.push(h("h2", { class: "section", text: "kno.plus pages · counted here" }));
+  const shown = site.series.filter((p) => p.count !== null);
+  out.push(h("div", { class: "metric-grid" }, metric("Page views", count(site.pageRequests)), metric("Contact messages", count(site.contacts)), metric("Busiest day", count(Math.max(0, ...shown.map((p) => p.count)))), metric("Counting since", prettyDay(site.started.slice(0, 10)))),
+    h("div", { class: "split" }, list("Top pages", site.pages, [["Page", (r) => r.name], ["Views", (r) => count(r.count)]]), list("Where visitors came from", site.sources, [["Source", (r) => r.name], ["Views", (r) => count(r.count)]])),
+    h("p", { class: "note", text: "Counted by kno.plus itself without keeping who anyone is: public pages only, no bots, no addresses or query strings." }));
+  return out;
+}
+
+// ---------- Clients ----------
+function clientsBody(d) {
+  if (!d.projects.length) return [h("div", { class: "panel" }, h("p", { text: "No client projects yet. Add one on the client page." }))];
+  return [h("div", { class: "projects" }, d.projects.map((p) => h("a", { class: "project plain", href: "/clients/" },
+    h("div", {}, h("span", { class: "eyebrow", text: p.trial ? "WEBSITE · TRIAL ONLINE" : "WEBSITE" }), h("h3", { text: p.name }),
+      h("p", { text: p.clients.length ? p.clients.map((c) => c.email + (c.disabled ? " (off)" : "")).join(", ") : "No client access yet" })),
+    h("div", { class: "project-right" }, h("div", { class: "figure" }, h("strong", { text: plural(p.updates, "update") }),
+      h("span", { class: "small", text: p.latest ? "Latest: " + p.latest.title + " · " + prettyDay(new Date(p.latest.created).toISOString().slice(0, 10)) : "No updates yet" })),
+      h("span", { class: "arrow", "aria-hidden": "true", text: "↗" })))))];
+}
+function clientsView(d) {
+  return [intro("Your clients", "The work, together.", "Each client project, who can see it, and the latest update you posted.", h("a", { class: "button", href: "/clients/", text: "Manage clients ↗" })), ...clientsBody(d)];
+}
+
+// ---------- Settings ----------
+function workspaceSettingsView(d) {
+  const row = (name, on, how) => h("div", { class: "row line" }, h("div", { class: "grow" }, h("strong", { text: name }), h("p", { class: "small", text: how })), h("span", { class: "pill" + (on ? "" : " bad"), text: on ? "Connected" : "Not connected" }));
+  return [
+    intro("Settings", "Connections.", "Where Annex gets its numbers. Keys live in Cloudflare as Worker secrets, never on this page."),
+    h("div", { class: "panel" },
+      row("Cloudflare traffic", d.insights.cloudflare, "Worker secret CLOUDFLARE_API_TOKEN (Zone › Zone › Read, Zone › Analytics › Read)"),
+      row("Google Search Console", d.insights.google, "Worker secret GOOGLE_SERVICE_ACCOUNT (a service account's JSON key)")),
+    h("h2", { class: "section", text: (state.me.account || {}).name + " sales" }),
+    ...settingsView(d),
+  ];
+}
 // ---------- Home ----------
 function changeLine(change, length) {
   const span = length === 1 ? "the day before" : `the ${length} days before`;
@@ -201,27 +416,6 @@ function homeView(d) {
   ];
 }
 
-// ---------- Website ----------
-// kno.plus's own numbers: page requests and contact messages, counted by the Worker without keeping who anyone is.
-function siteRange() {
-  return h("select", { "aria-label": "Period", onchange: (e) => { state.siteDays = e.target.value; load(); } },
-    ["7", "28", "90"].map((v) => h("option", { value: v, selected: (state.siteDays || "28") === v, text: "Last " + v + " days" })));
-}
-function siteView(d) {
-  const count = (n) => Number(n || 0).toLocaleString("en-US");
-  const shown = d.series.filter((p) => p.count !== null);
-  const tiles = [["Page requests", count(d.pageRequests)], ["Contact messages", count(d.contacts)], ["Busiest day", count(Math.max(0, ...shown.map((p) => p.count)))], ["Counting since", prettyDay(d.started.slice(0, 10))]];
-  const list = (title, rows, total) => h("div", { class: "card scroll" }, h("h2", { text: title }), rows.length ? h("table", { class: "table" },
-    h("tbody", {}, rows.map((r) => h("tr", {}, h("td", { text: r.name }), h("td", { class: "n", text: count(r.count) }), h("td", { class: "n small", text: total ? Math.round((100 * r.count) / total) + "%" : "" })))))
-    : h("p", { class: "note", text: "Nothing counted in these days yet." }));
-  return [
-    h("div", { class: "tiles" }, tiles.map(([t, v]) => h("div", { class: "card tile" }, h("div", { class: "label", text: t }), h("div", { class: "value", text: v })))),
-    h("div", { class: "card" }, h("h2", { text: "Page requests by day" }),
-      lineChart({ label: "Page requests by day", axis: true, format: count, series: [{ name: "Requests", color: "var(--accent)", values: shown.map((p) => ({ key: p.day, value: p.count })) }] })),
-    h("div", { class: "split" }, list("Top pages", d.pages, d.pageRequests), list("Where visitors came from", d.sources, d.pageRequests)),
-    h("p", { class: "note", text: "Counts of public pages served, not people. Bots, private pages, query strings and addresses are never counted or kept." }),
-  ];
-}
 
 // ---------- Orders ----------
 const STATUS = { paid: "Paid", printing: "Printing", shipped: "Shipped", refunded: "Refunded", cancelled: "Cancelled" };
@@ -328,25 +522,22 @@ const label = (key) => (key.length === 7 ? new Date(key + "-15T12:00:00Z").toLoc
 
 // ---------- Settings ----------
 function settingsView(d) {
-  const acct = state.me.account;
+  const acct = state.acct || state.me.account;
   const colors = (acct.brand || {}).colors || {};
-  const css = getComputedStyle(document.documentElement);
   const zones = Intl.supportedValuesOf ? Intl.supportedValuesOf("timeZone") : [acct.tz];
   const said = h("p", { class: "note", role: "status" });
   const account = h("form", { class: "card stack", onsubmit: async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
     try {
-      await send("settings", { name: f.get("name"), tz: f.get("tz"), colors: Object.fromEntries(["ink", "accent", "surface", "page"].map((k) => [k, f.get(k)])) });
+      await send("settings", { name: f.get("name"), tz: f.get("tz"), colors });
       location.reload();
     } catch (err) { said.textContent = err.message; }
   } },
-    h("h2", { text: "Account" }),
+    h("h2", { text: "Sales account" }),
     h("div", { class: "split" },
       h("label", {}, "Business name", h("input", { name: "name", value: acct.name })),
       h("label", {}, "Time zone", h("select", { name: "tz" }, zones.map((z) => h("option", { value: z, selected: z === acct.tz, text: z.replace(/_/g, " ") }))))),
-    h("div", { class: "row" }, [["ink", "Text"], ["accent", "Accent"], ["surface", "Cards"], ["page", "Background"]].map(([k, t]) =>
-      h("label", {}, t, h("input", { type: "color", name: k, value: colors[k] || css.getPropertyValue("--" + k).trim() || "#000000" })))),
     said, h("div", {}, h("button", { class: "primary", type: "submit", text: "Save" })));
 
   const conn = (c) => {
@@ -379,11 +570,6 @@ function settingsView(d) {
       h("p", { class: "note" }, "Square's webhook address (Square Developer › Webhooks, events payment, refund, subscription, invoice and dispute): ", h("code", { text: d.hook })),
       h("div", { class: "row" }, h("button", { class: "quiet", text: "Refresh now", onclick: run(false) }), h("button", { class: "quiet", text: "Pull all history again", onclick: run(true) })), sync),
     ...d.connections.map(conn),
-    h("div", { class: "row" }, h("span", { class: "note grow", text: "Signed in as " + state.me.user.email }),
-      h("button", { class: "quiet", text: "Sign out", onclick: async () => {
-        await fetch("/api/clients/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" });
-        location.reload();
-      } })),
   ];
 }
 

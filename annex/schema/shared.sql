@@ -7,3 +7,18 @@ CREATE TABLE IF NOT EXISTS accounts (
   brand TEXT NOT NULL DEFAULT '{}',  -- {"name","logo","colors":{...}}
   created TEXT NOT NULL
 );
+-- Quest's money-making areas, shown on Assets and Overview. account names a seller account above when its sales are
+-- connected; kind 'service' with id 'websites' counts the client projects.
+CREATE TABLE IF NOT EXISTS assets (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'app',  -- store, app, service, tool
+  status TEXT NOT NULL DEFAULT '',
+  account TEXT NOT NULL DEFAULT '',
+  link TEXT NOT NULL DEFAULT '',
+  image TEXT NOT NULL DEFAULT '',
+  tone TEXT NOT NULL DEFAULT '#85cfc0',
+  note TEXT NOT NULL DEFAULT '',
+  sort INTEGER NOT NULL DEFAULT 0,
+  created TEXT NOT NULL
+);

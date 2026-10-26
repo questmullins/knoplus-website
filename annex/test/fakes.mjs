@@ -1,4 +1,4 @@
-// Stand-ins for RoseWave, Square and Prodigi, for testing Annex on this machine with `wrangler dev`.
+// Stand-ins for RoseWave, Square, Prodigi, Cloudflare and Google Search Console, for testing Annex on this machine with `wrangler dev`.
 // RoseWave's feed is the real RoseWave worker (its file passed as the first argument) over a stand-in bucket.
 // Usage: node test/fakes.mjs <path to rosewave cloud/worker.js> [port]
 import http from "node:http";
@@ -61,6 +61,13 @@ const prodigi = { orders: [
 ], hasMore: false };
 const prodigiSandbox = { orders: [{ id: "ord_D", merchantReference: "d0000000-0004", created: ago(5), status: { stage: "Complete" }, charges: charge("D", 30, 9) }], hasMore: false };
 
+
+// Cloudflare: two zones with a week of traffic. Google: a token for any signed JWT, and one Search Console property.
+const week = [...Array(7)].map((_, i) => day(7 - i));
+const cloudflare = (zone, scale) => ({ zoneTag: zone, httpRequests1dGroups: week.map((date, i) => ({ dimensions: { date }, sum: { requests: 1000 * scale + i * 10, pageViews: 100 * scale + i, bytes: 5e6 * scale, threats: i % 2, countryMap: [{ clientCountryName: "US", requests: 800 * scale }, { clientCountryName: "GB", requests: 200 * scale }] }, uniq: { uniques: 40 * scale + i } })) });
+const searchRows = { date: week.map((d, i) => ({ keys: [d], clicks: 3 + i, impressions: 100 + i * 10, ctr: (3 + i) / (100 + i * 10), position: 8 })), query: [{ keys: ["kno plus"], clicks: 30, impressions: 120, ctr: 0.25, position: 1.2 }], page: [{ keys: ["https://kno.plus/store/"], clicks: 20, impressions: 300, ctr: 0.0667, position: 6.4 }] };
+const body = (req) => new Promise((done) => { let s = ""; req.on("data", (c) => (s += c)); req.on("end", () => done(s)); });
+
 export const seen = [];
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
@@ -75,6 +82,26 @@ http.createServer(async (req, res) => {
     if (req.headers.authorization !== "Bearer sq-token") return reply(401, { errors: [{ detail: "bad token" }] });
     const key = url.pathname.slice(11).replace(/\/+$/, "");
     return square[key] ? reply(200, square[key]) : reply(404, { errors: [{ detail: "no " + key }] });
+  }
+  if (url.pathname.startsWith("/cloudflare/")) {
+    if (req.headers.authorization !== "Bearer cf-token") return reply(403, { success: false, errors: [{ message: "bad token" }] });
+    if (url.pathname === "/cloudflare/client/v4/zones") return reply(200, { success: true, result: [{ id: "z1", name: "kno.plus" }, { id: "z2", name: "example-client.com" }] });
+    if (url.pathname === "/cloudflare/client/v4/graphql") {
+      const { variables } = JSON.parse(await body(req));
+      return reply(200, { data: { viewer: { zones: variables.zones.map((z) => cloudflare(z, z === "z1" ? 3 : 1)) } }, errors: null });
+    }
+  }
+  if (url.pathname === "/google/token") {
+    const form = new URLSearchParams(await body(req));
+    return (form.get("assertion") || "").split(".").length === 3 ? reply(200, { access_token: "g-token", expires_in: 3600 }) : reply(400, {});
+  }
+  if (url.pathname.startsWith("/google/webmasters/v3/")) {
+    if (req.headers.authorization !== "Bearer g-token") return reply(401, {});
+    if (url.pathname === "/google/webmasters/v3/sites") return reply(200, { siteEntry: [{ siteUrl: "sc-domain:kno.plus", permissionLevel: "siteRestrictedUser" }, { siteUrl: "https://nope.example/", permissionLevel: "siteUnverifiedUser" }] });
+    if (url.pathname.endsWith("/searchAnalytics/query")) {
+      const { dimensions } = JSON.parse(await body(req));
+      return reply(200, { rows: searchRows[dimensions[0]] || [] });
+    }
   }
   if (url.pathname === "/prodigi/v4.0/orders") return req.headers["x-api-key"] === "pd-live" ? reply(200, prodigi) : reply(401, {});
   if (url.pathname === "/prodigi/sandbox/v4.0/orders") return req.headers["x-api-key"] === "pd-sandbox" ? reply(200, prodigiSandbox) : reply(401, {});
