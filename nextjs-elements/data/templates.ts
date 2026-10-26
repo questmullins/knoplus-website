@@ -31,7 +31,7 @@ export const templates: TemplateItem[] = [
     theme: "traditional-auto",
     features: ["2-page build", "Service sections", "Contact form"],
     sellingPoints: ["High-impact first impression", "Built for bookings"],
-    price: "$750 as shown",
+    price: "Ready to make yours",
     genre: "Automotive",
     stack: ["HTML", "CSS", "JavaScript"],
     styleTags: ["Classic", "Bold", "High contrast"]
@@ -46,7 +46,7 @@ export const templates: TemplateItem[] = [
     theme: "synergy",
     features: ["2-page build", "Floating nav", "FAQ sections"],
     sellingPoints: ["Feels polished and modern", "Easy to scan"],
-    price: "$750 as shown",
+    price: "Ready to make yours",
     genre: "Automotive",
     stack: ["Next.js", "React", "JavaScript"],
     styleTags: ["Modern", "Glass", "Soft UI"]
@@ -62,7 +62,7 @@ export const templates: TemplateItem[] = [
     theme: "homey-coffee",
     features: ["5-page build", "Menu highlights", "Location and careers"],
     sellingPoints: ["Feels warm and local", "Built for cafe discovery"],
-    price: "$1,250 as shown",
+    price: "Ready to make yours",
     genre: "Food & Beverage",
     stack: ["HTML", "CSS", "JavaScript"],
     styleTags: ["Homey", "Editorial", "Soft UI"]
@@ -78,7 +78,7 @@ export const templates: TemplateItem[] = [
     theme: "photo-portfolio",
     features: ["Portfolio filtering", "Image-led sections", "Print/contact path"],
     sellingPoints: ["Strong visual first impression", "Easy gallery browsing"],
-    price: "$1,500 as shown",
+    price: "Ready to make yours",
     genre: "Premium",
     stack: ["HTML", "CSS", "JavaScript"],
     styleTags: ["Editorial", "Minimal", "Photography"]
@@ -94,7 +94,7 @@ export const templates: TemplateItem[] = [
     theme: "cleaning-restoration",
     features: ["3-page build", "Lead form", "Services page"],
     sellingPoints: ["Emergency-ready conversion", "Strong trust signals"],
-    price: "$1,000 as shown",
+    price: "Ready to make yours",
     genre: "Home Services",
     stack: ["Next.js", "React", "JavaScript"],
     styleTags: ["Modern", "Lead-gen", "Emergency"]

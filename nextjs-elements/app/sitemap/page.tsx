@@ -7,7 +7,7 @@ import { templates } from "@/data/templates";
 export const metadata: Metadata = {
   title: "Sitemap",
   description:
-    "Browse the Knoplus sitemap for website templates, custom website design, pricing, process, care plans, and template previews.",
+    "Browse the Knoplus sitemap for website templates, custom website design, process, care plans, and template previews.",
   alternates: {
     canonical: "/sitemap"
   },
@@ -21,7 +21,7 @@ const corePages = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
   { label: "Our Process", href: "/process" },
-  { label: "Pricing", href: "/pricing" }
+  { label: "Websites", href: "/websites" }
 ];
 
 export default function SitemapPage() {
@@ -34,10 +34,10 @@ export default function SitemapPage() {
       <SiteMenu className="sitemap-menu" />
       <section className="sitemap-hero">
         <div className="eyebrow">Knoplus sitemap</div>
-        <h1>Find the website service, pricing, or template path you need.</h1>
+        <h1>Find the website service or template path you need.</h1>
         <p>
           This sitemap connects the main Knoplus website design pages, service landing pages,
-          template previews, pricing, care plans, and process information for easier browsing and indexing.
+          template previews, care plans, and process information for easier browsing and indexing.
         </p>
       </section>
 

@@ -1,27 +1,39 @@
 import { EmailMessage } from "cloudflare:email";
-import { handleAnalytics, recordAnalytics } from './server/analytics.js';
+import { recordAnalytics } from './server/analytics.js';
 import { handleClients } from "./server/clients.js";
+import { handleAnnex, scheduledAnnex } from "./annex/src/index.js";
 
 const CONTACT_TO_FALLBACK = "info@kno.plus";
 const CONTACT_FROM_FALLBACK = "Knoplus <info@kno.plus>";
 const MAX_BODY_BYTES = 24 * 1024;
 
+// Pages that moved when the project showcase became the home page (assets under /revamp/ stay where they are).
+function movedTo(path) {
+  if (/\.[a-z0-9]+$/i.test(path)) return "";
+  const p = path.replace(/\/+$/, "") || "/";
+  if (p === "/revamp" || p === "/work") return "/";
+  if (p === "/manage") return "/annex/";
+  if (p === "/pricing") return "/websites";
+  const gallery = /^\/revamp\/rosewave\/gallery(\/.*)?$/.exec(p);
+  if (gallery) return "/store" + (gallery[1] || "");
+  const project = /^\/revamp\/([a-z0-9-]+)(?:\/horizontal)?$/.exec(p);
+  return project ? "/work/" + project[1] : "";
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    await scheduledAnnex(env, ctx);
+  },
+
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const analyticsResponse = await handleAnalytics(request, env);
-    if (analyticsResponse) return analyticsResponse;
-    // Dashboard shell is public; analytics are administrator-only.
-    if ((url.hostname === "manage.kno.plus" && url.pathname === "/") || url.pathname === "/manage" || url.pathname === "/manage/") {
-      const assetUrl = new URL("/manage/",url);
-      const response = await env.ASSETS.fetch(new Request(assetUrl,request));
-      const headers = new Headers(response.headers);
-      headers.set("X-Robots-Tag","noindex, nofollow, noarchive");
-      headers.set("Cache-Control","no-store");
-      return new Response(response.body,{status:response.status,headers});
-    }
+    if (url.hostname === "manage.kno.plus") return Response.redirect("https://kno.plus/annex/", 301);
+    const annexResponse = await handleAnnex(request, env, ctx);
+    if (annexResponse) return annexResponse;
     const clientResponse = await handleClients(request, env);
     if (clientResponse) return clientResponse;
+    const moved = movedTo(url.pathname);
+    if (moved) return Response.redirect(url.origin + moved + url.search, 301);
 
     if (url.pathname === "/update-config" || url.pathname === "/update-config/") {
       if (request.method !== "GET" && request.method !== "HEAD") {

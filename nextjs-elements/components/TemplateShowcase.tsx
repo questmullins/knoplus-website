@@ -12,12 +12,12 @@ const genres = ["All", ...Array.from(new Set(templates.map((template) => templat
 const serviceIntro = {
   label: "Website template service",
   navTitle: "Website Service",
-  title: "Modern websites.<br />Clear pricing.<br /><em>Built to launch.</em>",
+  title: "Modern websites.<br />Made with care.<br /><em>Built to launch.</em>",
   description:
     "Knoplus builds professional websites for independent businesses using polished website templates, custom website design, mobile-friendly layouts, SEO-ready page structure, contact forms, Cloudflare deployment, and practical launch support.",
   image: "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')",
   features: ["Template websites", "Custom websites", "Mobile-friendly design"],
-  sellingPoints: ["Starting at $500", "Built for local business launches"]
+  sellingPoints: ["Built for local business launches"]
 };
 
 function formatCounter(index: number, total: number) {
@@ -477,9 +477,9 @@ export function TemplateShowcase() {
 
                 <div
                   className="template-panel-details"
-                  aria-label={isIntroActive ? "Knoplus website service highlights" : `${currentTemplate.navTitle} features and price`}
+                  aria-label={isIntroActive ? "Knoplus website service highlights" : `${currentTemplate.navTitle} features`}
                 >
-                  <strong>{isIntroActive ? "From $500" : currentTemplate.price}</strong>
+                  <strong>{isIntroActive ? "Simple websites, made well" : currentTemplate.price}</strong>
                   <div>
                     <span>Features</span>
                     <p>{(isIntroActive ? serviceIntro.features : currentTemplate.features).join(" / ")}</p>
@@ -533,7 +533,7 @@ export function TemplateShowcase() {
             </button>
           </div>
           <div className="template-panel-details" aria-label="Knoplus website service highlights">
-            <strong>From $500</strong>
+            <strong>Simple websites, made well</strong>
             <div>
               <span>Website Services</span>
               <p>Template websites / Custom websites / SEO-ready structure</p>
@@ -579,7 +579,7 @@ export function TemplateShowcase() {
                 Inquire
               </button>
             </div>
-            <div className="template-panel-details" aria-label={`${template.navTitle} features and price`}>
+            <div className="template-panel-details" aria-label={`${template.navTitle} features`}>
               <strong>{template.price}</strong>
               <div>
                 <span>Features</span>

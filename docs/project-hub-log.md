@@ -67,3 +67,12 @@ These came from Quest during the hub work and should carry into the next attempt
 3. **Content before layout.** Collect real screenshots through `project-screens/`, and write each project's copy with Quest.
 4. **One page at a time on a preview link.** Show each page on a Cloudflare preview URL and merge only when the set looks like one site.
 5. **Reuse what's on `archive/project-hub`** (screens, copy, redirects) where it fits the new system, rather than rebuilding.
+
+## 2026-10-26: the showcase becomes kno.plus
+
+Quest's sentence: kno.plus is "a home of all of my work, then users can go down routes to discover more and clients can inspect their information on active work."
+
+- The `/revamp` showcase is now the home page. Projects live at `/work/<project>`, the template collection at `/websites`, and the old `/revamp/...` addresses redirect.
+- Rules changed by Quest: no prices on kno.plus itself, but the RoseWave store is its own route (`/store`) and keeps prices; the store sells the 2400-pixel copy of every set photo, while the app keeps its own free and members rules.
+- `/pricing` and template prices are gone. The management workspace (`manage.kno.plus`, then `/manage`) is replaced by Annex at `/annex` (no subdomains).
+- The site before this change is on `archive/website-home`.
