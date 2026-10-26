@@ -19,6 +19,7 @@ import { verify } from "./connections/square.js";
 import { websites } from "./insights/cloudflare.js";
 import { search } from "./insights/search.js";
 import { assetsWithNumbers, clientList, saveAsset } from "./workspace.js";
+import { deleteGuide, guideList, guideOne, saveGuides } from "./guides.js";
 import { addDays, dayOf, daysBetween, fail, json, readJson, same } from "./util.js";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -143,6 +144,13 @@ async function api(request, env, ctx, url) {
     return json({ ok: true });
   }
   if (route === "clients" && method === "GET") return json({ projects: await clientList(env.CLIENT_DB) });
+  if (route === "guides" && method === "GET") return json({ guides: await guideList(env.ANNEX) });
+  if (route === "guides" && method === "POST") return saveGuides(request, env.ANNEX);
+  if (route.startsWith("guides/")) {
+    const id = decodeURIComponent(route.slice(7));
+    if (method === "GET") return guideOne(env.ANNEX, id);
+    if (method === "DELETE") return deleteGuide(env.ANNEX, id);
+  }
   if (route === "overview" && method === "GET") {
     const [assets, site, web] = await Promise.all([
       assetsWithNumbers(env, ownDb),

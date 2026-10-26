@@ -25,12 +25,12 @@ const money = (c, sign) => {
 const pct = (x) => (x === null || x === undefined ? "–" : (x * 100).toFixed(Math.abs(x) < 0.1 ? 1 : 0) + "%");
 const plural = (n, one, many = one + "s") => n + " " + (n === 1 ? one : many);
 // Workspace routes are about everything; the rest are about the open asset's sales account.
-const WORKSPACE = /^(me|site|websites|search|assets|clients|overview|setup)\b/;
+const WORKSPACE = /^(me|site|websites|search|assets|clients|guides|overview|setup)\b/;
 const scoped = (path) => (state.account && !WORKSPACE.test(path) ? path + (path.includes("?") ? "&" : "?") + "account=" + encodeURIComponent(state.account) : path);
 async function get(path) {
   const r = await fetch(API + scoped(path), { credentials: "same-origin" });
   const body = await r.json().catch(() => ({}));
-  if (r.status === 401) { state.me.user = null; render(); throw new Error("signed out"); }
+  if (r.status === 401) { state.me.user = null; route(); throw new Error("signed out"); }
   if (!r.ok) throw new Error(body.error || "Something went wrong");
   return body;
 }
@@ -84,7 +84,7 @@ async function boot() {
 }
 
 // #overview, #assets, #asset/<id>/<tab>, #websites, #clients, #settings
-const PAGES = [["overview", "Overview"], ["assets", "Assets"], ["websites", "Websites"], ["clients", "Clients"], ["settings", "Settings"]];
+const PAGES = [["overview", "Overview"], ["assets", "Assets"], ["websites", "Websites"], ["clients", "Clients"], ["guides", "Guides"], ["settings", "Settings"]];
 async function route() {
   const me = state.me;
   if (!me.user && me.setup && (me.firstAdmin || location.hash === "#setup")) return setupView();
@@ -98,6 +98,7 @@ async function route() {
   state.page = PAGES.some(([p]) => p === page) || page === "asset" ? page : "overview";
   state.asset = state.page === "asset" ? id : null;
   state.tab = tab || "home";
+  state.guide = state.page === "guides" && id ? decodeURIComponent(id) : null;
   state.account = "";
   state.acct = null;
   shell();
@@ -173,14 +174,17 @@ async function openAsset() {
 
 async function load() {
   const view = document.getElementById("view");
-  const page = state.page, tab = state.tab, asset = state.asset;
+  const page = state.page, tab = state.tab, asset = state.asset, guide = state.guide;
   try {
     let path;
     if (page === "overview") path = "overview";
     else if (page === "assets") path = "assets";
     else if (page === "clients") path = "clients";
     else if (page === "settings") path = "connections";
-    else if (page === "websites") {
+    else if (page === "guides") {
+      const [list, one] = await Promise.all([get("guides"), state.guide && !["new", "import"].includes(state.guide) ? get("guides/" + encodeURIComponent(state.guide)).catch(() => null) : null]);
+      return done({ guides: list.guides, one });
+    } else if (page === "websites") {
       const days = state.days;
       const [web, searchData, site] = await Promise.all([get("websites?days=" + days), get("search?days=" + days), get("site?days=" + days)]);
       return done({ web, search: searchData, site });
@@ -195,7 +199,7 @@ async function load() {
     if (err.message !== "signed out") view.replaceChildren(h("p", { class: "empty", text: err.message }));
   }
   function done(data) {
-    if (page !== state.page || tab !== state.tab || asset !== state.asset) return;
+    if (page !== state.page || tab !== state.tab || asset !== state.asset || guide !== state.guide) return;
     state.data = data;
     draw();
   }
@@ -205,7 +209,7 @@ function draw() {
   const view = document.getElementById("view");
   tip.hidden = true;
   if (!view) return;
-  const pages = { overview: overviewView, assets: assetsView, websites: websitesView, clients: clientsView, settings: workspaceSettingsView, asset: assetView };
+  const pages = { overview: overviewView, assets: assetsView, websites: websitesView, clients: clientsView, guides: guidesView, settings: workspaceSettingsView, asset: assetView };
   view.replaceChildren(...[].concat(pages[state.page](state.data)));
 }
 
@@ -371,6 +375,172 @@ function clientsBody(d) {
 }
 function clientsView(d) {
   return [intro("Your clients", "The work, together.", "Each client project, who can see it, and the latest update you posted.", h("a", { class: "button", href: "/clients/", text: "Manage clients ↗" })), ...clientsBody(d)];
+}
+
+// ---------- Guides: the owner's SOPs and notes, written in markdown ----------
+// A small markdown reader for what the guides use: headings, paragraphs, lists, tables, code, bold and links.
+const mdText = (t) => t.replace(/&#91;/g, "[").replace(/&#93;/g, "]").replace(/\\([\\`*_{}\[\]()#+\-.!<>|~"])/g, "$1");
+const anchor = (t) => "g-" + t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+function inline(text) {
+  const out = [];
+  const re = /`([^`]+)`|\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
+  let at = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > at) out.push(mdText(text.slice(at, m.index)));
+    if (m[1] !== undefined) out.push(h("code", { text: m[1] }));
+    else if (m[2] !== undefined) out.push(h("strong", {}, inline(m[2])));
+    else {
+      const url = m[4], safe = /^(https:\/\/|http:\/\/|\/|#)/.test(url);
+      out.push(safe ? h("a", { href: url, target: url.startsWith("http") ? "_blank" : null, rel: url.startsWith("http") ? "noopener" : null }, inline(m[3])) : mdText(m[3]));
+    }
+    at = re.lastIndex;
+  }
+  if (at < text.length) out.push(mdText(text.slice(at)));
+  return out;
+}
+function markdown(src) {
+  const lines = String(src || "").replace(/\r/g, "").split("\n");
+  const out = [];
+  const cells = (l) => l.trim().replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((c) => c.trim());
+  for (let i = 0; i < lines.length;) {
+    const line = lines[i];
+    if (!line.trim() || /^(&#91;|\[)embedded content/.test(line.trim())) { i++; continue; }
+    if (line.startsWith("```")) {
+      const code = [];
+      for (i++; i < lines.length && !lines[i].startsWith("```"); i++) code.push(lines[i]);
+      out.push(h("pre", {}, h("code", { text: code.join("\n") })));
+      i++; continue;
+    }
+    const head = /^(#{1,4})\s+(.*)$/.exec(line);
+    if (head) {
+      const level = Math.max(2, head[1].length), words = mdText(head[2]);
+      out.push(h("h" + level, { id: anchor(words) }, inline(head[2])));
+      i++; continue;
+    }
+    if (line.trim().startsWith("|")) {
+      const rows = [];
+      for (; i < lines.length && lines[i].trim().startsWith("|"); i++) rows.push(cells(lines[i]));
+      const body = rows.filter((r, n) => !(n === 1 && r.every((c) => /^:?-{2,}:?$/.test(c))));
+      const [first, ...rest] = body;
+      out.push(h("div", { class: "scroll" }, h("table", { class: "table" },
+        h("thead", {}, h("tr", {}, first.map((c) => h("th", {}, inline(c))))),
+        h("tbody", {}, rest.map((r) => h("tr", {}, r.map((c) => h("td", {}, inline(c)))))))));
+      continue;
+    }
+    const item = /^(\s*)(\d+\.|[-*])\s+(.*)$/;
+    if (item.test(line)) {
+      const ordered = /\d/.test(item.exec(line)[2]);
+      const list = h(ordered ? "ol" : "ul");
+      for (; i < lines.length && item.test(lines[i]); i++) {
+        const [, , , words] = item.exec(lines[i]);
+        const task = /^\[( |x)\]\s+(.*)$/i.exec(words);
+        list.append(task ? h("li", { class: "task" }, h("input", { type: "checkbox", disabled: true, checked: task[1] !== " " }), " ", inline(task[2])) : h("li", {}, inline(words)));
+      }
+      out.push(list);
+      continue;
+    }
+    const para = [];
+    for (; i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```|\s*\||\s*(\d+\.|[-*])\s)/.test(lines[i]); i++) para.push(lines[i].trim());
+    out.push(h("p", {}, inline(para.join(" "))));
+  }
+  return out;
+}
+
+// A handbook pasted whole becomes one guide per "## " section; the text before the first one is its introduction.
+function splitHandbook(src) {
+  const lines = String(src).replace(/\r/g, "").split("\n");
+  const title = (/^#\s+(.*)$/.exec(lines.find((l) => /^#\s/.test(l)) || "") || [])[1];
+  const parts = [];
+  let cur = { title: title ? mdText(title) : "Introduction", body: [] };
+  for (const l of lines) {
+    if (/^#\s/.test(l)) continue;
+    const m = /^##\s+(.*)$/.exec(l);
+    if (m) { parts.push(cur); cur = { title: mdText(m[1]), body: [] }; } else cur.body.push(l);
+  }
+  parts.push(cur);
+  return parts.map((p) => ({ title: p.title.slice(0, 120), body: p.body.join("\n").trim() })).filter((p) => p.body).map((p, n) => ({ ...p, sort: n * 10 }));
+}
+
+function guideForm(g, done) {
+  const error = h("p", { class: "error", role: "alert" });
+  const body = h("textarea", { name: "body", rows: "22", spellcheck: "true", "aria-label": "Guide text (markdown)" });
+  body.value = g ? g.body : "";
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    try {
+      await send("guides", { id: g ? g.id : undefined, title: f.get("title"), body: body.value, sort: f.get("sort") });
+      done(g ? g.id : null);
+    } catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: g ? "Edit " + g.title : "New guide" }),
+    h("div", { class: "split" }, h("label", {}, "Title", h("input", { name: "title", required: true, maxlength: "120", value: g ? g.title : "" })),
+      h("label", {}, "Order in the list", h("input", { name: "sort", type: "number", min: "0", max: "9999", value: String(g ? g.sort : 100) }))),
+    h("label", {}, "Text. Use # for headings, 1. for steps, - for bullets, **bold**, [link](https://…)", body),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Save" }), h("a", { class: "button secondary", href: g ? "#guides/" + encodeURIComponent(g.id) : "#guides", text: "Cancel" })));
+}
+
+function importForm() {
+  const error = h("p", { class: "error", role: "alert" });
+  const text = h("textarea", { rows: "12", "aria-label": "Markdown to import", placeholder: "Paste the handbook's markdown here, or choose a .md file above." });
+  const file = h("input", { type: "file", accept: ".md,.markdown,.txt,text/markdown,text/plain", onchange: async (e) => { const f = e.target.files[0]; if (f) text.value = await f.text(); } });
+  const split = h("input", { type: "checkbox", checked: true });
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    if (!text.value.trim()) { error.textContent = "Paste some text or choose a file first."; return; }
+    const guides = split.checked ? splitHandbook(text.value) : [{ title: ((/^#\s+(.*)$/m.exec(text.value) || [])[1] || "Imported guide").slice(0, 120), body: text.value }];
+    try {
+      const r = await send("guides", { guides });
+      location.hash = "#guides";
+      route();
+      setTimeout(() => alert(plural(r.saved, "guide") + " imported."), 50);
+    } catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: "Import guides" }),
+    h("p", { class: "note", text: "In the Kno.plus operations handbook doc, choose Export › Markdown (or select all and copy). Then choose the file or paste it below. Importing again replaces guides with the same titles." }),
+    file, text,
+    h("label", { class: "row" }, split, "One guide per section (each ## heading)"),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Import" }), h("a", { class: "button secondary", href: "#guides", text: "Cancel" })));
+}
+
+function guidesView(d) {
+  const editing = state.tab === "edit", making = state.guide === "new", importing = state.guide === "import";
+  const actions = h("div", { class: "row" }, h("a", { class: "button", href: "#guides/new", text: "New guide" }), h("a", { class: "button secondary", href: "#guides/import", text: "Import" }));
+  const head = intro("Your guides", "How everything runs.", "Your SOPs and notes for running kno.plus. Only your owner login can open them.", actions);
+  const reload = (id) => { location.hash = id ? "#guides/" + encodeURIComponent(id) : "#guides"; route(); };
+  if (making) return [head, guideForm(null, reload)];
+  if (importing) return [head, importForm()];
+  if (!d.guides.length) return [head, h("div", { class: "panel" }, h("h2", { text: "No guides yet" }),
+    h("p", { text: "Bring in the operations handbook with Import, or write one with New guide." }))];
+
+  const search = h("input", { type: "search", placeholder: "Search guides", "aria-label": "Search guides", value: state.guideSearch || "" });
+  const list = h("nav", { class: "guide-list", "aria-label": "Guides" });
+  const fill = () => {
+    const q = search.value.trim().toLowerCase();
+    state.guideSearch = search.value;
+    const shown = d.guides.filter((g) => !q || (g.title + "\n" + g.body).toLowerCase().includes(q));
+    list.replaceChildren(...shown.map((g) => h("a", { href: "#guides/" + encodeURIComponent(g.id), "aria-current": state.guide === g.id ? "page" : null }, g.title,
+      q && !g.title.toLowerCase().includes(q) ? h("small", { text: "Mentions \"" + search.value.trim() + "\"" }) : null)),
+      shown.length ? "" : h("p", { class: "note", text: "Nothing matches." }));
+  };
+  search.addEventListener("input", fill);
+  fill();
+
+  const g = d.one || (!state.guide ? d.guides[0] : null);
+  let article;
+  if (!g) article = h("div", { class: "panel" }, h("p", { text: "There's no guide called " + state.guide + "." }));
+  else if (editing) article = guideForm(g, reload);
+  else {
+    const steps = markdown(g.body);
+    const inside = steps.filter((n) => n.tagName === "H3");
+    article = h("article", { class: "panel prose" },
+      h("div", { class: "panel-heading" }, h("div", {}, h("h2", { class: "guide-title", text: g.title }), h("p", { class: "small", text: "Updated " + new Date(g.updated).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) })),
+        h("div", { class: "row" }, h("a", { class: "button secondary", href: "#guides/" + encodeURIComponent(g.id) + "/edit", text: "Edit" }),
+          h("button", { class: "button secondary", type: "button", text: "Delete", onclick: async () => { if (confirm("Delete \"" + g.title + "\"? This can't be undone.")) { await send("guides/" + encodeURIComponent(g.id), {}, "DELETE"); reload(null); } } }))),
+      inside.length > 3 ? h("details", { class: "toc", open: true }, h("summary", { text: "In this guide" }), h("ul", {}, inside.map((n) => h("li", {}, h("a", { href: "#" + n.id, onclick: (e) => { e.preventDefault(); n.scrollIntoView({ behavior: "smooth" }); }, text: n.textContent }))))) : null,
+      steps);
+  }
+  return [head, h("div", { class: "guides" }, h("div", { class: "guide-side" }, search, list), article)];
 }
 
 // ---------- Settings ----------

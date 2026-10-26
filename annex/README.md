@@ -13,6 +13,9 @@ needs the kno.plus administrator sign-in (the same account `/clients` uses) and 
   Google Search Console (clicks, impressions, click-through rate, position, top searches and pages), and kno.plus page
   counts kept by the Worker without keeping who anyone is (`server/analytics.js`).
 - **Clients**: each client project, who can see it, and its latest update (managed at `/clients`).
+- **Guides**: Quest's SOPs and notes in markdown, owner only. They are kept in D1 (table `guides`), not in this
+  repository, because the repository is public. Import the operations handbook from its Markdown export; each `##`
+  section becomes a guide.
 - **Settings**: which connections are on.
 
 It installs on a phone as a web app (Add to Home Screen). The page is `nextjs-elements/public/annex/`; the server is

@@ -22,3 +22,12 @@ CREATE TABLE IF NOT EXISTS assets (
   sort INTEGER NOT NULL DEFAULT 0,
   created TEXT NOT NULL
 );
+
+-- The owner's guides and SOPs (markdown), shown on Annex › Guides. Kept here rather than in the public repository.
+CREATE TABLE IF NOT EXISTS guides (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL DEFAULT '',
+  sort INTEGER NOT NULL DEFAULT 0,
+  updated TEXT NOT NULL
+);

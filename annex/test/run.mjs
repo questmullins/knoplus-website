@@ -20,7 +20,7 @@ const check = (name, ok) => { assert.ok(ok, name); console.log("ok  " + name); }
 
 // a fresh start: no account, no sales (the local database only; d1 never touches the real one with --local)
 for (const file of ["annex/schema/shared.sql", "annex/schema/account.sql"]) execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--file", file], { stdio: "pipe" });
-d1(["accounts", "assets", "connections", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
+d1(["accounts", "assets", "guides", "connections", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
 
 const run = "annex-test-" + Date.now();
 
@@ -131,8 +131,16 @@ check("Search Console click-through rate: " + JSON.stringify(t), t.clicks === 7 
 check("clients list", Array.isArray((await api("clients")).body.projects));
 const overview = (await api("overview")).body;
 check("overview adds up the assets and the web", overview.sales === home.sales.value && overview.web.connected && overview.web.zones === 2 && overview.assets.length >= 3);
+check("guides start empty", (await api("guides")).body.guides.length === 0);
+check("a guide needs a title", (await api("guides", { title: "", body: "x" })).status === 400);
+check("guides import section by section", (await api("guides", { guides: [{ title: "Quick answers", body: "### Reset a password\n\n1. Go" }, { title: "Words you'll see", body: "| a | b |" }] })).body.saved === 2);
+const guides = (await api("guides")).body.guides;
+check("guides listed in order with ids from titles", guides.map((g) => g.id).join() === "quick-answers,words-you-ll-see");
+check("one guide opens", (await api("guides/quick-answers")).body.body.includes("Reset a password"));
+check("guide saved again replaces it", (await api("guides", { id: "quick-answers", title: "Quick answers", body: "new" })).status === 200 && (await api("guides/quick-answers")).body.body === "new");
+check("guide deleted", (await api("guides/words-you-ll-see", {}, "DELETE")).status === 200 && (await api("guides/words-you-ll-see")).status === 404);
 cookie = client;
-check("a client can't see the workspace", (await api("overview")).status === 403 && (await api("websites")).status === 403 && (await api("assets")).status === 403);
+check("a client can't see the workspace or the guides", (await api("overview")).status === 403 && (await api("websites")).status === 403 && (await api("assets")).status === 403 && (await api("guides")).status === 403);
 cookie = admin;
 
 // webhook: refused without the right signature
