@@ -18,6 +18,8 @@
   /* project accents are mixed toward the ink in light mode so they stay readable on paper */
   --accent-mix: 100%;
   --shadow: 1;
+  /* how strongly photos are washed over (dark scrim or paper wash); 1 is the original strength */
+  --overlay: 0.5;
   /* lines: 1.5px reads slightly heavier on high-density screens, 2px on standard ones (1.5px rounds down there) */
   --stroke: 1.5px;
   --sidebar-width: 390px;
@@ -492,7 +494,7 @@ h1 {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.72), rgb(var(--base-rgb) / 0.5) 34%, rgb(var(--base-rgb) / 0.18) 64%, rgb(var(--base-rgb) / 0.08)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.72 * var(--overlay))), rgb(var(--base-rgb) / calc(0.5 * var(--overlay))) 34%, rgb(var(--base-rgb) / calc(0.18 * var(--overlay))) 64%, rgb(var(--base-rgb) / calc(0.08 * var(--overlay)))),
     var(--bg);
   background-size: cover;
   background-position: center;
@@ -519,7 +521,7 @@ h1 {
   inset: 0;
   background:
     radial-gradient(circle at 40% 52%, rgb(var(--ink-rgb) / 0.055), transparent 28%),
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.48), rgb(var(--base-rgb) / 0.28) 42%, transparent 70%);
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.48 * var(--overlay))), rgb(var(--base-rgb) / calc(0.28 * var(--overlay))) 42%, transparent 70%);
   z-index: -1;
   pointer-events: none;
 }
@@ -755,7 +757,7 @@ h1 {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.92), rgb(var(--base-rgb) / 0.48) 56%, rgb(var(--base-rgb) / 0.84)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.92 * var(--overlay))), rgb(var(--base-rgb) / calc(0.48 * var(--overlay))) 56%, rgb(var(--base-rgb) / calc(0.84 * var(--overlay)))),
     radial-gradient(circle at 72% 28%, rgb(var(--ink-rgb) / 0.16), transparent 24%),
     url("https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
@@ -768,7 +770,7 @@ h1 {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.94), rgb(var(--base-rgb) / 0.56) 58%, rgb(var(--base-rgb) / 0.9)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.94 * var(--overlay))), rgb(var(--base-rgb) / calc(0.56 * var(--overlay))) 58%, rgb(var(--base-rgb) / calc(0.9 * var(--overlay)))),
     radial-gradient(circle at 72% 24%, rgb(var(--ink-rgb) / 0.15), transparent 25%),
     url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
@@ -779,7 +781,7 @@ h1 {
 
 .process-bg {
   background:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.94), rgb(var(--base-rgb) / 0.54) 58%, rgb(var(--base-rgb) / 0.9)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.94 * var(--overlay))), rgb(var(--base-rgb) / calc(0.54 * var(--overlay))) 58%, rgb(var(--base-rgb) / calc(0.9 * var(--overlay)))),
     radial-gradient(circle at 76% 22%, rgb(var(--ink-rgb) / 0.16), transparent 25%),
     url("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
@@ -790,7 +792,7 @@ h1 {
   position: absolute;
   inset: -8%;
   background:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.95), rgb(var(--base-rgb) / 0.54) 58%, rgb(var(--base-rgb) / 0.9)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.95 * var(--overlay))), rgb(var(--base-rgb) / calc(0.54 * var(--overlay))) 58%, rgb(var(--base-rgb) / calc(0.9 * var(--overlay)))),
     radial-gradient(circle at 72% 24%, rgb(var(--ink-rgb) / 0.15), transparent 25%),
     url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
@@ -803,7 +805,7 @@ h1 {
 
 .contact-bg {
   background:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.96), rgb(var(--base-rgb) / 0.58) 56%, rgb(var(--base-rgb) / 0.92)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.96 * var(--overlay))), rgb(var(--base-rgb) / calc(0.58 * var(--overlay))) 56%, rgb(var(--base-rgb) / calc(0.92 * var(--overlay)))),
     radial-gradient(circle at 74% 22%, rgb(var(--ink-rgb) / 0.14), transparent 24%),
     url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
@@ -816,7 +818,7 @@ h1 {
   inset: 0;
   background:
     radial-gradient(circle at 48% 56%, rgb(var(--ink-rgb) / 0.06), transparent 26%),
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.32), transparent 62%);
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.32 * var(--overlay))), transparent 62%);
   z-index: -1;
   pointer-events: none;
 }
@@ -827,7 +829,7 @@ h1 {
   inset: 0;
   background:
     radial-gradient(circle at 42% 58%, rgb(var(--ink-rgb) / 0.06), transparent 24%),
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.36), transparent 64%);
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.36 * var(--overlay))), transparent 64%);
   z-index: -1;
   pointer-events: none;
 }
@@ -838,7 +840,7 @@ h1 {
   inset: 0;
   background:
     radial-gradient(circle at 42% 58%, rgb(var(--ink-rgb) / 0.06), transparent 24%),
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.38), transparent 64%);
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.38 * var(--overlay))), transparent 64%);
   z-index: -1;
   pointer-events: none;
 }
@@ -1557,7 +1559,7 @@ h1 {
   inset: 0;
   left: var(--sidebar-width);
   background:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.44), transparent 52%),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.44 * var(--overlay))), transparent 52%),
     url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
@@ -2372,8 +2374,8 @@ p {
     position: absolute;
     inset: -12%;
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.42), rgb(var(--base-rgb) / 0.92) 72%),
-      linear-gradient(90deg, rgb(var(--base-rgb) / 0.64), rgb(var(--base-rgb) / 0.18)),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.42 * var(--overlay))), rgb(var(--base-rgb) / calc(0.92 * var(--overlay))) 72%),
+      linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.64 * var(--overlay))), rgb(var(--base-rgb) / calc(0.18 * var(--overlay)))),
       var(--bg, url("https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80"));
     background-size: cover;
     background-position: center;
@@ -2384,8 +2386,8 @@ p {
 
   .mobile-template-section::before {
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.21), rgb(var(--base-rgb) / 0.46) 72%),
-      linear-gradient(90deg, rgb(var(--base-rgb) / 0.32), rgb(var(--base-rgb) / 0.09)),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.21 * var(--overlay))), rgb(var(--base-rgb) / calc(0.46 * var(--overlay))) 72%),
+      linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.32 * var(--overlay))), rgb(var(--base-rgb) / calc(0.09 * var(--overlay)))),
       var(--bg, url("https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80"));
     background-size: cover;
     background-position: center;
@@ -2401,13 +2403,13 @@ p {
     z-index: 0;
     pointer-events: none;
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0), rgb(var(--base-rgb) / 0.72) 48%, rgb(var(--base-rgb) / 0.96));
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0 * var(--overlay))), rgb(var(--base-rgb) / calc(0.72 * var(--overlay))) 48%, rgb(var(--base-rgb) / calc(0.96 * var(--overlay))));
   }
 
   .mobile-service-intro::before {
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.34), rgb(var(--base-rgb) / 0.82) 72%),
-      linear-gradient(90deg, rgb(var(--base-rgb) / 0.58), rgb(var(--base-rgb) / 0.14)),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.34 * var(--overlay))), rgb(var(--base-rgb) / calc(0.82 * var(--overlay))) 72%),
+      linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.58 * var(--overlay))), rgb(var(--base-rgb) / calc(0.14 * var(--overlay)))),
       var(--bg, url("https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80"));
     background-size: cover;
     background-position: center;
@@ -2415,7 +2417,7 @@ p {
 
   .mobile-pricing-section::before {
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.68), rgb(var(--base-rgb) / 0.95) 70%),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.68 * var(--overlay))), rgb(var(--base-rgb) / calc(0.95 * var(--overlay))) 70%),
       var(--bg, url("https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=80"));
     background-size: cover;
     background-position: center;
@@ -2423,7 +2425,7 @@ p {
 
   .mobile-about-section::before {
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.62), rgb(var(--base-rgb) / 0.96) 72%),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.62 * var(--overlay))), rgb(var(--base-rgb) / calc(0.96 * var(--overlay))) 72%),
       url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
@@ -2431,7 +2433,7 @@ p {
 
   .process-mobile-section::before {
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.62), rgb(var(--base-rgb) / 0.96) 72%),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.62 * var(--overlay))), rgb(var(--base-rgb) / calc(0.96 * var(--overlay))) 72%),
       url("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
@@ -2439,7 +2441,7 @@ p {
 
   .mobile-contact-section::before {
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.64), rgb(var(--base-rgb) / 0.96) 72%),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.64 * var(--overlay))), rgb(var(--base-rgb) / calc(0.96 * var(--overlay))) 72%),
       url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
@@ -2774,7 +2776,7 @@ p {
     position: fixed;
     inset: -10%;
     background:
-      linear-gradient(180deg, rgb(var(--base-rgb) / 0.48), rgb(var(--base-rgb) / 0.96) 72%),
+      linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.48 * var(--overlay))), rgb(var(--base-rgb) / calc(0.96 * var(--overlay))) 72%),
       url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
@@ -2864,6 +2866,6 @@ section.stage > .content {
 
 :root[data-scheme="light"] :is(.preview-bg, .preview-bg-next) {
   background-image:
-    linear-gradient(90deg, rgb(var(--base-rgb) / 0.9), rgb(var(--base-rgb) / 0.78) 40%, rgb(var(--base-rgb) / 0.6) 70%, rgb(var(--base-rgb) / 0.5)),
+    linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(0.78 * var(--overlay))) 40%, rgb(var(--base-rgb) / calc(0.6 * var(--overlay))) 70%, rgb(var(--base-rgb) / calc(0.5 * var(--overlay)))),
     var(--bg);
 }

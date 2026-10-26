@@ -18,7 +18,7 @@
 .sidebarNote :global(.cta-copy) { font-size: 16px; line-height: 1.4; }
 .mainSite { font-size: 10px; color: var(--muted); width: fit-content; }
 .stage { min-width: 0; min-height: 0; }
-.background { animation: reveal-background .7s ease both; background-image: linear-gradient(90deg, rgb(var(--base-rgb) / 0.8), rgb(var(--base-rgb) / 0.53) 65%, rgb(var(--base-rgb) / 0.4)), var(--bg); }
+.background { animation: reveal-background .7s ease both; background-image: linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.8 * var(--overlay))), rgb(var(--base-rgb) / calc(0.53 * var(--overlay))) 65%, rgb(var(--base-rgb) / calc(0.4 * var(--overlay)))), var(--bg); }
 .content { padding-top: 80px; padding-bottom: 95px; gap: 35px; overflow-y: auto; }
 .anchor { min-height: 0; }
 .copy { animation: reveal-copy .4s ease both; }
@@ -89,7 +89,7 @@
   .mobileCounter { display: inline; }
   .mobileTrack { display: block; position: relative; height: 100%; width: 100%; overflow-x: hidden; overflow-y: auto; scroll-snap-type: y proximity; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-color: rgb(var(--ink-rgb) / 0.27) transparent; }
   .mobilePanel { position: relative; isolation: isolate; min-height: calc(100dvh - 70px); padding: 48px 7% 110px; display: flex; align-items: flex-start; scroll-snap-align: start; }
-  .background { background-image: linear-gradient(90deg, rgb(var(--base-rgb) / 0.8), rgb(var(--base-rgb) / 0.6)), var(--bg); }
+  .background { background-image: linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.8 * var(--overlay))), rgb(var(--base-rgb) / calc(0.6 * var(--overlay)))), var(--bg); }
   .siteMenu { display: none; }
   .content { height: 100%; padding: 45px 7% 85px; align-items: flex-start; overflow-y: auto; display: block; }
   .content.desktopContent { display: none; }
@@ -135,7 +135,7 @@
  .shell .mobilePanel .eyebrow{min-height:36px}
  .shell .stageFooter{display:none}
  .shell .sidebarNote{flex-wrap:wrap}
- .shell .mobilePanel .background{inset:-12%;transform:translateY(var(--parallax-y,0));background-image:linear-gradient(180deg,rgb(var(--base-rgb) / 0.33),rgb(var(--base-rgb) / 0.87)),var(--bg)}
+ .shell .mobilePanel .background{inset:-12%;transform:translateY(var(--parallax-y,0));background-image:linear-gradient(180deg,rgb(var(--base-rgb) / calc(0.33 * var(--overlay))),rgb(var(--base-rgb) / calc(0.87 * var(--overlay)))),var(--bg)}
  .shell .details{margin-top:34px}
 }
 @media(prefers-reduced-motion:reduce){.changingDetails{transition:none}.fading .changingDetails{opacity:1;transform:none}}
@@ -205,7 +205,7 @@
  .mobileIntro h1 { font-size:clamp(42px,12vw,64px);line-height:1.05;margin-top:20px;font-weight:300;letter-spacing:-.055em; }
  .mobileIntro p { font-size:16px;line-height:1.6;margin-top:18px;max-width:290px; }
  .sectionCard { display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;position:relative;isolation:isolate;overflow:hidden;width:100%;min-height:250px;margin-bottom:16px;padding:25px;text-align:left;border:var(--stroke) solid rgb(var(--ink-rgb) / 0.15);background:var(--surface);color:var(--white); }
- .sectionCard:before { content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgb(var(--base-rgb) / 0.13),rgb(var(--base-rgb) / 0.93)),var(--bg) center/cover;transition:transform .5s ease; }
+ .sectionCard:before { content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgb(var(--base-rgb) / calc(0.13 * var(--overlay))),rgb(var(--base-rgb) / calc(0.93 * var(--overlay)))),var(--bg) center/cover;transition:transform .5s ease; }
  .sectionCard:active:before { transform:scale(1.03); }
  .sectionCardLabel { font-size:9px;letter-spacing:.18em;margin-bottom:15px; }
  .sectionCardTitle { font:300 38px/1.1 var(--font-display);letter-spacing:-.04em; }
@@ -223,5 +223,5 @@
  .shell .mobilePanel { scroll-margin-top:104px; }
 }
 /* Light mode: a heavier paper wash over the photos keeps the dark text readable. */
-:global(:root[data-scheme="light"]) .background { background-image: linear-gradient(90deg, rgb(var(--base-rgb) / 0.9), rgb(var(--base-rgb) / 0.76) 65%, rgb(var(--base-rgb) / 0.66)), var(--bg); }
-@media (max-width: 760px) { :global(:root[data-scheme="light"]) .shell .mobilePanel .background { background-image: linear-gradient(180deg, rgb(var(--base-rgb) / 0.72), rgb(var(--base-rgb) / 0.92)), var(--bg); } }
+:global(:root[data-scheme="light"]) .background { background-image: linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(0.76 * var(--overlay))) 65%, rgb(var(--base-rgb) / calc(0.66 * var(--overlay)))), var(--bg); }
+@media (max-width: 760px) { :global(:root[data-scheme="light"]) .shell .mobilePanel .background { background-image: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.72 * var(--overlay))), rgb(var(--base-rgb) / calc(0.92 * var(--overlay)))), var(--bg); } }

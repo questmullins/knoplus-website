@@ -22,6 +22,7 @@
   --glow: #24433845;
   --stroke: 1.5px;
   --shadow: 1;
+  --overlay: 0.5;
   /* names the sales views use */
   --ink: var(--paper);
   --accent: var(--mint);
@@ -139,7 +140,7 @@ h2.section { font-size: 11px; font-weight: 500; letter-spacing: .22em; text-tran
 /* asset cards, after the old project cards */
 .projects { display: grid; gap: 14px; }
 .project { position: relative; overflow: hidden; min-height: 150px; border: var(--stroke) solid var(--line); background: var(--surface); color: var(--paper); padding: 26px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; isolation: isolate; }
-.project::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(var(--base-rgb) / 0.98) 25%, rgb(var(--base-rgb) / 0.6)), var(--image, none) center / cover; opacity: .85; transition: transform .7s ease, opacity .5s; }
+.project::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.98 * var(--overlay))) 25%, rgb(var(--base-rgb) / calc(0.6 * var(--overlay)))), var(--image, none) center / cover; opacity: .85; transition: transform .7s ease, opacity .5s; }
 .project:hover::before { transform: scale(1.025); opacity: 1; }
 .project.plain::before { background: linear-gradient(90deg, var(--menu), var(--bg)); }
 .project:hover { border-color: color-mix(in srgb, var(--mint) 34%, transparent); }
