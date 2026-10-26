@@ -92,8 +92,8 @@ async function route() {
   if (!me.user) return gate("Annex", "Sign in with your kno.plus administrator account to see your work, your websites and your sales.",
     h("div", { class: "stack" }, h("a", { class: "button", href: me.signIn || "/clients/?next=/annex/", text: "Sign in" }),
       me.setup ? h("a", { class: "text-link", href: "#setup", text: "Use your setup code to make or reset your sign-in" }) : null));
-  if (me.user.role !== "owner") return gate("Annex", "Annex is for the kno.plus administrator. Your projects are on your client page.",
-    h("a", { class: "button", href: "/clients/", text: "Go to your projects" }));
+  // clients sign in at the same place and land on their own page
+  if (me.user.role !== "owner") { location.replace("/clients/"); return; }
   const [page, id, tab] = location.hash.slice(1).split("/");
   state.page = PAGES.some(([p]) => p === page) || page === "asset" ? page : "overview";
   state.asset = state.page === "asset" ? id : null;
@@ -205,12 +205,15 @@ async function load() {
   }
 }
 
+// an open ⋯ menu closes when you click anywhere else or press Escape
+document.addEventListener("click", (e) => { for (const m of document.querySelectorAll("details.menu[open]")) if (!m.contains(e.target)) m.open = false; });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") for (const m of document.querySelectorAll("details.menu[open]")) m.open = false; });
 function draw() {
   const view = document.getElementById("view");
   tip.hidden = true;
   if (!view) return;
   const pages = { overview: overviewView, assets: assetsView, websites: websitesView, clients: clientsView, guides: guidesView, settings: workspaceSettingsView, asset: assetView };
-  view.replaceChildren(...[].concat(pages[state.page](state.data)));
+  view.replaceChildren(...[].concat(pages[state.page](state.data)).flat(Infinity).filter((x) => x !== null && x !== undefined && x !== false));
 }
 
 // ---------- Overview ----------
@@ -364,17 +367,156 @@ function websitesView(d) {
 }
 
 // ---------- Clients ----------
+// Every project and who it's for, one row per client, with a ⋯ menu for what you do with them.
+const STATUS_TONE = { "Ongoing": "mint", "Payment needed": "gold", "Waiting on client": "rose", "Live": "mint", "Paused": "muted", "Done": "muted" };
+async function clientAction(path, body, said) {
+  try {
+    const r = await send("clients/" + path, body);
+    state.clientNotice = said ? said(r) : null;
+  } catch (err) { state.clientNotice = { error: err.message }; }
+  state.clientEditor = null;
+  await load();
+  scrollTo({ top: 0, behavior: "smooth" });
+}
+function linkNotice(r, who) {
+  if (r.emailed) return { text: "Sent a password link to " + r.to + " from info@kno.plus. It works once and expires in " + (r.expiresHours === 1 ? "one hour" : r.expiresHours + " hours") + "." };
+  return { text: (r.emailProblem ? r.emailProblem + " " : "") + "Here's the link for " + (who || r.to) + ". Send it to them privately; it works once and expires in " + (r.expiresHours === 1 ? "one hour" : r.expiresHours + " hours") + ".", link: r.link };
+}
+function clientNotice() {
+  const n = state.clientNotice;
+  if (!n) return null;
+  const close = h("button", { class: "text-link", type: "button", text: "Dismiss", onclick: () => { state.clientNotice = null; draw(); } });
+  if (n.error) return h("div", { class: "notice bad", role: "alert" }, h("p", { text: n.error }), close);
+  const copy = n.link ? h("div", { class: "row" }, h("input", { class: "grow", readonly: true, value: n.link, "aria-label": "Password link", onfocus: (e) => e.target.select() }),
+    h("button", { class: "button", type: "button", text: "Copy link", onclick: async (e) => { try { await navigator.clipboard.writeText(n.link); e.target.textContent = "Copied"; } catch { /* the field is selectable */ } } })) : null;
+  return h("div", { class: "notice", role: "status" }, h("p", { text: n.text }), copy, close);
+}
+
+function projectForm(p, d) {
+  const error = h("p", { class: "error", role: "alert" });
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try { await send("clients/project", { ...f, id: p ? p.id : f.id, trial: f.trial ? "/trials/" + (p ? p.id : f.id) + "/" : "" }); state.clientNotice = { text: (p ? "Saved " : "Added ") + f.name + "." }; state.clientEditor = null; await load(); }
+    catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: p ? "Edit " + p.name : "Add a project" }),
+    h("div", { class: "split" },
+      p ? null : h("label", {}, "Short id (letters, numbers, dashes)", h("input", { name: "id", required: true, pattern: "[a-z0-9-]{2,64}", placeholder: "houseplant-nation" })),
+      h("label", {}, "Project name", h("input", { name: "name", required: true, maxlength: "120", value: p ? p.name : "" })),
+      h("label", {}, "Domain", h("input", { name: "domain", placeholder: "example.com", value: p ? p.domain : "" })),
+      h("label", {}, "Status", h("select", { name: "status" }, d.statuses.map((x) => h("option", { value: x, selected: (p ? p.status : "Ongoing") === x, text: x }))))),
+    h("label", { class: "row" }, h("input", { type: "checkbox", name: "trial", value: "1", checked: !!(p && p.trial) }), "It has a preview site under /trials/"),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Save" }), h("button", { class: "button secondary", type: "button", text: "Cancel", onclick: () => { state.clientEditor = null; draw(); } })));
+}
+function clientForm(d, projectId) {
+  const error = h("p", { class: "error", role: "alert" });
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try {
+      const r = await send("clients/client", f);
+      state.clientNotice = r.existing ? { text: f.email + " already had a login; they now also see this project." } : r.link ? linkNotice(r, f.email) : { text: "Added " + f.email + " with the starting password you chose. Send it to them privately." };
+      state.clientEditor = null; await load();
+    } catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: "Add a client" }),
+    h("div", { class: "split" },
+      h("label", {}, "Name", h("input", { name: "name", maxlength: "120", placeholder: "Jane Smith" })),
+      h("label", {}, "Email", h("input", { name: "email", type: "email", required: true })),
+      h("label", {}, "Project", h("select", { name: "projectId", required: true }, d.projects.map((p) => h("option", { value: p.id, selected: p.id === projectId, text: p.name }))))),
+    h("label", {}, "Starting password (optional). Leave it empty and they get an email from info@kno.plus to choose their own.", h("input", { name: "password", type: "password", minlength: "12", autocomplete: "new-password" })),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Add client" }), h("button", { class: "button secondary", type: "button", text: "Cancel", onclick: () => { state.clientEditor = null; draw(); } })));
+}
+function personForm(c) {
+  const error = h("p", { class: "error", role: "alert" });
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try { await send("clients/person", { userId: c.id, ...f }); state.clientNotice = { text: "Saved " + (f.name || f.email) + "." }; state.clientEditor = null; await load(); }
+    catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: "Edit " + (c.name || c.email) }),
+    h("div", { class: "split" }, h("label", {}, "Name", h("input", { name: "name", maxlength: "120", value: c.name })), h("label", {}, "Email", h("input", { name: "email", type: "email", required: true, value: c.email }))),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Save" }), h("button", { class: "button secondary", type: "button", text: "Cancel", onclick: () => { state.clientEditor = null; draw(); } })));
+}
+function updateForm(p) {
+  const error = h("p", { class: "error", role: "alert" });
+  const body = h("textarea", { name: "body", rows: "6", required: true, maxlength: "8000" });
+  return h("form", { class: "panel stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    try { await send("clients/update", { projectId: p.id, title: f.title, body: body.value }); state.clientNotice = { text: "Posted to " + p.name + ". Its clients see it next time they sign in." }; state.clientEditor = null; await load(); }
+    catch (err) { error.textContent = err.message; }
+  } },
+    h("h2", { text: "Post an update to " + p.name }),
+    h("label", {}, "Title", h("input", { name: "title", required: true, maxlength: "200" })), h("label", {}, "Update", body),
+    error, h("div", { class: "row" }, h("button", { class: "button", type: "submit", text: "Post update" }), h("button", { class: "button secondary", type: "button", text: "Cancel", onclick: () => { state.clientEditor = null; draw(); } })));
+}
+
+function rowMenu(p, c, d) {
+  const edit = (form) => () => { state.clientEditor = form; draw(); document.getElementById("client-editor")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const item = (text, run, bad) => h("button", { type: "button", class: bad ? "bad" : null, role: "menuitem", text, onclick: (e) => { e.target.closest("details").open = false; run(); } });
+  const who = c ? c.name || c.email : "";
+  const items = c ? [
+    !c.disabled && item("Send reset email", () => clientAction("reset", { userId: c.id }, (r) => linkNotice(r, who))),
+    !c.disabled && item("Copy a reset link", () => clientAction("reset", { userId: c.id, send: false }, (r) => linkNotice(r, who))),
+    item("Edit name or email", edit(personForm(c))),
+    item("Post an update", edit(updateForm(p))),
+    item("Edit project", edit(projectForm(p, d))),
+    p.trial && h("a", { role: "menuitem", href: p.trial, target: "_blank", rel: "noopener", text: "Open preview site ↗" }),
+    item(c.disabled ? "Turn access back on" : "Turn off access", () => clientAction("disable", { userId: c.id, disabled: !c.disabled }, () => ({ text: (c.disabled ? "Turned access back on for " : "Turned off access for ") + who + "." })), !c.disabled),
+    item("Remove from this project", () => { if (confirm("Remove " + who + " from " + p.name + "? Their login stays.")) clientAction("access", { userId: c.id, projectId: p.id, allow: false }, () => ({ text: "Removed " + who + " from " + p.name + "." })); }, true),
+  ] : [
+    item("Add a client", edit(clientForm(d, p.id))),
+    item("Post an update", edit(updateForm(p))),
+    item("Edit project", edit(projectForm(p, d))),
+    p.trial && h("a", { role: "menuitem", href: p.trial, target: "_blank", rel: "noopener", text: "Open preview site ↗" }),
+  ];
+  return h("details", { class: "menu" }, h("summary", { "aria-label": "Actions for " + (who || p.name), title: "Actions" }, "⋯"), h("div", { class: "menu-list", role: "menu" }, items));
+}
+function statusPicker(p, d) {
+  return h("select", { class: "status " + (STATUS_TONE[p.status] || "mint"), "aria-label": "Status of " + p.name, onchange: (e) => clientAction("project", { id: p.id, name: p.name, domain: p.domain, trial: p.trial, status: e.target.value }, () => ({ text: p.name + " is now " + e.target.value + "." })) },
+    d.statuses.map((x) => h("option", { value: x, selected: p.status === x, text: x })));
+}
+
 function clientsBody(d) {
-  if (!d.projects.length) return [h("div", { class: "panel" }, h("p", { text: "No client projects yet. Add one on the client page." }))];
-  return [h("div", { class: "projects" }, d.projects.map((p) => h("a", { class: "project plain", href: "/clients/" },
-    h("div", {}, h("span", { class: "eyebrow", text: p.trial ? "WEBSITE · TRIAL ONLINE" : "WEBSITE" }), h("h3", { text: p.name }),
-      h("p", { text: p.clients.length ? p.clients.map((c) => c.email + (c.disabled ? " (off)" : "")).join(", ") : "No client access yet" })),
-    h("div", { class: "project-right" }, h("div", { class: "figure" }, h("strong", { text: plural(p.updates, "update") }),
-      h("span", { class: "small", text: p.latest ? "Latest: " + p.latest.title + " · " + prettyDay(new Date(p.latest.created).toISOString().slice(0, 10)) : "No updates yet" })),
-      h("span", { class: "arrow", "aria-hidden": "true", text: "↗" })))))];
+  const q = (state.clientSearch || "").toLowerCase(), only = state.clientStatus || "";
+  const rows = [];
+  for (const p of d.projects) {
+    if (only && p.status !== only) continue;
+    const people = p.clients.length ? p.clients : [null];
+    for (const c of people) {
+      const hay = [p.name, p.domain, p.status, c && c.name, c && c.email].join(" ").toLowerCase();
+      if (!q || hay.includes(q)) rows.push({ p, c });
+    }
+  }
+  const search = h("input", { type: "search", class: "grow", placeholder: "Search projects, clients, emails, domains", "aria-label": "Search clients", value: state.clientSearch || "", oninput: (e) => { state.clientSearch = e.target.value; const at = e.target.selectionStart; draw(); const again = document.querySelector(".client-tools input[type=search]"); if (again) { again.focus(); again.setSelectionRange(at, at); } } });
+  const filter = h("select", { "aria-label": "Show status", onchange: (e) => { state.clientStatus = e.target.value; draw(); } }, h("option", { value: "", text: "Every status" }), d.statuses.map((x) => h("option", { value: x, selected: only === x, text: x })));
+  const name = (c) => c ? [c.name || h("span", { class: "small", text: "No name" }), c.disabled ? h("span", { class: "pill bad", text: "Off" }) : null, c.resetAsked ? h("span", { class: "pill gold", text: "Asked for a reset" }) : null] : h("span", { class: "small", text: "No client yet" });
+  const domain = (p) => p.domain ? h("a", { class: "text-link", href: "https://" + p.domain, target: "_blank", rel: "noopener", text: p.domain }) : h("span", { class: "small", text: "—" });
+  const table = h("div", { class: "panel scroll wide client-table" }, h("table", { class: "table" },
+    h("thead", {}, h("tr", {}, ["Project", "Client", "Email", "Domain", "Status", ""].map((t) => h("th", { text: t })))),
+    h("tbody", {}, rows.map(({ p, c }) => h("tr", {},
+      h("td", {}, h("strong", { text: p.name }), p.latest ? h("div", { class: "small", text: "Last update " + prettyDay(new Date(p.latest.created).toISOString().slice(0, 10)) }) : null),
+      h("td", {}, name(c)), h("td", {}, c ? c.email : ""), h("td", {}, domain(p)), h("td", {}, statusPicker(p, d)), h("td", { class: "n" }, rowMenu(p, c, d)))))));
+  const cards = h("div", { class: "narrow client-cards" }, rows.map(({ p, c }) => h("div", { class: "panel client-card" },
+    h("div", { class: "row" }, h("div", { class: "grow" }, h("span", { class: "eyebrow", text: p.name }), h("strong", {}, name(c)), c ? h("div", { class: "small", text: c.email }) : null), rowMenu(p, c, d)),
+    h("div", { class: "row" }, domain(p), h("span", { class: "grow" }), statusPicker(p, d)))));
+  const editor = state.clientEditor ? h("div", { id: "client-editor" }, state.clientEditor) : null;
+  return [
+    clientNotice(),
+    d.email ? null : h("p", { class: "note", text: "Reset emails aren't set up yet, so ⋯ › Send reset email gives you a link to copy instead. Guides › \"Set up emails to clients\" shows how to turn it on." }),
+    editor,
+    h("div", { class: "row client-tools" }, search, filter),
+    rows.length ? [table, cards] : h("p", { class: "empty", text: d.projects.length ? "Nothing matches." : "No projects yet. Add one to get started." }),
+  ];
 }
 function clientsView(d) {
-  return [intro("Your clients", "The work, together.", "Each client project, who can see it, and the latest update you posted.", h("a", { class: "button", href: "/clients/", text: "Manage clients ↗" })), ...clientsBody(d)];
+  const add = (form) => () => { state.clientEditor = form; draw(); };
+  return [intro("Your clients", "The work, together.", "Every project, who it's for and where it stands. Clients only ever see their own page.",
+    h("div", { class: "row" }, h("button", { class: "button", type: "button", text: "Add client", onclick: add(clientForm(d)) }), h("button", { class: "button secondary", type: "button", text: "Add project", onclick: add(projectForm(null, d)) }))),
+  ...clientsBody(d)];
 }
 
 // ---------- Guides: the owner's SOPs and notes, written in markdown ----------

@@ -69,6 +69,7 @@ const searchRows = { date: week.map((d, i) => ({ keys: [d], clicks: 3 + i, impre
 const body = (req) => new Promise((done) => { let s = ""; req.on("data", (c) => (s += c)); req.on("end", () => done(s)); });
 
 export const seen = [];
+let lastMail = null;
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   const reply = (status, body) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
@@ -105,5 +106,12 @@ http.createServer(async (req, res) => {
   }
   if (url.pathname === "/prodigi/v4.0/orders") return req.headers["x-api-key"] === "pd-live" ? reply(200, prodigi) : reply(401, {});
   if (url.pathname === "/prodigi/sandbox/v4.0/orders") return req.headers["x-api-key"] === "pd-sandbox" ? reply(200, prodigiSandbox) : reply(401, {});
+  // Resend: keeps the last email so the tests can read the link it carried
+  if (url.pathname === "/resend/emails" && req.method === "POST") {
+    if (req.headers.authorization !== "Bearer re-test") return reply(401, { message: "API key is invalid" });
+    lastMail = JSON.parse(await body(req));
+    return reply(200, { id: "mail-" + Date.now() });
+  }
+  if (url.pathname === "/resend/last") return reply(200, lastMail);
   reply(404, {});
 }).listen(port, () => console.log("fakes on " + port));

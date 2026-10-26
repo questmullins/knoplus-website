@@ -129,6 +129,42 @@ check("Search Console: the verified property only", sc.connected && sc.sites.len
 const t = sc.sites[0].totals;
 check("Search Console click-through rate: " + JSON.stringify(t), t.clicks === 7 * 3 + 21 && t.impressions === 700 + 210 && Math.abs(t.ctr - 42 / 910) < 1e-9 && sc.sites[0].queries[0].name === "kno plus");
 check("clients list", Array.isArray((await api("clients")).body.projects));
+
+// clients, managed from Annex: projects with a domain and status, clients on them, and password links by email
+const FAKES = "http://127.0.0.1:8790";
+const lastMail = async () => (await fetch(FAKES + "/resend/last")).json();
+const proj = run.toLowerCase().slice(0, 40);
+check("a project needs a good id", (await api("clients/project", { id: "Bad Id", name: "x" })).status === 400);
+check("a project's domain is checked", (await api("clients/project", { id: proj, name: "Test site", domain: "not a domain" })).status === 400);
+check("project saved with domain and status", (await api("clients/project", { id: proj, name: "Test site", domain: "https://Example-Client.com/about", status: "Payment needed" })).status === 200);
+let table = (await api("clients")).body;
+let row = table.projects.find((p) => p.id === proj);
+check("the table shows the domain and status", row.domain === "example-client.com" && row.status === "Payment needed" && table.statuses.includes("Ongoing") && table.email === true);
+const newClient = await api("clients/client", { name: "Ada Test", email: `${run}-ada@example.test`, projectId: proj });
+let mail = await lastMail();
+check("a new client is emailed an invite from info@kno.plus", newClient.body.emailed === true && mail.to[0] === `${run}-ada@example.test` && /info@kno\.plus/.test(mail.from) && mail.text.includes(newClient.body.link));
+row = (await api("clients")).body.projects.find((p) => p.id === proj);
+const ada = row.clients[0];
+check("the client shows on their project", ada && ada.name === "Ada Test" && !ada.disabled);
+check("a client can't be added twice by email", (await api("clients/client", { email: `${run}-ada@example.test`, projectId: proj })).body.existing === true);
+const reset = await api("clients/reset", { userId: ada.id });
+mail = await lastMail();
+check("reset email sent with a one-hour link", reset.body.emailed === true && reset.body.expiresHours === 1 && mail.subject.includes("Reset") && mail.text.includes(reset.body.link));
+const copied = await api("clients/reset", { userId: ada.id, send: false });
+check("a reset link can be copied instead", copied.body.emailed === false && copied.body.link !== reset.body.link && (await lastMail()).text.includes(reset.body.link));
+const used = await fetch(ORIGIN + "/api/clients/reset", { method: "POST", headers: { "Content-Type": "application/json", Origin: ORIGIN }, body: JSON.stringify({ token: copied.body.link.split("#reset=")[1], password: "a brand new password" }) });
+check("the client sets a password with the link", used.status === 200);
+const stale = await fetch(ORIGIN + "/api/clients/reset", { method: "POST", headers: { "Content-Type": "application/json", Origin: ORIGIN }, body: JSON.stringify({ token: reset.body.link.split("#reset=")[1], password: "a brand new password" }) });
+check("the older link stopped working", stale.status === 400);
+check("name and email edited", (await api("clients/person", { userId: ada.id, name: "Ada L", email: `${run}-ada2@example.test` })).status === 200);
+check("an update posted", (await api("clients/update", { projectId: proj, title: "Week one", body: "Pages are up." })).status === 200);
+row = (await api("clients")).body.projects.find((p) => p.id === proj);
+check("the table shows the edit and the update", row.clients[0].email === `${run}-ada2@example.test` && row.updates === 1 && row.latest.title === "Week one");
+check("access turned off", (await api("clients/disable", { userId: ada.id, disabled: true })).status === 200 && (await api("clients")).body.projects.find((p) => p.id === proj).clients[0].disabled);
+check("no reset link while access is off", (await api("clients/reset", { userId: ada.id })).status === 400);
+check("removed from the project", (await api("clients/access", { userId: ada.id, projectId: proj, allow: false })).status === 200 && (await api("clients")).body.projects.find((p) => p.id === proj).clients.length === 0);
+check("an unknown action is refused", (await api("clients/nope", {})).status >= 400);
+process.on("exit", () => d1(`DELETE FROM updates WHERE project_id = '${proj}'; DELETE FROM grants WHERE project_id = '${proj}'; DELETE FROM projects WHERE id = '${proj}'; DELETE FROM resets WHERE user_id IN (SELECT id FROM users WHERE email LIKE '${run}%'); DELETE FROM users WHERE email LIKE '${run}%';`));
 const overview = (await api("overview")).body;
 check("overview adds up the assets and the web", overview.sales === home.sales.value && overview.web.connected && overview.web.zones === 2 && overview.assets.length >= 3);
 const firstGuides = (await api("guides")).body;
@@ -142,6 +178,7 @@ check("guide saved again replaces it", (await api("guides", { id: "quick-answers
 check("guide deleted", (await api("guides/words-you-ll-see", {}, "DELETE")).status === 200 && (await api("guides/words-you-ll-see")).status === 404);
 cookie = client;
 check("a client can't see the workspace or the guides", (await api("overview")).status === 403 && (await api("websites")).status === 403 && (await api("assets")).status === 403 && (await api("guides")).status === 403);
+check("a client can't manage clients", (await api("clients")).status === 403 && (await api("clients/reset", { userId: "x" })).status === 403);
 cookie = admin;
 
 // webhook: refused without the right signature

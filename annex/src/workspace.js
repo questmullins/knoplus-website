@@ -67,19 +67,3 @@ export async function saveAsset(request, db) {
       String(ask.note || "").trim().slice(0, 160), Math.max(0, Math.min(999, Number(ask.sort) || 0)), new Date().toISOString()).run();
   return json({ ok: true });
 }
-
-// The client side of the work: projects, who can see them, and the latest update on each.
-export async function clientList(db) {
-  const q = async (sql) => (await db.prepare(sql).all()).results;
-  const [projects, grants, updates] = await Promise.all([
-    q("SELECT * FROM projects ORDER BY name"),
-    q("SELECT g.project_id, u.email, u.disabled FROM grants g JOIN users u ON u.id = g.user_id WHERE u.role = 'client'"),
-    q("SELECT project_id, title, created FROM updates ORDER BY created DESC LIMIT 200"),
-  ]);
-  return projects.map((p) => ({
-    id: p.id, name: p.name, trial: p.trial_path,
-    clients: grants.filter((g) => g.project_id === p.id).map((g) => ({ email: g.email, disabled: !!g.disabled })),
-    latest: updates.find((u) => u.project_id === p.id) || null,
-    updates: updates.filter((u) => u.project_id === p.id).length,
-  }));
-}

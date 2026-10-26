@@ -268,3 +268,34 @@ textarea { background: var(--field); border: 1px solid var(--line); color: var(-
 .sop .go .button { white-space: normal; text-align: center; }
 @media (max-width: 760px) { .sop summary { font-size: 18px; } .sop .go .button { flex: 1 1 100%; } }
 .toolbar h2.section { font-size: 11px; font-weight: 500; }
+
+/* Clients: one table of projects and their clients, a ⋯ menu on each row, and notices after an action */
+.notice { display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; border: 1px solid #85cfc055; background: #85cfc010; padding: 14px 18px; margin-bottom: 18px; }
+.notice p { margin: 0; color: var(--paper); flex: 1 1 260px; }
+.notice .row { flex: 1 1 100%; }
+.notice input, .client-tools input, .client-tools select { background: var(--field); border: 1px solid var(--line); padding: 10px 12px; min-height: 40px; }
+.notice.bad { border-color: #ff8a8055; background: #ff8a8010; }
+.client-tools { margin-bottom: 14px; }
+.client-table.scroll { overflow: visible; }
+.client-table td { vertical-align: middle; }
+.client-table .off { color: var(--muted); text-decoration: line-through; }
+details.menu { position: relative; display: inline-block; }
+details.menu > summary { list-style: none; cursor: pointer; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); font-size: 18px; line-height: 1; user-select: none; }
+details.menu > summary::-webkit-details-marker { display: none; }
+details.menu > summary:hover, details.menu[open] > summary { border-color: var(--mint); color: var(--mint); }
+.menu-list { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 230px; display: grid; background: #0d1312; border: 1px solid #ffffff35; box-shadow: 0 18px 40px #000a; padding: 6px 0; }
+.menu-list > button, .menu-list > a { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 10px 16px; font-size: 13px; color: var(--paper); white-space: nowrap; }
+.menu-list > button:hover, .menu-list > a:hover { background: #85cfc018; color: var(--mint); }
+.menu-list > .bad { color: var(--bad); }
+select.status { background: var(--field); border: 1px solid currentColor; padding: 6px 10px; font-size: 12px; min-height: 34px; color: var(--mint); }
+select.status.gold { color: var(--gold); }
+select.status.rose { color: var(--rose); }
+select.status.muted { color: var(--muted); }
+select.status option { color: var(--paper); }
+.pill.gold { color: var(--gold); border-color: #d9b06f55; }
+.client-cards { display: grid; gap: 12px; }
+.client-card { display: grid; gap: 8px; }
+.client-card .row { justify-content: space-between; flex-wrap: nowrap; }
+.client-card .menu-list { right: 0; }
+.client-table .pill, .client-card .pill { margin-left: 6px; }
+@media (min-width: 761px) { .client-cards { display: none; } .client-tools select { width: auto; flex: 0 0 220px; } }
