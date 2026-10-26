@@ -5,13 +5,17 @@
   "main": "./worker.js",
   "workers_dev": true,
   "preview_urls": true,
-  "routes": [{"pattern":"kno.plus","custom_domain":true},{"pattern":"manage.kno.plus","custom_domain":true}],
+  "routes": [{"pattern":"kno.plus","custom_domain":true}],
   "assets": {
     "directory": "./nextjs-elements/out",
     "binding": "ASSETS",
     "run_worker_first": true
   },
   "d1_databases": [{"binding":"CLIENT_DB","database_name":"knoplus-clients","database_id":"9c723a22-a9bc-4104-92d7-a933d9dcb145"}],
+  // Annex (annex/) reads its account's .sql schema files as text.
+  "rules": [{ "type": "Text", "globs": ["**/*.sql"], "fallthrough": true }],
+  // Annex pulls every connected account's sales each night; Square's webhook keeps them fresh in between.
+  "triggers": { "crons": ["17 8 * * *"] },
   "send_email": [
     {
       "name": "EMAIL",
@@ -20,7 +24,8 @@
   ],
   "vars": {
     "CONTACT_TO": "info@kno.plus",
-    "CONTACT_FROM": "Knoplus <info@kno.plus>"
+    "CONTACT_FROM": "Knoplus <info@kno.plus>",
+    "ANNEX_ACCOUNT": "rosewave"
   },
   "observability": {
     "enabled": true

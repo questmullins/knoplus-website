@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import { TemplateShowcase } from "@/components/TemplateShowcase";
+import { ServicesShowcase } from "./work/services-showcase";
 
 export const metadata: Metadata = {
-  title: "Website Templates and Custom Websites",
+  title: "Web Services & App Services",
   description:
-    "Explore Knoplus website templates, custom website options, mobile-friendly layouts, SEO-ready structure, and launch support for independent businesses.",
-  alternates: {
-    canonical: "/"
-  }
+    "Thoughtful websites, web tools, and mobile apps, shaped around the thing you want to change.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Kno.plus — Ideas into useful things",
+    description: "Design and development. Websites, web tools, and mobile apps.",
+    url: "https://kno.plus/",
+  },
 };
 
 export default function HomePage() {
-  return <TemplateShowcase />;
+  return <ServicesShowcase />;
 }

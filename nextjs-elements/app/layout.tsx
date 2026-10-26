@@ -10,28 +10,22 @@ const structuredData = [
     url: "https://kno.plus",
     email: "info@kno.plus",
     description:
-      "Knoplus builds fast website templates and service websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
+      "Knoplus makes websites, web tools, and mobile apps, including fast service websites for independent businesses with mobile-friendly design, basic SEO setup, contact forms, Cloudflare deployment, and launch support.",
     areaServed: "United States",
     offers: [
       {
         "@type": "Offer",
         name: "Template Website",
-        price: "500",
-        priceCurrency: "USD",
         description: "Professional template websites customized for small businesses, local companies, and independent brands."
       },
       {
         "@type": "Offer",
         name: "Custom Website",
-        price: "1500",
-        priceCurrency: "USD",
         description: "Custom website design with original layouts, user experience, visual direction, and launch support."
       },
       {
         "@type": "Offer",
         name: "Website Care Plan",
-        price: "39",
-        priceCurrency: "USD",
         description: "Optional monthly website care for hosting management, SSL monitoring, client-owned domain connection support, and content updates."
       }
     ],
@@ -62,14 +56,14 @@ const structuredData = [
       "About Us",
       "Home",
       "Our Process",
-      "Pricing",
+      "Websites",
       "Sitemap"
     ],
     url: [
       "https://kno.plus/about",
       "https://kno.plus",
       "https://kno.plus/process",
-      "https://kno.plus/pricing",
+      "https://kno.plus/websites",
       "https://kno.plus/sitemap"
     ]
   }
@@ -78,7 +72,7 @@ const structuredData = [
 export const metadata: Metadata = {
   metadataBase: new URL("https://kno.plus"),
   title: {
-    default: "Knoplus | Website Templates and Custom Websites for Independent Businesses",
+    default: "Knoplus | Websites, Web Tools, and Mobile Apps",
     template: "%s | Knoplus"
   },
   description:
@@ -102,7 +96,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Knoplus | Website Templates and Custom Websites",
     description:
-      "Modern, professional websites starting at $500 with templates, custom builds, mobile-friendly design, basic SEO setup, and launch support.",
+      "Modern, professional websites with templates, custom builds, mobile-friendly design, basic SEO setup, and launch support.",
     url: "https://kno.plus",
     siteName: "Knoplus",
     type: "website"

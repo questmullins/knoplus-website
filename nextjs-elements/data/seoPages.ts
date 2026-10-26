@@ -44,7 +44,7 @@ export const seoPages: SeoPage[] = [
     ],
     links: [
       { label: "Explore Templates", href: "/" },
-      { label: "View Pricing", href: "/pricing" },
+      { label: "Browse Websites", href: "/websites" },
       { label: "Website Care Plans", href: "/website-care-plans" }
     ]
   },
@@ -75,8 +75,8 @@ export const seoPages: SeoPage[] = [
     ],
     links: [
       { label: "Explore Automotive Templates", href: "/" },
-      { label: "View Template Pricing", href: "/pricing" },
-      { label: "Request Custom Quote", href: "/pricing" }
+      { label: "Browse Templates", href: "/websites" },
+      { label: "Request Custom Quote", href: "mailto:info@kno.plus?subject=Custom%20website" }
     ]
   },
   {
@@ -106,7 +106,7 @@ export const seoPages: SeoPage[] = [
     ],
     links: [
       { label: "Explore Home Service Templates", href: "/" },
-      { label: "View Pricing", href: "/pricing" },
+      { label: "Browse Websites", href: "/websites" },
       { label: "See Our Process", href: "/process" }
     ]
   },
@@ -136,9 +136,9 @@ export const seoPages: SeoPage[] = [
       }
     ],
     links: [
-      { label: "View Care Pricing", href: "/pricing" },
+      { label: "Ask About Care", href: "mailto:info@kno.plus?subject=Website%20care" },
       { label: "Explore Templates", href: "/" },
-      { label: "Request Custom Quote", href: "/pricing" }
+      { label: "Request Custom Quote", href: "mailto:info@kno.plus?subject=Custom%20website" }
     ]
   }
 ];

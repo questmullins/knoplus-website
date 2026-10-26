@@ -59,7 +59,7 @@ export function SeoLandingPage({ page }: SeoLandingPageProps) {
           <nav className="seo-nav" aria-label="Website service pages">
             <span>Explore</span>
             <Link href="/">Template Viewer</Link>
-            <Link href="/pricing">Pricing</Link>
+            <Link href="/websites">Websites</Link>
             <Link href="/small-business-websites">Small Business Websites</Link>
             <Link href="/process">Our Process</Link>
           </nav>
