@@ -85,8 +85,15 @@ def svg(letter):
         pen = SVGPathPen(glyphs)
         glyphs[name].draw(pen)
         paths.append(f'<path transform="translate({ox + dx * s:.2f} {oy:.2f}) scale({s:.5f} {-s:.5f})" d="{pen.getCommands()}"/>')
+    # A faint point grid behind the letters, faded out toward the edges by a vignette.
+    grid = (f'<defs><pattern id="g" width="6" height="6" patternUnits="userSpaceOnUse" x="2" y="2">'
+            f'<circle cx="1" cy="1" r=".75" fill="{PAPER}"/></pattern>'
+            f'<radialGradient id="v"><stop offset="0" stop-color="#fff" stop-opacity=".55"/>'
+            f'<stop offset=".75" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+            f'<mask id="m"><rect width="64" height="64" fill="url(#v)"/></mask></defs>'
+            f'<rect width="64" height="64" fill="url(#g)" mask="url(#m)"/>')
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="{INK}"/>'
-            f'<g fill="{PAPER}">{"".join(paths)}</g></svg>\n')
+            f'{grid}<g fill="{PAPER}">{"".join(paths)}</g></svg>\n')
 
 
 def png(letter, size, box=0.78, rounded=False):
@@ -94,6 +101,18 @@ def png(letter, size, box=0.78, rounded=False):
     s, ox, oy = fit(parts, box, size * 4)
     n = size * 4
     img = Image.new("RGB", (n, n), INK)
+    # same point grid and vignette as the SVG, at this size
+    dots = Image.new("L", (n, n), 0)
+    dd = ImageDraw.Draw(dots)
+    r = n / 64 * 0.75
+    for gy in range(11):
+        for gx in range(11):
+            cx, cy = (3 + gx * 6) * n / 64, (3 + gy * 6) * n / 64
+            dist = ((cx - n / 2) ** 2 + (cy - n / 2) ** 2) ** 0.5 / (n / 2)
+            a = 0.55 - (0.41 * dist / 0.75 if dist < 0.75 else 0.41 + 0.56 * (dist - 0.75))
+            if a > 0:
+                dd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=int(255 * a))
+    img.paste(Image.new("RGB", (n, n), PAPER), mask=dots)
     mask = Image.new("L", (n, n), 0)
     for name, dx in parts:
         pen = Flat(glyphs)
