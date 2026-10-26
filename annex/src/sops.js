@@ -219,6 +219,7 @@ export const SOPS = [
         id: "setup-email", q: "Set up emails to clients (reset links and invites)",
         answer: "Client emails go out through Resend, a sending service, so they come from info@kno.plus. Until it's set up, Annex gives you a link to copy instead.",
         steps: [
+          "First check: if **Clients** shows no note about emails, `RESEND_API_KEY` is already set (the contact form can use it too) and you're done. Otherwise:",
           "Make a free account at [resend.com](https://resend.com).",
           "Go to **Domains › Add domain**, enter `kno.plus`, and let Resend add its records to Cloudflare (or copy them into Cloudflare › kno.plus › DNS). Wait until it says **Verified**.",
           "Go to **API Keys › Create API key**. Give it **Sending access** to kno.plus only. Copy the key; Resend shows it once.",
