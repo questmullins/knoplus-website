@@ -22,8 +22,23 @@ const check = (name, ok) => { assert.ok(ok, name); console.log("ok  " + name); }
 for (const file of ["annex/schema/shared.sql", "annex/schema/account.sql"]) execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--file", file], { stdio: "pipe" });
 d1(["accounts", "connections", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
 
-// a kno.plus administrator and a client, signed in by writing their sessions straight into the local database
 const run = "annex-test-" + Date.now();
+
+// the first administrator: only with the setup code, and only once
+d1("DELETE FROM sessions; DELETE FROM users WHERE role = 'admin'; DELETE FROM limits;");
+check("no administrator yet: setup offered", (await api("me")).body.setup === true);
+check("wrong setup code refused", (await api("setup", { code: "nope", email: "q@example.test", password: "a long password" })).status === 403);
+check("short password refused", (await api("setup", { code: "test-setup-code-123", email: "q@example.test", password: "short" })).status === 400);
+const made = await fetch(BASE + "setup", { method: "POST", headers: { "Content-Type": "application/json", Origin: ORIGIN }, body: JSON.stringify({ code: "test-setup-code-123", email: `${run}-first@example.test`, password: "a long password" }) });
+check("setup makes the administrator and signs in", made.status === 200 && /__Host-kno_client=[a-f0-9]{64}/.test(made.headers.get("set-cookie")));
+cookie = made.headers.get("set-cookie").split(";")[0];
+check("the new administrator sees Annex", (await api("me")).body.user.role === "owner");
+cookie = "";
+check("second setup refused", (await api("setup", { code: "test-setup-code-123", email: "x@example.test", password: "a long password" })).status === 409);
+check("setup no longer offered", (await api("me")).body.setup === false);
+d1(`DELETE FROM sessions; DELETE FROM users WHERE email = '${run}-first@example.test';`);
+
+// a kno.plus administrator and a client, signed in by writing their sessions straight into the local database
 const token = (role) => {
   const t = randomBytes(32).toString("hex");
   d1(`INSERT INTO users(id,email,password,role,disabled) VALUES('${run}-${role}','${run}-${role}@example.test','unused','${role}',0);

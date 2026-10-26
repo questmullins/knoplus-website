@@ -41,6 +41,10 @@ Keys are Worker secrets and are never stored anywhere else or shown on the page.
 
 ## Turning it on
 
+0. **Your sign-in.** Add a Worker secret `ANNEX_SETUP_CODE` (any 12+ characters) to knoplus-website, open
+   `https://kno.plus/annex`, and enter that code with your email and a password. This makes the kno.plus administrator
+   (the same sign-in works at `/clients`). It only works while there is no administrator; delete the secret afterwards
+   if you like.
 1. **kno.plus Worker secrets** (Workers & Pages › knoplus-website › Settings › Variables and Secrets, type Secret):
    the connection secrets above.
 2. **RoseWave worker:** deploy the `cloud/worker.js` that has `annex/feed`, add the secret `ANNEX_KEY` (any long

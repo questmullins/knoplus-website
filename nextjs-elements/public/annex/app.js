@@ -92,6 +92,8 @@ async function boot() {
 }
 
 function render() {
+  if (!state.me.user && state.me.setup) return setupView();
+  if (!state.me.user && state.me.setupCodeMissing) return gate("Set up Annex", "Annex has no administrator yet. Add a Worker secret named ANNEX_SETUP_CODE (12 or more characters) to knoplus-website in Cloudflare, then reload this page.", null);
   if (!state.me.user) return gate("Annex", "Sign in with your kno.plus administrator account to see your work, your website and your sales.",
     h("a", { class: "primary", href: state.me.signIn || "/clients/?next=/annex/", text: "Sign in" }));
   if (state.me.user.role !== "owner") return gate("Annex", "Annex is for the kno.plus administrator. Your projects are on your client page.",
@@ -103,6 +105,23 @@ function render() {
 
 function gate(title, words, action) {
   app.replaceChildren(h("section", { class: "gate" }, h("h1", { text: title }), h("p", { text: words }), action));
+}
+
+function setupView() {
+  const error = h("p", { class: "error", role: "alert" });
+  const form = h("form", { class: "stack", onsubmit: async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    try {
+      await send("setup", { code: f.get("code"), email: f.get("email"), password: f.get("password") });
+      location.reload();
+    } catch (err) { error.textContent = err.message; }
+  } },
+    h("label", {}, "Setup code (the ANNEX_SETUP_CODE secret)", h("input", { name: "code", type: "password", required: true, autocomplete: "off" })),
+    h("label", {}, "Your email", h("input", { name: "email", type: "email", required: true, autocomplete: "email" })),
+    h("label", {}, "Password (12 or more characters)", h("input", { name: "password", type: "password", required: true, minlength: "12", autocomplete: "new-password" })),
+    error, h("button", { class: "primary", type: "submit", text: "Create my sign-in" }));
+  gate("Set up Annex", "Create the kno.plus administrator sign-in. It works here and at kno.plus/clients.", form);
 }
 
 // ---------- the frame: name, date range, tabs ----------

@@ -10,12 +10,13 @@
 // Sign-in is the kno.plus administrator account (the same one /clients uses), so there is one password for everything.
 // Annex keeps its account list and each account's sales in the kno.plus database (CLIENT_DB) unless an account names
 // a database of its own (a binding DB_<ACCOUNT>).
-import { sessionUser } from "../../server/client-auth.js";
+import { cookie, digest, passwordHash, randomToken, rateLimit, sessionUser } from "../../server/client-auth.js";
+import clientSchema from "../../server/client-schema.sql";
 import { siteReport } from "../../server/analytics.js";
 import { CONNECTIONS, accountDb, connectionRows, ensureShared, secretName, syncAccount } from "./sync.js";
 import { bestSellers, costSummary, home, memberSummary, orderList, trends } from "./report.js";
 import { verify } from "./connections/square.js";
-import { addDays, dayOf, daysBetween, fail, json, readJson } from "./util.js";
+import { addDays, dayOf, daysBetween, fail, json, readJson, same } from "./util.js";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ID = /^[a-z0-9][a-z0-9-]{0,30}$/;
@@ -97,9 +98,13 @@ async function api(request, env, ctx, url) {
     if (request.headers.get("Origin") !== url.origin) return fail("Not allowed", 403);
     if (!(request.headers.get("Content-Type") || "").startsWith("application/json")) return fail("Send JSON", 415);
   }
+  if (route === "setup" && method === "POST") return setupAdmin(request, env);
   const user = await sessionUser(request, env.CLIENT_DB);
   if (route === "me") {
-    if (!user) return json({ user: null, signIn: "/clients/?next=/annex/" });
+    if (!user) {
+      const open = !(await hasAdmin(env.CLIENT_DB));
+      return json({ user: null, signIn: "/clients/?next=/annex/", setup: open && !!env.ANNEX_SETUP_CODE, setupCodeMissing: open && !env.ANNEX_SETUP_CODE });
+    }
     if (user.role !== "admin") return json({ user: { email: user.email, role: "" } });
   }
   if (!user) return fail("Sign in first", 401);
@@ -141,6 +146,38 @@ async function api(request, env, ctx, url) {
   if (method === "POST" && route.startsWith("connections/")) return configure(request, db, route.slice(12));
   if (method === "POST" && route === "settings") return settings(request, env, account);
   return fail("Not found", 404);
+}
+
+// The kno.plus tables, made here too so the very first sign-in works on a new database.
+let clientTables;
+const ensureClientTables = (db) => (clientTables ||= db.batch(
+  clientSchema.split(";").map((s) => s.trim()).filter(Boolean).map((s) => db.prepare(s)),
+).catch((error) => { clientTables = null; throw error; }));
+
+async function hasAdmin(db) {
+  await ensureClientTables(db);
+  return !!(await db.prepare("SELECT 1 FROM users WHERE role = 'admin' AND disabled = 0 LIMIT 1").first());
+}
+
+// The first administrator: only while there is none, and only with the ANNEX_SETUP_CODE Worker secret.
+async function setupAdmin(request, env) {
+  const db = env.CLIENT_DB;
+  const ip = request.headers.get("CF-Connecting-IP") || "local";
+  await ensureClientTables(db);
+  if (!(await rateLimit(db, "annex-setup:" + ip, 10))) return fail("Too many tries. Wait fifteen minutes and try again.", 429);
+  if (await hasAdmin(db)) return fail("Annex is already set up. Sign in instead.", 409);
+  const ask = await readJson(request);
+  const code = env.ANNEX_SETUP_CODE || "";
+  if (code.length < 12 || !same(String(ask.code || ""), code)) return fail("That setup code isn't right.", 403);
+  const email = String(ask.email || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) return fail("Add a valid email.");
+  if (typeof ask.password !== "string" || ask.password.length < 12 || ask.password.length > 256) return fail("Use a password of at least 12 characters.");
+  const id = crypto.randomUUID(), token = randomToken();
+  await db.batch([
+    db.prepare("INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, 'admin') ON CONFLICT(email) DO UPDATE SET password = excluded.password, role = 'admin', disabled = 0").bind(id, email, await passwordHash(ask.password)),
+    db.prepare("INSERT INTO sessions (token, user_id, expires) SELECT ?, id, ? FROM users WHERE email = ?").bind(await digest(token), Date.now() + 43200000, email),
+  ]);
+  return json({ ok: true }, 200, { "Set-Cookie": cookie(token) });
 }
 
 const validZone = (tz) => {
