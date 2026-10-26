@@ -104,6 +104,12 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true
+  },
+  // Tab icons are the section's letter in Kanit and a + (scripts/tab-icons.py): K+ here,
+  // R+ on the store, W+ on websites, C+ for clients, A+ in Annex.
+  icons: {
+    icon: { url: "/icons/k-plus.svg", type: "image/svg+xml" },
+    apple: "/icons/k-plus-180.png"
   }
 };
 
