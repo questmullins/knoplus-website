@@ -194,7 +194,7 @@
 .category-action {
   width: fit-content;
   padding-bottom: 5px;
-  border-bottom: 1px solid currentColor;
+  border-bottom: var(--stroke) solid currentColor;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -398,7 +398,7 @@
   padding: clamp(34px, 5vw, 70px);
   display: grid;
   align-content: end;
-  border-right: 1px solid var(--line);
+  border-right: var(--stroke) solid var(--line);
 }
 
 .journal-section span {
@@ -417,7 +417,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-top: 1px solid var(--line);
+  border-top: var(--stroke) solid var(--line);
   background: var(--paper);
 }
 
@@ -441,7 +441,7 @@
   .menu-toggle {
     width: 48px;
     height: 42px;
-    border: 1px solid rgba(255, 255, 255, 0.54);
+    border: var(--stroke) solid rgba(255, 255, 255, 0.54);
     display: inline-grid;
     place-content: center;
     gap: 7px;
@@ -491,7 +491,7 @@
 
   .photo-nav a {
     padding: 16px 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: var(--stroke) solid rgba(255, 255, 255, 0.14);
   }
 
   .category-stack {
@@ -558,7 +558,7 @@
   .journal-section article {
     min-height: 260px;
     border-right: 0;
-    border-bottom: 1px solid var(--line);
+    border-bottom: var(--stroke) solid var(--line);
   }
 
   .photo-footer {
@@ -588,7 +588,7 @@
 .print-section > button { padding: 0; border: 0; cursor: pointer; background: var(--soft); width: 100%; }
 .print-section h2 { font-size: clamp(38px, 5vw, 76px); }
 .print-section p { margin-block: 24px; }
-.text-link { display: inline-block; margin-top: 24px; border: 0; border-bottom: 1px solid; padding: 0 0 6px; background: transparent; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: .16em; }
+.text-link { display: inline-block; margin-top: 24px; border: 0; border-bottom: var(--stroke) solid; padding: 0 0 6px; background: transparent; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: .16em; }
 .journal-section article a { display: block; }
 .journal-section article p { margin-top: 18px; font-size: 13px; }
 .journal-section article span { display: block; }
@@ -620,7 +620,7 @@
 .page .app-icon { width: 20px; height: 20px; object-fit: contain; flex: 0 0 auto; }
 .photo-header {
   align-items: center; padding-block: 17px; color: var(--ink); mix-blend-mode: normal;
-  background: #fff1e1f0; border-bottom: 1px solid #e9c4b680; backdrop-filter: blur(18px);
+  background: #fff1e1f0; border-bottom: var(--stroke) solid #e9c4b680; backdrop-filter: blur(18px);
 }
 .brand { display: flex; align-items: center; gap: 13px; }
 .brand .brand-mark { display: grid; place-items: center; width: 46px; height: 46px; background: #f5e0d1; border-radius: 50%; }
@@ -678,7 +678,7 @@
 .text-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 38px; padding: 15px 22px; min-height: 50px; background: #7c4e5c; color: #fff1e1; border: 0; border-radius: 28px; font-size: 10px; letter-spacing: .1em; }
 .text-link .app-icon { filter: brightness(0) invert(1); }
 .text-link:hover { background: #5d3c49; }
-.journal-section { border-top: 1px solid var(--line); }
+.journal-section { border-top: var(--stroke) solid var(--line); }
 .journal-section article { padding-inline: clamp(26px, 3vw, 55px); }
 .journal-section article h3 { font-size: clamp(28px, 2.7vw, 42px); letter-spacing: -.015em; }
 .journal-section article:last-child { border-right: 0; }
@@ -693,7 +693,7 @@
   .brand .brand-mark { width: 40px; height: 40px; }
   .menu-toggle { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f5e0d1; color: #5d3c49; }
   .menu-toggle .app-icon { width: 24px; height: 24px; }
-  .photo-nav { color: #5d3c49; background: #fff1e1fa; box-shadow: 0 16px 40px #5d3c4926; border: 1px solid #e9c4b6; border-radius: 14px; gap: 0; }
+  .photo-nav { color: #5d3c49; background: #fff1e1fa; box-shadow: 0 16px 40px #5d3c4926; border: var(--stroke) solid #e9c4b6; border-radius: 14px; gap: 0; }
   .photo-nav a { border-color: #e9c4b6; }
   .photo-nav button { margin-top: 12px; }
   .collection-intro { padding: 118px 22px 105px; min-height: 340px; }

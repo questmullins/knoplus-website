@@ -79,7 +79,6 @@ export function AboutExperience() {
                 type="button"
               >
                 <span>{principle.label}</span>
-                <span className="plus" />
               </button>
             ))}
           </div>

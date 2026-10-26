@@ -79,7 +79,6 @@ export function ProcessExperience() {
                 type="button"
               >
                 <span>{step.label}</span>
-                <span className="plus" />
               </button>
             ))}
           </div>

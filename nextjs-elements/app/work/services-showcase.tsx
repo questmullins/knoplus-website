@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ContactModal } from "@/components/ContactModal";
+import { SchemeToggle } from "@/components/SchemeToggle";
 import { SiteMenu } from "@/components/SiteMenu";
 import { buildShowcase } from "./showcase-model";
 import { serviceAccent, type ServiceItem } from "./services";
@@ -212,7 +213,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       <button type="button" className={`template-btn ${s.row} ${expanded.has(item.id) && item.children ? s.open : ""} ${selectedId === item.id ? s.current : ""} ${ancestors.includes(item.id) ? s.inPath : ""}`}
         style={{ "--depth": depth, "--item-accent": serviceAccent(item) } as CSSProperties} data-depth={depth} aria-expanded={item.children ? expanded.has(item.id) : undefined}
         aria-controls={item.children ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, true)}>
-        <span>{item.name}</span><span className="plus" aria-hidden="true" />
+        <span>{item.name}</span>{item.children && <span className={`plus ${expanded.has(item.id) ? "is-open" : ""}`} aria-hidden="true" />}
       </button>
       {item.children && <div id={`folder-${item.id}`} className={`${s.folder} ${expanded.has(item.id) ? s.folderOpen : ""}`} inert={!expanded.has(item.id)} aria-hidden={!expanded.has(item.id)}><div className={s.folderInner}>{rows(item.children, depth + 1)}</div></div>}
     </li>)}</ul>;
@@ -272,7 +273,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   return <>
     <div className={`app ${s.shell}`}>
       <a href="#service-stage" className={s.skip}>Skip to project preview</a>
-      <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Browse services"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
+      <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<SchemeToggle className={s.mobileScheme} /><button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Browse services"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
       <aside inert={isMobile && !mobileOpen} className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
         <div className={`sidebar-brand ${s.desktopBrand}`}>{logo}</div>
         <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Services and projects">

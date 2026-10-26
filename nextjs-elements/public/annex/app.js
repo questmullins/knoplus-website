@@ -146,7 +146,7 @@ function shell() {
   const toggle = h("button", { class: "menu-toggle", "aria-expanded": "false", "aria-controls": "sidebar", onclick: () => open(!document.body.classList.contains("menu-open")) }, "Workspace ", h("span", { "aria-hidden": "true", text: "+" }));
   const current = state.page === "asset" ? "assets" : state.page;
   const nav = h("nav", { "aria-label": "Workspace" }, h("div", { class: "nav-label", text: "Workspace" }),
-    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, onclick: () => open(false) }, name, h("span", { class: "nav-plus", "aria-hidden": "true" }))));
+    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, onclick: () => open(false) }, name)));
   const signOut = h("button", { class: "text-link", text: "Sign out", onclick: async () => {
     await fetch("/api/clients/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" });
     location.reload();
@@ -157,8 +157,15 @@ function shell() {
     h("aside", { id: "sidebar" }, h("a", { class: "brand", href: "/", text: "KNOPLUS" }), nav,
       h("div", { class: "aside-bottom" }, h("div", { class: "motto" }, "Know More.", h("br"), "Know Better.", h("br"), "Knoplus."),
         h("p", { class: "small", text: state.me.user.email }), h("div", { class: "row" }, h("a", { class: "text-link", href: "/", text: "kno.plus ↗" }), signOut))),
-    h("main", {}, h("header", { class: "crumbs" }, h("span", { id: "crumb", text: crumb() }), h("span", { class: "identity" }, "Owner", h("i"))),
+    h("main", {}, h("header", { class: "crumbs" }, h("span", { id: "crumb", text: crumb() }), h("div", { class: "row" }, h("span", { class: "identity" }, "Owner", h("i")), schemeToggle())),
       h("section", { class: "view", id: "view" }, h("p", { class: "loading", text: "Loading…" }))));
+}
+// Light or dark; /scheme.js (shared with kno.plus) handles the click and remembers the choice.
+function schemeToggle() {
+  return h("button", { class: "scheme-toggle", type: "button", "data-scheme-toggle": "", "aria-label": "Switch between light and dark mode", title: "Light or dark" },
+    h("svg:svg", { viewBox: "0 0 20 20", width: 16, height: 16, "aria-hidden": "true" },
+      h("svg:circle", { cx: 10, cy: 10, r: 7.25, fill: "none", stroke: "currentColor", "stroke-width": 1.75 }),
+      h("svg:path", { d: "M10 2.75a7.25 7.25 0 0 1 0 14.5z", fill: "currentColor" })));
 }
 function crumb() {
   if (state.page === "asset") return "YOUR WORK / ASSETS / " + String(state.asset).toUpperCase();

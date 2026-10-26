@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { SchemeToggle } from "./SchemeToggle";
 
 type SiteMenuProps = {
   className?: string;
@@ -55,6 +56,7 @@ export function SiteMenu({ className = "", hideIcon = false, onContact, onNaviga
         {showLabel ? <span className="top-menu-text">Menu</span> : null}
         {hideIcon ? null : <span className="menu-plus" />}
       </button>
+      <SchemeToggle />
 
       <div className={`menu-panel ${isMenuOpen ? "open" : ""}`}>
         <nav>
