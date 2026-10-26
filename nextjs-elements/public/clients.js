@@ -21,7 +21,7 @@
       state=await api('me');
       if(!state.user){login();return;}
       const next=new URLSearchParams(location.search).get('next');
-      if(next==='/annex/' && state.user.role==='admin'){location.replace('/annex/');return;}
+      if(state.user.role==='admin' && !(next && next.startsWith('/trials/'))){location.replace(next==='/annex/'?'/annex/':'/annex/#clients');return;}
       if(next && /^\/trials\/[a-z0-9-]+(?:\/|$)/.test(next)&&!next.includes('..')&&state.projects.some(p=>next.startsWith(p.trial_path)&&p.trial_path)){
         location.replace(next);return;
       }

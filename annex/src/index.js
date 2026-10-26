@@ -18,7 +18,8 @@ import { bestSellers, costSummary, home, memberSummary, orderList, trends } from
 import { verify } from "./connections/square.js";
 import { websites } from "./insights/cloudflare.js";
 import { search } from "./insights/search.js";
-import { assetsWithNumbers, clientList, saveAsset } from "./workspace.js";
+import { assetsWithNumbers, saveAsset } from "./workspace.js";
+import { addClient, clientTable, passwordLink, postUpdate, saveProject, setAccess, setDisabled, updateClient } from "../../server/client-admin.js";
 import { deleteGuide, guideList, guideOne, saveGuides } from "./guides.js";
 import { SOPS } from "./sops.js";
 import { addDays, dayOf, daysBetween, fail, json, readJson, same } from "./util.js";
@@ -144,7 +145,20 @@ async function api(request, env, ctx, url) {
     await env.ANNEX.prepare("DELETE FROM assets WHERE id = ?").bind(decodeURIComponent(route.slice(7))).run();
     return json({ ok: true });
   }
-  if (route === "clients" && method === "GET") return json({ projects: await clientList(env.CLIENT_DB) });
+  if (route === "clients" && method === "GET") return json({ ...(await clientTable(env.CLIENT_DB)), email: !!env.RESEND_API_KEY });
+  if (method === "POST" && route.startsWith("clients/")) {
+    const ask = await readJson(request).catch(() => ({}));
+    const db = env.CLIENT_DB, what = route.slice(8);
+    const done = what === "project" ? await saveProject(db, ask)
+      : what === "client" ? await addClient(db, env, url.origin, ask)
+      : what === "person" ? await updateClient(db, ask)
+      : what === "access" ? await setAccess(db, ask)
+      : what === "disable" ? await setDisabled(db, ask)
+      : what === "update" ? await postUpdate(db, ask)
+      : what === "reset" ? await passwordLink(db, env, url.origin, ask.userId, "reset", ask.send !== false)
+      : { error: "Not found", status: 404 };
+    return done.error ? fail(done.error, done.status || 400) : json(done);
+  }
   if (route === "guides" && method === "GET") return json({ sops: SOPS, guides: await guideList(env.ANNEX) });
   if (route === "guides" && method === "POST") return saveGuides(request, env.ANNEX);
   if (route.startsWith("guides/")) {

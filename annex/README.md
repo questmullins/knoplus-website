@@ -12,7 +12,11 @@ needs the kno.plus administrator sign-in (the same account `/clients` uses) and 
 - **Websites**: traffic for every site on the Cloudflare account (visitors, page views, requests, threats, countries),
   Google Search Console (clicks, impressions, click-through rate, position, top searches and pages), and kno.plus page
   counts kept by the Worker without keeping who anyone is (`server/analytics.js`).
-- **Clients**: each client project, who can see it, and its latest update (managed at `/clients`).
+- **Clients**: every project and its clients in one table (Project, Client, Email, Domain, Status), with a ⋯ menu on
+  each row to send a reset email, copy a reset link, edit, post an update, or turn access off. Adding projects and
+  clients happens here too (`server/client-admin.js`). One sign-in serves both sides: the owner lands in Annex › Clients,
+  and a client lands on their own page at `/clients`. Reset links and invites are emailed from info@kno.plus through
+  Resend when the `RESEND_API_KEY` secret is set (kno.plus verified in Resend); without it, Annex shows the link to copy.
 - **Guides**: Quest's SOPs and notes in markdown, owner only. They are kept in D1 (table `guides`), not in this
   repository, because the repository is public. Import the operations handbook from its Markdown export; each `##`
   section becomes a guide.
