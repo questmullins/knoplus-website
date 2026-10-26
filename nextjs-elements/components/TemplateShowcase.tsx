@@ -415,7 +415,6 @@ export function TemplateShowcase() {
               type="button"
             >
               <span>{serviceIntro.navTitle}</span>
-              <span className="plus" />
             </button>
             {visibleTemplates.map(({ template, index }) => (
               <button
@@ -426,7 +425,6 @@ export function TemplateShowcase() {
                 type="button"
               >
                 <span>{template.navTitle}</span>
-                <span className="plus" />
               </button>
             ))}
           </div>

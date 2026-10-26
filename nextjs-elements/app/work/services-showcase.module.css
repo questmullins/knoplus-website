@@ -9,7 +9,6 @@
 .row[data-depth="1"] { font-size: 19px; min-height: 56px; }
 .row[data-depth="2"] { font-size: 15px; min-height: 48px; }
 .row[aria-expanded="true"], .row.current, .row.inPath { color: var(--white); }
-.row.open :global(.plus) { transform: rotate(45deg); }
 .row .itemArrow { color: rgb(var(--ink-rgb) / 0.4); font-size: 16px; padding-right: 1px; }
 .row.current .itemArrow { color: var(--white); }
 .row.current > span:first-child { text-decoration: underline; text-decoration-color: rgb(var(--ink-rgb) / 0.4); text-underline-offset: 6px; }
@@ -110,7 +109,6 @@
 .shell .row[data-depth="1"]{font-size:23px;min-height:65px}
 .shell .row[data-depth="2"]{font-size:18px;min-height:54px}
 .shell .row.current>span:first-child{text-decoration:none}
-.row.current :global(.plus){transform:rotate(45deg)}
 .clientLink{font-size:11px;line-height:1.8;color:var(--muted);padding:12px 14px;border:var(--stroke) solid color-mix(in srgb, var(--mint) 34%, transparent);width:fit-content}
 .clientLink strong{color:var(--white);font-weight:400}
 .shell .background{animation:none}

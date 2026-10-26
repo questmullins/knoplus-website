@@ -398,7 +398,6 @@ h1 {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
-.template-btn.active .plus,
 .top-menu.open .menu-plus {
   transform: rotate(45deg);
 }
@@ -712,9 +711,6 @@ h1 {
   transform: none;
 }
 
-.about-nav-item.active .plus {
-  transform: rotate(45deg);
-}
 
 .pricing-choice-stage {
   position: relative;
@@ -2868,4 +2864,23 @@ section.stage > .content {
   background-image:
     linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(0.78 * var(--overlay))) 40%, rgb(var(--base-rgb) / calc(0.6 * var(--overlay))) 70%, rgb(var(--base-rgb) / calc(0.5 * var(--overlay)))),
     var(--bg);
+}
+
+/* Sidebar icons: only items that open show a +, and it turns into a downward triangle while open. Plain links show none. */
+.plus.is-open {
+  transform: none;
+}
+
+.plus.is-open::before {
+  width: 0;
+  height: 0;
+  background: none;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid currentColor;
+  transform: translate(-50%, -40%);
+}
+
+.plus.is-open::after {
+  display: none;
 }

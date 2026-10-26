@@ -146,7 +146,7 @@ function shell() {
   const toggle = h("button", { class: "menu-toggle", "aria-expanded": "false", "aria-controls": "sidebar", onclick: () => open(!document.body.classList.contains("menu-open")) }, "Workspace ", h("span", { "aria-hidden": "true", text: "+" }));
   const current = state.page === "asset" ? "assets" : state.page;
   const nav = h("nav", { "aria-label": "Workspace" }, h("div", { class: "nav-label", text: "Workspace" }),
-    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, onclick: () => open(false) }, name, h("span", { class: "nav-plus", "aria-hidden": "true" }))));
+    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, onclick: () => open(false) }, name)));
   const signOut = h("button", { class: "text-link", text: "Sign out", onclick: async () => {
     await fetch("/api/clients/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" });
     location.reload();
