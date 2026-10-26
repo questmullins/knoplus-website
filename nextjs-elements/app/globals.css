@@ -19,7 +19,7 @@
   --accent-mix: 100%;
   --shadow: 1;
   /* how strongly photos are washed over (dark scrim or paper wash); 1 is the original strength */
-  --overlay: 0.5;
+  --overlay: 0.45;
   /* lines: 1.5px reads slightly heavier on high-density screens, 2px on standard ones (1.5px rounds down there) */
   --stroke: 1.5px;
   --sidebar-width: 390px;
@@ -45,6 +45,7 @@
   --surface: #ebe7de;
   --accent-mix: 52%;
   --shadow: 0.35;
+  --overlay: 0.9;
 }
 
 * {
@@ -2872,13 +2873,12 @@ section.stage > .content {
 }
 
 .plus.is-open::before {
-  width: 0;
-  height: 0;
-  background: none;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid currentColor;
-  transform: translate(-50%, -40%);
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M2 4.5h14L9 15.5z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M2 4.5h14L9 15.5z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transform: translate(-50%, -50%);
 }
 
 .plus.is-open::after {
