@@ -643,6 +643,7 @@ export function TemplateShowcase() {
         isOpen={isContactOpen}
         onClose={() => setIsContactOpen(false)}
         selectedTemplate={selectedContactTemplate}
+        selectedTopic="websites"
       />
     </>
   );

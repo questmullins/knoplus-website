@@ -53,16 +53,12 @@ const structuredData = [
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
     name: [
-      "About Us",
       "Home",
-      "Our Process",
       "Websites",
       "Sitemap"
     ],
     url: [
-      "https://kno.plus/about",
       "https://kno.plus",
-      "https://kno.plus/process",
       "https://kno.plus/websites",
       "https://kno.plus/sitemap"
     ]

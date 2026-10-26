@@ -1,0 +1,26 @@
+[
+  { "group": "Websites", "options": [
+    { "id": "website-template", "label": "Website from a template" },
+    { "id": "website-custom", "label": "Custom website" },
+    { "id": "website-care", "label": "Website care" }
+  ] },
+  { "group": "Web apps", "options": [
+    { "id": "freestyle", "label": "Freestyle" },
+    { "id": "instapost", "label": "Insta-Post Maker" }
+  ] },
+  { "group": "Phone apps", "options": [
+    { "id": "rosewave", "label": "RoseWave app" },
+    { "id": "update", "label": "UpDate" },
+    { "id": "textualize", "label": "Textualize" }
+  ] },
+  { "group": "Store", "options": [
+    { "id": "rosewave-prints", "label": "RoseWave prints" }
+  ] },
+  { "group": "Production", "options": [
+    { "id": "prepress-assistant", "label": "Prepress Assistant" }
+  ] },
+  { "group": "Other", "options": [
+    { "id": "active-project", "label": "A project we're working on" },
+    { "id": "other", "label": "Something else" }
+  ] }
+]

@@ -19,8 +19,7 @@ export const metadata: Metadata = {
 
 const corePages = [
   { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
-  { label: "Our Process", href: "/process" },
+  { label: "Store", href: "/store" },
   { label: "Websites", href: "/websites" }
 ];
 
