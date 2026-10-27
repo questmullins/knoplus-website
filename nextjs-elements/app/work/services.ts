@@ -1,5 +1,7 @@
 import type { ProjectPhoto } from "./project-catalog";
 import { templates } from "@/data/templates";
+import type { ToolGroup } from "@/data/toolkit";
+import { experienceItems } from "./experience";
 
 export type ServiceItem = {
   id: string;
@@ -20,6 +22,9 @@ export type ServiceItem = {
   note?: string;
   template?: boolean;
   sellingPoints?: string[];
+  highlightsLabel?: string;
+  sellingPointsLabel?: string;
+  tools?: ToolGroup[];
 };
 
 const architecture = "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')";
@@ -34,7 +39,7 @@ export const serviceOverview: ServiceItem = {
   id: "work", name: "All services", label: "Websites, apps & useful things",
   title: "Websites.<br />Apps.<br /><em>Useful things.</em>",
   description: "A website that feels yours. An app you enjoy using. A tool that makes work easier. Explore what I make, and find a starting point for what you have in mind.",
-  image: architecture, highlights: ["Web Services", "App Services"],
+  image: architecture, highlights: ["Web Services", "App Services", "Experience"],
 };
 
 export const services: ServiceItem[] = [
@@ -106,7 +111,13 @@ export const services: ServiceItem[] = [
       },
     ],
   },
-
+  {
+    id: "experience", name: "Experience", label: "Experience / 2022–2025",
+    title: "Better processes.<br />Smarter systems.<br /><em>Less busywork.</em>",
+    description: "For three years I worked inside a growing manufacturer and retailer, finding the slow, repetitive parts of the business and building the tools that took them over. More than forty systems and workflows, grouped by the kind of work: automation behind the scenes, interactive tools people use every day, and full applications.",
+    image: "url('/revamp/banners/consulting.webp')", highlights: ["Process improvement", "Custom software", "Workflow automation", "Systems integration", "Data & reporting"],
+    highlightsLabel: "Capabilities", children: experienceItems,
+  },
 ];
 
 // Shared by the folder buttons, project actions, and mobile section dividers.
@@ -114,7 +125,7 @@ export function serviceAccent(item: ServiceItem): string {
   const colors: Record<string, string> = {
     work: "#85cfc0", "web-services": "#85cfc0", websites: "#d9b06f", "web-apps": "#9cbff0",
     "app-services": "#c5aceb", rosewave: "#edb3a4", update: "#b6a1ee", textualize: "#a6c9ed",
-    freestyle: "#8dd7be", instapost: "#edbc8c", consulting: "#c9cf9a",
+    freestyle: "#8dd7be", instapost: "#edbc8c", consulting: "#c9cf9a", experience: "#c9cf9a",
     "traditional-auto": "#f4776e", synergy: "#f0ede4", "editorial-local": "#d8c4a3",
     "photo-portfolio": "#d5ad63", "cleaning-restoration": "#86d5c3", "homey-coffee": "#d9b06f",
   };

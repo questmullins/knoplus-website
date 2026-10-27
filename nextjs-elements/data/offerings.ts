@@ -11,5 +11,6 @@ export function offeringLabel(id: string) {
 // Maps a showcase item or project slug to the offering a "Let's talk" should start on.
 export function offeringFor(id = ""): string {
   if (id.startsWith("website-") || id === "websites") return "website-template";
+  if (id === "experience" || id.startsWith("experience--")) return "process-automation";
   return offerings.some(option => option.id === id) ? id : "other";
 }
