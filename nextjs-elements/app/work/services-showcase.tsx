@@ -237,7 +237,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
             : item.children?.length || item.id === "work" ? <button className="cta-button explore-button" type="button" onClick={() => {
               select(item.children?.[0] || model.navigation[0]);
               if (window.matchMedia("(max-width: 760px)").matches) setMobileOpen(false);
-            }}>{item.id === "work" ? "Explore Services" : item.id === "websites" ? "Explore Websites" : item.id === "experience" ? "Read the stories" : "Explore the folder"}</button>
+            }}>{item.id === "work" ? "Explore Services" : item.id === "websites" ? "Explore Websites" : item.id === "experience" ? "Explore the work" : "Explore the folder"}</button>
               : <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>Let’s talk</button>}
         {item.related && <Link className="cta-button inquire-button" href={item.related.href}>{item.related.label}</Link>}
         {!!item.photos?.length && <button className="cta-button inquire-button" type="button" onClick={() => { commit(item, "none", false, false); screens.current?.showModal(); }}>View {item.platform ? "app screens" : "screens"}</button>}
@@ -306,7 +306,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
           {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : mobileCategory ? <>
             <div className={s.feedBar}><button type="button" onClick={() => commit(model.overview)}>← All sections</button><span>{mobileCategory.name}</span></div>
-            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.length} {mobileCategory.id === "experience" ? "stories" : "projects"}. Scroll to take a look.</p></div>
+            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.length} projects. Scroll to take a look.</p></div>
             {mobileFeed.map((item,index)=>mobilePanel(item,index+1))}
             <div className={s.feedEnd}><p>You’ve reached the end of {mobileCategory.name}.</p><button type="button" onClick={() => commit(model.overview)}>Explore another section ↗</button></div>
           </> : mobileHome()}
