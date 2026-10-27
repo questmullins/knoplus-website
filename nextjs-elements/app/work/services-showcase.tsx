@@ -306,7 +306,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
           {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : mobileCategory ? <>
             <div className={s.feedBar}><button type="button" onClick={() => commit(model.overview)}>← All sections</button><span>{mobileCategory.name}</span></div>
-            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.length} projects. Scroll to take a look.</p></div>
+            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.filter(item => !item.tools).length} projects. Scroll to take a look.</p></div>
             {mobileFeed.map((item,index)=>mobilePanel(item,index+1))}
             <div className={s.feedEnd}><p>You’ve reached the end of {mobileCategory.name}.</p><button type="button" onClick={() => commit(model.overview)}>Explore another section ↗</button></div>
           </> : mobileHome()}
