@@ -224,6 +224,15 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     return !!item.stats?.length && <dl className={s.stats}>{item.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>;
   }
 
+  function results(item: ServiceItem) {
+    return !!item.metrics?.length && <div className={s.metrics}><span>Results</span><div className={s.charts}>{item.metrics.map(metric => <figure className={s.result} key={metric.label}>
+      <figcaption>{metric.label}</figcaption>
+      {metric.headline && <p className={s.headline}>{metric.headline}<span>{metric.change}</span></p>}
+      <p className={s.swap}><s>{metric.before}</s><b>{metric.after}</b></p>
+      {!metric.headline && <span className={s.chip}>{metric.change}</span>}
+    </figure>)}</div></div>;
+  }
+
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
     const Heading = mobile && index > 0 ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
@@ -251,6 +260,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {item.tools && <Toolkit groups={item.tools} />}
       {item.note && <p className={s.note}>{item.note}</p>}
+      {results(item)}
       </div>
     </div></div>;
   }

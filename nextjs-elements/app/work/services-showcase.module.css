@@ -243,3 +243,18 @@
 
 /* Dark mode: full-ink copy over the photographs (the global p is 74% ink, too faint on bright photos). */
 :global(:root:not([data-scheme="light"])) .description, :global(:root:not([data-scheme="light"])) .details p, :global(:root:not([data-scheme="light"])) .note { color: var(--white); }
+
+/* Before-and-after results at the foot of a measured project: red, struck through, for before; green for now. */
+.metrics { --old: #e5786e; --now: #6fd294; border-top: var(--stroke) solid var(--line); margin: 32px auto 0; padding-top: 25px; display: grid; gap: 20px; text-align: left; max-width: 680px; }
+:global(:root[data-scheme="light"]) .metrics { --old: #c4463c; --now: #23894c; }
+.metrics > span { font-size: 9px; text-transform: uppercase; letter-spacing: .3em; color: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); }
+.shell .metrics > span { font-size: 11px; }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.result { margin: 0; display: grid; gap: 10px; align-content: start; padding: 18px; border: var(--stroke) solid var(--line); background: rgb(var(--base-rgb) / .35); }
+.result figcaption { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+.headline { display: grid; gap: 4px; max-width: none; margin: 0; font: 300 46px/.95 var(--font-display); letter-spacing: -.04em; color: var(--now); }
+.headline span { font: 400 13px/1.4 var(--font-body); letter-spacing: 0; color: var(--white); }
+.swap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; max-width: none; margin: 0; }
+.swap s { font: 300 20px/1.1 var(--font-display); color: var(--old); text-decoration-thickness: 2px; }
+.swap b { font: 300 30px/1.1 var(--font-display); letter-spacing: -.02em; color: var(--now); }
+.chip { justify-self: start; font-size: 12px; font-weight: 500; padding: 3px 8px; border: var(--stroke) solid var(--now); color: var(--now); }

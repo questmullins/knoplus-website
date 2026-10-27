@@ -26,7 +26,11 @@ export type ServiceItem = {
   sellingPointsLabel?: string;
   tools?: ToolGroup[];
   stats?: { value: string; label: string }[];
+  metrics?: Metric[];
 };
+
+// A before-and-after result. `headline` is the big percentage, when the result has one.
+export type Metric = { label: string; change: string; before: string; after: string; headline?: string };
 
 const architecture = "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')";
 const rose = "url('/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp')";

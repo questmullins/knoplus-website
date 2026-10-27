@@ -1,5 +1,5 @@
 import { toolkit } from "@/data/toolkit";
-import type { ServiceItem } from "./services";
+import type { Metric, ServiceItem } from "./services";
 
 // Business systems work for a former employer, written up without the company's name, code or internal figures.
 // The three strongest projects in each of three groups: Automation (runs behind the scenes), Interactive tools (what
@@ -19,15 +19,23 @@ const build = (...args: Parameters<typeof project> extends [Group, ...infer Rest
 // `also` lists the smaller projects folded into each one.
 const also = (item: ServiceItem, related: string[]): ServiceItem => ({ ...item, note: `Also includes: ${related.join(", ")}.` });
 
+// `measured` adds the before-and-after results. Only projects with recorded numbers get them.
+const measured = (item: ServiceItem, metrics: Metric[]): ServiceItem => ({ ...item, metrics });
+
 const automation: ServiceItem[] = [
-  also(auto("paperwork", "Shipping & document paperwork", "cellese",
+  measured(also(auto("paperwork", "Shipping & document paperwork", "cellese",
     "Every international shipment needed its own declaration, invoice and carrier wording, put together by hand. I built a pipeline that reads pending shipments, checks the data, generates each document, splits and stamps every page with tracking numbers and dates, files it, links it back to the shipment record and tells the team when it’s done. The same approach took over invoices, pick lists and approvals.",
     ["Google Apps Script", "Google Sheets", "PDF.co", "Google Drive", "Gmail", "Power Automate", "SharePoint"], ["75 min → 10 sec per shipment (99.8% less time)", "500+ hours saved a year"]),
     ["commercial and military (APO) invoices", "affiliate invoices", "PDF assembly", "warehouse pick lists", "approval routing into Approved and Rejected libraries"]),
-  also(auto("commerce-data", "Commerce data", "web-services",
+    [{ label: "Paperwork per shipment", headline: "99.8%", change: "less time", before: "75 min", after: "10 sec" }]),
+  measured(also(auto("commerce-data", "Commerce data", "web-services",
     "Orders lived in Shopify, shipments in ShipStation and customers in HubSpot, and none of them lined up. I built the extractors and models that brought them together: seven stores in one 43-column order history, bundles broken into their parts, system IDs replaced with real names, and the product catalog kept in step for the ordering app. One run pulled in 2,321 draft orders in a single pass.",
     ["Shopify", "ShipStation", "HubSpot", "Asana", "Python", "SQL", "Snowflake", "Pipedream", "Grow"], ["600+ hours saved a year", "90% less manual reporting", "Reports from about 48 hours behind to near real time"]),
     ["Snowflake data models", "CRM data", "distributor draft orders", "bundle reporting, rebuilt three times as it grew", "product catalog sync", "production board export", "sales reporting"]),
+    [
+      { label: "Manual reporting", headline: "90%", change: "less work by hand", before: "All by hand", after: "10% left" },
+      { label: "Reporting delay", change: "Days to near real time", before: "~48 hrs", after: "Near real time" },
+    ]),
   also(auto("scheduler", "Automation control", "web-apps",
     "Once there were many scripts, someone had to remember to run them. I built a scheduler that runs each one on its own timetable, in priority order, shows the last and next run, and lets anyone start a job on demand. Exports write safely, so a failed run never leaves a broken file behind.",
     ["Python", "Tkinter", "APScheduler", "Power Automate Desktop"], "Separate automations working as one system"),
@@ -43,10 +51,11 @@ const interactive: ServiceItem[] = [
     "The project tracker became an interactive dashboard: timelines, active and completed counts, turnaround, delivery accuracy, notes per project and a light and dark theme, rebuilt from the workbook with a click. The same thinking went into live views of attendance and hiring.",
     ["Python", "pandas", "Plotly", "HTML", "JavaScript", "Google Sheets"], ["Spreadsheets people actually look at", "Attendance and hiring for a team of 40+"]),
     ["six-day attendance tracker", "hiring dashboard"]),
-  also(tool("ordering", "Ordering & lookup tools", "process",
+  measured(also(tool("ordering", "Ordering & lookup tools", "process",
     "An app where reps request stock from a controlled allocation: lists hold the stock, roles decide who can do what, and order emails go out on their own. Alongside it, quick lookups so people could find a provider, a distributor’s orders or a stock count without digging.",
     ["Power Apps", "SharePoint Lists", "Power Automate", "Outlook", "Excel"], ["5–10 minutes saved per order", "Provider lookups from 20 minutes to seconds"]),
     ["provider locator", "distributor assistant", "inventory and bulk count sheets", "product costing sheet"]),
+    [{ label: "Finding a provider", change: "Minutes to seconds", before: "~20 min", after: "Seconds" }]),
 ];
 
 const builds: ServiceItem[] = [
