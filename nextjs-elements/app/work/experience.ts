@@ -1,7 +1,7 @@
 import { toolkit } from "@/data/toolkit";
 import type { ServiceItem } from "./services";
 
-// 2022–2025 business systems work, written up without the company's name, code or internal figures.
+// Business systems work for a former employer, written up without the company's name, code or internal figures.
 // The three strongest projects in each of three groups: Automation (runs behind the scenes), Interactive tools (what
 // people look at and type into) and Full builds (complete applications, from code to installer). The full list of
 // 42 projects is in git history (commit 50d179b) if any need to come back.
