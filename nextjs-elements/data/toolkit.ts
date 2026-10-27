@@ -30,7 +30,7 @@ export const toolkit: ToolGroup[] = [
   ] },
   { name: "Data & integration", tools: [
     { name: "Snowflake", icon: "snowflake" }, { name: "pandas", icon: "pandas" }, { name: "openpyxl", mark: "px", color: "#217346" },
-    { name: "Plotly", icon: "plotly" }, { name: "Grow", mark: "Gr", color: "#6A4CFF" }, { name: "Pipedream", mark: "Pd", color: "#1F9D55" },
+    { name: "Plotly", icon: "plotly" }, { name: "Grow", mark: "Gr", color: "#6A4CFF" }, { name: "Pipedream", image: "pipedream.webp" },
     { name: "GraphQL", icon: "graphql" }, { name: "REST APIs", mark: "API", color: "#5A6472" }, { name: "PDF.co", mark: "PDF", color: "#E5252A" },
   ] },
   { name: "Apps & interfaces", tools: [
