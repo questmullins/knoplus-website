@@ -244,16 +244,21 @@
 /* Dark mode: full-ink copy over the photographs (the global p is 74% ink, too faint on bright photos). */
 :global(:root:not([data-scheme="light"])) .description, :global(:root:not([data-scheme="light"])) .details p, :global(:root:not([data-scheme="light"])) .note { color: var(--white); }
 
-/* Before-and-after result bars at the foot of a measured project. */
-.metrics { border-top: var(--stroke) solid var(--line); margin: 32px auto 0; padding-top: 25px; display: grid; gap: 22px; text-align: left; max-width: 680px; }
+/* Before-and-after result charts at the foot of a measured project: red for before, green for now. */
+.metrics { --old: #e5786e; --now: #6fd294; border-top: var(--stroke) solid var(--line); margin: 32px auto 0; padding-top: 25px; display: grid; gap: 20px; text-align: left; max-width: 680px; }
+:global(:root[data-scheme="light"]) .metrics { --old: #c4463c; --now: #23894c; }
 .metrics > span { font-size: 9px; text-transform: uppercase; letter-spacing: .3em; color: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); }
 .shell .metrics > span { font-size: 11px; }
-.metric { display: grid; gap: 8px; }
-.metricHead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; max-width: none; margin: 0; font-size: 13px; color: var(--white); }
-.metricHead b { font-weight: 500; }
-.metricHead em { font-style: normal; font-weight: 500; white-space: nowrap; color: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); }
-.bar { position: relative; height: 26px; border: var(--stroke) solid var(--line); background: rgb(var(--base-rgb) / .35); }
-.bar i { position: absolute; inset: 0 auto 0 0; width: var(--fill, 100%); background: rgb(var(--ink-rgb) / .22); }
-.bar.after i { background: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); }
-.bar small { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; letter-spacing: .04em; color: var(--white); }
-.bar.after small { left: calc(var(--fill) + 10px); }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; }
+.chart { margin: 0; display: grid; gap: 14px; align-content: start; padding: 16px; border: var(--stroke) solid var(--line); background: rgb(var(--base-rgb) / .35); }
+.chart figcaption { display: grid; gap: 4px; font-size: 13px; line-height: 1.4; color: var(--white); }
+.chart figcaption b { font-weight: 500; }
+.chart figcaption em { font-style: normal; font-weight: 500; color: var(--now); }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.column { display: grid; gap: 8px; }
+.well { height: 110px; display: flex; align-items: flex-end; border-bottom: var(--stroke) solid var(--line); }
+.well i { display: block; width: 100%; height: var(--fill); }
+.well i.old { background: var(--old); }
+.well i.now { background: var(--now); }
+.column small { display: grid; gap: 2px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.column small b { font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--white); }

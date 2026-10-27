@@ -225,11 +225,14 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   }
 
   function metricBars(item: ServiceItem) {
-    return !!item.metrics?.length && <div className={s.metrics}><span>Results</span>{item.metrics.map(metric => <div className={s.metric} key={metric.label}>
-      <p className={s.metricHead}><b>{metric.label}</b><em>{metric.change}</em></p>
-      <div className={s.bar}><i /><small>Before · {metric.before}</small></div>
-      <div className={`${s.bar} ${s.after}`} style={{ "--fill": `${Math.max(metric.ratio * 100, 1.5)}%` } as CSSProperties}><i /><small>After · {metric.after}</small></div>
-    </div>)}</div>;
+    const column = (label: string, value: string, fill: number, tone: string) => <div className={s.column}>
+      <div className={s.well}><i className={tone} style={{ "--fill": `${Math.max(fill * 100, 2)}%` } as CSSProperties} /></div>
+      <small>{label}<b>{value}</b></small>
+    </div>;
+    return !!item.metrics?.length && <div className={s.metrics}><span>Results</span><div className={s.charts}>{item.metrics.map(metric => <figure className={s.chart} key={metric.label}>
+      <figcaption><b>{metric.label}</b><em>{metric.change}</em></figcaption>
+      <div className={s.columns}>{column("Before", metric.before, 1, s.old)}{column("Now", metric.after, metric.ratio, s.now)}</div>
+    </figure>)}</div></div>;
   }
 
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
