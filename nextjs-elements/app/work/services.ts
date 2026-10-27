@@ -1,7 +1,7 @@
 import type { ProjectPhoto } from "./project-catalog";
 import { templates } from "@/data/templates";
 import type { ToolGroup } from "@/data/toolkit";
-import { experienceItems } from "./experience";
+import { experienceItems, experienceStats } from "./experience";
 
 export type ServiceItem = {
   id: string;
@@ -25,6 +25,7 @@ export type ServiceItem = {
   highlightsLabel?: string;
   sellingPointsLabel?: string;
   tools?: ToolGroup[];
+  stats?: { value: string; label: string }[];
 };
 
 const architecture = "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')";
@@ -116,7 +117,7 @@ export const services: ServiceItem[] = [
     title: "Better processes.<br />Smarter systems.<br /><em>Less busywork.</em>",
     description: "For three years I worked inside a growing manufacturer and retailer, finding the slow, repetitive parts of the business and building the tools that took them over. More than forty systems and workflows, grouped by the kind of work: automation behind the scenes, interactive tools people use every day, and full applications.",
     image: "url('/revamp/banners/consulting.webp')", highlights: ["Process improvement", "Custom software", "Workflow automation", "Systems integration", "Data & reporting"],
-    highlightsLabel: "Capabilities", children: experienceItems,
+    highlightsLabel: "Capabilities", stats: experienceStats.stats, note: experienceStats.note, children: experienceItems,
   },
 ];
 

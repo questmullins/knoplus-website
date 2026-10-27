@@ -220,6 +220,10 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     </li>)}</ul>;
   }
 
+  function statList(item: ServiceItem) {
+    return !!item.stats?.length && <dl className={s.stats}>{item.stats.map(stat => <div key={stat.value}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>;
+  }
+
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
     const Heading = mobile && index > 0 ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
@@ -243,6 +247,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         {!!item.photos?.length && <button className="cta-button inquire-button" type="button" onClick={() => { commit(item, "none", false, false); screens.current?.showModal(); }}>View {item.platform ? "app screens" : "screens"}</button>}
         {item.template && <button className="cta-button inquire-button" type="button" onClick={() => openContact(item)}>Inquire</button>}
       </div>
+      {statList(item)}
       {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {item.tools && <Toolkit groups={item.tools} />}
       {item.note && <p className={s.note}>{item.note}</p>}
@@ -306,7 +311,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
           {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : mobileCategory ? <>
             <div className={s.feedBar}><button type="button" onClick={() => commit(model.overview)}>← All sections</button><span>{mobileCategory.name}</span></div>
-            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.filter(item => !item.tools).length} projects. Scroll to take a look.</p></div>
+            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.filter(item => !item.tools).length} projects. Scroll to take a look.</p>{statList(mobileCategory)}{mobileCategory.stats && <p className={s.note}>{mobileCategory.note}</p>}</div>
             {mobileFeed.map((item,index)=>mobilePanel(item,index+1))}
             <div className={s.feedEnd}><p>You’ve reached the end of {mobileCategory.name}.</p><button type="button" onClick={() => commit(model.overview)}>Explore another section ↗</button></div>
           </> : mobileHome()}
