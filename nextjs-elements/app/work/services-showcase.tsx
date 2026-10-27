@@ -224,6 +224,14 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     return !!item.stats?.length && <dl className={s.stats}>{item.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>;
   }
 
+  function metricBars(item: ServiceItem) {
+    return !!item.metrics?.length && <div className={s.metrics}><span>Results</span>{item.metrics.map(metric => <div className={s.metric} key={metric.label}>
+      <p className={s.metricHead}><b>{metric.label}</b><em>{metric.change}</em></p>
+      <div className={s.bar}><i /><small>Before · {metric.before}</small></div>
+      <div className={`${s.bar} ${s.after}`} style={{ "--fill": `${Math.max(metric.ratio * 100, 1.5)}%` } as CSSProperties}><i /><small>After · {metric.after}</small></div>
+    </div>)}</div>;
+  }
+
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
     const Heading = mobile && index > 0 ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
@@ -251,6 +259,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {item.tools && <Toolkit groups={item.tools} />}
       {item.note && <p className={s.note}>{item.note}</p>}
+      {metricBars(item)}
       </div>
     </div></div>;
   }
