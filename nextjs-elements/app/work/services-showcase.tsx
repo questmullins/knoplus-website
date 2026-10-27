@@ -224,14 +224,12 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     return !!item.stats?.length && <dl className={s.stats}>{item.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>;
   }
 
-  function metricBars(item: ServiceItem) {
-    const column = (label: string, value: string, fill: number, tone: string) => <div className={s.column}>
-      <div className={s.well}><i className={tone} style={{ "--fill": `${Math.max(fill * 100, 2)}%` } as CSSProperties} /></div>
-      <small>{label}<b>{value}</b></small>
-    </div>;
-    return !!item.metrics?.length && <div className={s.metrics}><span>Results</span><div className={s.charts}>{item.metrics.map(metric => <figure className={s.chart} key={metric.label}>
-      <figcaption><b>{metric.label}</b><em>{metric.change}</em></figcaption>
-      <div className={s.columns}>{column("Before", metric.before, 1, s.old)}{column("Now", metric.after, metric.ratio, s.now)}</div>
+  function results(item: ServiceItem) {
+    return !!item.metrics?.length && <div className={s.metrics}><span>Results</span><div className={s.charts}>{item.metrics.map(metric => <figure className={s.result} key={metric.label}>
+      <figcaption>{metric.label}</figcaption>
+      {metric.headline && <p className={s.headline}>{metric.headline}<span>{metric.change}</span></p>}
+      <p className={s.swap}><s>{metric.before}</s><b>{metric.after}</b></p>
+      {!metric.headline && <span className={s.chip}>{metric.change}</span>}
     </figure>)}</div></div>;
   }
 
@@ -262,7 +260,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {item.tools && <Toolkit groups={item.tools} />}
       {item.note && <p className={s.note}>{item.note}</p>}
-      {metricBars(item)}
+      {results(item)}
       </div>
     </div></div>;
   }
