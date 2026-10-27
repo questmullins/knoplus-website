@@ -10,7 +10,7 @@ function tone(hex: string) {
   return luminance < .045 ? "dark" : luminance > .45 ? "pale" : undefined;
 }
 
-// The Experience / Toolkit list: one tile per program in its brand colour, grouped, with a coloured monogram where there's no logo.
+// The Experience / Toolkit list: one tile per program with its real logo, grouped, with a coloured monogram where there's no logo.
 export function Toolkit({ groups }: { groups: ToolGroup[] }) {
   const count = groups.reduce((total, group) => total + group.tools.length, 0);
   return <div className={s.toolkit}>
@@ -21,8 +21,10 @@ export function Toolkit({ groups }: { groups: ToolGroup[] }) {
         const logo = tool.icon ? toolIcons[tool.icon] : undefined;
         const color = tool.color || logo?.hex || "#5A6472";
         return <li key={tool.name}>
-          <span className={s.icon} aria-hidden="true" data-tone={tone(color)} style={{ "--brand": color } as CSSProperties}>{logo
-            ? <svg viewBox="0 0 24 24"><path d={logo.path} /></svg>
+          <span className={s.icon} aria-hidden="true" data-tone={tone(color)} style={{ "--brand": color } as CSSProperties}>{tool.image
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img src={`/icons/tools/${tool.image}`} alt="" width={30} height={30} loading="lazy" />
+            : logo ? <svg viewBox="0 0 24 24"><path d={logo.path} /></svg>
             : <span className={s.mark}>{tool.mark}</span>}</span>
           <span className={s.name}>{tool.name}</span>
         </li>;

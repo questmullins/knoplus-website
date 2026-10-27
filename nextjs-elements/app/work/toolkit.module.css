@@ -9,6 +9,7 @@
   border: var(--stroke) solid rgb(var(--ink-rgb) / 0.16); background: rgb(var(--base-rgb) / 0.55); backdrop-filter: blur(6px); text-align: center; }
 .icon { width: 30px; height: 30px; display: grid; place-items: center; }
 .icon svg { width: 100%; height: 100%; fill: var(--brand); }
+.icon img { width: 100%; height: 100%; object-fit: contain; }
 :global(:root:not([data-scheme="light"])) .icon[data-tone="dark"] svg { fill: var(--white); }
 :global(:root[data-scheme="light"]) .icon[data-tone="pale"] svg { fill: color-mix(in srgb, var(--brand) 72%, black); }
 .mark { width: 30px; height: 30px; display: grid; place-items: center; background: var(--brand); border-radius: 0;
