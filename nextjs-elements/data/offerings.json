@@ -19,6 +19,9 @@
   { "group": "Production", "options": [
     { "id": "prepress-assistant", "label": "Prepress Assistant" }
   ] },
+  { "group": "Business systems", "options": [
+    { "id": "process-automation", "label": "Process, automation & reporting" }
+  ] },
   { "group": "Other", "options": [
     { "id": "active-project", "label": "A project we're working on" },
     { "id": "other", "label": "Something else" }
