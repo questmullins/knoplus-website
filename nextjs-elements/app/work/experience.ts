@@ -8,9 +8,9 @@ import type { ServiceItem } from "./services";
 type Group = "automation" | "tools" | "builds";
 const groupNames: Record<Group, string> = { automation: "Automation", tools: "Interactive tools", builds: "Full builds" };
 
-const project = (group: Group, id: string, name: string, image: string, description: string, tools: string[], outcome?: string): ServiceItem => ({
+const project = (group: Group, id: string, name: string, image: string, description: string, tools: string[], outcome?: string | string[]): ServiceItem => ({
   id: `experience--${id}`, name, label: `Experience / ${groupNames[group]} / ${name}`, description, image: `url('/revamp/banners/${image}.webp')`,
-  highlights: tools, highlightsLabel: "Tools", ...(outcome ? { sellingPoints: [outcome], sellingPointsLabel: "Outcome" } : {}),
+  highlights: tools, highlightsLabel: "Tools", ...(outcome ? { sellingPoints: ([] as string[]).concat(outcome), sellingPointsLabel: "Outcome" } : {}),
 });
 const auto = (...args: Parameters<typeof project> extends [Group, ...infer Rest] ? Rest : never) => project("automation", ...args);
 const tool = (...args: Parameters<typeof project> extends [Group, ...infer Rest] ? Rest : never) => project("tools", ...args);
@@ -22,11 +22,11 @@ const also = (item: ServiceItem, related: string[]): ServiceItem => ({ ...item, 
 const automation: ServiceItem[] = [
   also(auto("paperwork", "Shipping & document paperwork", "cellese",
     "Every international shipment needed its own declaration, invoice and carrier wording, put together by hand. I built a pipeline that reads pending shipments, checks the data, generates each document, splits and stamps every page with tracking numbers and dates, files it, links it back to the shipment record and tells the team when it’s done. The same approach took over invoices, pick lists and approvals.",
-    ["Google Apps Script", "Google Sheets", "PDF.co", "Google Drive", "Gmail", "Power Automate", "SharePoint"], "From over an hour per shipment to a few seconds"),
+    ["Google Apps Script", "Google Sheets", "PDF.co", "Google Drive", "Gmail", "Power Automate", "SharePoint"], ["75 min → 10 sec per shipment (99.8% less time)", "500+ hours saved a year"]),
     ["commercial and military (APO) invoices", "affiliate invoices", "PDF assembly", "warehouse pick lists", "approval routing into Approved and Rejected libraries"]),
   also(auto("commerce-data", "Commerce data", "web-services",
     "Orders lived in Shopify, shipments in ShipStation and customers in HubSpot, and none of them lined up. I built the extractors and models that brought them together: seven stores in one 43-column order history, bundles broken into their parts, system IDs replaced with real names, and the product catalog kept in step for the ordering app. One run pulled in 2,321 draft orders in a single pass.",
-    ["Shopify", "ShipStation", "HubSpot", "Asana", "Python", "SQL", "Snowflake", "Pipedream", "Grow"], "One order history everyone could read"),
+    ["Shopify", "ShipStation", "HubSpot", "Asana", "Python", "SQL", "Snowflake", "Pipedream", "Grow"], ["600+ hours saved a year", "90% less manual reporting", "Reports from about 48 hours behind to near real time"]),
     ["Snowflake data models", "CRM data", "distributor draft orders", "bundle reporting, rebuilt three times as it grew", "product catalog sync", "production board export", "sales reporting"]),
   also(auto("scheduler", "Automation control", "web-apps",
     "Once there were many scripts, someone had to remember to run them. I built a scheduler that runs each one on its own timetable, in priority order, shows the last and next run, and lets anyone start a job on demand. Exports write safely, so a failed run never leaves a broken file behind.",
@@ -41,18 +41,18 @@ const interactive: ServiceItem[] = [
     ["manager production view", "end-of-shift notes", "lab QC form", "fulfilment KPIs"]),
   also(tool("dashboards", "Project & team dashboards", "journey",
     "The project tracker became an interactive dashboard: timelines, active and completed counts, turnaround, delivery accuracy, notes per project and a light and dark theme, rebuilt from the workbook with a click. The same thinking went into live views of attendance and hiring.",
-    ["Python", "pandas", "Plotly", "HTML", "JavaScript", "Google Sheets"], "Spreadsheets people actually look at"),
+    ["Python", "pandas", "Plotly", "HTML", "JavaScript", "Google Sheets"], ["Spreadsheets people actually look at", "Attendance and hiring for a team of 40+"]),
     ["six-day attendance tracker", "hiring dashboard"]),
   also(tool("ordering", "Ordering & lookup tools", "process",
     "An app where reps request stock from a controlled allocation: lists hold the stock, roles decide who can do what, and order emails go out on their own. Alongside it, quick lookups so people could find a provider, a distributor’s orders or a stock count without digging.",
-    ["Power Apps", "SharePoint Lists", "Power Automate", "Outlook", "Excel"]),
+    ["Power Apps", "SharePoint Lists", "Power Automate", "Outlook", "Excel"], ["5–10 minutes saved per order", "Provider lookups from 20 minutes to seconds"]),
     ["provider locator", "distributor assistant", "inventory and bulk count sheets", "product costing sheet"]),
 ];
 
 const builds: ServiceItem[] = [
   also(build("returns", "Returns", "process",
     "Returns came in across seven storefronts, and checking them meant searching each one by hand. I built a desktop app for the team that pulls a rolling year of returns from every store, filters by SKU, records what actually arrived, exports the results and drafts the customer email. It shipped with a proper installer, so anyone could set it up.",
-    ["Python", "Shopify GraphQL", "Excel", "Outlook", "PyInstaller", "Inno Setup"], "Seven stores, one returns workflow"),
+    ["Python", "Shopify GraphQL", "Excel", "Outlook", "PyInstaller", "Inno Setup"], ["7 storefronts in one workflow", "A rolling 365 days of returns"]),
     ["the returns and refunds tracker it replaced", "the companion email utility"]),
   also(build("documents", "Batch documents", "prepress",
     "Manufacturing paperwork was rebuilt by hand for every batch. I built a desktop tool that turns production data into finished, printable batch documents, with quantities, specs and dates filled in and empty steps cleaned out, packaged so it runs on anyone’s computer.",
@@ -60,13 +60,23 @@ const builds: ServiceItem[] = [
     ["the recipe-scaling flow it grew from (Forms, Power Automate, OneDrive, Teams)"]),
   build("distributor-reports", "Distributor reports", "cellese",
     "Pick a distributor and a date range, and this desktop app pulls their orders, links drafts to final orders and produces a branded Excel report with a summary and a tab for every order.",
-    ["Python", "CustomTkinter", "pandas", "Shopify"], "Branded reports for any distributor, on demand"),
+    ["Python", "CustomTkinter", "pandas", "Shopify"], ["Branded reports for any distributor, on demand", "2,321 draft orders pulled in one recorded run"]),
 ];
 
 const group = (id: Group, image: string, description: string, children: ServiceItem[]): ServiceItem => ({
   id: `experience--${id}`, name: groupNames[id], label: `Experience / ${groupNames[id]}`, description,
   image: `url('/revamp/banners/${image}.webp')`, highlights: children.map(child => child.name), highlightsLabel: "Projects", children,
 });
+
+// The headline numbers, from the project records of the time (self-reported, not audited).
+const stats = [
+  { value: "99.8%", label: "less time on international shipping paperwork" },
+  { value: "90%", label: "less manual reporting" },
+  { value: "500+", label: "hours a year saved on shipping paperwork alone" },
+  { value: "~48 hrs", label: "of reporting delay removed; reports now near real time" },
+];
+
+export const experienceStats = { stats, note: "Figures come from project records at the time." };
 
 export const experienceItems: ServiceItem[] = [
   group("automation", "process",
