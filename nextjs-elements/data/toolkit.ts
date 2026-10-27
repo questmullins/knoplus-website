@@ -14,7 +14,7 @@ export const toolkit: ToolGroup[] = [
     { name: "Apps Script", icon: "googleappsscript" },
   ] },
   { name: "Commerce & operations", tools: [
-    { name: "Shopify", icon: "shopify" }, { name: "ShipStation", mark: "SS", color: "#84C041" }, { name: "HubSpot", icon: "hubspot" },
+    { name: "Shopify", icon: "shopify" }, { name: "ShipStation", image: "shipstation.svg" }, { name: "HubSpot", icon: "hubspot" },
     { name: "Asana", icon: "asana" }, { name: "Square", icon: "square" }, { name: "FedEx", icon: "fedex" },
     { name: "DHL", icon: "dhl" }, { name: "Discord", icon: "discord" },
   ] },
@@ -30,8 +30,8 @@ export const toolkit: ToolGroup[] = [
   ] },
   { name: "Data & integration", tools: [
     { name: "Snowflake", icon: "snowflake" }, { name: "pandas", icon: "pandas" }, { name: "openpyxl", mark: "px", color: "#217346" },
-    { name: "Plotly", icon: "plotly" }, { name: "Grow", mark: "Gr", color: "#6A4CFF" }, { name: "Pipedream", image: "pipedream.webp" },
-    { name: "GraphQL", icon: "graphql" }, { name: "REST APIs", mark: "API", color: "#5A6472" }, { name: "PDF.co", mark: "PDF", color: "#E5252A" },
+    { name: "Plotly", icon: "plotly" }, { name: "Grow", image: "grow.webp" }, { name: "Pipedream", image: "pipedream.webp" },
+    { name: "GraphQL", icon: "graphql" }, { name: "REST APIs", mark: "API", color: "#5A6472" }, { name: "PDF.co", image: "pdf-co.svg" },
   ] },
   { name: "Apps & interfaces", tools: [
     { name: "React", icon: "react" }, { name: "Next.js", icon: "nextdotjs" }, { name: "Android", icon: "android" },
