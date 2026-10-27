@@ -63,25 +63,35 @@ const builds: ServiceItem[] = [
     ["Python", "CustomTkinter", "pandas", "Shopify"], ["Branded reports for any distributor, on demand", "2,321 draft orders pulled in one recorded run"]),
 ];
 
-const group = (id: Group, image: string, description: string, children: ServiceItem[]): ServiceItem => ({
+const group = (id: Group, image: string, description: string, children: ServiceItem[], extra: Partial<ServiceItem> = {}): ServiceItem => ({
   id: `experience--${id}`, name: groupNames[id], label: `Experience / ${groupNames[id]}`, description,
-  image: `url('/revamp/banners/${image}.webp')`, highlights: children.map(child => child.name), highlightsLabel: "Projects", children,
+  image: `url('/revamp/banners/${image}.webp')`, highlights: children.map(child => child.name), highlightsLabel: "Projects", children, ...extra,
 });
 
-// The headline numbers, from the project records of the time (self-reported, not audited).
+const note = "Figures come from project records at the time.";
+
+// Across all of the work: counts of what was built and who it reached.
 const stats = [
-  { value: "99.8%", label: "less time on international shipping paperwork" },
+  { value: "40+", label: "systems and workflows built" },
+  { value: "50+", label: "programs, platforms and languages used" },
+  { value: "7", label: "online stores brought into one workflow" },
+  { value: "40+", label: "people on the team supported by the tools" },
+];
+
+// The biggest single wins, all from the automation work (self-reported, not audited).
+const wins = [
+  { value: "99.8%", label: "less time on each shipment’s paperwork" },
   { value: "90%", label: "less manual reporting" },
   { value: "500+", label: "hours a year saved on shipping paperwork alone" },
   { value: "~48 hrs", label: "of reporting delay removed; reports now near real time" },
 ];
 
-export const experienceStats = { stats, note: "Figures come from project records at the time." };
+export const experienceStats = { stats, note };
 
 export const experienceItems: ServiceItem[] = [
   group("automation", "process",
     "Work that runs behind the scenes so people don’t have to: paperwork that makes itself, data that moves between systems on its own, and reports that are ready before anyone asks.",
-    automation),
+    automation, { stats: wins, note }),
   group("tools", "consulting",
     "Tools people use every day to see what’s happening at a glance and enter what they know, with the checks built in so the information stays right.",
     interactive),
