@@ -251,7 +251,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   }
 
   function mobilePanel(item: ServiceItem, index = 1) {
-    return <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} aria-label={item.name}
+    return <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} data-experience={item.id.startsWith("experience") || undefined} aria-label={item.name}
       ref={node => { if (node) mobileSections.current.set(item.id,node); else mobileSections.current.delete(item.id); }}>
       <div className={`preview-bg ${s.background}`} style={{ "--bg": item.image } as CSSProperties} />{panelCopy(item,true,index)}
     </section>;
@@ -293,7 +293,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         </nav>
         <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><button type="button" onClick={() => openContact(selected)} className="cta-button">Let’s talk</button><Link href="/clients/" prefetch={false} className={s.clientLink}>Are we working with you?<br /><strong>Check here for updates ↗</strong></Link><Link href="/websites" className={s.mainSite}>Website collection ↗</Link></div>
       </aside>
-      <main ref={stage} id="service-stage" tabIndex={0} className={`stage ${s.stage}`} data-theme={selected.theme || "service"} inert={mobileOpen} onKeyDown={event => {
+      <main ref={stage} id="service-stage" tabIndex={0} className={`stage ${s.stage}`} data-theme={selected.theme || "service"} data-experience={selected.id.startsWith("experience") || undefined} inert={mobileOpen} onKeyDown={event => {
         if (window.matchMedia("(max-width: 760px)").matches || (event.target as Element).closest("button,a,input,select,textarea")) return;
         const direction = ["ArrowDown", "PageDown", "ArrowRight"].includes(event.key) ? 1 : ["ArrowUp", "PageUp", "ArrowLeft"].includes(event.key) ? -1 : 0;
         const target = event.key === "Home" ? model.panels[0] : event.key === "End" ? model.panels.at(-1) : direction ? nextPanel(direction) : undefined;

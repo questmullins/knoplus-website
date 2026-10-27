@@ -224,5 +224,8 @@
 :global(:root[data-scheme="light"]) .background { background-image: linear-gradient(90deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(0.76 * var(--overlay))) 65%, rgb(var(--base-rgb) / calc(0.66 * var(--overlay)))), var(--bg); }
 @media (max-width: 760px) { :global(:root[data-scheme="light"]) .shell .mobilePanel .background { background-image: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.72 * var(--overlay))), rgb(var(--base-rgb) / calc(0.92 * var(--overlay)))), var(--bg); } }
 
+/* Dark mode: Experience photos sit under a heavier overlay (0.6 instead of the site's 0.45). */
+:global(:root:not([data-scheme="light"])) :is(.stage, .mobilePanel)[data-experience] { --overlay: 0.6; }
+
 /* Dark mode: full-ink copy over the photographs (the global p is 74% ink, too faint on bright photos). */
-:global(:root:not([data-scheme="light"])) .description, :global(:root:not([data-scheme="light"])) .details p { color: var(--white); }
+:global(:root:not([data-scheme="light"])) .description, :global(:root:not([data-scheme="light"])) .details p, :global(:root:not([data-scheme="light"])) .note { color: var(--white); }
