@@ -9,6 +9,7 @@ import { SiteMenu } from "@/components/SiteMenu";
 import { buildShowcase } from "./showcase-model";
 import { serviceAccent, type ServiceItem } from "./services";
 import { StoreBadges } from "./store-badges";
+import { Toolkit } from "./toolkit";
 import s from "./services-showcase.module.css";
 
 export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
@@ -243,6 +244,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         {item.template && <button className="cta-button inquire-button" type="button" onClick={() => openContact(item)}>Inquire</button>}
       </div>
       {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
+      {item.tools && <Toolkit groups={item.tools} />}
       {item.note && <p className={s.note}>{item.note}</p>}
       </div>
     </div></div>;

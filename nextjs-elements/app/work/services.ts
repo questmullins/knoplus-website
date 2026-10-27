@@ -1,5 +1,6 @@
 import type { ProjectPhoto } from "./project-catalog";
 import { templates } from "@/data/templates";
+import { toolkit, type ToolGroup } from "@/data/toolkit";
 
 export type ServiceItem = {
   id: string;
@@ -22,6 +23,7 @@ export type ServiceItem = {
   sellingPoints?: string[];
   highlightsLabel?: string;
   sellingPointsLabel?: string;
+  tools?: ToolGroup[];
 };
 
 const architecture = "url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80')";
@@ -61,10 +63,9 @@ const experienceItems: ServiceItem[] = [
     "Bundle reporting started as a Google Sheet with hundreds of formulas. When that became hard to maintain, I moved the logic into Python. When running it on one computer became the bottleneck, I moved it into a cloud workflow that feeds the dashboards directly. Build for today’s problem, and notice when it needs to grow.",
     ["Google Sheets", "Python", "Pipedream", "Grow"], "Three versions, each one easier to run"),
   {
-    ...story("toolkit", "Toolkit", "web-services",
-      "The tools are how the work gets done, not what you’re buying. You need returns that are easier to handle, not GraphQL. These are the platforms and languages I’ve built real, everyday systems with.",
-      ["Shopify", "ShipStation", "HubSpot", "Asana", "Power Apps", "Power Automate", "SharePoint", "Microsoft Graph", "Google Workspace", "Snowflake"], ""),
-    highlightsLabel: "Platforms", sellingPoints: ["Python", "JavaScript", "SQL", "Google Apps Script", "HTML & CSS"], sellingPointsLabel: "Languages",
+    id: "experience--toolkit", name: "Toolkit", label: "Experience / Toolkit", image: "url('/revamp/banners/web-services.webp')",
+    description: "Every program, platform and language I’ve built real, everyday systems with. The tools are how the work gets done, not what you’re buying, but here’s what will feel familiar.",
+    tools: toolkit,
   },
 ];
 
