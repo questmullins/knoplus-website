@@ -221,7 +221,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   }
 
   function statList(item: ServiceItem) {
-    return !!item.stats?.length && <dl className={s.stats}>{item.stats.map(stat => <div key={stat.value}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>;
+    return !!item.stats?.length && <dl className={s.stats}>{item.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>;
   }
 
   function panelCopy(item: ServiceItem, mobile = false, index = 0) {
