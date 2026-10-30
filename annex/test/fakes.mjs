@@ -1,8 +1,9 @@
-// Stand-ins for RoseWave, Square, Prodigi, Cloudflare and Google Search Console, for testing Annex on this machine with `wrangler dev`.
+// Stand-ins for RoseWave, Square, Prodigi, Etsy, Cloudflare and Google Search Console, for testing Annex on this machine with `wrangler dev`.
 // RoseWave's feed is the real RoseWave worker (its file passed as the first argument) over a stand-in bucket.
 // Usage: node test/fakes.mjs <path to rosewave cloud/worker.js> [port]
 import http from "node:http";
 import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 
 const rosewave = (await import(pathToFileURL(process.argv[2]).href)).default;
 const port = Number(process.argv[3] || 8790);
@@ -68,6 +69,23 @@ const cloudflare = (zone, scale) => ({ zoneTag: zone, httpRequests1dGroups: week
 const searchRows = { date: week.map((d, i) => ({ keys: [d], clicks: 3 + i, impressions: 100 + i * 10, ctr: (3 + i) / (100 + i * 10), position: 8 })), query: [{ keys: ["kno plus"], clicks: 30, impressions: 120, ctr: 0.25, position: 1.2 }], page: [{ keys: ["https://kno.plus/store/"], clicks: 20, impressions: 300, ctr: 0.0667, position: 6.4 }] };
 const body = (req) => new Promise((done) => { let s = ""; req.on("data", (c) => (s += c)); req.on("end", () => done(s)); });
 
+// Etsy: the code for a sign-in is "code-" + its PKCE challenge, so the verifier can be checked. The first token lasts a
+// minute, so the first pull has to refresh it. Two paid receipts (one part refunded) and one not paid yet.
+const etsyMoney = (cents) => ({ amount: cents, divisor: 100, currency_code: "USD" });
+const etsyReceipts = [
+  { receipt_id: 7001, created_timestamp: Math.floor(Date.parse(ago(4)) / 1000), status: "Completed", is_paid: true, is_shipped: true, name: "Ada Lovelace",
+    total_price: etsyMoney(5000), discount_amt: etsyMoney(500), total_shipping_cost: etsyMoney(600), total_tax_cost: etsyMoney(410), total_vat_cost: etsyMoney(0),
+    grandtotal: etsyMoney(5510), refunds: [], transactions: [
+      { transaction_id: 1, title: "Golden Hour Print", quantity: 2, price: etsyMoney(1500), variations: [{ formatted_name: "Size", formatted_value: "8x10" }] },
+      { transaction_id: 2, title: "Blue Wave Print", quantity: 1, price: etsyMoney(2000), variations: [] }] },
+  { receipt_id: 7002, created_timestamp: Math.floor(Date.parse(ago(2)) / 1000), status: "Partially Refunded", is_paid: true, is_shipped: false, name: "Grace Hopper",
+    total_price: etsyMoney(3000), discount_amt: etsyMoney(0), total_shipping_cost: etsyMoney(0), total_tax_cost: etsyMoney(0), total_vat_cost: etsyMoney(0),
+    grandtotal: etsyMoney(3000), refunds: [{ amount: etsyMoney(1000) }], transactions: [{ transaction_id: 3, title: "Metal Print", quantity: 1, price: etsyMoney(3000), variations: [] }] },
+  { receipt_id: 7003, created_timestamp: Math.floor(Date.parse(ago(1)) / 1000), status: "Open", is_paid: false, name: "Not Paid", total_price: etsyMoney(900), grandtotal: etsyMoney(900), transactions: [] },
+];
+let etsyTokens = 0;
+const etsyB64 = (buf) => buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
 export const seen = [];
 let lastMail = null;
 http.createServer(async (req, res) => {
@@ -104,6 +122,31 @@ http.createServer(async (req, res) => {
       return reply(200, { rows: searchRows[dimensions[0]] || [] });
     }
   }
+  if (url.pathname === "/etsy/v3/public/oauth/token" && req.method === "POST") {
+    const form = new URLSearchParams(await body(req));
+    if (form.get("client_id") !== "test-etsy-key") return reply(401, { error: "invalid_client" });
+    if (form.get("grant_type") === "authorization_code") {
+      const sent = etsyB64(createHash("sha256").update(form.get("code_verifier") || "").digest());
+      if (form.get("code") !== "code-" + sent || !/\/annex\/etsy\/callback$/.test(form.get("redirect_uri") || "")) return reply(400, { error: "invalid_grant" });
+      return reply(200, { access_token: "1234.access-" + ++etsyTokens, refresh_token: "1234.refresh-" + etsyTokens, expires_in: 60, token_type: "Bearer" });
+    }
+    if (form.get("grant_type") === "refresh_token" && form.get("refresh_token") === "1234.refresh-" + etsyTokens) {
+      return reply(200, { access_token: "1234.access-" + ++etsyTokens, refresh_token: "1234.refresh-" + etsyTokens, expires_in: 3600, token_type: "Bearer" });
+    }
+    return reply(400, { error: "invalid_grant" });
+  }
+  if (url.pathname.startsWith("/etsy/v3/application/")) {
+    if (req.headers["x-api-key"] !== "test-etsy-key:test-etsy-secret" || req.headers.authorization !== "Bearer 1234.access-" + etsyTokens) return reply(401, { error: "invalid_token" });
+    const path = url.pathname.slice("/etsy/v3/application".length);
+    if (path === "/users/me") return reply(200, { user_id: 1234, shop_id: 5678 });
+    if (path === "/shops/5678/receipts") {
+      seen.push("etsy receipts since " + (url.searchParams.get("min_last_modified") || "the start"));
+      const offset = Number(url.searchParams.get("offset") || 0);
+      return reply(200, { count: etsyReceipts.length, results: etsyReceipts.slice(offset, offset + Number(url.searchParams.get("limit") || 25)) });
+    }
+    if (path === "/shops/5678/listings" && url.searchParams.get("state") === "active") return reply(200, { count: 42, results: [] });
+  }
+  if (url.pathname === "/etsy/seen") return reply(200, seen.filter((s) => s.startsWith("etsy ")));
   if (url.pathname === "/prodigi/v4.0/orders") return req.headers["x-api-key"] === "pd-live" ? reply(200, prodigi) : reply(401, {});
   if (url.pathname === "/prodigi/sandbox/v4.0/orders") return req.headers["x-api-key"] === "pd-sandbox" ? reply(200, prodigiSandbox) : reply(401, {});
   // Resend: keeps the last email so the tests can read the link it carried

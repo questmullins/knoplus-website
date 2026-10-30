@@ -95,3 +95,9 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   through TEXT NOT NULL DEFAULT '',  -- paid up to
   test INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS etsy_auth (
+  id TEXT PRIMARY KEY,               -- 'token' for the linked shop, 'pending:<state>' while Connect Etsy is under way
+  data TEXT NOT NULL,                -- encrypted (see connections/etsy-link.js); never readable without ETSY_SECRET
+  shop TEXT NOT NULL DEFAULT '',     -- Etsy's shop id, not secret
+  at TEXT NOT NULL
+);

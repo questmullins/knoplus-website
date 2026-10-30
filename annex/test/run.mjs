@@ -7,6 +7,8 @@ import { createHash, randomBytes } from "node:crypto";
 const BASE = process.env.ANNEX_URL || "http://127.0.0.1:8787/annex/api/";
 const ORIGIN = new URL(BASE).origin;
 const d1 = (sql) => execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--command", sql], { stdio: "pipe" });
+const rows = (sql) => JSON.parse(execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--json", "--command", sql], { stdio: "pipe" }))[0].results;
+const until = async (test, ms = 15000) => { for (const end = Date.now() + ms; Date.now() < end; await new Promise((r) => setTimeout(r, 300))) if (await test()) return true; return false; };
 let cookie = "";
 async function api(path, body, method) {
   const ask = () => fetch(BASE + path, {
@@ -22,7 +24,7 @@ const check = (name, ok) => { assert.ok(ok, name); console.log("ok  " + name); }
 
 // a fresh start: no account, no sales (the local database only; d1 never touches the real one with --local)
 for (const file of ["annex/schema/shared.sql", "annex/schema/account.sql"]) execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--file", file], { stdio: "pipe" });
-d1(["accounts", "assets", "guides", "connections", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
+d1(["accounts", "assets", "guides", "connections", "etsy_auth", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
 
 const run = "annex-test-" + Date.now();
 
@@ -229,5 +231,43 @@ check("Plus: $10 a month, no setup fee, credits cover the listings: " + JSON.str
 check("lots of listings", (await api("connections/etsy", { opened: "2025-03-01", listings: 300, plus: true, setupWaived: true })).status === 200);
 ec = (await api("costs?from=2025-03-01&to=2025-04-30")).body.total;
 check("credits stop at $3.00 a month: " + JSON.stringify(ec), ec.etsyCredits === -600);
-process.on("exit", () => d1("DELETE FROM lines WHERE order_id LIKE 'etsy:%'; DELETE FROM orders WHERE source = 'etsy'; DELETE FROM payments WHERE source = 'etsy'; DELETE FROM refunds WHERE id LIKE 'etsy-refund:%'; DELETE FROM connections WHERE id = 'etsy';"));
+
+// Etsy's API: Connect Etsy, the sign-in coming back, the tokens kept encrypted, and orders pulled with their fees
+const etsyConn = async () => (await api("connections")).body.connections.find((c) => c.id === "etsy");
+let ec2 = await etsyConn();
+check("Etsy's keys are the app's own, not named after the account", ec2.secrets.map((x) => x.name).join() === "ETSY_KEY,ETSY_SECRET,ETSY_WEBHOOK_SECRET" && ec2.secrets.every((x) => x.set) && !ec2.linked);
+const link = (await api("etsy/connect", {})).body.url;
+const lq = new URL(link).searchParams;
+check("Connect Etsy asks Etsy for the right things", link.startsWith("https://www.etsy.com/oauth/connect?") && lq.get("code_challenge_method") === "S256" && lq.get("state").startsWith("rosewave.")
+  && lq.get("scope") === "transactions_r listings_r listings_w shops_r" && /^https?:\/\/[^/]+\/annex\/etsy\/callback$/.test(lq.get("redirect_uri")) && lq.get("client_id") === "test-etsy-key");
+const back = (qs, c = cookie) => fetch(ORIGIN + "/annex/etsy/callback?" + qs, { redirect: "manual", headers: { Cookie: c } }).then((r) => ({ status: r.status, to: decodeURIComponent(r.headers.get("location") || "") }));
+const signedIn = `state=${encodeURIComponent(lq.get("state"))}&code=code-${lq.get("code_challenge")}`;
+check("the way back needs the owner signed in", (await back(signedIn, "")).to.includes("/clients/"));
+check("a made-up state is turned away", (await back("state=rosewave.made-up&code=x")).to.includes("expired"));
+d1("DELETE FROM connections WHERE id = 'etsy'"); // a first connect, with no Etsy settings saved yet
+const came = await back(signedIn);
+check("Etsy's sign-in comes back connected: " + came.to, came.status === 302 && came.to.endsWith("?etsy=connected#asset/rosewave/settings"));
+check("the same sign-in can't be used twice", (await back(signedIn)).to.includes("expired"));
+const kept = rows("SELECT * FROM etsy_auth");
+check("Etsy's tokens are kept encrypted", kept.length === 1 && kept[0].id === "token" && kept[0].shop === "5678" && !/access|refresh|1234/.test(kept[0].data));
+check("connecting pulls Etsy's orders", await until(async () => /Linked to Etsy/.test((await etsyConn()).message)));
+ec2 = await etsyConn();
+check("linked, with Etsy's listing count: " + ec2.message, ec2.linked && ec2.linked.shop === "5678" && ec2.config.listings === 42 && /2 brought up to date; 42 active listings/.test(ec2.message));
+const pulled = (await api("orders")).body.orders;
+const r1 = pulled.find((o) => o.id === "etsy:7001"), r2 = pulled.find((o) => o.id === "etsy:7002");
+// 7001: on 50.00 − 5.00 + 6.00 = 51.00: 6.5% = 3.32, 3% of 55.10 + 0.25 = 1.90, 3 items renew = 0.60
+check("an Etsy receipt becomes an order with its items and fees: " + JSON.stringify(r1), r1 && r1.customer === "Ada Lovelace" && r1.items.includes("Golden Hour Print · Size: 8x10") && r1.fee === 332 + 190 + 60);
+check("a part refund is counted, an unpaid order isn't", r2 && r2.status === "paid" && r2.refunded === 1000 && !pulled.some((o) => o.id === "etsy:7003"));
+check("the first pull refreshed the short-lived token and took everything", (await (await fetch(FAKES + "/etsy/seen")).json()).includes("etsy receipts since the start"));
+// Etsy's webhook: only when signed with the endpoint's secret
+const hookBody = JSON.stringify({ event_type: "order.paid" }), hookId = "msg_" + Date.now(), hookAt = String(Math.floor(Date.now() / 1000));
+const hookKey = await crypto.subtle.importKey("raw", Buffer.from("dGVzdC1ldHN5LWhvb2sta2V5", "base64"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+const hookSig = Buffer.from(await crypto.subtle.sign("HMAC", hookKey, new TextEncoder().encode(`${hookId}.${hookAt}.${hookBody}`))).toString("base64");
+const etsyHook = (sig, at = hookAt) => fetch(ORIGIN + "/annex/hooks/etsy", { method: "POST", body: hookBody, headers: { "webhook-id": hookId, "webhook-timestamp": at, "webhook-signature": sig } }).then((r) => r.status);
+check("an unsigned Etsy webhook is ignored", (await etsyHook("v1,bm9wZQ==")) === 404);
+check("an old Etsy webhook is ignored", (await etsyHook("v1," + hookSig, String(Number(hookAt) - 3600))) === 404);
+check("a signed Etsy webhook is taken", (await etsyHook("v1,abc v1," + hookSig)) === 200);
+check("the webhook pulls the last few days", await until(async () => (await (await fetch(FAKES + "/etsy/seen")).json()).some((x) => /since \d+$/.test(x))));
+check("Disconnect Etsy", (await api("etsy/disconnect", {})).status === 200 && !(await etsyConn()).linked && rows("SELECT id FROM etsy_auth WHERE id = 'token'").length === 0);
+process.on("exit", () => d1("DELETE FROM etsy_auth; DELETE FROM lines WHERE order_id LIKE 'etsy:%'; DELETE FROM orders WHERE source = 'etsy'; DELETE FROM payments WHERE source = 'etsy'; DELETE FROM refunds WHERE id LIKE 'etsy-refund:%'; DELETE FROM connections WHERE id = 'etsy';"));
 console.log("all good");

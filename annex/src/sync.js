@@ -27,6 +27,8 @@ export async function accountDb(env, account) {
 
 // a connection's secrets are Worker secrets named after the account: ROSEWAVE_SQUARE_TOKEN for account rosewave
 export const secretName = (account, name) => account.id.toUpperCase().replace(/[^A-Z0-9]/g, "_") + "_" + name;
+// ...except an app's own keys shared by every account (Etsy's), which keep their plain names
+export const secretFor = (c, account, name) => (c.about.plainSecrets ? name : secretName(account, name));
 
 export async function connectionRows(db) {
   const rows = (await db.prepare("SELECT * FROM connections").all()).results;
@@ -47,9 +49,9 @@ export async function syncAccount(env, account, { full = false, days, only } = {
     let result, message;
     try {
       result = await c.pull({
-        db, config: row.config, cursor: row.cursor, days,
+        db, env, config: row.config, cursor: row.cursor, days,
         full: full || !row.last_ok, // the first pull of a connection brings its history
-        secret: (name) => env[secretName(account, name)] || "",
+        secret: (name) => env[secretFor(c, account, name)] || "",
         base: fakes,
       });
       message = result.skipped || result.counted || "";

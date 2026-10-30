@@ -1,1 +1,6 @@
 RESEND_API_KEY=replace-with-your-resend-api-key
+
+# Etsy app (developer portal): keystring, shared secret, and the webhook signing secret
+ETSY_KEY=replace-with-your-etsy-keystring
+ETSY_SECRET=replace-with-your-etsy-shared-secret
+ETSY_WEBHOOK_SECRET=replace-with-your-etsy-webhook-signing-secret

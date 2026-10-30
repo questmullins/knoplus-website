@@ -5,6 +5,8 @@
 //   /annex/...                 the dashboard itself (static files in nextjs-elements/public/annex)
 //   /annex/api/...             the dashboard's data, for a signed-in kno.plus administrator
 //   POST /annex/hooks/square   Square's webhook: checked with the account's signature key, then a quick pull
+//   GET /annex/etsy/callback   where Etsy sends the owner back after Connect Etsy
+//   POST /annex/hooks/etsy     Etsy's webhook: checked with ETSY_WEBHOOK_SECRET, then a quick pull of Etsy
 // The Worker's cron runs every account's connections nightly.
 //
 // Sign-in is the kno.plus administrator account (the same one /clients uses), so there is one password for everything.
@@ -13,10 +15,11 @@
 import { cookie, digest, passwordHash, randomToken, rateLimit, sessionUser } from "../../server/client-auth.js";
 import clientSchema from "../../server/client-schema.sql";
 import { siteReport } from "../../server/analytics.js";
-import { CONNECTIONS, accountDb, connectionRows, ensureShared, secretName, syncAccount } from "./sync.js";
+import { CONNECTIONS, accountDb, connectionRows, ensureShared, secretFor, secretName, syncAccount } from "./sync.js";
 import { bestSellers, costSummary, home, memberSummary, orderList, trends } from "./report.js";
 import { verify } from "./connections/square.js";
 import { importFile, markOffsite, pull as etsyStatus, refigure } from "./connections/etsy.js";
+import { connectUrl, finishConnect, linked, ready as etsyReady, unlink, verifyHook } from "./connections/etsy-link.js";
 import { websites } from "./insights/cloudflare.js";
 import { search } from "./insights/search.js";
 import { assetsWithNumbers, saveAsset } from "./workspace.js";
@@ -74,6 +77,8 @@ export async function handleAnnex(request, env, ctx) {
   try {
     if (url.pathname.startsWith("/annex/api/")) return guard(await api(request, env, ctx, url));
     if (url.pathname === "/annex/hooks/square" && request.method === "POST") return await squareHook(request, env, ctx, url);
+    if (url.pathname === "/annex/hooks/etsy" && request.method === "POST") return await etsyHook(request, env, ctx, url);
+    if (url.pathname === "/annex/etsy/callback" && request.method === "GET") return guard(await etsyCallback(request, env, ctx, url));
   } catch (error) {
     console.error(JSON.stringify({ event: "annex_error", path: url.pathname, message: String(error && error.message) }));
     return guard(fail("Something went wrong. Try again in a minute.", 500));
@@ -217,6 +222,14 @@ async function api(request, env, ctx, url) {
       .bind(now, status.counted ? now : "", status.counted || status.skipped).run();
     return json(done);
   }
+  if (route === "etsy/connect" && method === "POST") {
+    if (!etsyReady(env)) return fail("Add the ETSY_KEY and ETSY_SECRET Worker secrets in Cloudflare first.");
+    return json({ url: await connectUrl(env, db, account, url.origin) });
+  }
+  if (route === "etsy/disconnect" && method === "POST") {
+    await unlink(db);
+    return json({ ok: true });
+  }
   if (method === "POST" && route === "settings") return settings(request, env, account);
   return fail("Not found", 404);
 }
@@ -317,6 +330,7 @@ async function configure(request, db, id) {
 
 async function connectionStatus(env, account, db, url) {
   const rows = await connectionRows(db);
+  const etsyLink = (await linked(db)) || null;
   return {
     insights: { cloudflare: !!env.CLOUDFLARE_API_TOKEN, google: !!env.GOOGLE_SERVICE_ACCOUNT },
     hook: url.origin + "/annex/hooks/square" + (account.id === (env.ANNEX_ACCOUNT || "rosewave") ? "" : "?account=" + account.id),
@@ -324,7 +338,8 @@ async function connectionStatus(env, account, db, url) {
       const row = rows.get(c.about.id) || { config: {} };
       return {
         id: c.about.id, name: c.about.name, config: row.config, lastRun: row.last_run || "", lastOk: row.last_ok || "", message: row.message || "",
-        secrets: c.about.secrets.map((s) => ({ name: secretName(account, s), set: !!env[secretName(account, s)] })),
+        secrets: c.about.secrets.map((s) => ({ name: secretFor(c, account, s), set: !!env[secretFor(c, account, s)] })),
+        ...(c.about.id === "etsy" ? { linked: etsyLink, hook: url.origin + "/annex/hooks/etsy", callback: url.origin + "/annex/etsy/callback" } : {}),
       };
     }),
   };
@@ -343,5 +358,42 @@ async function squareHook(request, env, ctx, url) {
   const body = await request.text();
   if (body.length > 256 * 1024 || !(await verify(request, body, env[secretName(account, "SQUARE_SIGNATURE")]))) return new Response("Not found", { status: 404 });
   ctx.waitUntil(syncAccount(env, account, { days: 3, only: ["rosewave", "square", "prodigi"] }).catch((e) => console.error("annex hook", e.message)));
+  return new Response("OK");
+}
+
+// Etsy sends the owner back here after Connect Etsy. Only the signed-in owner may finish it.
+async function etsyCallback(request, env, ctx, url) {
+  if (!env.CLIENT_DB) return new Response("Not found", { status: 404 });
+  await ensureClientTables(env.CLIENT_DB);
+  const user = await sessionUser(request, env.CLIENT_DB);
+  if (!user || user.role !== "admin") return Response.redirect(url.origin + "/clients/?next=/annex/", 302);
+  await ensureShared(env);
+  // the state starts with the account it was asked for
+  const account = await findAccount(env, (url.searchParams.get("state") || "").split(".")[0]);
+  if (!account || !etsyReady(env)) return new Response("Not found", { status: 404 });
+  const db = await accountDb(env, account);
+  let said;
+  try {
+    said = await finishConnect(env, db, url, fakeBase(env) && fakeBase(env) + "/etsy");
+  } catch (error) {
+    said = "Etsy didn't connect: " + String(error.message).slice(0, 200);
+  }
+  if (!said) ctx.waitUntil(syncAccount(env, account, { full: true, only: ["etsy"] }).catch((e) => console.error("annex etsy connect", e.message)));
+  // the note rides in the query, which the page shows once and clears
+  return Response.redirect(url.origin + "/annex/?etsy=" + encodeURIComponent(said || "connected") + "#asset/" + account.id + "/settings", 302);
+}
+
+async function etsyHook(request, env, ctx, url) {
+  if (!env.CLIENT_DB) return new Response("Not found", { status: 404 });
+  const body = await request.text();
+  if (body.length > 256 * 1024 || !(await verifyHook(request, body, env.ETSY_WEBHOOK_SECRET))) return new Response("Not found", { status: 404 });
+  await ensureShared(env);
+  const account = await findAccount(env, accountId(url, env));
+  if (!account) return new Response("Not found", { status: 404 });
+  await ensureClientTables(env.CLIENT_DB);
+  // a burst of webhooks (an order paid, then shipped) needs only one pull a minute
+  if (await rateLimit(env.CLIENT_DB, "annex-etsy-hook:" + account.id + ":" + Math.floor(Date.now() / 60e3), 1)) {
+    ctx.waitUntil(syncAccount(env, account, { days: 3, only: ["etsy"] }).catch((e) => console.error("annex etsy hook", e.message)));
+  }
   return new Response("OK");
 }
