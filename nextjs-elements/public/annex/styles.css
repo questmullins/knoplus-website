@@ -101,23 +101,30 @@ aside nav a.active, aside nav a:hover { color: var(--mint); }
 aside nav a { justify-content: flex-start; gap: 18px; }
 .nav-icon { flex: 0 0 24px; }
 .nav-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.brand-short { display: none; }
 .side-toggle { margin-left: auto; width: 40px; height: 40px; display: grid; place-items: center; background: none; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.16); color: rgb(var(--ink-rgb) / 0.72); cursor: pointer; transition: color .25s ease, border-color .25s ease; }
 .side-toggle:hover { color: var(--mint); border-color: var(--mint); }
 .side-toggle .nav-icon { width: 20px; height: 20px; transition: transform .3s ease; }
-/* the shrunk sidebar: icons only (computers; on a phone the sidebar is the Workspace menu) */
+/* the shrunk sidebar: icons only (computers; on a phone the sidebar is the Workspace menu).
+   The rail narrows while the words fade, and the icons stay where they are, so nothing jumps. */
 @media (min-width: 761px) {
-  aside#sidebar, #app > main { transition: width .3s cubic-bezier(.2,.7,.2,1), margin-left .3s cubic-bezier(.2,.7,.2,1), padding .3s ease; }
+  aside#sidebar, #app > main { transition: width .32s cubic-bezier(.2,.7,.2,1), margin-left .32s cubic-bezier(.2,.7,.2,1), padding .32s cubic-bezier(.2,.7,.2,1); }
+  aside#sidebar { overflow: hidden; grid-template-columns: minmax(0, 1fr); }
+  aside > .brand { position: relative; white-space: nowrap; }
+  .brand-short { display: block; position: absolute; inset: 0; opacity: 0; }
+  .brand-full, .brand-short, .nav-label, .nav-name, .motto, .aside-bottom p, .aside-bottom .row > :not(.side-toggle) { transition: opacity .22s ease .1s; }
+  .nav-label, .motto, .aside-bottom p { white-space: nowrap; }
+  aside nav a { padding-left: 0; transition: color .25s ease, padding .32s cubic-bezier(.2,.7,.2,1); }
+  .side-toggle { transition: color .25s ease, border-color .25s ease, margin .32s cubic-bezier(.2,.7,.2,1); }
   .side-small { --side: 88px; }
-  .side-small aside#sidebar { padding-inline: 14px; overflow: hidden; }
-  .side-small .brand-full, .side-small .nav-label, .side-small .nav-name, .side-small .motto, .side-small .aside-bottom p, .side-small .aside-bottom .row > :not(.side-toggle) { display: none; }
-  .side-small .brand-short { display: inline; }
-  .side-small aside nav a { justify-content: center; }
-  .side-small .aside-bottom .row { justify-content: center; }
-  .side-small .side-toggle { margin: 0; }
+  .side-small aside#sidebar { padding-inline: 14px; }
+  .side-small :is(.brand-full, .nav-label, .nav-name, .motto, .aside-bottom p, .aside-bottom .row > :not(.side-toggle)) { opacity: 0; pointer-events: none; transition-delay: 0s; }
+  .side-small .brand-short { opacity: 1; }
+  .side-small .aside-bottom .row > :not(.side-toggle) { position: absolute; }
+  .side-small aside nav a { padding-left: 18px; }
+  .side-small .side-toggle { margin-right: 10px; }
   .side-small .side-toggle .nav-icon { transform: scaleX(-1); }
 }
-@media (prefers-reduced-motion: reduce) { aside#sidebar, #app > main { transition: none; } }
+@media (prefers-reduced-motion: reduce) { aside#sidebar, #app > main, aside nav a, aside *, .side-toggle { transition: none !important; } }
 .nav-plus { position: relative; flex: 0 0 18px; width: 18px; height: 18px; transition: transform .28s ease; }
 .nav-plus::before, .nav-plus::after { content: ""; position: absolute; left: 50%; top: 50%; width: 18px; height: 2px; background: currentColor; transform: translate(-50%, -50%); }
 .nav-plus::after { transform: translate(-50%, -50%) rotate(90deg); }
