@@ -149,7 +149,16 @@ function shell() {
   const toggle = h("button", { class: "menu-toggle", "aria-expanded": "false", "aria-controls": "sidebar", onclick: () => open(!document.body.classList.contains("menu-open")) }, "Workspace ", h("span", { "aria-hidden": "true", text: "+" }));
   const current = state.page === "asset" ? "assets" : state.page;
   const nav = h("nav", { "aria-label": "Workspace" }, h("div", { class: "nav-label", text: "Workspace" }),
-    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, onclick: () => open(false) }, name)));
+    PAGES.map(([id, name]) => h("a", { href: "#" + id, class: current === id ? "active" : null, "aria-current": current === id ? "page" : null, title: name, onclick: () => open(false) }, icon(id), h("span", { class: "nav-name", text: name }))));
+  // on a computer the sidebar can shrink to its icons; the choice is remembered
+  const small = (on) => {
+    document.documentElement.classList.toggle("side-small", on);
+    shrink.setAttribute("aria-pressed", String(on));
+    shrink.title = on ? "Show the sidebar" : "Shrink the sidebar";
+    store("annex-side-small", on);
+  };
+  const shrink = h("button", { class: "side-toggle", type: "button", "aria-label": "Shrink the sidebar", onclick: () => small(!document.documentElement.classList.contains("side-small")) }, icon("side"));
+  small(!!recall("annex-side-small"));
   const signOut = h("button", { class: "text-link", text: "Sign out", onclick: async () => {
     await fetch("/api/clients/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" });
     location.reload();
@@ -157,11 +166,25 @@ function shell() {
   document.body.classList.remove("menu-open");
   app.replaceChildren(
     h("div", { class: "mobile-bar" }, h("a", { class: "brand", href: "/", text: "KNOPLUS" }), toggle),
-    h("aside", { id: "sidebar" }, h("a", { class: "brand", href: "/", text: "KNOPLUS" }), nav,
+    h("aside", { id: "sidebar" }, h("a", { class: "brand", href: "/", "aria-label": "KNOPLUS" }, h("span", { class: "brand-full", text: "KNOPLUS" }), h("span", { class: "brand-short", text: "K+" })), nav,
       h("div", { class: "aside-bottom" }, h("div", { class: "motto" }, "Know More.", h("br"), "Know Better.", h("br"), "Knoplus."),
-        h("p", { class: "small", text: state.me.user.email }), h("div", { class: "row" }, h("a", { class: "text-link", href: "/", text: "kno.plus ↗" }), signOut))),
+        h("p", { class: "small", text: state.me.user.email }), h("div", { class: "row" }, h("a", { class: "text-link", href: "/", text: "kno.plus ↗" }), signOut, shrink))),
     h("main", {}, h("header", { class: "crumbs" }, h("span", { id: "crumb", text: crumb() }), h("div", { class: "row" }, h("span", { class: "identity" }, "Owner", h("i")), schemeToggle())),
       h("section", { class: "view", id: "view" }, h("p", { class: "loading", text: "Loading…" }))));
+}
+// The sidebar's line icons, drawn on a 24-unit grid in the ink colour.
+const ICONS = {
+  overview: ["M4 4h7v7H4z", "M13 4h7v4h-7z", "M13 10h7v10h-7z", "M4 13h7v7H4z"],
+  assets: ["M12 3 21 8l-9 5-9-5z", "M3 12.5l9 5 9-5", "M3 16.5l9 5 9-5"],
+  websites: ["M3 5h18v14H3z", "M3 9h18", "M6 7h.01", "M8.5 7h.01"],
+  clients: ["M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z", "M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6", "M16 4.3a3.5 3.5 0 0 1 0 6.4", "M18 14.4c2.1.8 3.5 2.8 3.5 5.6"],
+  guides: ["M12 6.5C10 5 7 4.5 3 5v14c4-.5 7 0 9 1.5", "M12 6.5C14 5 17 4.5 21 5v14c-4-.5-7 0-9 1.5", "M12 6.5v14"],
+  settings: ["M4 7h9", "M17 7h3", "M15 4.5v5", "M4 17h3", "M11 17h9", "M9 14.5v5"],
+  side: ["M3 4h18v16H3z", "M9 4v16", "M15.5 9.5 13 12l2.5 2.5"],
+};
+function icon(name) {
+  return h("svg:svg", { class: "nav-icon", viewBox: "0 0 24 24", width: 24, height: 24, "aria-hidden": "true" },
+    ICONS[name].map((d) => h("svg:path", { d, fill: "none", stroke: "currentColor", "stroke-width": 1.6, "stroke-linecap": "round", "stroke-linejoin": "round" })));
 }
 // Light or dark; /scheme.js (shared with kno.plus) handles the click and remembers the choice.
 function schemeToggle() {
