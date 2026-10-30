@@ -268,6 +268,8 @@ check("an unsigned Etsy webhook is ignored", (await etsyHook("v1,bm9wZQ==")) ===
 check("an old Etsy webhook is ignored", (await etsyHook("v1," + hookSig, String(Number(hookAt) - 3600))) === 404);
 check("a signed Etsy webhook is taken", (await etsyHook("v1,abc v1," + hookSig)) === 200);
 check("the webhook pulls the last few days", await until(async () => (await (await fetch(FAKES + "/etsy/seen")).json()).some((x) => /since \d+$/.test(x))));
+check("saving Etsy settings keeps Etsy's own listing count", (await api("connections/etsy", { opened: D, plus: true, setupWaived: true })).status === 200 && (await etsyConn()).config.listings === 42);
+check("webhook keys are optional", (await api("connections")).body.connections.every((c) => c.secrets.every((x) => x.optional === /SIGNATURE|SANDBOX|WEBHOOK/.test(x.name))));
 check("Disconnect Etsy", (await api("etsy/disconnect", {})).status === 200 && !(await etsyConn()).linked && rows("SELECT id FROM etsy_auth WHERE id = 'token'").length === 0);
 process.on("exit", () => d1("DELETE FROM etsy_auth; DELETE FROM lines WHERE order_id LIKE 'etsy:%'; DELETE FROM orders WHERE source = 'etsy'; DELETE FROM payments WHERE source = 'etsy'; DELETE FROM refunds WHERE id LIKE 'etsy-refund:%'; DELETE FROM connections WHERE id = 'etsy';"));
 console.log("all good");

@@ -7,6 +7,7 @@ export const about = {
   name: "Prodigi",
   // Secrets: <ACCOUNT>_PRODIGI_KEY (live), <ACCOUNT>_PRODIGI_SANDBOX (optional: sandbox orders, kept as test costs)
   secrets: ["PRODIGI_KEY", "PRODIGI_SANDBOX"],
+  optional: ["PRODIGI_SANDBOX"], // only for test orders
 };
 
 export async function pull(ctx) {

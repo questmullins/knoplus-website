@@ -11,6 +11,7 @@ export const about = {
   // config: sandbox = true for Square's sandbox. Secrets: <ACCOUNT>_SQUARE_TOKEN (read-only access token),
   // <ACCOUNT>_SQUARE_SIGNATURE (the webhook subscription's signature key)
   secrets: ["SQUARE_TOKEN", "SQUARE_SIGNATURE"],
+  optional: ["SQUARE_SIGNATURE"], // only for the webhook; without it, pulls still run nightly and on Refresh
 };
 
 const VERSION = "2026-09-16";

@@ -5,6 +5,7 @@ import * as rosewave from "./connections/rosewave.js";
 import * as square from "./connections/square.js";
 import * as prodigi from "./connections/prodigi.js";
 import * as etsy from "./connections/etsy.js";
+import { SHOP } from "./connections/etsy.js";
 
 export const CONNECTIONS = [rosewave, square, prodigi, etsy];
 
@@ -22,6 +23,12 @@ export async function accountDb(env, account) {
   const db = env[account.db];
   if (!db) throw new Error(`The ${account.db} database isn't bound to the Annex worker yet.`);
   await ensure(db, accountSchema, account.db);
+  if (!ready.has("etsy-shop:" + account.db)) {
+    // the Etsy shop's starting settings, only where they've never been saved (no opening day yet)
+    await db.prepare(`UPDATE connections SET config = json_set(config, '$.opened', ?, '$.setupWaived', json('true'), '$.plus', json('true'))
+      WHERE id = 'etsy' AND json_extract(config, '$.opened') IS NULL`).bind(SHOP.opened).run();
+    ready.add("etsy-shop:" + account.db);
+  }
   return db;
 }
 

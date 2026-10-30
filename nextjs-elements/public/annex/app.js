@@ -908,24 +908,60 @@ const label = (key) => (key.length === 7 ? new Date(key + "-15T12:00:00Z").toLoc
 // How to set up each connection, opened from its Help button. Each entry is [heading, ...lines]; a line that is an
 // array is a list.
 const code = (t) => h("code", { text: t });
+// Each guide says where to find every key and where it goes. Two places hold keys in Cloudflare:
+const STORE_STEPS = ["Cloudflare › Secrets Store (left menu) › your store › Create secret. Use the exact name given, paste the value, set the scope to Workers, and save. The kno.plus worker reads it from there; nothing else to do."];
+const WORKER_STEPS = ["Cloudflare › Workers & Pages › knoplus-website › Settings › Variables and Secrets › Add. Choose Secret, use the exact name given, paste the value, and Deploy."];
 const HELP = {
   rosewave: () => [
     ["What it brings in", "Orders and memberships from the RoseWave app and the kno.plus store."],
-    ["Set it up", ["Enter the RoseWave worker's address (https://….workers.dev) and press Save.", ["The Worker secret ", code("ROSEWAVE_ANNEX_KEY"), " must match RoseWave's ", code("ANNEX_KEY"), "."]]],
+    ["1. The feed password", [
+      "Make up a long random value (24+ characters) with your password manager. It isn't from any website; it's what RoseWave and Annex share so they trust each other.",
+      ["Save it in the Secrets Store as ", code("ROSEWAVE_ANNEX_KEY"), "."],
+      ["Save the same value on the RoseWave worker as a secret named ", code("ANNEX_KEY"), " (Workers & Pages › RoseWave's worker › Settings › Variables and Secrets › Add)."]]],
+    ["2. RoseWave's address", [
+      "Cloudflare › Workers & Pages › RoseWave's worker. Copy the address under Domains & Routes (it ends in .workers.dev, or is your own domain).",
+      "Paste it into this card's RoseWave worker address and press Save."]],
+    ["3. Check", ["Press Refresh now under Connections. This card turns green when the feed answers."]],
+    ["Where keys go", [...STORE_STEPS]],
   ],
   square: (c, d) => [
     ["What it brings in", "Payments, refunds, Square's fees, subscriptions and disputes."],
-    ["Set it up", [["Add the access token and webhook signature key as Worker secrets (below)."], ["In Square Developer › Webhooks, add ", code(d.hook), " with the payment, refund, subscription, invoice and dispute events."], ["Tick Sandbox only to try test payments."]]],
+    ["1. Access token (needed)", [
+      ["Open ", h("a", { href: "https://developer.squareup.com/apps", target: "_blank", rel: "noopener", text: "developer.squareup.com/apps" }), " and open your app."],
+      "Choose Sandbox or Production at the top (the same one RoseWave uses), open Credentials, and copy the Access token.",
+      ["Save it in the Secrets Store as ", code("SQUARE_TOKEN"), ". RoseWave uses the same one."],
+      "Sandbox token? Tick Sandbox on this card and press Save. Untick it when you switch to Production."]],
+    ["2. Webhook signature (optional: instant updates)", [
+      "Without it, Annex still pulls Square every night and when you press Refresh now.",
+      ["In your Square app: Webhooks › Subscriptions (Sandbox or Production, as above) › Add subscription. URL: ", code(d.hook), ". Events: payment, refund, subscription, invoice and dispute. Save."],
+      ["Open the subscription and copy its Signature key. Save it on the kno.plus worker as ", code("ROSEWAVE_SQUARE_SIGNATURE"), " (it belongs to this webhook only, so not in the store)."]]],
+    ["3. Check", ["Press Refresh now. This card shows the payments it found."]],
+    ["Where keys go", [...STORE_STEPS, ...WORKER_STEPS]],
   ],
   prodigi: () => [
     ["What it brings in", "What each print cost at the lab, and its shipping."],
-    ["Set it up", [["Add Prodigi's live API key (and its sandbox key, if you test) as Worker secrets (below)."]]],
+    ["1. Live API key (needed)", [
+      ["Sign in at ", h("a", { href: "https://dashboard.prodigi.com", target: "_blank", rel: "noopener", text: "dashboard.prodigi.com" }), ", open Settings, and copy the API key."],
+      ["Save it in the Secrets Store as ", code("PRODIGI_KEY"), ". RoseWave uses the same one."]]],
+    ["2. Sandbox key (optional: test orders)", [
+      "Only if you place test orders. Sign in to Prodigi's sandbox dashboard and copy its API key the same way.",
+      ["Save it on the kno.plus worker as ", code("ROSEWAVE_PRODIGI_SANDBOX"), "."]]],
+    ["3. Check", ["Press Refresh now. This card shows how many lab orders it found."]],
+    ["Where keys go", [...STORE_STEPS, ...WORKER_STEPS]],
   ],
   etsy: (c) => [
-    ["Connect your shop", [["Press Connect Etsy, sign in to Etsy and press Allow access. Etsy sends you back here."], ["After that, orders and the active listing count come in every night, and within a minute of Etsy's webhook."], ["If Etsy ever ends the link, or ETSY_SECRET changes, press Connect again."]]],
-    ["Etsy's developer portal", [["Callback URL: ", code(c.callback)], ["Webhook URL: ", code(c.hook), " (Order and Listing events)"]]],
-    ["Fees Annex counts for every order", [["6.5% transaction, on the order without tax"], ["3% + $0.25 payment processing"], ["$0.20 when a listing renews after a sale, and every 4 months per active listing"], ["$29 setup fee, unless waived"], ["Etsy Plus: $10 a month, with 15 listing credits a month off listing fees"], ["Currency conversion 2.5%, only if your shop's currency differs from your bank's"], ["Offsite Ads 15% (12% over $10,000 a year), on orders you tick as from an Offsite Ad under Orders"]]],
-    ["Import a file instead", [["In Etsy: Shop Manager › Settings › Options › Download Data."], ["Download Orders, then Order Items, and import each with Import a file. Importing again never doubles orders."]]],
+    ["What it brings in", "Etsy orders with their items, refunds and fees, and the active listing count."],
+    ["1. The app's keys (needed)", [
+      ["Open ", h("a", { href: "https://www.etsy.com/developers/your-apps", target: "_blank", rel: "noopener", text: "etsy.com/developers/your-apps" }), " and open your app. Copy the Keystring and the Shared secret."],
+      ["Save them on the kno.plus worker as ", code("ETSY_KEY"), " and ", code("ETSY_SECRET"), "."],
+      ["In the app's settings, add the callback URL ", code(c.callback), " exactly."]]],
+    ["2. Connect", ["Press Connect Etsy, sign in to Etsy and press Allow access. Etsy sends you back here, and orders come in within a minute.", "If Etsy ever ends the link, or ETSY_SECRET changes, press Connect again."]],
+    ["3. Webhook (optional: instant updates)", [
+      ["In the app's Webhooks, add an endpoint ", code(c.hook), " with the Order and Listing events."],
+      ["Copy its signing secret and save it on the kno.plus worker as ", code("ETSY_WEBHOOK_SECRET"), "."]]],
+    ["Fees Annex counts", ["6.5% transaction, on the order without tax", "3% + $0.25 payment processing", "$0.20 when a listing renews after a sale, and every 4 months per active listing", "$29 setup fee, unless waived", "Etsy Plus: $10 a month, with 15 listing credits a month off listing fees", "Currency conversion 2.5%, only if your shop's currency differs from your bank's", "Offsite Ads 15% (12% over $10,000 a year), on orders you tick as from an Offsite Ad under Orders"]],
+    ["Older sales from a file", ["In Etsy: Shop Manager › Settings › Options › Download Data. Download Orders, then Order Items, and import each with Import a file. Importing again never doubles orders."]],
+    ["Where keys go", [...WORKER_STEPS]],
   ],
 };
 function help(title, sections, secrets) {
@@ -934,9 +970,9 @@ function help(title, sections, secrets) {
     h("div", { class: "stack" },
       h("div", { class: "row" }, h("h2", { class: "grow", text: title }), h("button", { class: "quiet", type: "button", text: "Close", onclick: () => box.close() })),
       sections.map(([head, body]) => h("section", { class: "stack" }, h("h3", { text: head }), Array.isArray(body) ? h("ul", {}, body.map(line)) : h("p", { text: body }))),
-      secrets.length ? h("section", { class: "stack" }, h("h3", { text: "Worker secrets" }),
-        h("p", { class: "small", text: "Kept in Cloudflare, never here: Workers & Pages › knoplus-website › Settings › Variables and Secrets. Square's token, Prodigi's key and the RoseWave feed key can instead live once in the account's Secrets Store as SQUARE_TOKEN, PRODIGI_KEY and ROSEWAVE_ANNEX_KEY, shared with the RoseWave worker." }),
-        h("ul", {}, secrets.map((x) => h("li", {}, code(x.name), x.set ? " is set" : h("span", { class: "neg", text: " is not set" }))))) : null));
+      secrets.length ? h("section", { class: "stack" }, h("h3", { text: "Your keys" }),
+        h("p", { class: "small", text: "Right now, in Cloudflare:" }),
+        h("ul", {}, secrets.map((x) => h("li", {}, code(x.name), x.store ? " (Secrets Store)" : " (kno.plus worker)", x.set ? " is set" : x.optional ? " is not set (optional)" : h("span", { class: "neg", text: " is not set" }))))) : null));
   document.body.append(box);
   box.showModal();
 }
@@ -964,7 +1000,7 @@ function settingsView(d) {
   const conn = (c) => {
     const msg = h("p", { class: "note", role: "status" });
     const back = c.id === "etsy" && !!etsyNote; // just back from Etsy's sign-in: open this card
-    const missing = c.secrets.filter((s) => !s.set).map((s) => s.name);
+    const missing = c.secrets.filter((s) => !s.set && !s.optional).map((s) => s.name);
     const tick = (name, on, text) => h("label", { class: "row tick" }, h("input", { type: "checkbox", name, checked: !!on }), text);
     const fields = [];
     if (c.id === "rosewave") fields.push(h("label", {}, "RoseWave worker address", h("input", { name: "url", type: "url", value: c.config.url || "", placeholder: "https://…workers.dev" })));
@@ -976,7 +1012,9 @@ function settingsView(d) {
       fields.push(
         h("div", { class: "split tight" },
           h("label", {}, "Shop opened", h("input", { name: "opened", type: "date", value: c.config.opened || "" })),
-          h("label", {}, c.linked ? "Active listings (from Etsy)" : "Active listings", h("input", { name: "listings", type: "number", min: "0", step: "1", readonly: !!c.linked, value: String(c.config.listings || 0) })),
+          // a linked shop's listings are counted by Etsy, so they're shown, not typed
+          c.linked ? h("div", { class: "readout" }, h("span", { class: "small", text: "Active listings (from Etsy)" }), h("strong", { text: String(c.config.listings || 0) }))
+            : h("label", {}, "Active listings", h("input", { name: "listings", type: "number", min: "0", step: "1", value: String(c.config.listings || 0) })),
           h("label", {}, "Offsite Ads rate", h("select", { name: "offsiteRate" }, h("option", { value: "15", selected: c.config.offsiteRate !== 12, text: "15%" }), h("option", { value: "12", selected: c.config.offsiteRate === 12, text: "12%" }))),
           since),
         h("div", { class: "row ticks" }, plus, tick("setupWaived", c.config.setupWaived, "Setup fee waived"), tick("conversion", c.config.conversion, "Currency conversion")));
