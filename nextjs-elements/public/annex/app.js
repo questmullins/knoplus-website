@@ -935,7 +935,7 @@ function help(title, sections, secrets) {
       h("div", { class: "row" }, h("h2", { class: "grow", text: title }), h("button", { class: "quiet", type: "button", text: "Close", onclick: () => box.close() })),
       sections.map(([head, body]) => h("section", { class: "stack" }, h("h3", { text: head }), Array.isArray(body) ? h("ul", {}, body.map(line)) : h("p", { text: body }))),
       secrets.length ? h("section", { class: "stack" }, h("h3", { text: "Worker secrets" }),
-        h("p", { class: "small", text: "Kept in Cloudflare, never here: Workers & Pages › knoplus-website › Settings › Variables and Secrets." }),
+        h("p", { class: "small", text: "Kept in Cloudflare, never here: Workers & Pages › knoplus-website › Settings › Variables and Secrets. Square's token, Prodigi's key and the RoseWave feed key can instead live once in the account's Secrets Store as SQUARE_TOKEN, PRODIGI_KEY and ROSEWAVE_ANNEX_KEY, shared with the RoseWave worker." }),
         h("ul", {}, secrets.map((x) => h("li", {}, code(x.name), x.set ? " is set" : h("span", { class: "neg", text: " is not set" }))))) : null));
   document.body.append(box);
   box.showModal();
