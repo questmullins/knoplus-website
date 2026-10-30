@@ -4,8 +4,9 @@ import sharedSchema from "../schema/shared.sql";
 import * as rosewave from "./connections/rosewave.js";
 import * as square from "./connections/square.js";
 import * as prodigi from "./connections/prodigi.js";
+import * as etsy from "./connections/etsy.js";
 
-export const CONNECTIONS = [rosewave, square, prodigi];
+export const CONNECTIONS = [rosewave, square, prodigi, etsy];
 
 // The tables are made on first use, so a new database needs nothing run by hand.
 const ready = new Set();

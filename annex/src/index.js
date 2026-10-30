@@ -16,6 +16,7 @@ import { siteReport } from "../../server/analytics.js";
 import { CONNECTIONS, accountDb, connectionRows, ensureShared, secretName, syncAccount } from "./sync.js";
 import { bestSellers, costSummary, home, memberSummary, orderList, trends } from "./report.js";
 import { verify } from "./connections/square.js";
+import { importFile, markOffsite, pull as etsyStatus, refigure } from "./connections/etsy.js";
 import { websites } from "./insights/cloudflare.js";
 import { search } from "./insights/search.js";
 import { assetsWithNumbers, saveAsset } from "./workspace.js";
@@ -203,6 +204,19 @@ async function api(request, env, ctx, url) {
     return json({ report: await syncAccount(env, account, { full: !!ask.full }), updated: await updated(db) });
   }
   if (method === "POST" && route.startsWith("connections/")) return configure(request, db, route.slice(12));
+  if (method === "POST" && (route === "etsy/import" || route === "etsy/offsite")) {
+    const ask = await readJson(request, 8 * 1024 * 1024).catch(() => null);
+    if (!ask) return fail("That file is too large or isn't readable.");
+    const config = (await connectionRows(db)).get("etsy")?.config || {};
+    const done = route === "etsy/import" ? await importFile(db, String(ask.csv || ""), config) : await markOffsite(db, String(ask.orderId || ""), !!ask.on, config);
+    if (done.error) return fail(done.error);
+    // an import is Etsy's pull: it shows as connected from the first file
+    const status = await etsyStatus({ db }), now = new Date().toISOString();
+    await db.prepare(`INSERT INTO connections (id, last_run, last_ok, message) VALUES ('etsy', ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET last_run = excluded.last_run, last_ok = CASE WHEN excluded.last_ok = '' THEN connections.last_ok ELSE excluded.last_ok END, message = excluded.message`)
+      .bind(now, status.counted ? now : "", status.counted || status.skipped).run();
+    return json(done);
+  }
   if (method === "POST" && route === "settings") return settings(request, env, account);
   return fail("Not found", 404);
 }
@@ -285,8 +299,17 @@ async function configure(request, db, id) {
     config.url = address.replace(/\/+$/, "");
   }
   if (id === "square") config.sandbox = !!ask.sandbox;
+  if (id === "etsy") {
+    if (ask.opened && !DAY.test(ask.opened)) return fail("The day the shop opened isn't a date.");
+    const listings = Math.round(Number(ask.listings || 0));
+    if (!Number.isFinite(listings) || listings < 0 || listings > 100000) return fail("Add how many listings are active, or 0.");
+    Object.assign(config, { opened: ask.opened || "", listings, conversion: !!ask.conversion, offsiteRate: Number(ask.offsiteRate) === 12 ? 12 : 15 });
+  }
   await db.prepare(`INSERT INTO connections (id, config) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET config = excluded.config, cursor = '', last_ok = ''`)
     .bind(id, JSON.stringify(config)).run();
+  if (id === "etsy") await db.prepare("UPDATE connections SET last_ok = last_run WHERE id = 'etsy' AND last_run != '' AND message NOT LIKE 'No Etsy%'").run();
+  // Etsy's fees depend on its settings, so every order's are worked out again
+  if (id === "etsy") await refigure(db, config);
   return json({ ok: true });
 }
 

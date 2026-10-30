@@ -769,17 +769,19 @@ function homeView(d) {
     h("div", { class: "label", text: label }), h("div", { class: "value", text: money(item.value) }), changeLine(item.change, length),
     lineChart({ compact: true, label: label + " by day", series: [{ name: label, color: "var(--accent)", values: d.series.map((s) => ({ key: s.day, value: s[key] })) }] }));
   const n = d.now;
-  const breakdown = h("details", {}, h("summary", { text: "How profit is worked out" }),
+  const line = ([t, c]) => h("tr", {}, h("td", { text: t }), h("td", { class: "n" + (c < 0 ? " neg" : ""), text: money(c) }));
+  const sum = (t, c) => h("tr", {}, h("td", {}, h("b", { text: t })), h("td", { class: "n" }, h("b", { text: money(c) })));
+  const breakdown = h("details", {}, h("summary", { text: "How gross, net and profit are worked out" }),
     h("table", { class: "table" }, h("tbody", {},
-      [["Sales", n.sales], ["Shipping charged to buyers", n.shippingCharged], ["Payment fees", -n.fees], ["Print cost at the lab", -n.print], ["Shipping cost at the lab", -n.shipping], ["Chargebacks", -n.chargebacks], ["Your own costs", -n.other]]
-        .map(([t, c]) => h("tr", {}, h("td", { text: t }), h("td", { class: "n" + (c < 0 ? " neg" : ""), text: money(c) }))),
-      h("tr", {}, h("td", {}, h("b", { text: "Profit" })), h("td", { class: "n" }, h("b", { text: money(n.profit) }))))),
-    h("p", { class: "note", text: "Sales leave out sales tax and shipping charged. Shipping counts once: what the lab charged, less what the buyer paid for it. Refunds count on the day they happen." }));
+      [["Sales", n.sales], ["Shipping charged to buyers", n.shippingCharged]].map(line), sum("Gross", n.gross),
+      [["Square and other payment fees", -(n.fees - n.etsy)], n.etsy ? ["Etsy fees", -n.etsy] : null].filter(Boolean).map(line), sum("Net after fees", n.net),
+      [["Print cost at the lab", -n.print], ["Shipping cost at the lab", -n.shipping], ["Chargebacks", -n.chargebacks], ["Your own costs", -n.other]].map(line), sum("Profit", n.profit))),
+    h("p", { class: "note", text: "Sales leave out sales tax and shipping charged; gross adds the shipping back. Net is gross less every payment and selling fee. Shipping counts once in profit: what the lab charged, less what the buyer paid for it. Refunds count on the day they happen." }));
   const refresh = owner ? h("button", { class: "quiet", text: "Refresh", onclick: async (e) => { e.target.disabled = true; e.target.textContent = "Refreshing…"; try { await send("sync", {}); } catch (err) { alert(err.message); } load(); } }) : null;
   return [
     h("div", { class: "heroes" }, hero("Sales", d.sales, "sales"), hero("Profit", d.profit, "profit")),
     h("div", { class: "tiles" },
-      [["Orders", String(d.cards.orders)], ["Average order", money(d.cards.average)], ["Active members", String(d.cards.members)], ["Refunds", money(d.cards.refunds)]]
+      [["Gross", money(n.gross)], ["Net after fees", money(n.net)], ["Orders", String(d.cards.orders)], ["Average order", money(d.cards.average)], ["Active members", String(d.cards.members)], ["Refunds", money(d.cards.refunds)]]
         .map(([t, v]) => h("div", { class: "card tile" }, h("div", { class: "label", text: t }), h("div", { class: "value", text: v })))),
     h("div", { class: "card" }, breakdown),
     h("div", { class: "row" }, h("span", { class: "note grow", text: d.updated ? "Updated " + ago(d.updated) : "Nothing connected yet. Connect your sales in Settings." }), refresh),
@@ -793,20 +795,22 @@ function ordersView(d) {
   if (!d.orders.length) return h("p", { class: "empty", text: "No orders in these dates." });
   const pill = (o) => h("span", { class: "pill" + (o.status === "refunded" || o.status === "cancelled" || o.detail.problem ? " bad" : ""), text: o.detail.problem ? "Needs you" : STATUS[o.status] || o.status });
   const what = (o) => o.items.join(", ") || "Order";
+  const ad = (o) => o.channel === "Etsy" && state.me.user.role === "owner" ? h("label", { class: "ad-tick", title: "Etsy charges an Offsite Ads fee on orders that came through its ads" },
+    h("input", { type: "checkbox", checked: !!o.detail.offsite, onchange: async (e) => { try { await send("etsy/offsite", { orderId: o.id, on: e.target.checked }); load(); } catch (err) { alert(err.message); } } }), "From an Offsite Ad") : null;
   const cards = h("div", { class: "orders narrow" }, d.orders.map((o) => h("article", { class: "card order" },
     h("div", { class: "what", text: what(o) }), h("div", { class: "money", text: money(o.paid) }),
     h("div", { class: "small", text: [prettyDay(o.day), o.customer, o.channel].filter(Boolean).join(" · ") }), h("div", { class: "money small", text: "profit " + money(o.profit) }),
-    h("div", {}, pill(o), o.promo ? h("span", { class: "small", text: " code " + o.promo }) : null, o.detail.problem ? h("div", { class: "small", text: o.detail.problem }) : null))));
+    h("div", {}, pill(o), o.promo ? h("span", { class: "small", text: " code " + o.promo }) : null, o.detail.problem ? h("div", { class: "small", text: o.detail.problem }) : null), ad(o))));
   const table = h("div", { class: "card scroll wide" }, h("table", { class: "table" },
     h("thead", {}, h("tr", {}, ["Date", "Order", "Customer", "Where", "Status", "Paid", "Costs", "Profit"].map((t, i) => h("th", { class: i > 4 ? "n" : null, text: t })))),
     h("tbody", {}, d.orders.map((o) => h("tr", {},
       h("td", { text: prettyDay(o.day) }),
       h("td", {}, what(o), o.promo ? h("div", { class: "small", text: "code " + o.promo }) : null, o.member ? h("div", { class: "small", text: "member price" }) : null, o.detail.problem ? h("div", { class: "small neg", text: o.detail.problem }) : null),
-      h("td", { text: o.customer }), h("td", { text: o.channel }), h("td", {}, pill(o)),
+      h("td", { text: o.customer }), h("td", {}, o.channel, ad(o)), h("td", {}, pill(o)),
       h("td", { class: "n", text: money(o.paid) }),
       h("td", { class: "n", title: `fee ${money(o.fee)} · print ${money(o.print)} · shipping ${money(o.shipping)}`, text: money(o.cost) }),
       h("td", { class: "n" + (o.profit < 0 ? " neg" : ""), text: money(o.profit) }))))));
-  return [h("p", { class: "note", text: plural(d.orders.length, "order") + ", newest first. Costs are the payment fee plus what the lab charged." }), cards, table];
+  return [h("p", { class: "note", text: plural(d.orders.length, "order") + ", newest first. Costs are the payment and selling fees plus what the lab charged." }), cards, table];
 }
 
 // ---------- Best sellers ----------
@@ -839,7 +843,7 @@ function membersView(d) {
 function costsView(d) {
   const t = d.total;
   const owner = state.me.user.role === "owner";
-  const tiles = [["Payment fees", t.fees], ["Print cost", t.print], ["Shipping, net", t.shipping - t.shippingCharged], ["Chargebacks", t.chargebacks], ["Your own costs", t.other]];
+  const tiles = [["Square and other fees", t.fees - t.etsy], t.etsy ? ["Etsy fees", t.etsy] : null, ["Print cost", t.print], ["Shipping, net", t.shipping - t.shippingCharged], ["Chargebacks", t.chargebacks], ["Your own costs", t.other]].filter(Boolean);
   const error = h("p", { class: "error", role: "alert" });
   const form = owner ? h("form", { class: "card stack", onsubmit: async (e) => {
     e.preventDefault();
@@ -855,8 +859,14 @@ function costsView(d) {
       h("label", {}, "Starting", h("input", { name: "at", type: "date", required: true, value: todayIn(tz()).slice(0, 8) + "01" })),
       h("label", {}, "Ending (leave empty if it goes on)", h("input", { name: "until", type: "date" }))),
     error, h("div", {}, h("button", { class: "primary", type: "submit", text: "Add cost" }))) : null;
+  const etsy = t.etsy ? h("div", { class: "card scroll" }, h("h2", { text: "Etsy fees" }), h("table", { class: "table" }, h("tbody", {},
+    [["Transaction, 6.5% of the order without tax", t.etsyTransaction], ["Payment processing, 3% + $0.25", t.etsyProcessing], ["Listings, $0.20 each", t.etsyListing], ["Currency conversion, 2.5%", t.etsyConversion], ["Offsite Ads", t.etsyOffsite], ["Shop setup, $29 once", t.etsySetup]]
+      .filter(([, c]) => c).map(([n, c]) => h("tr", {}, h("td", { text: n }), h("td", { class: "n", text: money(c) }))),
+    h("tr", {}, h("td", {}, h("b", { text: "All Etsy fees" })), h("td", { class: "n" }, h("b", { text: money(t.etsy) }))))),
+    h("p", { class: "note", text: "Worked out from Etsy's published rates. Refunds give back the transaction fee in proportion. Settings › Etsy changes the rates that vary." })) : null;
   return [
     h("div", { class: "tiles" }, tiles.map(([n, c]) => h("div", { class: "card tile" }, h("div", { class: "label", text: n }), h("div", { class: "value", text: money(c) })))),
+    etsy,
     h("div", { class: "card scroll" }, h("h2", { text: "Margin by type" }), d.types.length ? h("table", { class: "table" },
       h("thead", {}, h("tr", {}, ["Type", "Sold", "Sales", "Profit", "Margin"].map((x, i) => h("th", { class: i ? "n" : null, text: x })))),
       h("tbody", {}, d.types.map((r) => h("tr", {}, h("td", { text: r.name }), h("td", { class: "n", text: String(r.units) }), h("td", { class: "n", text: money(r.sales) }), h("td", { class: "n" + (r.profit < 0 ? " neg" : ""), text: money(r.profit) }), h("td", { class: "n", text: pct(r.margin) })))))
@@ -915,16 +925,43 @@ function settingsView(d) {
     const fields = [];
     if (c.id === "rosewave") fields.push(h("label", {}, "RoseWave worker address", h("input", { name: "url", type: "url", value: c.config.url || "", placeholder: "https://…workers.dev" })));
     if (c.id === "square") fields.push(h("label", { class: "row" }, h("input", { type: "checkbox", name: "sandbox", checked: !!c.config.sandbox }), "Square's sandbox (test payments only)"));
+    if (c.id === "etsy") fields.push(
+      h("p", { class: "note", text: "Etsy's fees come off every sale: 6.5% transaction (on the order without tax), 3% + $0.25 payment processing, $0.20 when a listing renews after a sale, plus the settings below. Annex works them out for each order you import." }),
+      h("div", { class: "split" },
+        h("label", {}, "Day the shop opened ($29 setup fee)", h("input", { name: "opened", type: "date", value: c.config.opened || "" })),
+        h("label", {}, "Active listings (each renews for $0.20 every 4 months)", h("input", { name: "listings", type: "number", min: "0", step: "1", value: String(c.config.listings || 0) })),
+        h("label", {}, "Offsite Ads rate", h("select", { name: "offsiteRate" }, h("option", { value: "15", selected: c.config.offsiteRate !== 12, text: "15% (most shops)" }), h("option", { value: "12", selected: c.config.offsiteRate === 12, text: "12% (over $10,000 a year in sales)" })))),
+      h("label", { class: "row" }, h("input", { type: "checkbox", name: "conversion", checked: !!c.config.conversion }), "My shop's currency differs from my bank's (2.5% currency conversion)"));
     const save = fields.length ? h("button", { class: "quiet", type: "submit", text: "Save" }) : null;
     return h("form", { class: "card stack", onsubmit: async (e) => {
       e.preventDefault();
       const f = new FormData(e.target);
-      try { await send("connections/" + c.id, { url: f.get("url"), sandbox: f.get("sandbox") === "on" }); msg.textContent = "Saved. It will pull everything on the next refresh."; } catch (err) { msg.textContent = err.message; }
+      try {
+        await send("connections/" + c.id, { url: f.get("url"), sandbox: f.get("sandbox") === "on", opened: f.get("opened"), listings: f.get("listings"), conversion: f.get("conversion") === "on", offsiteRate: f.get("offsiteRate") });
+        msg.textContent = c.id === "etsy" ? "Saved. Every Etsy order's fees were worked out again." : "Saved. It will pull everything on the next refresh.";
+      } catch (err) { msg.textContent = err.message; }
     } },
       h("div", { class: "row" }, h("h2", { class: "grow", text: c.name }), h("span", { class: "pill" + (c.message.startsWith("Problem") ? " bad" : ""), text: c.lastOk ? "Connected" : c.message.startsWith("Problem") ? "Problem" : "Not connected" })),
-      h("p", { class: "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? " Last pulled " + ago(c.lastOk) + "." : "") }),
-      h("p", { class: "small" }, "Keys are kept in Cloudflare, never here. Worker secrets: ", c.secrets.map((s, i) => [i ? ", " : "", h("code", { text: s.name }), s.set ? " (set)" : " (not set)"])),
-      ...fields, save ? h("div", {}, save) : null, msg);
+      h("p", { class: "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? (c.id === "etsy" ? " Last imported " : " Last pulled ") + ago(c.lastOk) + "." : "") }),
+      c.secrets.length ? h("p", { class: "small" }, "Keys are kept in Cloudflare, never here. Worker secrets: ", c.secrets.map((s, i) => [i ? ", " : "", h("code", { text: s.name }), s.set ? " (set)" : " (not set)"])) : null,
+      ...fields, save ? h("div", {}, save) : null, msg, c.id === "etsy" ? etsyImport() : null);
+  };
+  // Etsy's sales come in as files: Orders for the money, Order Items for what sold
+  const etsyImport = () => {
+    const said = h("p", { class: "note", role: "status" });
+    const file = h("input", { type: "file", accept: ".csv,text/csv", "aria-label": "Etsy file" });
+    const go = h("button", { class: "quiet", type: "button", text: "Import", onclick: async () => {
+      if (!file.files[0]) { said.textContent = "Choose a file first."; return; }
+      go.disabled = true; said.textContent = "Importing…";
+      try {
+        const r = await send("etsy/import", { csv: await file.files[0].text() });
+        said.textContent = r.kind === "items" ? `Filled in what sold for ${plural(r.count, "order")}.` : `Imported ${plural(r.count, "order")} with their Etsy fees.`;
+      } catch (err) { said.textContent = err.message; }
+      go.disabled = false;
+    } });
+    return h("div", { class: "stack" }, h("h3", { text: "Import Etsy sales" }),
+      h("p", { class: "note", text: "In Etsy, open Shop Manager › Settings › Options › Download Data. Download Orders (the money) and Order Items (what sold) for the months you want, then import each here. Importing again updates orders without doubling them." }),
+      h("div", { class: "row" }, file, go), said);
   };
 
   const sync = h("p", { class: "note", role: "status" });

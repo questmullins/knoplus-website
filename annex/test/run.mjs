@@ -9,11 +9,13 @@ const ORIGIN = new URL(BASE).origin;
 const d1 = (sql) => execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--command", sql], { stdio: "pipe" });
 let cookie = "";
 async function api(path, body, method) {
-  const r = await fetch(BASE + path, {
+  const ask = () => fetch(BASE + path, {
     method: method || (body ? "POST" : "GET"),
     headers: { "Content-Type": "application/json", Origin: ORIGIN, Cookie: cookie },
     body: body ? JSON.stringify(body) : undefined,
   });
+  // wrangler dev can drop an idle kept-alive socket while the tests write to the database directly: ask again once
+  const r = await ask().catch(ask);
   return { status: r.status, body: await r.json().catch(() => ({})) };
 }
 const check = (name, ok) => { assert.ok(ok, name); console.log("ok  " + name); };
@@ -108,7 +110,7 @@ check("members: MRR " + members.mrr + ", cancelled " + members.cancelled, member
 const trends = (await api("trends?by=week")).body;
 check("trends by week", trends.now.length >= 4 && trends.now.reduce((s, p) => s + p.sales, 0) === withCost.now.sales);
 const conns = (await api("connections")).body;
-check("connections never show keys", !JSON.stringify(conns).includes("sq-token") && conns.connections.every((c) => c.lastOk));
+check("connections never show keys", !JSON.stringify(conns).includes("sq-token") && conns.connections.filter((c) => c.id !== "etsy").every((c) => c.lastOk));
 
 // the workspace around the sales: assets, websites (Cloudflare and Search Console stand-ins), clients, overview
 const assets = (await api("assets")).body;
@@ -190,4 +192,35 @@ const body = JSON.stringify({ type: "payment.updated" });
 const key = await crypto.subtle.importKey("raw", new TextEncoder().encode("sig-key"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
 const sig = Buffer.from(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signed + body))).toString("base64");
 check("signed webhook accepted", (await fetch(hook, { method: "POST", body, headers: { "x-square-hmacsha256-signature": sig } })).status === 200);
+// Etsy: sales by file, and Etsy's fees worked out from its rates
+const D = "2025-01-15";
+const etsyOrders = [
+  "Sale Date,Order ID,Buyer User ID,Full Name,Number of Items,Currency,Order Value,Coupon Code,Discount Amount,Shipping Discount,Shipping,Sales Tax,Order Total,Status,Card Processing Fees,Order Net,Adjusted Order Total",
+  `01/15/25,9001,b1,"Lovelace, Ada",2,USD,40.00,,0,0,5.00,3.00,48.00,Completed,,,48.00`,
+  `01/15/25,9002,b2,Grace Hopper,1,USD,20.00,,0,0,0,0,20.00,Completed,0.85,,10.00`,
+].join("\n");
+check("Etsy settings saved", (await api("connections/etsy", { opened: D, listings: 10, conversion: false, offsiteRate: 15 })).status === 200);
+check("a file that isn't Etsy's is refused", (await api("etsy/import", { csv: "a,b\n1,2" })).status === 400);
+const imported = (await api("etsy/import", { csv: etsyOrders })).body;
+check("Etsy orders imported", imported.kind === "orders" && imported.count === 2);
+check("importing again doesn't double them", (await api("etsy/import", { csv: etsyOrders })).body.count === 2);
+let ec = (await api(`costs?from=${D}&to=${D}`)).body.total;
+// order 1: 6.5% of 45.00 = 2.93, 3% of 48.00 + 0.25 = 1.69, 2 items renew = 0.40. Order 2: 1.30, Etsy's own 0.85, 0.20,
+// half refunded gives back 0.65. Plus $29 to open the shop and 10 listings at $0.20 every 4 months (1.64 a day).
+check("Etsy fees part by part: " + JSON.stringify(ec), ec.etsyTransaction === 293 + 130 - 65 && ec.etsyProcessing === 169 + 85 && ec.etsyListing === 60 + 2 && ec.etsySetup === 2900 && ec.etsy === 3574);
+let eh = (await api(`home?from=${D}&to=${D}`)).body.now;
+check("gross and net after fees: " + JSON.stringify({ gross: eh.gross, net: eh.net }), eh.sales === 5000 && eh.gross === 5500 && eh.net === 5500 - 3574 && eh.profit === eh.net - eh.other);
+check("offsite ad marked", (await api("etsy/offsite", { orderId: "etsy:9001", on: true })).status === 200);
+ec = (await api(`costs?from=${D}&to=${D}`)).body.total;
+check("Offsite Ads fee, 15% of 45.00", ec.etsyOffsite === 675 && ec.etsy === 3574 + 675);
+check("currency conversion on", (await api("connections/etsy", { opened: D, listings: 10, conversion: true, offsiteRate: 12 })).status === 200);
+ec = (await api(`costs?from=${D}&to=${D}`)).body.total;
+check("settings work every order out again: " + JSON.stringify(ec), ec.etsyConversion === 108 + 45 && ec.etsyOffsite === 540);
+const items = "Sale Date,Item Name,Buyer,Quantity,Price,Coupon Code,Order ID,Transaction ID,Variations,Item Total\n01/15/25,Golden Hour Print,Ada,2,20.00,,9001,t1,Size: 8x10,40.00";
+check("Etsy items filled in", (await api("etsy/import", { csv: items })).body.kind === "items");
+const eo = (await api(`orders?from=${D}&to=${D}`)).body.orders;
+const e1 = eo.find((o) => o.id === "etsy:9001");
+check("an Etsy order shows what sold and its fees", e1 && e1.items[0] === "Golden Hour Print · Size: 8x10" && e1.channel === "Etsy" && e1.customer === "Lovelace, Ada" && e1.fee === 293 + 169 + 40 + 108 + 540);
+check("Etsy shows as connected", /2 Etsy orders/.test((await api("connections")).body.connections.find((c) => c.id === "etsy").message));
+process.on("exit", () => d1("DELETE FROM lines WHERE order_id LIKE 'etsy:%'; DELETE FROM orders WHERE source = 'etsy'; DELETE FROM payments WHERE source = 'etsy'; DELETE FROM refunds WHERE id LIKE 'etsy-refund:%'; DELETE FROM connections WHERE id = 'etsy';"));
 console.log("all good");
