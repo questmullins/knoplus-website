@@ -252,6 +252,29 @@ function warmUp() {
 // an open ⋯ menu closes when you click anywhere else or press Escape
 document.addEventListener("click", (e) => { for (const m of document.querySelectorAll("details.menu[open]")) if (!m.contains(e.target)) m.open = false; });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") for (const m of document.querySelectorAll("details.menu[open]")) m.open = false; });
+
+// folding cards and guides slide open and shut instead of jumping (not the ⋯ menus, and not when motion is turned down)
+const still = matchMedia("(prefers-reduced-motion: reduce)");
+document.addEventListener("click", (e) => {
+  const sum = e.target.closest("summary"), d = sum && sum.parentElement;
+  if (!d || d.tagName !== "DETAILS" || d.classList.contains("menu") || still.matches || e.target.closest("a, button, input")) return;
+  e.preventDefault();
+  slide(d, d.slide ? !d.opening : !d.open);
+});
+function slide(d, open) {
+  const from = d.offsetHeight;
+  d.slide?.cancel();
+  d.open = open;
+  const to = d.offsetHeight;
+  if (!open) d.open = true; // stays open while it closes, so the contents slide away
+  d.opening = open;
+  d.style.overflow = "hidden";
+  const run = d.animate({ height: [from + "px", to + "px"] }, { duration: 260, easing: "cubic-bezier(.2,.7,.2,1)" });
+  d.slide = run;
+  run.onfinish = () => { d.open = open; done(); };
+  run.oncancel = done;
+  function done() { if (d.slide === run) { d.slide = null; d.style.overflow = ""; } }
+}
 function draw() {
   const view = document.getElementById("view");
   tip.hidden = true;
