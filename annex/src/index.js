@@ -43,6 +43,19 @@ const accountId = (url, env) => url.searchParams.get("account") || env.ANNEX_ACC
 // Annex's tables live in the kno.plus database; an account's data in its own database when one is bound.
 const withDb = (env) => ({ ...env, ANNEX: env.ANNEX || env.CLIENT_DB });
 
+// Keys shared with the RoseWave worker are kept once in Cloudflare's Secrets Store (see wrangler.jsonc) and read here
+// under the names Annex uses. The store wins; a Worker secret of the same name is the fallback.
+const STORED = { ROSEWAVE_SQUARE_TOKEN: "STORE_SQUARE_TOKEN", ROSEWAVE_PRODIGI_KEY: "STORE_PRODIGI_KEY", ROSEWAVE_ANNEX_KEY: "STORE_ROSEWAVE_ANNEX_KEY" };
+async function withStore(env) {
+  const out = { ...env };
+  await Promise.all(Object.entries(STORED).map(async ([name, binding]) => {
+    if (typeof env[binding]?.get !== "function") return;
+    const value = await env[binding].get().catch(() => "");
+    if (value) out[name] = value;
+  }));
+  return out;
+}
+
 async function findAccount(env, id, create = false) {
   if (!ID.test(id)) return null;
   let row = await env.ANNEX.prepare("SELECT * FROM accounts WHERE id = ?").bind(id).first();
@@ -73,7 +86,7 @@ export async function handleAnnex(request, env, ctx) {
   const url = new URL(request.url);
   if (url.pathname !== "/annex" && !url.pathname.startsWith("/annex/")) return null;
   if (url.pathname === "/annex") return Response.redirect(url.origin + "/annex/" + url.search, 301);
-  env = withDb(env);
+  env = withDb(await withStore(env));
   try {
     if (url.pathname.startsWith("/annex/api/")) return guard(await api(request, env, ctx, url));
     if (url.pathname === "/annex/hooks/square" && request.method === "POST") return await squareHook(request, env, ctx, url);
@@ -94,7 +107,7 @@ function guard(response) {
 }
 
 export async function scheduledAnnex(env, ctx) {
-  env = withDb(env);
+  env = withDb(await withStore(env));
   await ensureShared(env);
   await findAccount(env, env.ANNEX_ACCOUNT || "rosewave", true);
   const accounts = (await env.ANNEX.prepare("SELECT * FROM accounts").all()).results;

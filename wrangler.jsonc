@@ -22,6 +22,14 @@
       "destination_address": "info@kno.plus"
     }
   ],
+  // Keys shared with the RoseWave worker live once, in the account's Secrets Store; Annex reads each as the name
+  // after "->" (annex/src/index.js, STORED): SQUARE_TOKEN -> ROSEWAVE_SQUARE_TOKEN, PRODIGI_KEY -> ROSEWAVE_PRODIGI_KEY,
+  // ROSEWAVE_ANNEX_KEY -> ROSEWAVE_ANNEX_KEY. A Worker secret of the same name still works when the store has none.
+  "secrets_store_secrets": [
+    { "binding": "STORE_SQUARE_TOKEN", "store_id": "25406ed6729e44a4a615fdd095d1dad7", "secret_name": "SQUARE_TOKEN" },
+    { "binding": "STORE_PRODIGI_KEY", "store_id": "25406ed6729e44a4a615fdd095d1dad7", "secret_name": "PRODIGI_KEY" },
+    { "binding": "STORE_ROSEWAVE_ANNEX_KEY", "store_id": "25406ed6729e44a4a615fdd095d1dad7", "secret_name": "ROSEWAVE_ANNEX_KEY" }
+  ],
   "vars": {
     "CONTACT_TO": "info@kno.plus",
     "CONTACT_FROM": "Knoplus <info@kno.plus>",
