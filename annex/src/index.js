@@ -303,7 +303,9 @@ async function configure(request, db, id) {
     if (ask.opened && !DAY.test(ask.opened)) return fail("The day the shop opened isn't a date.");
     const listings = Math.round(Number(ask.listings || 0));
     if (!Number.isFinite(listings) || listings < 0 || listings > 100000) return fail("Add how many listings are active, or 0.");
-    Object.assign(config, { opened: ask.opened || "", listings, conversion: !!ask.conversion, offsiteRate: Number(ask.offsiteRate) === 12 ? 12 : 15 });
+    if (ask.plusFrom && !DAY.test(ask.plusFrom)) return fail("The day Etsy Plus started isn't a date.");
+    Object.assign(config, { opened: ask.opened || "", listings, conversion: !!ask.conversion, offsiteRate: Number(ask.offsiteRate) === 12 ? 12 : 15,
+      plus: !!ask.plus, plusFrom: ask.plusFrom || "", setupWaived: !!ask.setupWaived });
   }
   await db.prepare(`INSERT INTO connections (id, config) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET config = excluded.config, cursor = '', last_ok = ''`)
     .bind(id, JSON.stringify(config)).run();

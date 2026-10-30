@@ -91,13 +91,27 @@ export const SOPS = [
         id: "money-etsy", q: "Count Etsy sales and Etsy's fees",
         answer: "Annex takes Etsy's sales from the files Etsy lets you download, and works out Etsy's fees for every order. Sales, gross and net after fees then include them.",
         steps: [
-          "Once: open **Assets › RoseWave › Connections › Etsy**. Enter the day the shop opened ($29 setup fee), how many listings are active, your Offsite Ads rate (15%, or 12% over $10,000 a year), and tick currency conversion only if your shop's currency differs from your bank's. Press **Save**.",
+          "Once: open **Assets › RoseWave › Connections › Etsy**. Enter the day the shop opened ($29 setup fee, or tick that it was waived), whether you have Etsy Plus, how many listings are active, your Offsite Ads rate (15%, or 12% over $10,000 a year), and tick currency conversion only if your shop's currency differs from your bank's. Press **Save**.",
           "In Etsy, open **Shop Manager › Settings › Options › Download Data**. Download **Orders** and **Order Items** for the months you want.",
           "Back in Connections › Etsy, import the Orders file, then the Order Items file. Importing again only updates, it never doubles.",
           "If an order came through an Offsite Ad, tick **From an Offsite Ad** on it under **Orders**. Its fee is added at once.",
           "See the fees part by part under **Costs and margin › Etsy fees**, and gross and net under **Sales**.",
         ],
         go: [go("Open Etsy settings", "#asset/rosewave/settings"), go("Etsy downloads", "https://www.etsy.com/your/shops/me/download")],
+      },
+      {
+        id: "money-etsy-plus", q: "What Etsy Plus gives me, and how Annex counts it",
+        answer: "Etsy Plus is $10 a month, taken from your Etsy payment account. Annex counts the $10 and the listing credits; the rest are shop tools.",
+        steps: [
+          "**15 listing credits a month** ($3.00 of listing fees). They reset each month and don't roll over. Annex takes them off that month's listing fees, never more than the fees.",
+          "**$5 a month of Etsy Ads credit**, for ads shown on Etsy itself (not Offsite Ads). It also resets monthly. Annex doesn't count Etsy Ads spend, so this credit isn't counted either.",
+          "**Shop look:** a banner carousel or collage, a featured grid of listings, and a custom colour theme for your shop home.",
+          "**Restock requests:** shoppers can ask to be emailed when a sold-out item is back (it has to sell out, not be marked sold out by hand).",
+          "**Search insights:** unlimited searches of Etsy's search data.",
+          "**Setup fee:** if your Plus deal waived the $29 setup fee, tick **The $29 setup fee was waived** in Connections › Etsy.",
+          "**To set it up in Annex:** Connections › Etsy › tick **Etsy Plus**, enter the day it started, and press **Save**.",
+        ],
+        go: [go("Open Etsy settings", "#asset/rosewave/settings")],
       },
       {
         id: "money-rosewave", q: "See how much RoseWave made",

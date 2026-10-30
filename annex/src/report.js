@@ -10,7 +10,7 @@ import { addDays, dayOf, daysBetween } from "./util.js";
 import { RATES } from "./connections/etsy.js";
 
 const ZERO = { sales: 0, shippingCharged: 0, fees: 0, print: 0, shipping: 0, chargebacks: 0, orders: 0, refunds: 0, other: 0,
-  etsy: 0, etsyTransaction: 0, etsyProcessing: 0, etsyListing: 0, etsyConversion: 0, etsyOffsite: 0, etsySetup: 0 };
+  etsy: 0, etsyTransaction: 0, etsyProcessing: 0, etsyListing: 0, etsyConversion: 0, etsyOffsite: 0, etsySetup: 0, etsyPlus: 0, etsyCredits: 0 };
 
 const PER_MONTH = { DAILY: 365 / 12, WEEKLY: 52 / 12, EVERY_TWO_WEEKS: 26 / 12, THIRTY_DAYS: 365 / 360, SIXTY_DAYS: 365 / 720, NINETY_DAYS: 365 / 1080, MONTHLY: 1, EVERY_TWO_MONTHS: 1 / 2, QUARTERLY: 1 / 3, EVERY_FOUR_MONTHS: 1 / 4, EVERY_SIX_MONTHS: 1 / 6, ANNUAL: 1 / 12, EVERY_TWO_YEARS: 1 / 24 };
 export const monthly = (s) => Math.round(s.cents * (PER_MONTH[s.cadence] ?? 1));
@@ -73,11 +73,25 @@ export async function load(db, tz, from, to) {
     if (d) day(d).fees += p.fee_cents;
   }
   // Etsy's fees outside any one order: the $29 to open the shop, and each active listing renewing every 4 months
-  if (/^\d{4}-\d{2}-\d{2}$/.test(etsy.opened || "")) {
-    const fixed = (d, part, c) => { const t = day(d); t[part] += c; t.etsy += c; t.fees += c; };
-    if (etsy.opened >= from && etsy.opened <= to) fixed(etsy.opened, "etsySetup", RATES.setup);
+  const isDay = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+  const fixed = (d, part, c) => { const t = day(d); t[part] += c; t.etsy += c; t.fees += c; };
+  if (isDay(etsy.opened)) {
+    if (etsy.opened >= from && etsy.opened <= to && !etsy.setupWaived) fixed(etsy.opened, "etsySetup", RATES.setup);
     const perDay = ((Number(etsy.listings) || 0) * RATES.listing * 3) / 365;
     if (perDay) for (let d = etsy.opened > from ? etsy.opened : from; d <= to; d = addDays(d, 1)) fixed(d, "etsyListing", perDay);
+  }
+  // Etsy Plus: $10 a month, spread over its days, and 15 listing credits a month ($3.00) taken off that month's listing
+  // fees as they come, never more than the fees. Credits reset each month and don't roll over. (A range that starts
+  // mid-month counts that month's credits from its first day shown.)
+  const plusFrom = isDay(etsy.plusFrom) ? etsy.plusFrom : etsy.opened;
+  if (etsy.plus && isDay(plusFrom)) {
+    let month = "", pool = 0;
+    for (let d = plusFrom > from ? plusFrom : from; d <= to; d = addDays(d, 1)) {
+      fixed(d, "etsyPlus", (RATES.plus * 12) / 365);
+      if (d.slice(0, 7) !== month) { month = d.slice(0, 7); pool = RATES.plusCredits * RATES.listing; }
+      const use = Math.min(pool, Math.max(0, day(d).etsyListing + day(d).etsyCredits));
+      if (use > 0) { fixed(d, "etsyCredits", -use); pool -= use; }
+    }
   }
   for (const c of costs) {
     const d = inRange(c.at);

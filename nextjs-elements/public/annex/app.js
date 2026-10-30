@@ -860,7 +860,7 @@ function costsView(d) {
       h("label", {}, "Ending (leave empty if it goes on)", h("input", { name: "until", type: "date" }))),
     error, h("div", {}, h("button", { class: "primary", type: "submit", text: "Add cost" }))) : null;
   const etsy = t.etsy ? h("div", { class: "card scroll" }, h("h2", { text: "Etsy fees" }), h("table", { class: "table" }, h("tbody", {},
-    [["Transaction, 6.5% of the order without tax", t.etsyTransaction], ["Payment processing, 3% + $0.25", t.etsyProcessing], ["Listings, $0.20 each", t.etsyListing], ["Currency conversion, 2.5%", t.etsyConversion], ["Offsite Ads", t.etsyOffsite], ["Shop setup, $29 once", t.etsySetup]]
+    [["Transaction, 6.5% of the order without tax", t.etsyTransaction], ["Payment processing, 3% + $0.25", t.etsyProcessing], ["Listings, $0.20 each", t.etsyListing], ["Currency conversion, 2.5%", t.etsyConversion], ["Offsite Ads", t.etsyOffsite], ["Shop setup, $29 once", t.etsySetup], ["Etsy Plus, $10 a month", t.etsyPlus], ["Etsy Plus listing credits", t.etsyCredits]]
       .filter(([, c]) => c).map(([n, c]) => h("tr", {}, h("td", { text: n }), h("td", { class: "n", text: money(c) }))),
     h("tr", {}, h("td", {}, h("b", { text: "All Etsy fees" })), h("td", { class: "n" }, h("b", { text: money(t.etsy) }))))),
     h("p", { class: "note", text: "Worked out from Etsy's published rates. Refunds give back the transaction fee in proportion. Settings › Etsy changes the rates that vary." })) : null;
@@ -931,13 +931,16 @@ function settingsView(d) {
         h("label", {}, "Day the shop opened ($29 setup fee)", h("input", { name: "opened", type: "date", value: c.config.opened || "" })),
         h("label", {}, "Active listings (each renews for $0.20 every 4 months)", h("input", { name: "listings", type: "number", min: "0", step: "1", value: String(c.config.listings || 0) })),
         h("label", {}, "Offsite Ads rate", h("select", { name: "offsiteRate" }, h("option", { value: "15", selected: c.config.offsiteRate !== 12, text: "15% (most shops)" }), h("option", { value: "12", selected: c.config.offsiteRate === 12, text: "12% (over $10,000 a year in sales)" })))),
-      h("label", { class: "row" }, h("input", { type: "checkbox", name: "conversion", checked: !!c.config.conversion }), "My shop's currency differs from my bank's (2.5% currency conversion)"));
+      h("label", { class: "row" }, h("input", { type: "checkbox", name: "conversion", checked: !!c.config.conversion }), "My shop's currency differs from my bank's (2.5% currency conversion)"),
+      h("label", { class: "row" }, h("input", { type: "checkbox", name: "setupWaived", checked: !!c.config.setupWaived }), "The $29 setup fee was waived"),
+      h("label", { class: "row" }, h("input", { type: "checkbox", name: "plus", checked: !!c.config.plus }), "Etsy Plus ($10 a month; 15 listing credits a month come off listing fees)"),
+      h("label", {}, "Day Etsy Plus started (empty means the day the shop opened)", h("input", { name: "plusFrom", type: "date", value: c.config.plusFrom || "" })));
     const save = fields.length ? h("button", { class: "quiet", type: "submit", text: "Save" }) : null;
     return h("form", { class: "card stack", onsubmit: async (e) => {
       e.preventDefault();
       const f = new FormData(e.target);
       try {
-        await send("connections/" + c.id, { url: f.get("url"), sandbox: f.get("sandbox") === "on", opened: f.get("opened"), listings: f.get("listings"), conversion: f.get("conversion") === "on", offsiteRate: f.get("offsiteRate") });
+        await send("connections/" + c.id, { url: f.get("url"), sandbox: f.get("sandbox") === "on", opened: f.get("opened"), listings: f.get("listings"), conversion: f.get("conversion") === "on", offsiteRate: f.get("offsiteRate"), plus: f.get("plus") === "on", plusFrom: f.get("plusFrom"), setupWaived: f.get("setupWaived") === "on" });
         msg.textContent = c.id === "etsy" ? "Saved. Every Etsy order's fees were worked out again." : "Saved. It will pull everything on the next refresh.";
       } catch (err) { msg.textContent = err.message; }
     } },
