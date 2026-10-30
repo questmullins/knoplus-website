@@ -88,11 +88,23 @@ export const SOPS = [
     group: "Money and sales",
     items: [
       {
+        id: "money-etsy-connect", q: "Connect Etsy so orders come in by themselves",
+        answer: "Once linked, Annex pulls Etsy's orders every night, and within a minute of Etsy's webhook saying an order or listing changed. Etsy's active listing count comes in too.",
+        steps: [
+          "Once, in Cloudflare (**Workers & Pages › knoplus-website › Settings › Variables and Secrets**): add the app's keystring as **ETSY_KEY**, its shared secret as **ETSY_SECRET**, and the webhook's signing secret as **ETSY_WEBHOOK_SECRET**. All three are in Etsy's developer portal.",
+          "Once, in Etsy's developer portal: the callback URL is `https://kno.plus/annex/etsy/callback` and the webhook URL is `https://kno.plus/annex/hooks/etsy` (Order and Listing events).",
+          "Open **Assets › RoseWave › Connections › Etsy** and press **Connect Etsy**. Sign in to Etsy, press **Allow access**, and Etsy sends you back. Every past order comes in over the next minute.",
+          "Etsy's sign-in is kept encrypted in Annex's database; only ETSY_SECRET unlocks it. If you change ETSY_SECRET, or Etsy says the link has ended, press **Connect Etsy** again.",
+          "**Disconnect** stops the pulls. Orders already in Annex stay.",
+        ],
+        go: [go("Open Etsy settings", "#asset/rosewave/settings"), go("Etsy developer portal", "https://www.etsy.com/developers/your-apps")],
+      },
+      {
         id: "money-etsy", q: "Count Etsy sales and Etsy's fees",
-        answer: "Annex takes Etsy's sales from the files Etsy lets you download, and works out Etsy's fees for every order. Sales, gross and net after fees then include them.",
+        answer: "Annex takes Etsy's sales straight from Etsy once it's connected (or from the files Etsy lets you download), and works out Etsy's fees for every order. Sales, gross and net after fees then include them.",
         steps: [
           "Once: open **Assets › RoseWave › Connections › Etsy**. Enter the day the shop opened ($29 setup fee, or tick that it was waived), whether you have Etsy Plus, how many listings are active, your Offsite Ads rate (15%, or 12% over $10,000 a year), and tick currency conversion only if your shop's currency differs from your bank's. Press **Save**.",
-          "In Etsy, open **Shop Manager › Settings › Options › Download Data**. Download **Orders** and **Order Items** for the months you want.",
+          "Connected? Orders come in by themselves; skip the next two steps. Otherwise, in Etsy open **Shop Manager › Settings › Options › Download Data** and download **Orders** and **Order Items** for the months you want.",
           "Back in Connections › Etsy, import the Orders file, then the Order Items file. Importing again only updates, it never doubles.",
           "If an order came through an Offsite Ad, tick **From an Offsite Ad** on it under **Orders**. Its fee is added at once.",
           "See the fees part by part under **Costs and margin › Etsy fees**, and gross and net under **Sales**.",

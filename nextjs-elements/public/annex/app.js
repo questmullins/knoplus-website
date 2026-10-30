@@ -3,6 +3,9 @@
 const API = "/annex/api/";
 const app = document.getElementById("app");
 const tip = document.getElementById("tip");
+// Etsy's sign-in comes back with ?etsy=<what happened>: shown once on the Etsy card, then cleared from the address
+let etsyNote = new URLSearchParams(location.search).get("etsy") || "";
+if (etsyNote) { etsyNote = etsyNote === "connected" ? "Connected. Etsy's orders are coming in now; refresh in a minute." : etsyNote; history.replaceState(null, "", location.pathname + location.hash); }
 const state = { me: null, page: "overview", asset: null, account: "", acct: null, tab: "home", range: loadRange(), data: null, days: recall("annex-days") || "28" };
 
 // ---------- small helpers ----------
@@ -926,10 +929,10 @@ function settingsView(d) {
     if (c.id === "rosewave") fields.push(h("label", {}, "RoseWave worker address", h("input", { name: "url", type: "url", value: c.config.url || "", placeholder: "https://…workers.dev" })));
     if (c.id === "square") fields.push(h("label", { class: "row" }, h("input", { type: "checkbox", name: "sandbox", checked: !!c.config.sandbox }), "Square's sandbox (test payments only)"));
     if (c.id === "etsy") fields.push(
-      h("p", { class: "note", text: "Etsy's fees come off every sale: 6.5% transaction (on the order without tax), 3% + $0.25 payment processing, $0.20 when a listing renews after a sale, plus the settings below. Annex works them out for each order you import." }),
+      h("p", { class: "note", text: "Etsy's fees come off every sale: 6.5% transaction (on the order without tax), 3% + $0.25 payment processing, $0.20 when a listing renews after a sale, plus the settings below. Annex works them out for each order." }),
       h("div", { class: "split" },
         h("label", {}, "Day the shop opened ($29 setup fee)", h("input", { name: "opened", type: "date", value: c.config.opened || "" })),
-        h("label", {}, "Active listings (each renews for $0.20 every 4 months)", h("input", { name: "listings", type: "number", min: "0", step: "1", value: String(c.config.listings || 0) })),
+        h("label", {}, c.linked ? "Active listings (kept up to date from Etsy)" : "Active listings (each renews for $0.20 every 4 months)", h("input", { name: "listings", type: "number", min: "0", step: "1", value: String(c.config.listings || 0) })),
         h("label", {}, "Offsite Ads rate", h("select", { name: "offsiteRate" }, h("option", { value: "15", selected: c.config.offsiteRate !== 12, text: "15% (most shops)" }), h("option", { value: "12", selected: c.config.offsiteRate === 12, text: "12% (over $10,000 a year in sales)" })))),
       h("label", { class: "row" }, h("input", { type: "checkbox", name: "conversion", checked: !!c.config.conversion }), "My shop's currency differs from my bank's (2.5% currency conversion)"),
       h("label", { class: "row" }, h("input", { type: "checkbox", name: "setupWaived", checked: !!c.config.setupWaived }), "The $29 setup fee was waived"),
@@ -945,9 +948,31 @@ function settingsView(d) {
       } catch (err) { msg.textContent = err.message; }
     } },
       h("div", { class: "row" }, h("h2", { class: "grow", text: c.name }), h("span", { class: "pill" + (c.message.startsWith("Problem") ? " bad" : ""), text: c.lastOk ? "Connected" : c.message.startsWith("Problem") ? "Problem" : "Not connected" })),
-      h("p", { class: "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? (c.id === "etsy" ? " Last imported " : " Last pulled ") + ago(c.lastOk) + "." : "") }),
+      h("p", { class: "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? (c.id === "etsy" && !c.linked ? " Last imported " : " Last pulled ") + ago(c.lastOk) + "." : "") }),
       c.secrets.length ? h("p", { class: "small" }, "Keys are kept in Cloudflare, never here. Worker secrets: ", c.secrets.map((s, i) => [i ? ", " : "", h("code", { text: s.name }), s.set ? " (set)" : " (not set)"])) : null,
+      c.id === "etsy" ? etsyLink(c) : null,
       ...fields, save ? h("div", {}, save) : null, msg, c.id === "etsy" ? etsyImport() : null);
+  };
+  // Connect Etsy: Etsy asks the owner to allow Annex, then sends them back; orders then come in by themselves
+  const etsyLink = (c) => {
+    const said = h("p", { class: "note", role: "status", text: etsyNote || "" });
+    etsyNote = "";
+    const ready = c.secrets.filter((s) => s.name !== "ETSY_WEBHOOK_SECRET").every((s) => s.set);
+    const connect = h("button", { class: "primary", type: "button", text: c.linked ? "Connect again" : "Connect Etsy", disabled: !ready, onclick: async () => {
+      connect.disabled = true;
+      try { location.href = (await send("etsy/connect", {})).url; } catch (err) { said.textContent = err.message; connect.disabled = false; }
+    } });
+    const off = c.linked ? h("button", { class: "quiet", type: "button", text: "Disconnect", onclick: async () => {
+      if (!confirm("Disconnect Etsy? Orders already in Annex stay.")) return;
+      try { await send("etsy/disconnect", {}); location.reload(); } catch (err) { said.textContent = err.message; }
+    } }) : null;
+    return h("div", { class: "stack" }, h("h3", { text: "Etsy shop" }),
+      h("p", { class: "note", text: c.linked
+        ? `Linked to Etsy shop ${c.linked.shop} since ${prettyDay(c.linked.at.slice(0, 10))}. Orders and the active listing count come in every night, and within a minute of Etsy's webhook.`
+        : ready ? "Connect Etsy to bring orders in by themselves. Etsy asks you to sign in and allow Annex, then sends you back here."
+        : "Add the ETSY_KEY and ETSY_SECRET Worker secrets in Cloudflare, then come back to connect." }),
+      h("p", { class: "small" }, "In Etsy's developer portal, the callback URL is ", h("code", { text: c.callback }), " and the webhook URL is ", h("code", { text: c.hook }), "."),
+      h("div", { class: "row" }, connect, off), said);
   };
   // Etsy's sales come in as files: Orders for the money, Order Items for what sold
   const etsyImport = () => {
