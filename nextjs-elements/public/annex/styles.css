@@ -339,3 +339,8 @@ select.status option { color: var(--paper); }
 @media (min-width: 761px) { .client-cards { display: none; } .client-tools select { width: auto; flex: 0 0 220px; } }
 /* Light mode: an asset's own colour is mixed toward the ink so its label, figure and pill stay readable on paper. */
 :root[data-scheme="light"] .project { --tone-ink: color-mix(in srgb, var(--tone, var(--mint)) 58%, var(--paper)); }
+
+/* Etsy: the tick on an order that came through an Offsite Ad */
+label.ad-tick { display: flex; flex-direction: row; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 12px; color: var(--soft); white-space: nowrap; }
+label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; }
+.order label.ad-tick { grid-column: 1 / -1; justify-self: start; }

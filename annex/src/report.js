@@ -2,9 +2,15 @@
 //
 // Sales  = what was paid for goods and memberships (before discounts, less discounts), less refunds, counted on the day
 //          the refund happened. Sales tax and shipping charged leave out: they pass through to the state and the carrier.
+// Gross  = sales plus shipping charged: what buyers paid, tax aside. Net = gross less every payment and selling fee.
+// Etsy's fees are worked out from its rates (connections/etsy.js), part by part, and also count among the fees.
 // Profit = sales, less what the processor kept in fees, the lab's print cost, shipping (what the lab charged less what
 //          the buyer paid for it), chargebacks, and costs entered by hand (a monthly cost is spread over its days).
 import { addDays, dayOf, daysBetween } from "./util.js";
+import { RATES } from "./connections/etsy.js";
+
+const ZERO = { sales: 0, shippingCharged: 0, fees: 0, print: 0, shipping: 0, chargebacks: 0, orders: 0, refunds: 0, other: 0,
+  etsy: 0, etsyTransaction: 0, etsyProcessing: 0, etsyListing: 0, etsyConversion: 0, etsyOffsite: 0, etsySetup: 0 };
 
 const PER_MONTH = { DAILY: 365 / 12, WEEKLY: 52 / 12, EVERY_TWO_WEEKS: 26 / 12, THIRTY_DAYS: 365 / 360, SIXTY_DAYS: 365 / 720, NINETY_DAYS: 365 / 1080, MONTHLY: 1, EVERY_TWO_MONTHS: 1 / 2, QUARTERLY: 1 / 3, EVERY_FOUR_MONTHS: 1 / 4, EVERY_SIX_MONTHS: 1 / 6, ANNUAL: 1 / 12, EVERY_TWO_YEARS: 1 / 24 };
 export const monthly = (s) => Math.round(s.cents * (PER_MONTH[s.cadence] ?? 1));
@@ -14,7 +20,7 @@ export async function load(db, tz, from, to) {
   const lo = addDays(from, -1) + "T00:00:00Z";
   const hi = addDays(to, 2) + "T00:00:00Z";
   const q = async (sql, ...args) => (await db.prepare(sql).bind(...args).all()).results;
-  const [orders, lines, refunds, payments, costs, manual] = await Promise.all([
+  const [orders, lines, refunds, payments, costs, manual, etsyRow] = await Promise.all([
     q("SELECT * FROM orders WHERE test = 0 AND placed_at >= ? AND placed_at < ?", lo, hi),
     q("SELECT lines.* FROM lines JOIN orders ON orders.id = lines.order_id WHERE orders.test = 0 AND orders.placed_at >= ? AND orders.placed_at < ?", lo, hi),
     q(`SELECT refunds.*, orders.id AS order_id, orders.goods_cents, orders.discount_cents, orders.shipping_cents, orders.paid_cents
@@ -22,11 +28,13 @@ export async function load(db, tz, from, to) {
     q("SELECT * FROM payments WHERE test = 0 AND status = 'COMPLETED' AND created_at >= ? AND created_at < ?", lo, hi),
     q("SELECT * FROM costs WHERE test = 0 AND source != 'manual' AND at >= ? AND at < ?", lo, hi),
     q("SELECT * FROM costs WHERE source = 'manual'"),
+    q("SELECT config FROM connections WHERE id = 'etsy'"),
   ]);
+  const etsy = JSON.parse((etsyRow[0] || {}).config || "{}");
   const inRange = (iso) => { const d = dayOf(iso, tz); return d >= from && d <= to ? d : null; };
   const days = new Map();
   const day = (d) => {
-    if (!days.has(d)) days.set(d, { sales: 0, shippingCharged: 0, fees: 0, print: 0, shipping: 0, chargebacks: 0, orders: 0, refunds: 0, other: 0 });
+    if (!days.has(d)) days.set(d, { ...ZERO });
     return days.get(d);
   };
   for (const o of orders) {
@@ -36,6 +44,14 @@ export async function load(db, tz, from, to) {
     t.sales += o.goods_cents - o.discount_cents;
     t.shippingCharged += o.shipping_cents;
     t.orders += 1;
+    if (o.source === "etsy") {
+      const f = JSON.parse(o.detail || "{}").fees || {};
+      for (const [k, part] of [["transaction", "etsyTransaction"], ["processing", "etsyProcessing"], ["listing", "etsyListing"], ["conversion", "etsyConversion"], ["offsite", "etsyOffsite"]]) {
+        t[part] += f[k] || 0;
+        t.etsy += f[k] || 0;
+        t.fees += f[k] || 0;
+      }
+    }
   }
   for (const r of refunds) {
     const d = inRange(r.created_at);
@@ -49,10 +65,19 @@ export async function load(db, tz, from, to) {
     t.shippingCharged -= ship;
     t.refunds += r.amount_cents;
     t.fees += r.fee_cents;
+    if (r.payment.startsWith("etsy:")) { t.etsy += r.fee_cents; t.etsyTransaction += r.fee_cents; }
   }
+  // Etsy's payments carry fees already counted with their orders above
   for (const p of payments) {
-    const d = inRange(p.created_at);
+    const d = p.source === "etsy" ? null : inRange(p.created_at);
     if (d) day(d).fees += p.fee_cents;
+  }
+  // Etsy's fees outside any one order: the $29 to open the shop, and each active listing renewing every 4 months
+  if (/^\d{4}-\d{2}-\d{2}$/.test(etsy.opened || "")) {
+    const fixed = (d, part, c) => { const t = day(d); t[part] += c; t.etsy += c; t.fees += c; };
+    if (etsy.opened >= from && etsy.opened <= to) fixed(etsy.opened, "etsySetup", RATES.setup);
+    const perDay = ((Number(etsy.listings) || 0) * RATES.listing * 3) / 365;
+    if (perDay) for (let d = etsy.opened > from ? etsy.opened : from; d <= to; d = addDays(d, 1)) fixed(d, "etsyListing", perDay);
   }
   for (const c of costs) {
     const d = inRange(c.at);
@@ -79,9 +104,11 @@ export async function load(db, tz, from, to) {
 }
 
 export function total(days, from, to) {
-  const t = { sales: 0, shippingCharged: 0, fees: 0, print: 0, shipping: 0, chargebacks: 0, orders: 0, refunds: 0, other: 0 };
+  const t = { ...ZERO };
   for (const [d, v] of days) if (d >= from && d <= to) for (const k in t) t[k] += v[k];
-  t.other = Math.round(t.other);
+  for (const k in t) t[k] = Math.round(t[k]);
+  t.gross = t.sales + t.shippingCharged;
+  t.net = t.gross - t.fees;
   t.profit = Math.round(t.sales - t.fees - t.print - (t.shipping - t.shippingCharged) - t.chargebacks - t.other);
   return t;
 }

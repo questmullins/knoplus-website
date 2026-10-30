@@ -88,6 +88,18 @@ export const SOPS = [
     group: "Money and sales",
     items: [
       {
+        id: "money-etsy", q: "Count Etsy sales and Etsy's fees",
+        answer: "Annex takes Etsy's sales from the files Etsy lets you download, and works out Etsy's fees for every order. Sales, gross and net after fees then include them.",
+        steps: [
+          "Once: open **Assets › RoseWave › Connections › Etsy**. Enter the day the shop opened ($29 setup fee), how many listings are active, your Offsite Ads rate (15%, or 12% over $10,000 a year), and tick currency conversion only if your shop's currency differs from your bank's. Press **Save**.",
+          "In Etsy, open **Shop Manager › Settings › Options › Download Data**. Download **Orders** and **Order Items** for the months you want.",
+          "Back in Connections › Etsy, import the Orders file, then the Order Items file. Importing again only updates, it never doubles.",
+          "If an order came through an Offsite Ad, tick **From an Offsite Ad** on it under **Orders**. Its fee is added at once.",
+          "See the fees part by part under **Costs and margin › Etsy fees**, and gross and net under **Sales**.",
+        ],
+        go: [go("Open Etsy settings", "#asset/rosewave/settings"), go("Etsy downloads", "https://www.etsy.com/your/shops/me/download")],
+      },
+      {
         id: "money-rosewave", q: "See how much RoseWave made",
         answer: "Overview shows the last 30 days. RoseWave's own page has every detail for any dates.",
         steps: ["Open **Assets › RoseWave**.", "Use the tabs: **Sales, Orders, Best sellers, Members, Costs and margin, Trends**.", "Change the dates with the menu under the tabs."],
