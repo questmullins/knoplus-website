@@ -222,5 +222,12 @@ const eo = (await api(`orders?from=${D}&to=${D}`)).body.orders;
 const e1 = eo.find((o) => o.id === "etsy:9001");
 check("an Etsy order shows what sold and its fees", e1 && e1.items[0] === "Golden Hour Print · Size: 8x10" && e1.channel === "Etsy" && e1.customer === "Lovelace, Ada" && e1.fee === 293 + 169 + 40 + 108 + 540);
 check("Etsy shows as connected", /2 Etsy orders/.test((await api("connections")).body.connections.find((c) => c.id === "etsy").message));
+// Etsy Plus: $10 a month, the setup fee waived, and 15 listing credits ($3.00) a month off listing fees
+check("Etsy Plus on", (await api("connections/etsy", { opened: "2025-03-01", listings: 30, plus: true, setupWaived: true })).status === 200);
+ec = (await api("costs?from=2025-03-01&to=2025-03-31")).body.total;
+check("Plus: $10 a month, no setup fee, credits cover the listings: " + JSON.stringify(ec), ec.etsyPlus === 1019 && ec.etsySetup === 0 && ec.etsyListing === 153 && ec.etsyCredits === -153 && ec.etsy === 1019);
+check("lots of listings", (await api("connections/etsy", { opened: "2025-03-01", listings: 300, plus: true, setupWaived: true })).status === 200);
+ec = (await api("costs?from=2025-03-01&to=2025-04-30")).body.total;
+check("credits stop at $3.00 a month: " + JSON.stringify(ec), ec.etsyCredits === -600);
 process.on("exit", () => d1("DELETE FROM lines WHERE order_id LIKE 'etsy:%'; DELETE FROM orders WHERE source = 'etsy'; DELETE FROM payments WHERE source = 'etsy'; DELETE FROM refunds WHERE id LIKE 'etsy-refund:%'; DELETE FROM connections WHERE id = 'etsy';"));
 console.log("all good");

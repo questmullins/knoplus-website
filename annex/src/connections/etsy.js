@@ -5,7 +5,9 @@
 //   transaction     6.5% of the order total, sales tax left out (goods after discounts, plus shipping)
 //   processing      3% of the order total with tax and shipping, plus $0.25; Etsy's own figure from the file when given
 //   listing         $0.20 each time an item sells (the listing renews), plus $0.20 per active listing every 4 months
-//   setup           $29 once, on the day the shop opened
+//   setup           $29 once, on the day the shop opened (waived by some Etsy Plus deals: a setting)
+//   Etsy Plus       $10 a month, with 15 listing credits a month ($3.00 of listing fees) that don't roll over; its
+//                   $5 a month of Etsy Ads credit is for Etsy's own ads, which Annex doesn't count, so it isn't used
 //   conversion      2.5% of what you receive, only when the shop's currency differs from your bank's (a setting)
 //   offsite ads     15% (or 12%, a setting) of the order total for orders marked as from an Offsite Ad, at most $100
 //
@@ -15,11 +17,11 @@ import { decimalCents } from "../util.js";
 export const about = {
   id: "etsy",
   name: "Etsy",
-  // nothing secret: config = { opened, listings, conversion, offsiteRate }
+  // nothing secret: config = { opened, listings, conversion, offsiteRate, plus, plusFrom, setupWaived }
   secrets: [],
 };
 
-export const RATES = { transaction: 0.065, processing: 0.03, processingFixed: 25, listing: 20, setup: 2900, conversion: 0.025, offsiteCap: 10000 };
+export const RATES = { transaction: 0.065, processing: 0.03, processingFixed: 25, listing: 20, setup: 2900, conversion: 0.025, offsiteCap: 10000, plus: 1000, plusCredits: 15 };
 
 // Etsy has no pull yet: its sales arrive by file. This keeps the connection's status honest.
 export async function pull({ db }) {
