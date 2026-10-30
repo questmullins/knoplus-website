@@ -302,7 +302,7 @@ export const SOPS = [
         id: "setup-rosewave", q: "Connect RoseWave sales (Square, Prodigi, the app)",
         answer: "Three keys bring RoseWave's sales in. After that it runs on its own, every sale within seconds and a full re-check every night.",
         steps: [
-          "Make up a long random password (24+ characters). Save it as **ANNEX_KEY** on the RoseWave server and as **ROSEWAVE_ROSEWAVE_KEY** here. They must match.",
+          "Make up a long random password (24+ characters). Save it as **ANNEX_KEY** on the RoseWave server and as **ROSEWAVE_ANNEX_KEY** here. They must match.",
           "Save your Square access token as **ROSEWAVE_SQUARE_TOKEN** and your Prodigi key as **ROSEWAVE_PRODIGI_KEY**.",
           "In Square Developer › your app › **Webhooks**, add `https://kno.plus/annex/hooks/square` with the payment, refund, subscription, invoice payment and dispute events. Save its **Signature key** as **ROSEWAVE_SQUARE_SIGNATURE**.",
           "In **Assets › RoseWave › Connections**, enter the RoseWave server's address, press Save, then **Refresh now**.",

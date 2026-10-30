@@ -48,7 +48,7 @@ dashboard only reads those.
 
 | Connection | What it brings | Worker secrets (account `rosewave`) |
 |---|---|---|
-| RoseWave orders | Which photo, print, size, promo code, member price and shipping charged; app or website; memberships | `ROSEWAVE_ROSEWAVE_KEY` (the same text as `ANNEX_KEY` on the RoseWave worker), plus its address in Settings |
+| RoseWave orders | Which photo, print, size, promo code, member price and shipping charged; app or website; memberships | `ROSEWAVE_ANNEX_KEY` (the same text as `ANNEX_KEY` on the RoseWave worker), plus its address in Settings |
 | Square | Every payment and the fee kept, refunds, subscriptions, chargebacks; sales Square takes on its own (in person) | `ROSEWAVE_SQUARE_TOKEN`, `ROSEWAVE_SQUARE_SIGNATURE` |
 | Prodigi | What the lab invoiced per order, print and shipping apart | `ROSEWAVE_PRODIGI_KEY` (and `ROSEWAVE_PRODIGI_SANDBOX` to see sandbox orders as tests) |
 | Etsy | Orders and what sold, straight from Etsy's API once **Connect Etsy** is pressed (nightly, and within a minute of Etsy's signed webhook at `/annex/hooks/etsy`; sign-in in `annex/src/connections/etsy-link.js`, tokens kept AES-GCM encrypted in table `etsy_auth`), or from Etsy's Orders and Order Items downloads (imported in Settings); Etsy's fees worked out per order from its rates: 6.5% transaction, 3% + $0.25 processing, $0.20 listing renewals, $29 setup, and the optional 2.5% currency conversion and 15% or 12% Offsite Ads (`annex/src/connections/etsy.js`). Gross and net after fees show on Sales | `ETSY_KEY`, `ETSY_SECRET`, `ETSY_WEBHOOK_SECRET` (the app's own, not prefixed with the account; Etsy Plus, its listing credits and a waived setup fee are settings) |
@@ -67,7 +67,7 @@ Keys are Worker secrets and are never stored anywhere else or shown on the page.
 1. **kno.plus Worker secrets** (Workers & Pages › knoplus-website › Settings › Variables and Secrets, type Secret):
    the connection secrets above.
 2. **RoseWave worker:** deploy the `cloud/worker.js` that has `annex/feed`, add the secret `ANNEX_KEY` (any long
-   random text, 24+ characters, the same as `ROSEWAVE_ROSEWAVE_KEY`).
+   random text, 24+ characters, the same as `ROSEWAVE_ANNEX_KEY`).
 3. **Square webhook:** Square Developer › your app › Webhooks › Add subscription, URL
    `https://kno.plus/annex/hooks/square`, events `payment.created`, `payment.updated`, `refund.created`,
    `refund.updated`, `subscription.created`, `subscription.updated`, `invoice.payment_made`, `dispute.created`,
