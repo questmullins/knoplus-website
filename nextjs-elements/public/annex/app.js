@@ -911,7 +911,7 @@ const code = (t) => h("code", { text: t });
 const HELP = {
   rosewave: () => [
     ["What it brings in", "Orders and memberships from the RoseWave app and the kno.plus store."],
-    ["Set it up", ["Enter the RoseWave worker's address (https://….workers.dev) and press Save.", ["The Worker secret ", code("ROSEWAVE_ROSEWAVE_KEY"), " must match RoseWave's ", code("ANNEX_KEY"), "."]]],
+    ["Set it up", ["Enter the RoseWave worker's address (https://….workers.dev) and press Save.", ["The Worker secret ", code("ROSEWAVE_ANNEX_KEY"), " must match RoseWave's ", code("ANNEX_KEY"), "."]]],
   ],
   square: (c, d) => [
     ["What it brings in", "Payments, refunds, Square's fees, subscriptions and disputes."],

@@ -5,15 +5,16 @@ import { call } from "../util.js";
 export const about = {
   id: "rosewave",
   name: "RoseWave orders",
-  // config: url = the RoseWave worker's address; the feed's key is the Worker secret <ACCOUNT>_ROSEWAVE_KEY
-  secrets: ["ROSEWAVE_KEY"],
+  // config: url = the RoseWave worker's address; the feed's key is the Worker secret <ACCOUNT>_ANNEX_KEY
+  // (ROSEWAVE_ANNEX_KEY), the same text as ANNEX_KEY on the RoseWave worker
+  secrets: ["ANNEX_KEY"],
 };
 
 const STAGES = { paid: "paid", hand: "paid", sent: "printing", printing: "printing", shipped: "shipped", cancelled: "cancelled" };
 
 export async function pull(ctx) {
   const { db, config, secret, cursor, full, base } = ctx;
-  const key = secret("ROSEWAVE_KEY");
+  const key = secret("ANNEX_KEY") || secret("ROSEWAVE_KEY"); // its name before 2026-10-30, still read
   if (!config.url || !key) return { skipped: "Add the RoseWave worker's address and its key to connect." };
   // a day's overlap, so an order written while the last pull ran is never missed
   const since = full || !cursor ? "" : new Date(Date.parse(cursor) - 86400e3).toISOString();
