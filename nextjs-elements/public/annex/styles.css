@@ -353,3 +353,18 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 .conn[open] > summary { margin-bottom: 20px; }
 .pill.status-good { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
 .pill.status-bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.conn form { gap: 16px; }
+.conn .ticks { gap: 22px; }
+.conn label.tick { font-size: 13px; color: var(--soft); }
+.conn .split.tight { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.conn [hidden] { display: none; }
+
+/* Help windows: how to set something up, kept off the page until asked for */
+.help-dialog { width: min(640px, calc(100% - 32px)); max-height: calc(100% - 64px); overflow: auto; padding: 28px; border: var(--stroke) solid var(--line); background: var(--bg); color: var(--ink); }
+.help-dialog::backdrop { background: rgb(0 0 0 / .6); }
+.help-dialog h2 { margin: 0; }
+.help-dialog h3 { margin: 6px 0 0; font-size: 15px; font-weight: 500; }
+.help-dialog p, .help-dialog li { font-size: 13px; line-height: 1.6; color: var(--soft); margin: 0; }
+.help-dialog ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.help-dialog code { overflow-wrap: anywhere; }
+.conn form > p:empty { display: none; }
