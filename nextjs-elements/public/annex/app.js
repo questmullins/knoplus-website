@@ -904,6 +904,43 @@ function trendsView(d) {
 const label = (key) => (key.length === 7 ? new Date(key + "-15T12:00:00Z").toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" }) : prettyDay(key));
 
 // ---------- Settings ----------
+// ---------- Help windows ----------
+// How to set up each connection, opened from its Help button. Each entry is [heading, ...lines]; a line that is an
+// array is a list.
+const code = (t) => h("code", { text: t });
+const HELP = {
+  rosewave: () => [
+    ["What it brings in", "Orders and memberships from the RoseWave app and the kno.plus store."],
+    ["Set it up", ["Enter the RoseWave worker's address (https://….workers.dev) and press Save.", ["The Worker secret ", code("ROSEWAVE_ROSEWAVE_KEY"), " must match RoseWave's ", code("ANNEX_KEY"), "."]]],
+  ],
+  square: (c, d) => [
+    ["What it brings in", "Payments, refunds, Square's fees, subscriptions and disputes."],
+    ["Set it up", [["Add the access token and webhook signature key as Worker secrets (below)."], ["In Square Developer › Webhooks, add ", code(d.hook), " with the payment, refund, subscription, invoice and dispute events."], ["Tick Sandbox only to try test payments."]]],
+  ],
+  prodigi: () => [
+    ["What it brings in", "What each print cost at the lab, and its shipping."],
+    ["Set it up", [["Add Prodigi's live API key (and its sandbox key, if you test) as Worker secrets (below)."]]],
+  ],
+  etsy: (c) => [
+    ["Connect your shop", [["Press Connect Etsy, sign in to Etsy and press Allow access. Etsy sends you back here."], ["After that, orders and the active listing count come in every night, and within a minute of Etsy's webhook."], ["If Etsy ever ends the link, or ETSY_SECRET changes, press Connect again."]]],
+    ["Etsy's developer portal", [["Callback URL: ", code(c.callback)], ["Webhook URL: ", code(c.hook), " (Order and Listing events)"]]],
+    ["Fees Annex counts for every order", [["6.5% transaction, on the order without tax"], ["3% + $0.25 payment processing"], ["$0.20 when a listing renews after a sale, and every 4 months per active listing"], ["$29 setup fee, unless waived"], ["Etsy Plus: $10 a month, with 15 listing credits a month off listing fees"], ["Currency conversion 2.5%, only if your shop's currency differs from your bank's"], ["Offsite Ads 15% (12% over $10,000 a year), on orders you tick as from an Offsite Ad under Orders"]]],
+    ["Import a file instead", [["In Etsy: Shop Manager › Settings › Options › Download Data."], ["Download Orders, then Order Items, and import each with Import a file. Importing again never doubles orders."]]],
+  ],
+};
+function help(title, sections, secrets) {
+  const line = (l) => h("li", {}, Array.isArray(l) ? l : [l]);
+  const box = h("dialog", { class: "help-dialog", "aria-label": title + " help", onclose: () => box.remove(), onclick: (e) => { if (e.target === box) box.close(); } },
+    h("div", { class: "stack" },
+      h("div", { class: "row" }, h("h2", { class: "grow", text: title }), h("button", { class: "quiet", type: "button", text: "Close", onclick: () => box.close() })),
+      sections.map(([head, body]) => h("section", { class: "stack" }, h("h3", { text: head }), Array.isArray(body) ? h("ul", {}, body.map(line)) : h("p", { text: body }))),
+      secrets.length ? h("section", { class: "stack" }, h("h3", { text: "Worker secrets" }),
+        h("p", { class: "small", text: "Kept in Cloudflare, never here: Workers & Pages › knoplus-website › Settings › Variables and Secrets." }),
+        h("ul", {}, secrets.map((x) => h("li", {}, code(x.name), x.set ? " is set" : h("span", { class: "neg", text: " is not set" }))))) : null));
+  document.body.append(box);
+  box.showModal();
+}
+
 function settingsView(d) {
   const acct = state.acct || state.me.account;
   const colors = (acct.brand || {}).colors || {};
@@ -923,22 +960,27 @@ function settingsView(d) {
       h("label", {}, "Time zone", h("select", { name: "tz" }, zones.map((z) => h("option", { value: z, selected: z === acct.tz, text: z.replace(/_/g, " ") }))))),
     said, h("div", {}, h("button", { class: "primary", type: "submit", text: "Save" })));
 
+  // Each connection shows only what it is and what can be set; how to set it up lives behind Help.
   const conn = (c) => {
     const msg = h("p", { class: "note", role: "status" });
+    const back = c.id === "etsy" && !!etsyNote; // just back from Etsy's sign-in: open this card
+    const missing = c.secrets.filter((s) => !s.set).map((s) => s.name);
+    const tick = (name, on, text) => h("label", { class: "row tick" }, h("input", { type: "checkbox", name, checked: !!on }), text);
     const fields = [];
     if (c.id === "rosewave") fields.push(h("label", {}, "RoseWave worker address", h("input", { name: "url", type: "url", value: c.config.url || "", placeholder: "https://…workers.dev" })));
-    if (c.id === "square") fields.push(h("label", { class: "row" }, h("input", { type: "checkbox", name: "sandbox", checked: !!c.config.sandbox }), "Square's sandbox (test payments only)"));
-    if (c.id === "etsy") fields.push(
-      h("p", { class: "note", text: "Etsy's fees come off every sale: 6.5% transaction (on the order without tax), 3% + $0.25 payment processing, $0.20 when a listing renews after a sale, plus the settings below. Annex works them out for each order." }),
-      h("div", { class: "split" },
-        h("label", {}, "Day the shop opened ($29 setup fee)", h("input", { name: "opened", type: "date", value: c.config.opened || "" })),
-        h("label", {}, c.linked ? "Active listings (kept up to date from Etsy)" : "Active listings (each renews for $0.20 every 4 months)", h("input", { name: "listings", type: "number", min: "0", step: "1", value: String(c.config.listings || 0) })),
-        h("label", {}, "Offsite Ads rate", h("select", { name: "offsiteRate" }, h("option", { value: "15", selected: c.config.offsiteRate !== 12, text: "15% (most shops)" }), h("option", { value: "12", selected: c.config.offsiteRate === 12, text: "12% (over $10,000 a year in sales)" })))),
-      h("label", { class: "row" }, h("input", { type: "checkbox", name: "conversion", checked: !!c.config.conversion }), "My shop's currency differs from my bank's (2.5% currency conversion)"),
-      h("label", { class: "row" }, h("input", { type: "checkbox", name: "setupWaived", checked: !!c.config.setupWaived }), "The $29 setup fee was waived"),
-      h("label", { class: "row" }, h("input", { type: "checkbox", name: "plus", checked: !!c.config.plus }), "Etsy Plus ($10 a month; 15 listing credits a month come off listing fees)"),
-      h("label", {}, "Day Etsy Plus started (empty means the day the shop opened)", h("input", { name: "plusFrom", type: "date", value: c.config.plusFrom || "" })));
-    const save = fields.length ? h("button", { class: "quiet", type: "submit", text: "Save" }) : null;
+    if (c.id === "square") fields.push(tick("sandbox", c.config.sandbox, "Sandbox (test payments only)"));
+    if (c.id === "etsy") {
+      const since = h("label", { hidden: !c.config.plus }, "Etsy Plus since", h("input", { name: "plusFrom", type: "date", value: c.config.plusFrom || "" }));
+      const plus = tick("plus", c.config.plus, "Etsy Plus");
+      plus.querySelector("input").addEventListener("change", (e) => { since.hidden = !e.target.checked; });
+      fields.push(
+        h("div", { class: "split tight" },
+          h("label", {}, "Shop opened", h("input", { name: "opened", type: "date", value: c.config.opened || "" })),
+          h("label", {}, c.linked ? "Active listings (from Etsy)" : "Active listings", h("input", { name: "listings", type: "number", min: "0", step: "1", readonly: !!c.linked, value: String(c.config.listings || 0) })),
+          h("label", {}, "Offsite Ads rate", h("select", { name: "offsiteRate" }, h("option", { value: "15", selected: c.config.offsiteRate !== 12, text: "15%" }), h("option", { value: "12", selected: c.config.offsiteRate === 12, text: "12%" }))),
+          since),
+        h("div", { class: "row ticks" }, plus, tick("setupWaived", c.config.setupWaived, "Setup fee waived"), tick("conversion", c.config.conversion, "Currency conversion")));
+    }
     const status = c.message.startsWith("Problem") ? ["Problem", "bad"] : c.lastOk ? ["Connected", "good"] : ["Not connected", "bad"];
     const form = h("form", { class: "stack", onsubmit: async (e) => {
       e.preventDefault();
@@ -948,13 +990,18 @@ function settingsView(d) {
         msg.textContent = c.id === "etsy" ? "Saved. Every Etsy order's fees were worked out again." : "Saved. It will pull everything on the next refresh.";
       } catch (err) { msg.textContent = err.message; }
     } },
-      h("p", { class: "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? (c.id === "etsy" && !c.linked ? " Last imported " : " Last pulled ") + ago(c.lastOk) + "." : "") }),
-      c.secrets.length ? h("p", { class: "small" }, "Keys are kept in Cloudflare, never here. Worker secrets: ", c.secrets.map((s, i) => [i ? ", " : "", h("code", { text: s.name }), s.set ? " (set)" : " (not set)"])) : null,
-      c.id === "etsy" ? etsyLink(c) : null,
-      ...fields, save ? h("div", {}, save) : null, msg, c.id === "etsy" ? etsyImport() : null);
+      h("p", { class: c.message.startsWith("Problem") ? "error" : "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? (c.id === "etsy" && !c.linked ? " Last imported " : " Last pulled ") + ago(c.lastOk) + "." : "") }),
+      missing.length ? h("p", { class: "error", text: "Missing in Cloudflare: " + missing.join(", ") + ". Help shows where." }) : null,
+      c.id === "etsy" ? etsyLink(c, msg) : null,
+      ...fields,
+      h("div", { class: "row" },
+        fields.length ? h("button", { class: "quiet", type: "submit", text: "Save" }) : null,
+        c.id === "etsy" ? etsyImport(msg) : null,
+        h("button", { class: "quiet help-button", type: "button", text: "Help", onclick: () => help(c.name, HELP[c.id] ? HELP[c.id](c, d) : [], c.secrets) })),
+      msg);
     // each connection folds away; the status stays on the closed card, and which ones are open is remembered
     const opened = recall("annex-conn-open") || [];
-    return h("details", { class: "card conn", open: opened.includes(c.id) || (c.id === "etsy" && !!etsyNote), ontoggle: (e) => {
+    return h("details", { class: "card conn", open: opened.includes(c.id) || back, ontoggle: (e) => {
       const now = (recall("annex-conn-open") || []).filter((id) => id !== c.id);
       store("annex-conn-open", e.target.open ? [...now, c.id] : now);
     } },
@@ -962,11 +1009,10 @@ function settingsView(d) {
       form);
   };
   // Connect Etsy: Etsy asks the owner to allow Annex, then sends them back; orders then come in by themselves
-  const etsyLink = (c) => {
-    const said = h("p", { class: "note", role: "status", text: etsyNote || "" });
-    etsyNote = "";
+  const etsyLink = (c, said) => {
+    if (etsyNote) { said.textContent = etsyNote; etsyNote = ""; }
     const ready = c.secrets.filter((s) => s.name !== "ETSY_WEBHOOK_SECRET").every((s) => s.set);
-    const connect = h("button", { class: "primary", type: "button", text: c.linked ? "Connect again" : "Connect Etsy", disabled: !ready, onclick: async () => {
+    const connect = h("button", { class: c.linked ? "quiet" : "primary", type: "button", text: c.linked ? "Connect again" : "Connect Etsy", disabled: !ready, onclick: async () => {
       connect.disabled = true;
       try { location.href = (await send("etsy/connect", {})).url; } catch (err) { said.textContent = err.message; connect.disabled = false; }
     } });
@@ -974,30 +1020,20 @@ function settingsView(d) {
       if (!confirm("Disconnect Etsy? Orders already in Annex stay.")) return;
       try { await send("etsy/disconnect", {}); location.reload(); } catch (err) { said.textContent = err.message; }
     } }) : null;
-    return h("div", { class: "stack" }, h("h3", { text: "Etsy shop" }),
-      h("p", { class: "note", text: c.linked
-        ? `Linked to Etsy shop ${c.linked.shop} since ${prettyDay(c.linked.at.slice(0, 10))}. Orders and the active listing count come in every night, and within a minute of Etsy's webhook.`
-        : ready ? "Connect Etsy to bring orders in by themselves. Etsy asks you to sign in and allow Annex, then sends you back here."
-        : "Add the ETSY_KEY and ETSY_SECRET Worker secrets in Cloudflare, then come back to connect." }),
-      h("p", { class: "small" }, "In Etsy's developer portal, the callback URL is ", h("code", { text: c.callback }), " and the webhook URL is ", h("code", { text: c.hook }), "."),
-      h("div", { class: "row" }, connect, off), said);
+    return h("div", { class: "row" }, h("span", { class: "grow small", text: c.linked ? `Etsy shop ${c.linked.shop}, linked ${prettyDay(c.linked.at.slice(0, 10))}` : "Not linked to your Etsy shop yet" }), connect, off);
   };
-  // Etsy's sales come in as files: Orders for the money, Order Items for what sold
-  const etsyImport = () => {
-    const said = h("p", { class: "note", role: "status" });
-    const file = h("input", { type: "file", accept: ".csv,text/csv", "aria-label": "Etsy file" });
-    const go = h("button", { class: "quiet", type: "button", text: "Import", onclick: async () => {
-      if (!file.files[0]) { said.textContent = "Choose a file first."; return; }
-      go.disabled = true; said.textContent = "Importing…";
+  // Etsy's sales files (Orders, then Order Items): one button that asks for the file and imports it
+  const etsyImport = (said) => {
+    const file = h("input", { type: "file", accept: ".csv,text/csv", hidden: true, "aria-label": "Etsy file", onchange: async () => {
+      if (!file.files[0]) return;
+      said.textContent = "Importing…";
       try {
         const r = await send("etsy/import", { csv: await file.files[0].text() });
         said.textContent = r.kind === "items" ? `Filled in what sold for ${plural(r.count, "order")}.` : `Imported ${plural(r.count, "order")} with their Etsy fees.`;
       } catch (err) { said.textContent = err.message; }
-      go.disabled = false;
+      file.value = "";
     } });
-    return h("div", { class: "stack" }, h("h3", { text: "Import Etsy sales" }),
-      h("p", { class: "note", text: "In Etsy, open Shop Manager › Settings › Options › Download Data. Download Orders (the money) and Order Items (what sold) for the months you want, then import each here. Importing again updates orders without doubling them." }),
-      h("div", { class: "row" }, file, go), said);
+    return [file, h("button", { class: "quiet", type: "button", text: "Import a file", onclick: () => file.click() })];
   };
 
   const sync = h("p", { class: "note", role: "status" });
@@ -1010,7 +1046,6 @@ function settingsView(d) {
   return [
     account,
     h("div", { class: "card stack" }, h("h2", { text: "Connections" }),
-      h("p", { class: "note" }, "Square's webhook address (Square Developer › Webhooks, events payment, refund, subscription, invoice and dispute): ", h("code", { text: d.hook })),
       h("div", { class: "row" }, h("button", { class: "quiet", text: "Refresh now", onclick: run(false) }), h("button", { class: "quiet", text: "Pull all history again", onclick: run(true) })), sync),
     ...d.connections.map(conn),
   ];
