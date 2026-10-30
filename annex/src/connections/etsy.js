@@ -45,10 +45,12 @@ export async function pull({ db, env, config, cursor, days, full, base }) {
   }
   const started = new Date().toISOString();
   // a day's overlap, so nothing changed during the last pull is missed
-  const since = full ? 0 : Math.floor((days ? Date.now() - days * 86400e3 : Date.parse(cursor || 0) - 86400e3 || Date.now() - 30 * 86400e3) / 1000);
+  // (no cursor, as after saving the settings, means everything: Etsy refuses dates before 2000, so none is sent)
+  const last = cursor ? Date.parse(cursor) : NaN;
+  const since = full || !(last > 0) ? 0 : Math.floor((days ? Date.now() - days * 86400e3 : last - 86400e3) / 1000);
   const receipts = [];
   for (let offset = 0; offset < 10000; offset += 100) {
-    const page = await etsy.call(`/shops/${etsy.shop}/receipts?limit=100&offset=${offset}` + (since > 0 ? "&min_last_modified=" + since : ""));
+    const page = await etsy.call(`/shops/${etsy.shop}/receipts?limit=100&offset=${offset}` + (since > 946684800 ? "&min_last_modified=" + since : ""));
     receipts.push(...(page.results || []));
     if ((page.results || []).length < 100) break;
   }
