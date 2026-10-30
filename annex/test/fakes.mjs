@@ -141,6 +141,7 @@ http.createServer(async (req, res) => {
     if (path === "/users/me") return reply(200, { user_id: 1234, shop_id: 5678 });
     if (path === "/shops/5678/receipts") {
       seen.push("etsy receipts since " + (url.searchParams.get("min_last_modified") || "the start"));
+      if (url.searchParams.has("min_last_modified") && !(Number(url.searchParams.get("min_last_modified")) > 946684800)) return reply(400, { error: "Expected a epoch value greater than 946684800 for 'min_last_modified'" });
       const offset = Number(url.searchParams.get("offset") || 0);
       return reply(200, { count: etsyReceipts.length, results: etsyReceipts.slice(offset, offset + Number(url.searchParams.get("limit") || 25)) });
     }
