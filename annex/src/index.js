@@ -327,7 +327,9 @@ async function configure(request, db, id) {
   if (id === "square") config.sandbox = !!ask.sandbox;
   if (id === "etsy") {
     if (ask.opened && !DAY.test(ask.opened)) return fail("The day the shop opened isn't a date.");
-    const listings = Math.round(Number(ask.listings || 0));
+    // linked shops count their listings from Etsy, so the number isn't sent and stays as it was
+    const before = (await connectionRows(db)).get("etsy")?.config || {};
+    const listings = ask.listings === null || ask.listings === undefined ? Number(before.listings) || 0 : Math.round(Number(ask.listings || 0));
     if (!Number.isFinite(listings) || listings < 0 || listings > 100000) return fail("Add how many listings are active, or 0.");
     if (ask.plusFrom && !DAY.test(ask.plusFrom)) return fail("The day Etsy Plus started isn't a date.");
     Object.assign(config, { opened: ask.opened || "", listings, conversion: !!ask.conversion, offsiteRate: Number(ask.offsiteRate) === 12 ? 12 : 15,
@@ -351,7 +353,11 @@ async function connectionStatus(env, account, db, url) {
       const row = rows.get(c.about.id) || { config: {} };
       return {
         id: c.about.id, name: c.about.name, config: row.config, lastRun: row.last_run || "", lastOk: row.last_ok || "", message: row.message || "",
-        secrets: c.about.secrets.map((s) => ({ name: secretFor(c, account, s), set: !!env[secretFor(c, account, s)] })),
+        // a key shared through the Secrets Store is shown by its name there
+        secrets: c.about.secrets.map((s) => {
+          const name = secretFor(c, account, s);
+          return { name: STORED[name] ? STORED[name].slice(6) : name, store: !!STORED[name], set: !!env[name], optional: (c.about.optional || []).includes(s) };
+        }),
         ...(c.about.id === "etsy" ? { linked: etsyLink, hook: url.origin + "/annex/hooks/etsy", callback: url.origin + "/annex/etsy/callback" } : {}),
       };
     }),

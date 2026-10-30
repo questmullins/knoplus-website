@@ -23,9 +23,14 @@ export const about = {
   name: "Etsy",
   // the app's keys are shared by every account, so they aren't named after one (see etsy-link.js)
   secrets: ["ETSY_KEY", "ETSY_SECRET", "ETSY_WEBHOOK_SECRET"],
+  optional: ["ETSY_WEBHOOK_SECRET"], // only for the webhook; without it, pulls still run nightly and on Refresh
   plainSecrets: true,
   // config = { opened, listings, conversion, offsiteRate, plus, plusFrom, setupWaived }
 };
+
+// RoseWave's Etsy shop as Quest set it up: opened 2026-10-30 with Etsy Plus from the start and the setup fee waived.
+// Filled into the Etsy settings until they're first saved (sync.js), so the fees count from day one.
+export const SHOP = { opened: "2026-10-30", setupWaived: true, plus: true };
 
 export const RATES = { transaction: 0.065, processing: 0.03, processingFixed: 25, listing: 20, setup: 2900, conversion: 0.025, offsiteCap: 10000, plus: 1000, plusCredits: 15 };
 
