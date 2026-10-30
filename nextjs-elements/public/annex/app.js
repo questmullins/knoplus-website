@@ -939,7 +939,8 @@ function settingsView(d) {
       h("label", { class: "row" }, h("input", { type: "checkbox", name: "plus", checked: !!c.config.plus }), "Etsy Plus ($10 a month; 15 listing credits a month come off listing fees)"),
       h("label", {}, "Day Etsy Plus started (empty means the day the shop opened)", h("input", { name: "plusFrom", type: "date", value: c.config.plusFrom || "" })));
     const save = fields.length ? h("button", { class: "quiet", type: "submit", text: "Save" }) : null;
-    return h("form", { class: "card stack", onsubmit: async (e) => {
+    const status = c.message.startsWith("Problem") ? ["Problem", "bad"] : c.lastOk ? ["Connected", "good"] : ["Not connected", "bad"];
+    const form = h("form", { class: "stack", onsubmit: async (e) => {
       e.preventDefault();
       const f = new FormData(e.target);
       try {
@@ -947,11 +948,18 @@ function settingsView(d) {
         msg.textContent = c.id === "etsy" ? "Saved. Every Etsy order's fees were worked out again." : "Saved. It will pull everything on the next refresh.";
       } catch (err) { msg.textContent = err.message; }
     } },
-      h("div", { class: "row" }, h("h2", { class: "grow", text: c.name }), h("span", { class: "pill" + (c.message.startsWith("Problem") ? " bad" : ""), text: c.lastOk ? "Connected" : c.message.startsWith("Problem") ? "Problem" : "Not connected" })),
       h("p", { class: "note", text: (c.message ? c.message.replace(/\.?$/, ".") : "Not run yet.") + (c.lastOk ? (c.id === "etsy" && !c.linked ? " Last imported " : " Last pulled ") + ago(c.lastOk) + "." : "") }),
       c.secrets.length ? h("p", { class: "small" }, "Keys are kept in Cloudflare, never here. Worker secrets: ", c.secrets.map((s, i) => [i ? ", " : "", h("code", { text: s.name }), s.set ? " (set)" : " (not set)"])) : null,
       c.id === "etsy" ? etsyLink(c) : null,
       ...fields, save ? h("div", {}, save) : null, msg, c.id === "etsy" ? etsyImport() : null);
+    // each connection folds away; the status stays on the closed card, and which ones are open is remembered
+    const opened = recall("annex-conn-open") || [];
+    return h("details", { class: "card conn", open: opened.includes(c.id) || (c.id === "etsy" && !!etsyNote), ontoggle: (e) => {
+      const now = (recall("annex-conn-open") || []).filter((id) => id !== c.id);
+      store("annex-conn-open", e.target.open ? [...now, c.id] : now);
+    } },
+      h("summary", {}, h("h2", { class: "grow", text: c.name }), h("span", { class: "pill status-" + status[1], text: status[0] }), h("span", { class: "nav-plus", "aria-hidden": "true" })),
+      form);
   };
   // Connect Etsy: Etsy asks the owner to allow Annex, then sends them back; orders then come in by themselves
   const etsyLink = (c) => {
