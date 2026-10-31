@@ -24,7 +24,7 @@ const check = (name, ok) => { assert.ok(ok, name); console.log("ok  " + name); }
 
 // a fresh start: no account, no sales (the local database only; d1 never touches the real one with --local)
 for (const file of ["annex/schema/shared.sql", "annex/schema/account.sql"]) execFileSync(process.execPath, ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "knoplus-clients", "--local", "--file", file], { stdio: "pipe" });
-d1(["accounts", "assets", "guides", "connections", "etsy_auth", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
+d1(["accounts", "assets", "guides", "checklists", "connections", "etsy_auth", "orders", "lines", "payments", "refunds", "costs", "customers", "subscriptions"].map((t) => `DELETE FROM ${t};`).join(" "));
 
 const run = "annex-test-" + Date.now();
 
@@ -180,6 +180,23 @@ check("guides listed in order with ids from titles", guides.map((g) => g.id).joi
 check("one guide opens", (await api("guides/quick-answers")).body.body.includes("Reset a password"));
 check("guide saved again replaces it", (await api("guides", { id: "quick-answers", title: "Quick answers", body: "new" })).status === 200 && (await api("guides/quick-answers")).body.body === "new");
 check("guide deleted", (await api("guides/words-you-ll-see", {}, "DELETE")).status === 200 && (await api("guides/words-you-ll-see")).status === 404);
+
+// the A-to-Z checklists: one copy per customer or site, ticks kept per step
+check("both checklists offered, none started", firstGuides.checklists.map((c) => c.id).join() === "new-customer,new-website" && firstGuides.runs.length === 0);
+check("a checklist needs a name", (await api("checklists", { list: "new-website", name: " " })).status === 400);
+check("an unknown checklist refused", (await api("checklists", { list: "nope", name: "x" })).status === 400);
+const started = (await api("checklists", { list: "new-website", name: "rosewave.art" })).body;
+check("a checklist starts", started.ok && /^[a-f0-9]{16}$/.test(started.id));
+check("a dashed step ticks", (await api("checklists/" + started.id, { step: "add-zone", done: true })).status === 200);
+check("a second step ticks without undoing the first", (await api("checklists/" + started.id, { step: "buy", done: true })).status === 200);
+check("a step from the other list refused", (await api("checklists/" + started.id, { step: "quote", done: true })).status === 400);
+let run1 = (await api("guides")).body.runs.find((r) => r.id === started.id);
+check("both ticks kept, with when", Object.keys(run1.done).sort().join() === "add-zone,buy" && !Number.isNaN(Date.parse(run1.done.buy)));
+check("a step unticks", (await api("checklists/" + started.id, { step: "add-zone", done: false })).status === 200);
+check("a checklist renames", (await api("checklists/" + started.id, { name: "rosewave.art site" })).status === 200);
+run1 = (await api("guides")).body.runs.find((r) => r.id === started.id);
+check("untick and rename kept", Object.keys(run1.done).join() === "buy" && run1.name === "rosewave.art site");
+check("a checklist deletes", (await api("checklists/" + started.id, {}, "DELETE")).status === 200 && (await api("guides")).body.runs.length === 0);
 cookie = client;
 check("a client can't see the workspace or the guides", (await api("overview")).status === 403 && (await api("websites")).status === 403 && (await api("assets")).status === 403 && (await api("guides")).status === 403);
 check("a client can't manage clients", (await api("clients")).status === 403 && (await api("clients/reset", { userId: "x" })).status === 403);

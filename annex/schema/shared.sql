@@ -31,3 +31,14 @@ CREATE TABLE IF NOT EXISTS guides (
   sort INTEGER NOT NULL DEFAULT 0,
   updated TEXT NOT NULL
 );
+
+-- Copies of the A-to-Z checklists on Annex › Guides, one per customer or website; done maps a step's id to when it
+-- was ticked. The steps themselves are in annex/src/checklists.js.
+CREATE TABLE IF NOT EXISTS checklists (
+  id TEXT PRIMARY KEY,
+  list TEXT NOT NULL,
+  name TEXT NOT NULL,
+  done TEXT NOT NULL DEFAULT '{}',
+  created TEXT NOT NULL,
+  updated TEXT NOT NULL
+);

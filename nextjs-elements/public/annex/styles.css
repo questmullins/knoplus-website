@@ -398,3 +398,34 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 .conn .readout { display: grid; gap: 10px; align-content: start; }
 .conn .readout strong { font-size: 20px; font-weight: 400; line-height: 44px; }
 .help-dialog a { color: var(--mint); }
+
+/* Guides › A-to-Z checklists: a card per list with its copies, then one copy's steps, each with its own Help */
+.checklists { margin-bottom: 26px; }
+.check-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.check-card { display: grid; gap: 14px; align-content: start; }
+.check-card h2 { margin: 0; }
+.check-runs { display: grid; gap: 0; }
+.check-runs a { display: grid; gap: 8px; padding: 12px 0; border-top: var(--stroke) solid var(--line); color: var(--paper); }
+.check-runs a:hover strong { color: var(--mint); }
+.check-start { align-items: flex-end; }
+.check-start label { display: grid; gap: 6px; }
+.check-bar { height: 6px; background: rgb(var(--ink-rgb) / .1); overflow: hidden; }
+.check-bar i { display: block; height: 100%; background: var(--mint); transition: width .3s; }
+.check-progress { display: grid; gap: 10px; margin-bottom: 22px; }
+.check-list { display: grid; gap: 26px; }
+.check-section .toolbar { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px; }
+.check-step { border-top: var(--stroke) solid var(--line); }
+.check-section .check-step:last-child { border-bottom: var(--stroke) solid var(--line); }
+.check-row { display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 10px 4px; }
+.check-label { flex: 1; display: flex; gap: 14px; align-items: flex-start; cursor: pointer; font-size: 16px; line-height: 1.45; color: rgb(var(--ink-rgb) / .86); }
+.check-label input { margin-top: 2px; flex: none; }
+.check-label > span { display: grid; gap: 2px; }
+.check-step.done .check-text { color: var(--muted); text-decoration: line-through; text-decoration-color: rgb(var(--ink-rgb) / .3); }
+.check-step.done .check-label .small { color: var(--mint); }
+.check-help-button { flex: none; background: transparent; border: var(--stroke) solid var(--line); color: var(--paper); padding: 7px 12px; font-size: 12px; min-height: 34px; cursor: pointer; }
+.check-help-button:hover, .check-help-button[aria-expanded="true"] { border-color: var(--mint); color: var(--mint); }
+.check-help { padding: 0 4px 20px 38px; max-width: 800px; }
+.check-help > p:first-child { margin-top: 0; color: var(--paper); }
+.check-help .go { margin-top: 14px; gap: 10px; }
+.check-help .go .button { white-space: normal; text-align: center; }
+@media (max-width: 760px) { .check-help { padding-left: 4px; } .check-help .go .button { flex: 1 1 100%; } .check-label { font-size: 15px; } }
