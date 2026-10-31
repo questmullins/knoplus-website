@@ -89,8 +89,18 @@ async function boot() {
   }
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/annex/sw.js", { scope: "/annex/" }).catch(() => {});
   addEventListener("hashchange", route);
-  let wait;
-  addEventListener("resize", () => { clearTimeout(wait); wait = setTimeout(() => state.data && draw(), 150); });
+  // Charts are drawn to the page's width, so a wider or narrower window redraws them. Only a change of width counts: on
+  // a phone, scrolling shows and hides the address bar, which changes the height and used to redraw the page (shutting
+  // whatever was open). Guides has no charts and is never redrawn this way.
+  let wait, wide = innerWidth;
+  addEventListener("resize", () => {
+    clearTimeout(wait);
+    wait = setTimeout(() => {
+      if (innerWidth === wide) return;
+      wide = innerWidth;
+      if (state.data && state.page !== "guides") draw();
+    }, 150);
+  });
   route();
 }
 
