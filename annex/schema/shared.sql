@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS checklists (
   list TEXT NOT NULL,
   name TEXT NOT NULL,
   done TEXT NOT NULL DEFAULT '{}',
+  link TEXT NOT NULL DEFAULT '',
   created TEXT NOT NULL,
   updated TEXT NOT NULL
 );

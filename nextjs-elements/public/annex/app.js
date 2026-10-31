@@ -845,10 +845,42 @@ function checklistView(d, id) {
     try { await send("checklists/" + id, { name }); run.name = name.trim(); title.textContent = run.name; } catch (err) { alert(err.message); }
   };
   const title = h("h1", { text: run.name });
+  const autos = new Map();
   const view = h("div", { class: "check-list" }, list.sections.map((section, n) => h("section", { class: "check-section", "data-steps": section.steps.map((x) => x.id).join(",") },
     h("div", { class: "toolbar" }, h("h2", { class: "section", text: (n + 1) + ". " + section.title }), h("span", { class: "small num" })),
-    section.steps.map((x) => checkStep(list, run, x, tally)))));
+    section.steps.map((x) => checkStep(list, run, x, tally, autos)))));
   tally();
+
+  // Annex looks for itself: steps it finds done tick themselves, and each step it can see says what it saw
+  const looking = h("p", { class: "small", role: "status" });
+  const link = h("div", { class: "row check-link" });
+  const look = async () => {
+    looking.textContent = "Annex is checking…";
+    try {
+      const r = await fetchJson("checklists/" + id + "/check");
+      for (const [step, at] of Object.entries(r.done)) if (!run.done[step]) { run.done[step] = at; autos.get(step)?.tick(); }
+      for (const [step, a] of autos) a.show(r.checks[step]);
+      tally();
+      const seen = Object.keys(r.checks).length;
+      looking.textContent = r.target ? "Annex checked " + seen + (seen === 1 ? " step" : " steps") + " for " + r.target + " just now." : "";
+      linker(r.target);
+    } catch (err) { looking.textContent = "Annex couldn't check just now: " + err.message; }
+  };
+  const linker = async (target) => {
+    const save = async (value) => { try { await send("checklists/" + id, { link: value }); run.link = value; look(); } catch (err) { alert(err.message); } };
+    if (list.id === "new-website") {
+      const input = h("input", { value: run.link || (target ? "" : ""), placeholder: target || "example.com", "aria-label": "Domain" });
+      link.replaceChildren(h("span", { class: "small", text: target ? "Checking the domain " + target + ". A different domain?" : "Which domain should Annex check?" }), input,
+        h("button", { class: "button secondary", type: "button", text: "Use it", onclick: () => save(input.value) }));
+    } else {
+      const clients = await fetchJson("clients").catch(() => ({ projects: [] }));
+      const pick = h("select", { "aria-label": "Project in Clients", onchange: () => save(pick.value) },
+        h("option", { value: "", text: target ? "Matched by name" : "Pick their project" }),
+        clients.projects.map((p) => h("option", { value: p.id, selected: p.id === run.link || null, text: p.name })));
+      link.replaceChildren(h("span", { class: "small", text: target ? "Checking the project in Clients:" : "Link their project in Clients so Annex can check steps:" }), pick);
+    }
+  };
+  look();
   return [back,
     h("div", { class: "intro" }, h("div", {}, h("span", { class: "eyebrow", text: list.title }), title, h("p", { text: list.about })),
       h("div", { class: "row" }, h("button", { class: "button secondary", type: "button", text: "Rename", onclick: rename }),
@@ -856,12 +888,13 @@ function checklistView(d, id) {
           if (!confirm("Delete the checklist for \"" + run.name + "\"? Its ticks can't be brought back.")) return;
           await send("checklists/" + id, {}, "DELETE"); location.hash = "#guides";
         } }))),
-    h("div", { class: "panel check-progress" }, h("div", { class: "row" }, h("strong", { class: "grow", text: "Progress" }), count), bar),
+    h("div", { class: "panel check-progress" }, h("div", { class: "row" }, h("strong", { class: "grow", text: "Progress" }), count), bar,
+      h("div", { class: "row" }, h("span", { class: "grow" }, looking), h("button", { class: "button secondary", type: "button", text: "Check again", onclick: look })), link),
     view];
 }
 
 // One step: tick it off, or open Help for what usually goes wrong, buttons that go there, and a question to ask Claude.
-function checkStep(list, run, x, tally) {
+function checkStep(list, run, x, tally, autos) {
   const when = h("span", { class: "small" });
   const box = h("input", { type: "checkbox", checked: !!run.done[x.id] || null, onchange: async () => {
     const on = box.checked;
@@ -891,7 +924,17 @@ function checkStep(list, run, x, tally) {
   const toggle = h("button", { class: "check-help-button", type: "button", "aria-expanded": "false", text: "Help", onclick: () => {
     panel.hidden = !panel.hidden; toggle.setAttribute("aria-expanded", String(!panel.hidden)); toggle.textContent = panel.hidden ? "Help" : "Close help";
   } });
-  item.append(h("div", { class: "check-row" }, h("label", { class: "check-label" }, box, h("span", {}, h("span", { class: "check-text" }, inline(x.text)), when)), toggle), panel);
+  const seen = h("span", { class: "check-auto", hidden: true });
+  autos.set(x.id, {
+    tick: () => { box.checked = true; mark(); },
+    show: (c) => {
+      seen.hidden = !c;
+      if (!c) return;
+      seen.className = "check-auto " + (c.ok ? "ok" : "bad");
+      seen.textContent = (c.ok ? "Checked by Annex: " : "Annex sees: ") + c.note;
+    },
+  });
+  item.append(h("div", { class: "check-row" }, h("label", { class: "check-label" }, box, h("span", {}, h("span", { class: "check-text" }, inline(x.text)), when, seen)), toggle), panel);
   mark();
   return item;
 }

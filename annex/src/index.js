@@ -26,7 +26,7 @@ import { assetsWithNumbers, saveAsset } from "./workspace.js";
 import { addClient, clientTable, passwordLink, postUpdate, saveProject, setAccess, setDisabled, updateClient } from "../../server/client-admin.js";
 import { deleteGuide, guideList, guideOne, saveGuides } from "./guides.js";
 import { SOPS } from "./sops.js";
-import { CHECKLISTS, changeChecklist, checklistRuns, deleteChecklist, startChecklist } from "./checklists.js";
+import { CHECKLISTS, changeChecklist, checkChecklist, checklistRuns, deleteChecklist, startChecklist } from "./checklists.js";
 import { addDays, dayOf, daysBetween, fail, json, readJson, same } from "./util.js";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -183,6 +183,7 @@ async function api(request, env, ctx, url) {
   if (route === "checklists" && method === "POST") return startChecklist(request, env.ANNEX);
   if (route.startsWith("checklists/")) {
     const id = decodeURIComponent(route.slice(11));
+    if (method === "GET" && id.endsWith("/check")) return checkChecklist(insightEnv, id.slice(0, -6));
     if (method === "POST") return changeChecklist(request, env.ANNEX, id);
     if (method === "DELETE") return deleteChecklist(env.ANNEX, id);
   }

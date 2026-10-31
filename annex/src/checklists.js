@@ -4,6 +4,7 @@
 // live in D1 (table checklists), and the steps themselves live here. Same writing rules as sops.js: **bold**, `code`,
 // [links](https://…), and no keys or passwords, because this file is in the public repository.
 import { fail, json, readJson } from "./util.js";
+import { DOMAIN, asDomain, checksFor } from "./checklist-checks.js";
 
 const CF = "https://dash.cloudflare.com/";
 const go = (label, href) => ({ label, href });
@@ -348,9 +349,17 @@ export const CHECKLISTS = [
 const LIST = new Map(CHECKLISTS.map((c) => [c.id, c]));
 const STEPS = new Map(CHECKLISTS.map((c) => [c.id, new Set(c.sections.flatMap((s) => s.steps.map((x) => x.id)))]));
 const ID = /^[a-z0-9]{6,32}$/;
-const row = (r) => ({ id: r.id, list: r.list, name: r.name, done: JSON.parse(r.done || "{}"), created: r.created, updated: r.updated });
+const row = (r) => ({ id: r.id, list: r.list, name: r.name, link: r.link || "", done: JSON.parse(r.done || "{}"), created: r.created, updated: r.updated });
+
+// link (the Clients project or the domain a copy is about) came after the first table: added once, in place
+let linked;
+const ensureLink = (db) => (linked ||= (async () => {
+  const cols = (await db.prepare("SELECT name FROM pragma_table_info('checklists')").all()).results.map((c) => c.name);
+  if (!cols.includes("link")) await db.prepare("ALTER TABLE checklists ADD COLUMN link TEXT NOT NULL DEFAULT ''").run().catch((e) => { if (!/duplicate column/i.test(e.message)) throw e; });
+})().catch((error) => { linked = null; throw error; }));
 
 export async function checklistRuns(db) {
+  await ensureLink(db);
   return (await db.prepare("SELECT * FROM checklists ORDER BY updated DESC").all()).results.map(row);
 }
 
@@ -366,9 +375,10 @@ export async function startChecklist(request, db) {
   return json({ ok: true, id });
 }
 
-// tick or untick one step ({ step, done }), or rename ({ name })
+// tick or untick one step ({ step, done }), rename ({ name }), or say what it's about ({ link }: a project id or a domain)
 export async function changeChecklist(request, db, id) {
   if (!ID.test(id)) return fail("Not found", 404);
+  await ensureLink(db);
   const run = await db.prepare("SELECT * FROM checklists WHERE id = ?").bind(id).first();
   if (!run) return fail("That checklist was deleted.", 404);
   const ask = await readJson(request), now = new Date().toISOString();
@@ -376,6 +386,15 @@ export async function changeChecklist(request, db, id) {
     const name = String(ask.name).trim().slice(0, 80);
     if (!name) return fail("Give it a name.");
     await db.prepare("UPDATE checklists SET name = ?, updated = ? WHERE id = ?").bind(name, now, id).run();
+    return json({ ok: true });
+  }
+  if (ask.link !== undefined) {
+    let link = String(ask.link).trim().slice(0, 253);
+    if (link && run.list === "new-website") {
+      link = asDomain(link);
+      if (!DOMAIN.test(link)) return fail("The domain should look like example.com.");
+    }
+    await db.prepare("UPDATE checklists SET link = ?, updated = ? WHERE id = ?").bind(link, now, id).run();
     return json({ ok: true });
   }
   const stepId = String(ask.step || "");
@@ -391,4 +410,21 @@ export async function changeChecklist(request, db, id) {
 export async function deleteChecklist(db, id) {
   await db.prepare("DELETE FROM checklists WHERE id = ?").bind(id).run();
   return json({ ok: true });
+}
+
+// What Annex can see for one copy; steps it finds done are ticked (ticks already there stay, whatever it finds).
+export async function checkChecklist(env, id) {
+  if (!ID.test(id)) return fail("Not found", 404);
+  const db = env.ANNEX;
+  await ensureLink(db);
+  const found = await db.prepare("SELECT * FROM checklists WHERE id = ?").bind(id).first();
+  if (!found) return fail("That checklist was deleted.", 404);
+  const run = row(found), { target, checks } = await checksFor(env, run);
+  const steps = STEPS.get(run.list), now = new Date().toISOString();
+  const tick = Object.entries(checks).filter(([step, c]) => c.ok && steps.has(step) && !run.done[step]).map(([step]) => step);
+  if (tick.length) {
+    await db.batch(tick.map((step) => db.prepare(`UPDATE checklists SET done = json_set(done, '$."' || ? || '"', ?), updated = ? WHERE id = ?`).bind(step, now, now, id)));
+    for (const step of tick) run.done[step] = now;
+  }
+  return json({ target, checks, done: run.done, at: now });
 }

@@ -104,11 +104,28 @@ http.createServer(async (req, res) => {
   }
   if (url.pathname.startsWith("/cloudflare/")) {
     if (req.headers.authorization !== "Bearer cf-token") return reply(403, { success: false, errors: [{ message: "bad token" }] });
-    if (url.pathname === "/cloudflare/client/v4/zones") return reply(200, { success: true, result: [{ id: "z1", name: "kno.plus" }, { id: "z2", name: "example-client.com" }] });
+    if (url.pathname === "/cloudflare/client/v4/zones") {
+      // kno.plus and the client's site are active; new-site.art was just added and waits for its nameservers
+      const zones = [{ id: "z1", name: "kno.plus", status: "active" }, { id: "z2", name: "example-client.com", status: "active" },
+        { id: "z3", name: "new-site.art", status: "pending", name_servers: ["ada.ns.cloudflare.com", "bob.ns.cloudflare.com"] }];
+      const named = url.searchParams.get("name");
+      return reply(200, { success: true, result: zones.filter((z) => (named ? z.name === named : z.status === url.searchParams.get("status") || !url.searchParams.get("status"))) });
+    }
     if (url.pathname === "/cloudflare/client/v4/graphql") {
       const { variables } = JSON.parse(await body(req));
       return reply(200, { data: { viewer: { zones: variables.zones.map((z) => cloudflare(z, z === "z1" ? 3 : 1)) } }, errors: null });
     }
+  }
+  // the open web, for the checklists: kno.plus loads and its www forwards; new-site.art doesn't load yet
+  if (url.pathname.startsWith("/site/")) {
+    const host = url.pathname.split("/")[2];
+    if (host === "kno.plus" || host === "example-client.com") return reply(200, {});
+    if (host === "www.kno.plus") { res.writeHead(301, { Location: "https://kno.plus/" }); return res.end(); }
+    if (host === "www.example-client.com") return reply(200, {});
+    return reply(522, {});
+  }
+  if (url.pathname === "/dns") {
+    return reply(200, { Answer: url.searchParams.get("name") === "kno.plus" ? [{ data: "10 route1.mx.cloudflare.net." }] : [] });
   }
   if (url.pathname === "/google/token") {
     const form = new URLSearchParams(await body(req));
