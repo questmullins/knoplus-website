@@ -401,6 +401,8 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 
 /* Guides › A-to-Z checklists: a card per list with its copies, then one copy's steps, each with its own Help */
 .checklists { margin-bottom: 26px; }
+.check-bar-line { gap: 12px 16px; padding: 14px 0; margin: 0 0 18px; border-top: var(--stroke) solid var(--line); border-bottom: var(--stroke) solid var(--line); }
+.check-bar-line .small { color: var(--muted); }
 .check-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
 .check-card { display: grid; gap: 14px; align-content: start; }
 .check-card h2 { margin: 0; }
