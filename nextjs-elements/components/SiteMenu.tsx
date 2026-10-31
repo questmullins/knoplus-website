@@ -12,7 +12,7 @@ type SiteMenuProps = {
   showLabel?: boolean;
 };
 
-const menuItems = [
+export const menuItems = [
   { label: "Home", href: "/" },
   { label: "Websites", href: "/websites" },
   { label: "Annex", href: "/annex/" }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ContactModal } from "@/components/ContactModal";
 import { SchemeToggle } from "@/components/SchemeToggle";
-import { SiteMenu } from "@/components/SiteMenu";
+import { SiteMenu, menuItems } from "@/components/SiteMenu";
 import { buildShowcase } from "./showcase-model";
 import { serviceAccent, type ServiceItem } from "./services";
 import { StoreBadges } from "./store-badges";
@@ -302,10 +302,20 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   return <>
     <div className={`app ${s.shell}`}>
       <a href="#service-stage" className={s.skip}>Skip to project preview</a>
-      <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<SchemeToggle className={s.mobileScheme} /><button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Browse services"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
+      <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<SchemeToggle className={s.mobileScheme} /><button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Menu"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
       <aside inert={isMobile && !mobileOpen} className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
         <div className={`sidebar-brand ${s.desktopBrand}`}>{logo}</div>
-        <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Services and projects">
+        <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Menu, services and projects">
+          {/* Phone only: the site menu sits above the services, since the desktop Menu button is hidden on phones. */}
+          <div className={s.siteLinks}>
+            <span className={`nav-label ${s.navLabel}`}>Menu</span>
+            <ul>
+              {menuItems.map(item => <li key={item.href}><Link href={item.href} prefetch={false} onClick={event => {
+                if (item.href === "/" && !projectSlug) { event.preventDefault(); commit(model.overview); setMobileOpen(false); }
+              }}>{item.label}</Link></li>)}
+              <li><button type="button" onClick={() => { setMobileOpen(false); openContact(selected); }}>Contact Us</button></li>
+            </ul>
+          </div>
           <Link className={`nav-label ${s.navLabel}`} href="/#work">Services</Link>{rows(model.navigation)}
         </nav>
         <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><button type="button" onClick={() => openContact(selected)} className="cta-button">Let’s talk</button><Link href="/clients/" prefetch={false} className={s.clientLink}>Are we working with you?<br /><strong>Check here for updates ↗</strong></Link><Link href="/websites" className={s.mainSite}>Website collection ↗</Link></div>
