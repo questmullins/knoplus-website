@@ -859,6 +859,7 @@ function checklistView(d, id) {
     try {
       const r = await fetchJson("checklists/" + id + "/check");
       for (const [step, at] of Object.entries(r.done)) if (!run.done[step]) { run.done[step] = at; autos.get(step)?.tick(); }
+      run.seen = r.checks; run.target = r.target;
       for (const [step, a] of autos) a.show(r.checks[step]);
       tally();
       const seen = Object.keys(r.checks).length;
@@ -889,11 +890,48 @@ function checklistView(d, id) {
           await send("checklists/" + id, {}, "DELETE"); location.hash = "#guides";
         } }))),
     h("div", { class: "panel check-progress" }, h("div", { class: "row" }, h("strong", { class: "grow", text: "Progress" }), count), bar,
-      h("div", { class: "row" }, h("span", { class: "grow" }, looking), h("button", { class: "button secondary", type: "button", text: "Check again", onclick: look })), link),
+      h("div", { class: "row" }, h("span", { class: "grow" }, looking), h("button", { class: "button secondary", type: "button", text: "Check again", onclick: look }),
+        copyForAi(list, run, null)), link),
     view];
 }
 
-// One step: tick it off, or open Help for what usually goes wrong, buttons that go there, and a question to ask Claude.
+// The whole checklist as plain text for an AI assistant: every step, what's done and when, what Annex saw, and the step
+// you're on (the one asked from, else the first not done) with its how-to, so it can pick up exactly where you are.
+const plainText = (t) => String(t).replace(/\*\*(.+?)\*\*/g, "$1").replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, "$1 ($2)");
+function checklistForAi(list, run, at) {
+  const steps = list.sections.flatMap((s) => s.steps);
+  const here = at || steps.find((x) => !run.done[x.id]);
+  const day = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const seen = run.seen || {};
+  const out = [
+    `I'm working through the "${list.title}" checklist in Annex (my kno.plus workspace) for ${run.name}.` + (here ? ` I'm on the step marked "<- I'M HERE". Please help me get it done.` : " Every step is done."),
+    "", `Progress: ${steps.filter((x) => run.done[x.id]).length} of ${steps.length} steps done.` + (run.target ? ` Annex checks ${run.target}.` : ""),
+  ];
+  list.sections.forEach((section, n) => {
+    out.push("", (n + 1) + ". " + section.title);
+    for (const x of section.steps) {
+      const c = seen[x.id];
+      out.push((run.done[x.id] ? "[x] " : "[ ] ") + plainText(x.text) + (run.done[x.id] ? " (done " + day(run.done[x.id]) + ")" : "")
+        + (c ? " | Annex " + (c.ok ? "checked: " : "sees: ") + c.note : "") + (here && x.id === here.id ? "   <- I'M HERE" : ""));
+    }
+  });
+  if (here) {
+    out.push("", "About the step I'm on (" + plainText(here.text) + "):", plainText(here.help.answer));
+    if (here.help.fix.length) out.push("What usually goes wrong:", ...here.help.fix.map((f) => "- " + plainText(f)));
+    out.push("", "What I see right now: ");
+  }
+  return out.join("\n");
+}
+function copyForAi(list, run, at) {
+  const button = h("button", { class: "button secondary", type: "button", text: "Copy for AI", onclick: async () => {
+    const text = checklistForAi(list, run, at);
+    try { await navigator.clipboard.writeText(text); button.textContent = "Copied. Paste it into Claude"; setTimeout(() => { button.textContent = "Copy for AI"; }, 2500); }
+    catch { prompt("Copy this and paste it into Claude:", text); }
+  } });
+  return button;
+}
+
+// One step: tick it off, or open it (the +) for how to do it, what usually goes wrong, buttons that go there, and Copy for AI.
 function checkStep(list, run, x, tally, autos) {
   const when = h("span", { class: "small" });
   const box = h("input", { type: "checkbox", checked: !!run.done[x.id] || null, onchange: async () => {
@@ -908,22 +946,16 @@ function checkStep(list, run, x, tally, autos) {
     item.classList.toggle("done", !!run.done[x.id]);
     when.textContent = run.done[x.id] ? "Done " + new Date(run.done[x.id]).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
   };
-  const copied = h("span", { class: "small", role: "status" });
-  const askClaude = async () => {
-    const text = "I'm working through the \"" + list.title + "\" checklist in Annex for " + run.name + ", and I'm stuck on this step: \"" + x.text + "\".\n\nHere's what I see: ";
-    try { await navigator.clipboard.writeText(text); copied.textContent = "Copied. Paste it to Claude and add what you see."; }
-    catch { prompt("Copy this and paste it to Claude:", text); }
-  };
   const help = x.help;
   const panel = h("div", { class: "check-help prose", hidden: true },
     h("p", {}, inline(help.answer)),
     help.fix.length ? [h("h4", { text: "If it's stuck" }), h("ul", {}, help.fix.map((f) => h("li", {}, inline(f))))] : null,
     h("div", { class: "row go" },
       help.go.map((g, n) => h("a", { class: "button" + (n ? " secondary" : ""), href: g.href, target: /^https?:/.test(g.href) ? "_blank" : null, rel: /^https?:/.test(g.href) ? "noopener" : null }, g.label + (/^https?:/.test(g.href) ? " ↗" : " →"))),
-      h("button", { class: "button secondary", type: "button", text: "Still stuck? Copy a question for Claude", onclick: askClaude }), copied));
-  const toggle = h("button", { class: "check-help-button", type: "button", "aria-expanded": "false", text: "Help", onclick: () => {
-    panel.hidden = !panel.hidden; toggle.setAttribute("aria-expanded", String(!panel.hidden)); toggle.textContent = panel.hidden ? "Help" : "Close help";
-  } });
+      copyForAi(list, run, x)));
+  const toggle = h("button", { class: "check-open", type: "button", "aria-expanded": "false", "aria-label": "How to do this step", onclick: () => {
+    panel.hidden = !panel.hidden; toggle.setAttribute("aria-expanded", String(!panel.hidden));
+  } }, h("span", { class: "nav-plus", "aria-hidden": "true" }));
   const seen = h("span", { class: "check-auto", hidden: true });
   autos.set(x.id, {
     tick: () => { box.checked = true; mark(); },
