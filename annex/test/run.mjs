@@ -211,6 +211,9 @@ looked = (await api("checklists/" + siteRun + "/check")).body;
 check("a domain waiting on nameservers says which ones", looked.target === "new-site.art" && looked.checks["add-zone"].ok && !looked.checks.active.ok
   && /ada\.ns\.cloudflare\.com/.test(looked.checks.nameservers.note) && !looked.checks.visit.ok && !looked.checks.email.ok && !looked.checks["search-console"].ok);
 check("earlier ticks stay when a check later fails", looked.done.active && looked.done.visit);
+const lastCheck = (await api("guides")).body.runs.find((r) => r.id === siteRun);
+check("the last check is kept, so notes show on opening", lastCheck.target === "new-site.art" && lastCheck.checked === looked.at
+  && lastCheck.seen.nameservers.note === looked.checks.nameservers.note && lastCheck.seen.active.ok === false);
 const unknown = (await api("checklists", { list: "new-website", name: "nowhere.example" })).body.id;
 check("a domain Cloudflare doesn't have", (await api("checklists/" + unknown + "/check")).body.checks["add-zone"].ok === false);
 await api("checklists/" + siteRun, {}, "DELETE"); await api("checklists/" + unknown, {}, "DELETE");

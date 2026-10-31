@@ -349,13 +349,17 @@ export const CHECKLISTS = [
 const LIST = new Map(CHECKLISTS.map((c) => [c.id, c]));
 const STEPS = new Map(CHECKLISTS.map((c) => [c.id, new Set(c.sections.flatMap((s) => s.steps.map((x) => x.id)))]));
 const ID = /^[a-z0-9]{6,32}$/;
-const row = (r) => ({ id: r.id, list: r.list, name: r.name, link: r.link || "", done: JSON.parse(r.done || "{}"), created: r.created, updated: r.updated });
+const row = (r) => ({ id: r.id, list: r.list, name: r.name, link: r.link || "", done: JSON.parse(r.done || "{}"), created: r.created, updated: r.updated,
+  seen: JSON.parse(r.seen || "{}"), target: r.target || "", checked: r.checked || "" });
 
-// link (the Clients project or the domain a copy is about) came after the first table: added once, in place
+// Columns that came after the first table, added once, in place: link (the Clients project or the domain a copy is
+// about), and what Annex saw at its last check (seen, target, checked), so a checklist opens with its notes already there.
+const LATER = { link: "TEXT NOT NULL DEFAULT ''", seen: "TEXT NOT NULL DEFAULT '{}'", target: "TEXT NOT NULL DEFAULT ''", checked: "TEXT NOT NULL DEFAULT ''" };
 let linked;
 const ensureLink = (db) => (linked ||= (async () => {
   const cols = (await db.prepare("SELECT name FROM pragma_table_info('checklists')").all()).results.map((c) => c.name);
-  if (!cols.includes("link")) await db.prepare("ALTER TABLE checklists ADD COLUMN link TEXT NOT NULL DEFAULT ''").run().catch((e) => { if (!/duplicate column/i.test(e.message)) throw e; });
+  for (const [name, type] of Object.entries(LATER)) if (!cols.includes(name))
+    await db.prepare("ALTER TABLE checklists ADD COLUMN " + name + " " + type).run().catch((e) => { if (!/duplicate column/i.test(e.message)) throw e; });
 })().catch((error) => { linked = null; throw error; }));
 
 export async function checklistRuns(db) {
@@ -426,5 +430,6 @@ export async function checkChecklist(env, id) {
     await db.batch(tick.map((step) => db.prepare(`UPDATE checklists SET done = json_set(done, '$."' || ? || '"', ?), updated = ? WHERE id = ?`).bind(step, now, now, id)));
     for (const step of tick) run.done[step] = now;
   }
+  await db.prepare("UPDATE checklists SET seen = ?, target = ?, checked = ? WHERE id = ?").bind(JSON.stringify(checks), target, now, id).run();
   return json({ target, checks, done: run.done, at: now });
 }

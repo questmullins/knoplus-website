@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS checklists (
   name TEXT NOT NULL,
   done TEXT NOT NULL DEFAULT '{}',
   link TEXT NOT NULL DEFAULT '',
+  seen TEXT NOT NULL DEFAULT '{}',   -- what Annex saw at its last check, step id -> { ok, note }
+  target TEXT NOT NULL DEFAULT '',   -- the domain or Clients project it checked
+  checked TEXT NOT NULL DEFAULT '',  -- when
   created TEXT NOT NULL,
   updated TEXT NOT NULL
 );
