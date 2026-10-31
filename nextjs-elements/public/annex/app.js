@@ -230,7 +230,7 @@ async function load() {
   // what this page needs, read through `ask`: from memory (peek) or from the server (get)
   const gather = async (ask) => {
     if (page === "guides") {
-      const [list, one] = await Promise.all([ask("guides"), guide && !["new", "import"].includes(guide) && !guide.startsWith("check:") ? Promise.resolve().then(() => ask("guides/" + encodeURIComponent(guide))).catch((e) => { if (e === MISS) throw e; return null; }) : null]);
+      const [list, one] = await Promise.all([ask("guides"), guide && !["new", "import", "checklists"].includes(guide) && !guide.startsWith("check:") ? Promise.resolve().then(() => ask("guides/" + encodeURIComponent(guide))).catch((e) => { if (e === MISS) throw e; return null; }) : null]);
       return { guides: list.guides, sops: list.sops || [], checklists: list.checklists || [], runs: list.runs || [], one };
     }
     if (page === "websites") {
@@ -765,6 +765,8 @@ function guidesView(d) {
   if (importing) return [intro("Your guides", "Import guides.", null), importForm()];
 
   if (state.guide && state.guide.startsWith("check:")) return checklistView(d, state.guide.slice(6));
+  if (state.guide === "checklists") return [h("a", { class: "back", href: "#guides", text: "← All guides" }),
+    intro("Your guides", "A-to-Z checklists.", "Start one for each new customer or website, then tick it off as you go. Annex ticks the steps it can check by itself."), checklistCards(d)];
   if (state.guide) {
     const g = d.one;
     const back = h("a", { class: "back", href: "#guides", text: "← All guides" });
@@ -800,7 +802,7 @@ function guidesView(d) {
   };
   search.addEventListener("input", fill);
   fill();
-  return [intro("Your guides", "What do you need to do?", "Pick a question for the steps and a button that takes you there. Only your owner login can see this page."), checklistCards(d), search, results];
+  return [intro("Your guides", "What do you need to do?", "Pick a question for the steps and a button that takes you there. Only your owner login can see this page."), checklistBar(d), search, results];
 }
 
 // ---------- Checklists: A to Z for a new customer or a new website, one copy per customer or site ----------
@@ -812,6 +814,15 @@ const progress = (done, all) => {
   fill.style.width = (all ? (done / all) * 100 : 0) + "%";
   return h("div", { class: "check-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(all), "aria-valuenow": String(done) }, fill);
 };
+
+// On the Guides page the checklists are one slim line with a button over to them, since they're needed now and then.
+function checklistBar(d) {
+  if (!d.checklists.length) return null;
+  const going = d.runs.filter((r) => { const list = d.checklists.find((c) => c.id === r.list); return list && doneCount(list, r) < stepCount(list); }).length;
+  return h("div", { class: "row check-bar-line" },
+    h("span", { class: "grow" }, h("strong", { text: "A-to-Z checklists" }), h("span", { class: "small", text: " · " + d.checklists.map((c) => c.title).join(", ") + (going ? " · " + going + " in progress" : "") })),
+    h("a", { class: "button secondary", href: "#guides/checklists", text: "Open checklists →" }));
+}
 
 function checklistCards(d) {
   if (!d.checklists.length) return null;
@@ -838,7 +849,7 @@ function checklistCards(d) {
 }
 
 function checklistView(d, id) {
-  const back = h("a", { class: "back", href: "#guides", text: "← All guides" });
+  const back = h("a", { class: "back", href: "#guides/checklists", text: "← All checklists" });
   const run = d.runs.find((r) => r.id === id), list = run && d.checklists.find((c) => c.id === run.list);
   if (!run || !list) return [back, h("div", { class: "panel" }, h("p", { text: "This checklist was deleted, or never existed." }))];
   const all = stepCount(list);
@@ -939,7 +950,7 @@ function checklistView(d, id) {
       h("div", { class: "row" }, h("button", { class: "button secondary", type: "button", text: "Rename", onclick: rename }),
         h("button", { class: "button secondary", type: "button", text: "Delete", onclick: async () => {
           if (!confirm("Delete the checklist for \"" + run.name + "\"? Its ticks can't be brought back.")) return;
-          await send("checklists/" + id, {}, "DELETE"); location.hash = "#guides";
+          await send("checklists/" + id, {}, "DELETE"); location.hash = "#guides/checklists";
         } }))),
     h("div", { class: "panel check-progress" }, h("div", { class: "row" }, h("strong", { class: "grow", text: "Progress" }), count), bar,
       h("div", { class: "row" }, h("span", { class: "grow" }, looking), refresh, h("button", { class: "button secondary", type: "button", text: "Check again", onclick: () => look(true) }),
