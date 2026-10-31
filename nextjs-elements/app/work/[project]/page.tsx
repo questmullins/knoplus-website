@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: {
   const { project: slug } = await params;
   const project = projectCatalog.find(item => item.slug === slug);
   return {
-    title: project?.name ?? "Project",
-    description: project?.panes[0].text,
+    title: project?.seo?.title ?? project?.name ?? "Project",
+    description: project?.seo?.description ?? project?.panes[0].text,
     alternates: { canonical: `/work/${slug}` },
   };
 }

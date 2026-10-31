@@ -10,6 +10,7 @@ export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const corePages = ["", "/websites", "/store", "/sitemap"];
+  const toolPages = ["/webtools/freestyle/"];
   const workPages = projectCatalog.map((project) => `/work/${project.slug}`);
   const storePages = storeCatalog.collections.map((collection) => `/store/collections/${collection.id}`);
   const servicePages = seoPages.map((page) => `/${page.slug}`);
@@ -27,7 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/templates/photo-portfolio/index.html"
   ];
 
-  return [...corePages, ...workPages, ...storePages, ...servicePages, ...templatePages, ...templateSubpages].map((path) => ({
+  return [...corePages, ...toolPages, ...workPages, ...storePages, ...servicePages, ...templatePages, ...templateSubpages].map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
     changeFrequency: path === "" || path.startsWith("/templates/") ? "weekly" : "monthly",

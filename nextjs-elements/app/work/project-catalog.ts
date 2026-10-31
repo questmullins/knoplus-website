@@ -14,6 +14,8 @@ export type ProjectPresentation = {
   slug: string;
   panes: ProjectPane[];
   relatedLink?: { href: string; label: string };
+  /** What search results show for the project's page, when it should differ from its name and first pane. */
+  seo?: { title: string; description: string };
   action: { kind: "store" } | { kind: "link"; href: string; label: string; shortLabel: string };
 };
 
@@ -90,7 +92,11 @@ export const projectCatalog: ProjectPresentation[] = [
   },
   {
     name: "Freestyle", slug: "freestyle",
-    action: { kind: "link", href: "/webtools/freestyle/index.html", label: "Open Freestyle", shortLabel: "Open tool" },
+    seo: {
+      title: "Freestyle: a free swimlane diagram tool",
+      description: "Freestyle is a free swimlane diagram tool that runs in your browser. Sketch a process, get a clean swimlane diagram, and print or export it. No sign-up or payment needed.",
+    },
+    action: { kind: "link", href: "/webtools/freestyle/", label: "Open Freestyle", shortLabel: "Open tool" },
     panes: [
       {
         name: "A way around the paywall", title: "Make the diagram you need.",
