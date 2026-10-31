@@ -70,7 +70,7 @@ export const services: ServiceItem[] = [
           {
             id: "freestyle", name: "Freestyle", label: "Web Services / Web Apps / Freestyle",
             description: "I needed a swimlane diagram for work and kept finding services that wanted payment. Freestyle grew from finding a way around that. Finish your diagram and export it without reaching for a credit card.",
-            image: "url('/revamp/banners/freestyle.webp')", href: "/webtools/freestyle/index.html", action: "Open Freestyle",
+            image: "url('/revamp/banners/freestyle.webp')", href: "/webtools/freestyle/", action: "Open Freestyle",
             related: { href: "/work/freestyle", label: "About the project" },
 
             highlights: ["Board view", "Swimlanes", "Free image export"],

@@ -71,7 +71,7 @@ const projects: Project[] = [
     theme: "flow",
     screenshot: "/revamp/projects/freestyle/both.webp",
     href: "/work/freestyle",
-    toolHref: "/webtools/freestyle/index.html",
+    toolHref: "/webtools/freestyle/",
   },
   {
     name: "Prepress Assistant",
