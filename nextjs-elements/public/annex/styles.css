@@ -325,8 +325,8 @@ textarea { background: var(--field); border: var(--stroke) solid var(--line); co
 .sop summary::-webkit-details-marker { display: none; }
 .sop summary:hover, .sop[open] summary { color: var(--mint); }
 /* a + on things that open; a downward triangle while open */
-.sop[open] summary .nav-plus::before, .conn[open] > summary .nav-plus::before, .check-open[aria-expanded="true"] .nav-plus::before { width: 18px; height: 18px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M2 4.5h14L9 15.5z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M2 4.5h14L9 15.5z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transform: translate(-50%, -50%); }
-.sop[open] summary .nav-plus::after, .conn[open] > summary .nav-plus::after, .check-open[aria-expanded="true"] .nav-plus::after { display: none; }
+.sop[open] summary .nav-plus::before, .conn[open] > summary .nav-plus::before, .check-open[aria-expanded="true"] .nav-plus::before, .check-section-head[aria-expanded="true"] .nav-plus::before { width: 18px; height: 18px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M2 4.5h14L9 15.5z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M2 4.5h14L9 15.5z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transform: translate(-50%, -50%); }
+.sop[open] summary .nav-plus::after, .conn[open] > summary .nav-plus::after, .check-open[aria-expanded="true"] .nav-plus::after, .check-section-head[aria-expanded="true"] .nav-plus::after { display: none; }
 .sop-body { padding: 0 4px 22px; max-width: 760px; }
 .sop-body > p:first-child { margin-top: 0; color: var(--paper); }
 .sop .go { margin-top: 14px; gap: 10px; }
@@ -412,10 +412,20 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 .check-bar { height: 6px; background: rgb(var(--ink-rgb) / .1); overflow: hidden; }
 .check-bar i { display: block; height: 100%; background: var(--mint); transition: width .3s; }
 .check-progress { display: grid; gap: 10px; margin-bottom: 22px; }
-.check-list { display: grid; gap: 26px; }
-.check-section .toolbar { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px; }
+.check-list { display: grid; }
+.check-section { border-top: var(--stroke) solid var(--line); }
+.check-section:last-child { border-bottom: var(--stroke) solid var(--line); }
+.check-section-head { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 10px 4px; background: transparent; border: 0; color: var(--paper); text-align: left; cursor: pointer; }
+.check-section-head h2 { flex: 1; margin: 0; }
+.check-section-head .nav-plus { flex: none; margin: 0 13px; color: rgb(var(--ink-rgb) / 0.82); }
+.check-section-head:hover h2, .check-section-head:hover .nav-plus, .check-section-head[aria-expanded="true"] .nav-plus { color: var(--mint); }
+.check-steps { padding-bottom: 18px; }
 .check-step { border-top: var(--stroke) solid var(--line); }
-.check-section .check-step:last-child { border-bottom: var(--stroke) solid var(--line); }
+.check-steps .check-step:last-child { border-bottom: var(--stroke) solid var(--line); }
+.slide { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s ease; }
+.slide.open { grid-template-rows: 1fr; }
+.slide-in { min-height: 0; overflow: hidden; opacity: 0; transition: opacity .24s ease; }
+.slide.open .slide-in { opacity: 1; }
 .check-row { display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 10px 4px; }
 .check-label { flex: 1; display: flex; gap: 14px; align-items: flex-start; cursor: pointer; font-size: 16px; line-height: 1.45; color: rgb(var(--ink-rgb) / .86); }
 .check-label input { margin-top: 2px; flex: none; }

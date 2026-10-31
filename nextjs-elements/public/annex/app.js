@@ -846,10 +846,31 @@ function checklistView(d, id) {
   };
   const title = h("h1", { text: run.name });
   const autos = new Map();
-  const view = h("div", { class: "check-list" }, list.sections.map((section, n) => h("section", { class: "check-section", "data-steps": section.steps.map((x) => x.id).join(",") },
-    h("div", { class: "toolbar" }, h("h2", { class: "section", text: (n + 1) + ". " + section.title }), h("span", { class: "small num" })),
-    section.steps.map((x) => checkStep(list, run, x, tally, autos)))));
+  // Each section folds: the one you're on is open, the rest stay shut until you open them. Finishing a section by hand
+  // slides it shut and opens the next one that isn't done.
+  const folds = [];
+  let touched = false;
+  const sectionDone = (section) => section.steps.every((x) => run.done[x.id]);
+  const focus = () => {
+    const at = list.sections.findIndex((section) => !sectionDone(section));
+    folds.forEach((f, n) => f.set(n === at));
+  };
+  const finished = (x) => {
+    const n = list.sections.findIndex((section) => section.steps.includes(x));
+    if (!sectionDone(list.sections[n])) return;
+    const next = list.sections.findIndex((section, m) => m > n && !sectionDone(section));
+    folds[n].set(false);
+    if (next >= 0) folds[next].set(true);
+  };
+  const view = h("div", { class: "check-list" }, list.sections.map((section, n) => {
+    const head = h("button", { class: "check-section-head", type: "button", "aria-expanded": "false", onclick: () => { touched = true; fold.set(!fold.open); } },
+      h("h2", { class: "section", text: (n + 1) + ". " + section.title }), h("span", { class: "small num" }), h("span", { class: "nav-plus", "aria-hidden": "true" }));
+    const fold = slider(h("div", { class: "check-steps" }, section.steps.map((x) => checkStep(list, run, x, tally, autos, finished))), head);
+    folds.push(fold);
+    return h("section", { class: "check-section", "data-steps": section.steps.map((x) => x.id).join(",") }, head, fold.el);
+  }));
   tally();
+  focus();
 
   // Annex looks for itself: steps it finds done tick themselves, and each step it can see says what it saw
   const looking = h("p", { class: "small", role: "status" });
@@ -862,6 +883,7 @@ function checklistView(d, id) {
       run.seen = r.checks; run.target = r.target;
       for (const [step, a] of autos) a.show(r.checks[step]);
       tally();
+      if (!touched) focus();
       const seen = Object.keys(r.checks).length;
       looking.textContent = r.target ? "Annex checked " + seen + (seen === 1 ? " step" : " steps") + " for " + r.target + " just now." : "";
       linker(r.target);
@@ -931,13 +953,27 @@ function copyForAi(list, run, at) {
   return button;
 }
 
+// Something that slides open and shut under the button that toggles it. Shut, it's inert so tabbing skips what's hidden.
+function slider(content, button) {
+  const el = h("div", { class: "slide" }, h("div", { class: "slide-in" }, content));
+  const fold = { el, open: false, set(on) {
+    fold.open = on;
+    el.classList.toggle("open", on);
+    el.inert = !on;
+    button.setAttribute("aria-expanded", String(on));
+  } };
+  fold.set(false);
+  return fold;
+}
+
 // One step: tick it off, or open it (the +) for how to do it, what usually goes wrong, buttons that go there, and Copy for AI.
-function checkStep(list, run, x, tally, autos) {
+function checkStep(list, run, x, tally, autos, finished) {
   const when = h("span", { class: "small" });
   const box = h("input", { type: "checkbox", checked: !!run.done[x.id] || null, onchange: async () => {
     const on = box.checked;
     if (on) run.done[x.id] = new Date().toISOString(); else delete run.done[x.id];
     mark(); tally();
+    if (on) finished(x);
     try { await send("checklists/" + run.id, { step: x.id, done: on }); }
     catch (err) { box.checked = !on; if (on) delete run.done[x.id]; else run.done[x.id] = new Date().toISOString(); mark(); tally(); alert(err.message); }
   } });
@@ -947,15 +983,15 @@ function checkStep(list, run, x, tally, autos) {
     when.textContent = run.done[x.id] ? "Done " + new Date(run.done[x.id]).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
   };
   const help = x.help;
-  const panel = h("div", { class: "check-help prose", hidden: true },
+  const panel = h("div", { class: "check-help prose" },
     h("p", {}, inline(help.answer)),
     help.fix.length ? [h("h4", { text: "If it's stuck" }), h("ul", {}, help.fix.map((f) => h("li", {}, inline(f))))] : null,
     h("div", { class: "row go" },
       help.go.map((g, n) => h("a", { class: "button" + (n ? " secondary" : ""), href: g.href, target: /^https?:/.test(g.href) ? "_blank" : null, rel: /^https?:/.test(g.href) ? "noopener" : null }, g.label + (/^https?:/.test(g.href) ? " ↗" : " →"))),
       copyForAi(list, run, x)));
-  const toggle = h("button", { class: "check-open", type: "button", "aria-expanded": "false", "aria-label": "How to do this step", onclick: () => {
-    panel.hidden = !panel.hidden; toggle.setAttribute("aria-expanded", String(!panel.hidden));
-  } }, h("span", { class: "nav-plus", "aria-hidden": "true" }));
+  const toggle = h("button", { class: "check-open", type: "button", "aria-expanded": "false", "aria-label": "How to do this step", onclick: () => open.set(!open.open) },
+    h("span", { class: "nav-plus", "aria-hidden": "true" }));
+  const open = slider(panel, toggle);
   const seen = h("span", { class: "check-auto", hidden: true });
   autos.set(x.id, {
     tick: () => { box.checked = true; mark(); },
@@ -966,7 +1002,7 @@ function checkStep(list, run, x, tally, autos) {
       seen.textContent = (c.ok ? "Checked by Annex: " : "Annex sees: ") + c.note;
     },
   });
-  item.append(h("div", { class: "check-row" }, h("label", { class: "check-label" }, box, h("span", {}, h("span", { class: "check-text" }, inline(x.text)), when, seen)), toggle), panel);
+  item.append(h("div", { class: "check-row" }, h("label", { class: "check-label" }, box, h("span", {}, h("span", { class: "check-text" }, inline(x.text)), when, seen)), toggle), open.el);
   mark();
   return item;
 }
