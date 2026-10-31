@@ -443,6 +443,9 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 .check-progress .check-link { gap: 10px; }
 .check-progress .check-link > span { flex: 1 1 100%; }
 .check-progress .check-link input, .check-progress .check-link select { flex: 1 1 220px; background: var(--field); border: var(--stroke) solid var(--line); padding: 8px 12px; min-height: 40px; }
+.check-refresh { position: fixed; right: 24px; bottom: 24px; z-index: 30; }
+.check-refresh[hidden] { display: none; }
+@media (max-width: 760px) { .check-refresh { left: 16px; right: 16px; bottom: 16px; } }
 .check-auto { font-size: 12px; line-height: 1.45; text-decoration: none; }
 .check-auto.ok { color: var(--mint); }
 .check-auto.bad { color: var(--gold); }

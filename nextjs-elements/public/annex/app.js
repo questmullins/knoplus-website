@@ -872,25 +872,42 @@ function checklistView(d, id) {
   tally();
   focus();
 
-  // Annex looks for itself: steps it finds done tick themselves, and each step it can see says what it saw
+  // Annex looks for itself: steps it finds done tick themselves, and each step it can see says what it saw. The notes
+  // from its last check show straight away and stay put; when a fresh check in the background sees something different,
+  // a Refresh button appears instead of the page changing under you.
   const looking = h("p", { class: "small", role: "status" });
   const link = h("div", { class: "row check-link" });
-  const look = async () => {
-    looking.textContent = "Annex is checking…";
+  let pending = null;
+  const refresh = h("button", { class: "button check-refresh", type: "button", hidden: true, text: "Statuses changed · Refresh", onclick: () => pending && apply(pending) });
+  const say = () => {
+    const seen = Object.keys(run.seen || {}).length;
+    looking.textContent = pending ? "Annex has new statuses. Refresh to see them."
+      : run.target ? "Annex checked " + seen + (seen === 1 ? " step" : " steps") + " for " + run.target + " " + ago(run.checked) + "."
+      : run.checked ? "" : "Annex is checking…";
+  };
+  const apply = (r) => {
+    pending = null; refresh.hidden = true;
+    for (const [step, at] of Object.entries(r.done)) if (!run.done[step]) { run.done[step] = at; autos.get(step)?.tick(); }
+    run.seen = r.checks; run.target = r.target; run.checked = r.at;
+    for (const [step, a] of autos) a.show(r.checks[step]);
+    tally();
+    if (!touched) focus();
+    say();
+    linker(r.target);
+  };
+  const same = (checks) => JSON.stringify(Object.keys(checks).sort().map((k) => [k, checks[k].ok, checks[k].note]));
+  // asked: you pressed Check again (or changed what it checks), so show the answer at once
+  const look = async (asked) => {
+    if (asked === true) looking.textContent = "Annex is checking…";
     try {
       const r = await fetchJson("checklists/" + id + "/check");
-      for (const [step, at] of Object.entries(r.done)) if (!run.done[step]) { run.done[step] = at; autos.get(step)?.tick(); }
-      run.seen = r.checks; run.target = r.target;
-      for (const [step, a] of autos) a.show(r.checks[step]);
-      tally();
-      if (!touched) focus();
-      const seen = Object.keys(r.checks).length;
-      looking.textContent = r.target ? "Annex checked " + seen + (seen === 1 ? " step" : " steps") + " for " + r.target + " just now." : "";
-      linker(r.target);
+      const changed = same(r.checks) !== same(run.seen || {}) || r.target !== run.target || Object.keys(r.done).some((step) => !run.done[step]);
+      if (asked === true || !run.checked || !changed) return apply(r);
+      pending = r; refresh.hidden = false; say();
     } catch (err) { looking.textContent = "Annex couldn't check just now: " + err.message; }
   };
   const linker = async (target) => {
-    const save = async (value) => { try { await send("checklists/" + id, { link: value }); run.link = value; look(); } catch (err) { alert(err.message); } };
+    const save = async (value) => { try { await send("checklists/" + id, { link: value }); run.link = value; look(true); } catch (err) { alert(err.message); } };
     if (list.id === "new-website") {
       const input = h("input", { value: run.link || (target ? "" : ""), placeholder: target || "example.com", "aria-label": "Domain" });
       link.replaceChildren(h("span", { class: "small", text: target ? "Checking the domain " + target + ". A different domain?" : "Which domain should Annex check?" }), input,
@@ -903,6 +920,9 @@ function checklistView(d, id) {
       link.replaceChildren(h("span", { class: "small", text: target ? "Checking the project in Clients:" : "Link their project in Clients so Annex can check steps:" }), pick);
     }
   };
+  for (const [step, a] of autos) a.show((run.seen || {})[step]);
+  say();
+  linker(run.target);
   look();
   return [back,
     h("div", { class: "intro" }, h("div", {}, h("span", { class: "eyebrow", text: list.title }), title, h("p", { text: list.about })),
@@ -912,7 +932,7 @@ function checklistView(d, id) {
           await send("checklists/" + id, {}, "DELETE"); location.hash = "#guides";
         } }))),
     h("div", { class: "panel check-progress" }, h("div", { class: "row" }, h("strong", { class: "grow", text: "Progress" }), count), bar,
-      h("div", { class: "row" }, h("span", { class: "grow" }, looking), h("button", { class: "button secondary", type: "button", text: "Check again", onclick: look }),
+      h("div", { class: "row" }, h("span", { class: "grow" }, looking), refresh, h("button", { class: "button secondary", type: "button", text: "Check again", onclick: () => look(true) }),
         copyForAi(list, run, null)), link),
     view];
 }
