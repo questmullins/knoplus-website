@@ -52,3 +52,14 @@ export async function search(env, from, to) {
     })),
   };
 }
+
+// Only which properties the service account can read, for the checklists' Search Console step.
+export async function searchSites(env) {
+  let account;
+  try { account = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT || "null"); } catch { account = null; }
+  if (!account || !account.client_email) return null;
+  const base = env.fakeBase ? env.fakeBase + "/google" : "";
+  const listed = await call((base || "https://www.googleapis.com") + "/webmasters/v3/sites", { headers: { Authorization: "Bearer " + (await accessToken(account, base)) } });
+  if (!listed.ok) return null;
+  return { email: account.client_email, sites: (listed.said.siteEntry || []).filter((s) => s.permissionLevel !== "siteUnverifiedUser").map((s) => s.siteUrl) };
+}

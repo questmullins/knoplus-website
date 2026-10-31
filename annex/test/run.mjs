@@ -197,6 +197,35 @@ check("a checklist renames", (await api("checklists/" + started.id, { name: "ros
 run1 = (await api("guides")).body.runs.find((r) => r.id === started.id);
 check("untick and rename kept", Object.keys(run1.done).join() === "buy" && run1.name === "rosewave.art site");
 check("a checklist deletes", (await api("checklists/" + started.id, {}, "DELETE")).status === 200 && (await api("guides")).body.runs.length === 0);
+
+// Annex checks steps itself: Cloudflare, the site, mail, Search Console (the stand-ins in fakes.mjs), and Clients
+const siteRun = (await api("checklists", { list: "new-website", name: "kno.plus" })).body.id;
+let looked = (await api("checklists/" + siteRun + "/check")).body;
+check("a live domain: in Cloudflare, Active, loads with www forwarding, mail and Search Console set", looked.target === "kno.plus"
+  && ["add-zone", "nameservers", "active", "annex", "visit", "email", "search-console"].every((s) => looked.checks[s].ok && looked.done[s]));
+check("ticks Annex makes are kept", Object.keys((await api("guides")).body.runs.find((r) => r.id === siteRun).done).length === 7);
+check("a step Annex can't see stays as it is", !looked.checks.buy && !looked.done.buy);
+check("a domain that isn't a domain is refused", (await api("checklists/" + siteRun, { link: "not a domain" })).status === 400);
+check("another domain linked", (await api("checklists/" + siteRun, { link: "https://www.new-site.art/" })).status === 200);
+looked = (await api("checklists/" + siteRun + "/check")).body;
+check("a domain waiting on nameservers says which ones", looked.target === "new-site.art" && looked.checks["add-zone"].ok && !looked.checks.active.ok
+  && /ada\.ns\.cloudflare\.com/.test(looked.checks.nameservers.note) && !looked.checks.visit.ok && !looked.checks.email.ok && !looked.checks["search-console"].ok);
+check("earlier ticks stay when a check later fails", looked.done.active && looked.done.visit);
+const unknown = (await api("checklists", { list: "new-website", name: "nowhere.example" })).body.id;
+check("a domain Cloudflare doesn't have", (await api("checklists/" + unknown + "/check")).body.checks["add-zone"].ok === false);
+await api("checklists/" + siteRun, {}, "DELETE"); await api("checklists/" + unknown, {}, "DELETE");
+
+const customer = (await api("checklists", { list: "new-customer", name: "Nobody yet" })).body.id;
+check("a customer with no matching project: nothing checked", Object.keys((await api("checklists/" + customer + "/check")).body.checks).length === 0);
+d1(`INSERT OR REPLACE INTO projects (id, name, trial_path, domain, status) VALUES ('${run}-shop', 'Check Shop', '/trials/check-shop/', 'example-client.com', 'Ongoing')`);
+check("a customer linked to their project", (await api("checklists/" + customer, { link: run + "-shop" })).status === 200);
+looked = (await api("checklists/" + customer + "/check")).body;
+check("project and preview found; no client, no updates, not live", looked.checks.project.ok && looked.checks.preview.ok && !looked.checks.invite.ok && !looked.checks["signed-in"].ok && !looked.checks.update.ok && !looked.checks.live.ok && looked.checks.website.ok);
+d1(`INSERT INTO grants (user_id, project_id) VALUES ('${run}-client', '${run}-shop'); INSERT INTO updates (id, project_id, title, body, created) VALUES ('${run}-u', '${run}-shop', 'Preview ready', 'Have a look', ${Date.now()}); UPDATE projects SET status = 'Live' WHERE id = '${run}-shop'`);
+looked = (await api("checklists/" + customer + "/check")).body;
+check("client invited and signed in, update posted, live", ["invite", "signed-in", "update", "final-payment", "live"].every((s) => looked.checks[s].ok && looked.done[s]) && !looked.checks.done.ok);
+await api("checklists/" + customer, {}, "DELETE");
+d1(`DELETE FROM grants WHERE project_id = '${run}-shop'; DELETE FROM updates WHERE project_id = '${run}-shop'; DELETE FROM projects WHERE id = '${run}-shop'`);
 cookie = client;
 check("a client can't see the workspace or the guides", (await api("overview")).status === 403 && (await api("websites")).status === 403 && (await api("assets")).status === 403 && (await api("guides")).status === 403);
 check("a client can't manage clients", (await api("clients")).status === 403 && (await api("clients/reset", { userId: "x" })).status === 403);
