@@ -888,7 +888,7 @@ function checklistView(d, id) {
       h("h2", { class: "section", text: (n + 1) + ". " + section.title }), h("span", { class: "small num" }), h("span", { class: "nav-plus", "aria-hidden": "true" }));
     const fold = slider(h("div", { class: "check-steps" }, section.steps.map((x) => checkStep(list, run, x, tally, autos, finished))), head);
     folds.push(fold);
-    return h("section", { class: "check-section", "data-steps": section.steps.map((x) => x.id).join(",") }, head, fold.el);
+    return h("section", { class: "panel check-section", "data-steps": section.steps.map((x) => x.id).join(",") }, head, fold.el);
   }));
   tally();
   focus();
