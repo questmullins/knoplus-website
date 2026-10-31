@@ -200,7 +200,8 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       if (!window.matchMedia("(max-width: 760px)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       mobileSections.current.forEach(section => {
         const progress = (section.getBoundingClientRect().top - window.innerHeight / 2) / window.innerHeight;
-        section.style.setProperty("--parallax-y", `${Math.max(-34, Math.min(34, progress * -42))}px`);
+        // Set on the photo layer, not the section: a change on the section restyles and repaints the title every frame.
+        section.querySelector<HTMLElement>(`.${s.background}`)?.style.setProperty("--parallax-y", `${Math.max(-34, Math.min(34, progress * -42))}px`);
       });
     };
     const scroll = () => { if (!frame) frame = requestAnimationFrame(update); };
