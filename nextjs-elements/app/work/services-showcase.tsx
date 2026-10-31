@@ -237,9 +237,10 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     const Heading = mobile && index > 0 ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
     return <div className={`copy ${s.copy}`} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}><div className={`copy-anchor ${s.anchor}`}>
+      {/* The eyebrow and title fade and slide with the rest of the copy, so a section changes as one piece. */}
+      <div className={s.changingDetails}>
       <div className={`eyebrow ${s.eyebrow}`}>{item.label}</div>
       <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>
-      <div className={s.changingDetails}>
       {model.project && <h2 className={s.paneTitle}>{item.titleText || item.name}</h2>}
       <p className={s.description}>{item.description}</p>
       {item.platform === "android" && <StoreBadges />}

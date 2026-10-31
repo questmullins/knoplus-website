@@ -116,7 +116,8 @@
 .shell .copy{animation:none}
 .shell .eyebrow{min-height:36px;margin-bottom:24px}
 .shell .title{min-height:1.9em;display:flex;align-items:flex-start}
-.changingDetails{width:100%;transition:opacity .35s ease,transform .35s ease}
+/* will-change keeps the copy on its own layer, so the title text is not re-drawn with different spacing when a slide ends. */
+.changingDetails{width:100%;transition:opacity .35s ease,transform .35s ease;will-change:opacity,transform}
 .fading .changingDetails{opacity:0;transform:translateX(-4px)}
 .paneTitle{font:400 clamp(22px,2.1vw,32px)/1.2 var(--font-display);color:color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white));margin-top:12px}
 .details{border-top:var(--stroke) solid var(--line);margin-top:40px;padding-top:25px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px}
@@ -143,6 +144,7 @@
 .shell .anchor { align-items:center; text-align:center; }
 .shell .title { width:100%; justify-content:center; align-items:center; min-height:1.9em; }
 .shell .eyebrow { text-align:center; font-size:12px; }
+.shell .eyebrow, .shell .title { margin-left:auto; margin-right:auto; }
 .shell .description { font-size:clamp(18px,1.4vw,21px); line-height:1.65; max-width:640px; margin:24px auto 0; }
 .shell .actions, .shell .storeBadges { justify-content:center; }
 .shell .details { text-align:left; max-width:680px; margin-left:auto; margin-right:auto; }
