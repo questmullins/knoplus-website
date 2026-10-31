@@ -260,3 +260,12 @@
 .swap s { font: 300 20px/1.1 var(--font-display); color: var(--old); text-decoration-thickness: 2px; }
 .swap b { font: 300 30px/1.1 var(--font-display); letter-spacing: -.02em; color: var(--now); }
 .chip { justify-self: start; font-size: 12px; font-weight: 500; padding: 3px 8px; border: var(--stroke) solid var(--now); color: var(--now); }
+
+/* Site menu inside the phone + panel. Hidden on desktop, where the stage has its own Menu button. */
+.siteLinks{display:none}
+@media(max-width:760px){
+ .siteLinks{display:block;padding-bottom:22px;margin-bottom:26px;border-bottom:var(--stroke) solid var(--line)}
+ .siteLinks ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
+ .siteLinks a,.siteLinks button{display:flex;align-items:center;min-height:48px;width:100%;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:20px;font-weight:300;line-height:1.2;color:rgb(var(--ink-rgb) / 0.82);cursor:pointer}
+ .siteLinks a:hover,.siteLinks button:hover,.siteLinks a:focus-visible,.siteLinks button:focus-visible{color:var(--white);outline:none;text-decoration:underline;text-underline-offset:6px;text-decoration-color:rgb(var(--ink-rgb) / 0.4)}
+}
