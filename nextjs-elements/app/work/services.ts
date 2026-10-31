@@ -96,8 +96,7 @@ export const services: ServiceItem[] = [
       {
         id: "rosewave", platform: "android", name: "RoseWave", label: "App Services / RoseWave",
         description: "Find a photograph you connect with. Make it your wallpaper. Enjoy it every time you pick up your phone.",
-        image: rose, href: "/work/rosewave", action: "Explore RoseWave",
-        related: { href: "/store", label: "Gallery & print shop" },
+        image: rose, href: "https://rosewave.art", action: "Explore RoseWave",
 
         highlights: ["Original photography", "Wallpaper collections", "Make it yours"],
       },

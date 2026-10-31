@@ -10,16 +10,19 @@ const MAX_BODY_BYTES = 24 * 1024;
 const OFFERINGS = offeringGroups.flatMap(group => group.options.map(option => option.label));
 const TEMPLATE_OFFERING = "Website from a template";
 
+// RoseWave has its own site now: its project page and the print store (and the older gallery addresses) go there.
+const ROSEWAVE = "https://rosewave.art/";
+const rosewavePage = /^\/(?:store(?:\/.*)?|work\/rosewave|revamp\/rosewave(?:\/horizontal|\/gallery(?:\/.*)?)?)$/;
+
 // Pages that moved when the project showcase became the home page (assets under /revamp/ stay where they are).
 function movedTo(path) {
   if (/\.[a-z0-9]+$/i.test(path)) return "";
   const p = path.replace(/\/+$/, "") || "/";
+  if (rosewavePage.test(p)) return ROSEWAVE;
   if (p === "/revamp" || p === "/work") return "/";
   if (p === "/manage") return "/annex/";
   if (p === "/pricing") return "/websites";
   if (p === "/about" || p === "/process") return "/";
-  const gallery = /^\/revamp\/rosewave\/gallery(\/.*)?$/.exec(p);
-  if (gallery) return "/store" + (gallery[1] || "");
   const project = /^\/revamp\/([a-z0-9-]+)(?:\/horizontal)?$/.exec(p);
   return project ? "/work/" + project[1] : "";
 }
@@ -37,6 +40,7 @@ export default {
     const clientResponse = await handleClients(request, env);
     if (clientResponse) return clientResponse;
     const moved = movedTo(url.pathname);
+    if (moved === ROSEWAVE) return Response.redirect(ROSEWAVE, 301);
     if (moved) return Response.redirect(url.origin + moved + url.search, 301);
 
     if (url.pathname === "/update-config" || url.pathname === "/update-config/") {
