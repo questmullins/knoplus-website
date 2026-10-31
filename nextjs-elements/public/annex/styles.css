@@ -413,17 +413,16 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 .check-start label { display: grid; gap: 6px; }
 .check-bar { height: 6px; background: rgb(var(--ink-rgb) / .1); overflow: hidden; }
 .check-bar i { display: block; height: 100%; background: var(--mint); transition: width .3s; }
-.check-progress { display: grid; gap: 10px; margin-bottom: 22px; }
-.check-list { display: grid; }
-.check-section { border-top: var(--stroke) solid var(--line); }
-.check-section:last-child { border-bottom: var(--stroke) solid var(--line); }
-.check-section-head { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 10px 4px; background: transparent; border: 0; color: var(--paper); text-align: left; cursor: pointer; }
+.check-progress { display: grid; gap: 10px; margin-bottom: 16px; }
+.check-list { display: grid; gap: 16px; }
+.check-section.panel { padding: 0 20px; }
+.check-section-head { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 12px 0; background: transparent; border: 0; color: var(--paper); text-align: left; cursor: pointer; }
 .check-section-head h2 { flex: 1; margin: 0; }
-.check-section-head .nav-plus { flex: none; margin: 0 13px; color: rgb(var(--ink-rgb) / 0.82); }
+.check-section-head .nav-plus { flex: none; margin: 0 17px 0 13px; color: rgb(var(--ink-rgb) / 0.82); }
 .check-section-head:hover h2, .check-section-head:hover .nav-plus, .check-section-head[aria-expanded="true"] .nav-plus { color: var(--mint); }
-.check-steps { padding-bottom: 18px; }
+.check-steps { padding-bottom: 4px; }
 .check-step { border-top: var(--stroke) solid var(--line); }
-.check-steps .check-step:last-child { border-bottom: var(--stroke) solid var(--line); }
+.check-section-head h2.section { font-size: 16px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--paper); }
 .slide { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s ease; }
 .slide.open { grid-template-rows: 1fr; }
 .slide-in { min-height: 0; overflow: hidden; opacity: 0; transition: opacity .24s ease; }
@@ -441,7 +440,7 @@ label.ad-tick input { width: 16px; height: 16px; min-height: 0; margin: 0; paddi
 .check-help > p:first-child { margin-top: 0; color: var(--paper); }
 .check-help .go { margin-top: 14px; gap: 10px; }
 .check-help .go .button { white-space: normal; text-align: center; }
-@media (max-width: 760px) { .check-help { padding-left: 4px; } .check-help .go .button { flex: 1 1 100%; } .check-label { font-size: 15px; } }
+@media (max-width: 760px) { .check-section.panel { padding: 0 14px; } .check-help { padding-left: 4px; } .check-help .go .button { flex: 1 1 100%; } .check-label { font-size: 15px; } }
 .check-progress .check-link { gap: 10px; }
 .check-progress .check-link > span { flex: 1 1 100%; }
 .check-progress .check-link input, .check-progress .check-link select { flex: 1 1 220px; background: var(--field); border: var(--stroke) solid var(--line); padding: 8px 12px; min-height: 40px; }
