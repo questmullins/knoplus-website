@@ -28,7 +28,7 @@ const money = (c, sign) => {
 const pct = (x) => (x === null || x === undefined ? "–" : (x * 100).toFixed(Math.abs(x) < 0.1 ? 1 : 0) + "%");
 const plural = (n, one, many = one + "s") => n + " " + (n === 1 ? one : many);
 // Workspace routes are about everything; the rest are about the open asset's sales account.
-const WORKSPACE = /^(me|site|websites|search|assets|clients|guides|overview|setup)\b/;
+const WORKSPACE = /^(me|site|websites|search|assets|clients|guides|checklists|overview|setup)\b/;
 const scoped = (path) => (state.account && !WORKSPACE.test(path) ? path + (path.includes("?") ? "&" : "?") + "account=" + encodeURIComponent(state.account) : path);
 // Every answer is kept in memory, so a page you've seen (or one loaded ahead in the background) shows at once and then
 // refreshes quietly. Any change you make clears it, so nothing stale outlives an edit.
@@ -220,8 +220,8 @@ async function load() {
   // what this page needs, read through `ask`: from memory (peek) or from the server (get)
   const gather = async (ask) => {
     if (page === "guides") {
-      const [list, one] = await Promise.all([ask("guides"), guide && !["new", "import"].includes(guide) ? Promise.resolve().then(() => ask("guides/" + encodeURIComponent(guide))).catch((e) => { if (e === MISS) throw e; return null; }) : null]);
-      return { guides: list.guides, sops: list.sops || [], one };
+      const [list, one] = await Promise.all([ask("guides"), guide && !["new", "import"].includes(guide) && !guide.startsWith("check:") ? Promise.resolve().then(() => ask("guides/" + encodeURIComponent(guide))).catch((e) => { if (e === MISS) throw e; return null; }) : null]);
+      return { guides: list.guides, sops: list.sops || [], checklists: list.checklists || [], runs: list.runs || [], one };
     }
     if (page === "websites") {
       const days = state.days;
@@ -754,6 +754,7 @@ function guidesView(d) {
   if (making) return [intro("Your guides", "A new guide.", null), guideForm(null, reload)];
   if (importing) return [intro("Your guides", "Import guides.", null), importForm()];
 
+  if (state.guide && state.guide.startsWith("check:")) return checklistView(d, state.guide.slice(6));
   if (state.guide) {
     const g = d.one;
     const back = h("a", { class: "back", href: "#guides", text: "← All guides" });
@@ -789,7 +790,110 @@ function guidesView(d) {
   };
   search.addEventListener("input", fill);
   fill();
-  return [intro("Your guides", "What do you need to do?", "Pick a question for the steps and a button that takes you there. Only your owner login can see this page."), search, results];
+  return [intro("Your guides", "What do you need to do?", "Pick a question for the steps and a button that takes you there. Only your owner login can see this page."), checklistCards(d), search, results];
+}
+
+// ---------- Checklists: A to Z for a new customer or a new website, one copy per customer or site ----------
+const stepCount = (list) => list.sections.reduce((n, s) => n + s.steps.length, 0);
+const doneCount = (list, run) => list.sections.reduce((n, s) => n + s.steps.filter((x) => run.done[x.id]).length, 0);
+// the width is set through .style, not a style attribute, which Annex's content policy blocks
+const progress = (done, all) => {
+  const fill = h("i");
+  fill.style.width = (all ? (done / all) * 100 : 0) + "%";
+  return h("div", { class: "check-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(all), "aria-valuenow": String(done) }, fill);
+};
+
+function checklistCards(d) {
+  if (!d.checklists.length) return null;
+  return h("section", { class: "sop-group checklists" }, h("h2", { class: "section", text: "A-to-Z checklists" }),
+    h("div", { class: "check-cards" }, d.checklists.map((list) => {
+      const error = h("p", { class: "error", role: "alert" });
+      const name = h("input", { name: "name", required: true, maxlength: "80", placeholder: list.placeholder, "aria-label": list.name });
+      const runs = d.runs.filter((r) => r.list === list.id);
+      return h("article", { class: "panel check-card" },
+        h("h2", { text: list.title }), h("p", { class: "small", text: list.about }),
+        runs.length ? h("nav", { class: "check-runs", "aria-label": list.title }, runs.map((r) => {
+          const done = doneCount(list, r), all = stepCount(list);
+          return h("a", { href: "#guides/" + encodeURIComponent("check:" + r.id) },
+            h("span", { class: "row" }, h("strong", { class: "grow", text: r.name }), h("span", { class: "small num", text: done === all ? "All done" : done + " of " + all })),
+            progress(done, all));
+        })) : null,
+        h("form", { class: "row check-start", onsubmit: async (e) => {
+          e.preventDefault();
+          try { const r = await send("checklists", { list: list.id, name: name.value }); location.hash = "#guides/" + encodeURIComponent("check:" + r.id); }
+          catch (err) { error.textContent = err.message; }
+        } }, h("label", { class: "grow" }, h("span", { class: "small", text: list.name }), name), h("button", { class: "button", type: "submit", text: runs.length ? "Start another" : "Start" })),
+        error);
+    })));
+}
+
+function checklistView(d, id) {
+  const back = h("a", { class: "back", href: "#guides", text: "← All guides" });
+  const run = d.runs.find((r) => r.id === id), list = run && d.checklists.find((c) => c.id === run.list);
+  if (!run || !list) return [back, h("div", { class: "panel" }, h("p", { text: "This checklist was deleted, or never existed." }))];
+  const all = stepCount(list);
+  const count = h("span", { class: "small num" }), bar = h("div", { class: "check-bar" }, h("i"));
+  const tally = () => {
+    const done = doneCount(list, run);
+    count.textContent = done === all ? "All " + all + " done" : done + " of " + all + " done";
+    bar.firstChild.style.width = (done / all) * 100 + "%";
+    for (const s of view.querySelectorAll(".check-section")) s.querySelector(".num").textContent = s.dataset.steps.split(",").filter((x) => run.done[x]).length + " of " + s.dataset.steps.split(",").length;
+  };
+  const rename = async () => {
+    const name = prompt("Rename this checklist", run.name);
+    if (!name || name.trim() === run.name) return;
+    try { await send("checklists/" + id, { name }); run.name = name.trim(); title.textContent = run.name; } catch (err) { alert(err.message); }
+  };
+  const title = h("h1", { text: run.name });
+  const view = h("div", { class: "check-list" }, list.sections.map((section, n) => h("section", { class: "check-section", "data-steps": section.steps.map((x) => x.id).join(",") },
+    h("div", { class: "toolbar" }, h("h2", { class: "section", text: (n + 1) + ". " + section.title }), h("span", { class: "small num" })),
+    section.steps.map((x) => checkStep(list, run, x, tally)))));
+  tally();
+  return [back,
+    h("div", { class: "intro" }, h("div", {}, h("span", { class: "eyebrow", text: list.title }), title, h("p", { text: list.about })),
+      h("div", { class: "row" }, h("button", { class: "button secondary", type: "button", text: "Rename", onclick: rename }),
+        h("button", { class: "button secondary", type: "button", text: "Delete", onclick: async () => {
+          if (!confirm("Delete the checklist for \"" + run.name + "\"? Its ticks can't be brought back.")) return;
+          await send("checklists/" + id, {}, "DELETE"); location.hash = "#guides";
+        } }))),
+    h("div", { class: "panel check-progress" }, h("div", { class: "row" }, h("strong", { class: "grow", text: "Progress" }), count), bar),
+    view];
+}
+
+// One step: tick it off, or open Help for what usually goes wrong, buttons that go there, and a question to ask Claude.
+function checkStep(list, run, x, tally) {
+  const when = h("span", { class: "small" });
+  const box = h("input", { type: "checkbox", checked: !!run.done[x.id] || null, onchange: async () => {
+    const on = box.checked;
+    if (on) run.done[x.id] = new Date().toISOString(); else delete run.done[x.id];
+    mark(); tally();
+    try { await send("checklists/" + run.id, { step: x.id, done: on }); }
+    catch (err) { box.checked = !on; if (on) delete run.done[x.id]; else run.done[x.id] = new Date().toISOString(); mark(); tally(); alert(err.message); }
+  } });
+  const item = h("div", { class: "check-step" });
+  const mark = () => {
+    item.classList.toggle("done", !!run.done[x.id]);
+    when.textContent = run.done[x.id] ? "Done " + new Date(run.done[x.id]).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+  };
+  const copied = h("span", { class: "small", role: "status" });
+  const askClaude = async () => {
+    const text = "I'm working through the \"" + list.title + "\" checklist in Annex for " + run.name + ", and I'm stuck on this step: \"" + x.text + "\".\n\nHere's what I see: ";
+    try { await navigator.clipboard.writeText(text); copied.textContent = "Copied. Paste it to Claude and add what you see."; }
+    catch { prompt("Copy this and paste it to Claude:", text); }
+  };
+  const help = x.help;
+  const panel = h("div", { class: "check-help prose", hidden: true },
+    h("p", {}, inline(help.answer)),
+    help.fix.length ? [h("h4", { text: "If it's stuck" }), h("ul", {}, help.fix.map((f) => h("li", {}, inline(f))))] : null,
+    h("div", { class: "row go" },
+      help.go.map((g, n) => h("a", { class: "button" + (n ? " secondary" : ""), href: g.href, target: /^https?:/.test(g.href) ? "_blank" : null, rel: /^https?:/.test(g.href) ? "noopener" : null }, g.label + (/^https?:/.test(g.href) ? " ↗" : " →"))),
+      h("button", { class: "button secondary", type: "button", text: "Still stuck? Copy a question for Claude", onclick: askClaude }), copied));
+  const toggle = h("button", { class: "check-help-button", type: "button", "aria-expanded": "false", text: "Help", onclick: () => {
+    panel.hidden = !panel.hidden; toggle.setAttribute("aria-expanded", String(!panel.hidden)); toggle.textContent = panel.hidden ? "Help" : "Close help";
+  } });
+  item.append(h("div", { class: "check-row" }, h("label", { class: "check-label" }, box, h("span", {}, h("span", { class: "check-text" }, inline(x.text)), when)), toggle), panel);
+  mark();
+  return item;
 }
 
 // ---------- Settings ----------
