@@ -35,8 +35,8 @@ const projects: Project[] = [
     description:
       "A photograph can become part of somewhere you spend time every day. RoseWave gives a photo you connect with that place on your phone.",
     theme: "rose",
-    href: "/work/rosewave",
-    toolHref: "/store",
+    href: "https://rosewave.art",
+    toolHref: "https://rosewave.art",
     toolLabel: "Explore the gallery & print shop",
     screenshot: "/revamp/apps/rosewave/main.webp",
   },

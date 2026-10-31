@@ -35,7 +35,7 @@ export const projectCatalog: ProjectPresentation[] = [
   ...[updateStory, rosewaveStory].map(story => ({
     name: story.name,
     slug: story.slug,
-    ...(story.slug === "rosewave" ? { relatedLink: { href: "/store", label: "Explore the gallery & print shop" } } : {}),
+    ...(story.slug === "rosewave" ? { relatedLink: { href: "https://rosewave.art", label: "Explore the gallery & print shop" } } : {}),
     action: { kind: "store" as const },
     panes: appPanes(story).map(pane => ({
       ...pane,
