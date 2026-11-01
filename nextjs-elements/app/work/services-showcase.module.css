@@ -241,7 +241,7 @@
 }
 
 /* Dark mode: Experience photos sit under a heavier overlay (0.6 instead of the site's 0.45). */
-:global(:root:not([data-scheme="light"])) :is(.stage, .mobilePanel)[data-experience] { --overlay: 0.6; }
+:global(:root:not([data-scheme="light"])) :is(.stage, .mobilePanel)[data-experience] { --overlay: 0.8; }
 
 /* Dark mode: full-ink copy over the photographs (the global p is 74% ink, too faint on bright photos). */
 :global(:root:not([data-scheme="light"])) .description, :global(:root:not([data-scheme="light"])) .details p, :global(:root:not([data-scheme="light"])) .note { color: var(--white); }
