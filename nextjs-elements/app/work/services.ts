@@ -128,7 +128,7 @@ export const services: ServiceItem[] = [
       {
         id: "websites", name: "Websites", label: "Work with me / Websites",
         title: "Modern websites.<br />Some character.<br /><em>Made yours.</em>",
-        description: "I enjoy making websites, and I want you to feel excited about yours. Start with a template, then shape the photographs, words, and details into something that feels like your business.",
+        description: "Start with a template, then make the photographs, words, and details feel like your business.",
         image: "url('/revamp/banners/websites.webp')", highlights: ["Templates", "Customisation", "Practical turnaround"], children: websiteItems,
         related: { href: "/work/websites", label: "About website building" },
       },
