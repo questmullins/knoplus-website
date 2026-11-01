@@ -123,7 +123,7 @@ export const services: ServiceItem[] = [
     id: "work-with-me", name: "Work with me", label: "Work with me",
     title: "Your idea.<br />Built properly.<br /><em>Ready to use.</em>",
     description: "A website for your business, a tool for your team, or a process that runs itself. Here’s what I make for clients, work I’ve finished, and how a project goes.",
-    image: "url('/revamp/banners/web-services.webp')", highlights: ["Websites", "Custom tools & automation", "Client work", "How it works"],
+    image: "url('/revamp/banners/web-services.webp')", highlights: ["Websites", "Custom tools", "Client work", "How it works"],
     children: [
       {
         id: "websites", name: "Websites", label: "Work with me / Websites",
@@ -133,7 +133,7 @@ export const services: ServiceItem[] = [
         related: { href: "/work/websites", label: "About website building" },
       },
       {
-        id: "process-automation", name: "Custom tools & automation", label: "Work with me / Custom tools & automation",
+        id: "process-automation", name: "Custom tools", label: "Work with me / Custom tools & automation",
         description: "The slow, repetitive parts of a business are usually where the time goes. I find them and build the tools that take them over: automations, dashboards, forms, and full applications.",
         image: "url('/revamp/banners/process.webp')", highlights: ["Process automation", "Custom software", "Dashboards & reporting", "Systems integration"],
         highlightsLabel: "What I build", related: { href: "/#experience", label: "See the results" },

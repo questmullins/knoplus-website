@@ -221,15 +221,19 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     return () => { window.removeEventListener("scroll", scroll); cancelAnimationFrame(frame); };
   }, []);
 
+  // The menu lists only places you can go: the sections and their windows. Projects inside a group are reached from
+  // the group window's buttons, so they are not listed here (a project's own page still lists its panes).
   function rows(items: ServiceItem[], depth = 0) {
     const ancestors = model.entries.find(e => e.item.id === selectedId)?.ancestors || [];
-    return <ul className={s.rows}>{items.map(item => <li key={item.id}>
-      <button type="button" className={`template-btn ${s.row} ${expanded.has(item.id) && item.children ? s.open : ""} ${selectedId === item.id ? s.current : ""} ${ancestors.includes(item.id) ? s.inPath : ""}`}
-        style={{ "--depth": depth, "--item-accent": serviceAccent(item) } as CSSProperties} data-depth={depth} aria-expanded={item.children ? expanded.has(item.id) : undefined}
-        aria-controls={item.children ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, true)}>
-        <span>{item.name}</span>{item.children && <span className={`plus ${expanded.has(item.id) ? "is-open" : ""}`} aria-hidden="true" />}
+    const listed = (item: ServiceItem) => !!model.project || model.panels.some(p => p.id === item.id) || !!item.children?.some(child => model.panels.some(p => p.id === child.id));
+    const folder = (item: ServiceItem) => !!item.children?.some(listed);
+    return <ul className={s.rows}>{items.filter(item => depth === 0 || listed(item)).map(item => <li key={item.id}>
+      <button type="button" className={`template-btn ${s.row} ${expanded.has(item.id) && folder(item) ? s.open : ""} ${selectedId === item.id ? s.current : ""} ${ancestors.includes(item.id) ? s.inPath : ""}`}
+        style={{ "--depth": depth, "--item-accent": serviceAccent(item) } as CSSProperties} data-depth={depth} aria-expanded={folder(item) ? expanded.has(item.id) : undefined}
+        aria-controls={folder(item) ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, folder(item))}>
+        <span>{item.name}</span>{folder(item) && <span className={`plus ${expanded.has(item.id) ? "is-open" : ""}`} aria-hidden="true" />}
       </button>
-      {item.children && <div id={`folder-${item.id}`} className={`${s.folder} ${expanded.has(item.id) ? s.folderOpen : ""}`} inert={!expanded.has(item.id)} aria-hidden={!expanded.has(item.id)}><div className={s.folderInner}>{rows(item.children, depth + 1)}</div></div>}
+      {folder(item) && <div id={`folder-${item.id}`} className={`${s.folder} ${expanded.has(item.id) ? s.folderOpen : ""}`} inert={!expanded.has(item.id)} aria-hidden={!expanded.has(item.id)}><div className={s.folderInner}>{rows(item.children!, depth + 1)}</div></div>}
     </li>)}</ul>;
   }
 
@@ -260,10 +264,9 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
 
   function banners(item: ServiceItem) {
     return <ul className={s.banners}>{item.children!.map(child => <li key={child.id}>
-      <button type="button" className={s.banner} onClick={() => openProject(child)} style={{ "--bg": child.image, "--item-accent": serviceAccent(child) } as CSSProperties}>
+      <button type="button" className={s.banner} onClick={() => openProject(child)} style={{ "--item-accent": serviceAccent(child) } as CSSProperties}>
         <span className={s.bannerName}>{child.name}</span>
         {tag(child) && <span className={s.bannerTag}>{tag(child)}</span>}
-        <span className={s.bannerArrow} aria-hidden="true">→</span>
       </button>
     </li>)}</ul>;
   }
