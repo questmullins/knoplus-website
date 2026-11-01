@@ -18,6 +18,8 @@ function movedTo(path) {
   if (p === "/manage") return "/annex/";
   if (p === "/pricing") return "/websites";
   if (p === "/about" || p === "/process") return "/";
+  // The three parts of the home page have their own short addresses.
+  if (p === "/experience" || p === "/projects" || p === "/work-with-me") return "/#" + p.slice(1);
   const gallery = /^\/revamp\/rosewave\/gallery(\/.*)?$/.exec(p);
   if (gallery) return "/store" + (gallery[1] || "");
   const project = /^\/revamp\/([a-z0-9-]+)(?:\/horizontal)?$/.exec(p);

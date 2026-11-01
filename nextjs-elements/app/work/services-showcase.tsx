@@ -16,11 +16,10 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const model = useMemo(() => buildShowcase(projectSlug), [projectSlug]);
   const [selectedId, setSelectedId] = useState(model.overview.id);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(projectSlug
-    ? model.entries.find(e => e.item.id === model.overview.id)?.ancestors : ["web-services"]));
+    ? model.entries.find(e => e.item.id === model.overview.id)?.ancestors : []));
   const [displayId, setDisplayId] = useState(model.overview.id);
   const [crossfade, setCrossfade] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [contact, setContact] = useState<{ topic: string; template?: string } | null>(null);
   const stage = useRef<HTMLElement>(null);
@@ -49,10 +48,6 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
 
   const commit = useCallback((item: ServiceItem, history: "push" | "replace" | "none" = "push", scroll = true, closeMenu = true, toggle = false) => {
     setSelectedId(item.id);
-    if (scroll) {
-      const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
-      setMobileSection(item.id === "work" ? null : ancestors[0] || item.id);
-    }
     setExpanded(value => {
       const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
       const path = new Set([...ancestors, item.id]);
@@ -73,11 +68,13 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       mobileLock.current = performance.now() + 1600;
       window.clearTimeout(mobileScrollTimer.current);
       mobileScrollTimer.current = window.setTimeout(() => {
-        const target = mobileSections.current.get(item.id);
-        window.scrollTo({ top: target ? target.getBoundingClientRect().top + window.scrollY - 104 : 0, behavior: "instant" });
+        // A folder has no frame of its own on the phone, so it goes to the first frame inside it.
+        const first = model.entries.find(e => e.item.id === item.id || (e.ancestors.includes(item.id) && mobileSections.current.has(e.item.id)));
+        const target = mobileSections.current.get(item.id) || (first && mobileSections.current.get(first.item.id));
+        window.scrollTo({ top: target ? target.getBoundingClientRect().top + window.scrollY - 56 : 0, behavior: "instant" });
       }, 0);
     }
-    if (closeMenu && !item.children) {
+    if (closeMenu && (!item.children || scroll && window.matchMedia("(max-width: 760px)").matches && !toggle)) {
       setMobileOpen(false);
       if (scroll && window.matchMedia("(max-width: 760px)").matches) requestAnimationFrame(() => document.getElementById(`mobile-title-${item.id}`)?.focus({ preventScroll: true }));
     }
@@ -150,7 +147,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     }, { root: null, threshold: [.2, .45, .65, .85] });
     mobileSections.current.forEach(section => observer.observe(section));
     return () => observer.disconnect();
-  }, [commit, mobileOpen, model, mobileSection]);
+  }, [commit, mobileOpen, model]);
 
   useEffect(() => {
     document.body.classList.add("revamp-showcase");
@@ -241,22 +238,31 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       {/* The eyebrow and title fade and slide with the rest of the copy, so a section changes as one piece. */}
       <div className={s.changingDetails}>
       <div className={`eyebrow ${s.eyebrow}`}>{item.label}</div>
-      <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>
+      {item.doors && item.title ? <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={`${s.title} ${s.headlineTitle}`} dangerouslySetInnerHTML={{ __html: item.title }} />
+        : <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>}
       {model.project && <h2 className={s.paneTitle}>{item.titleText || item.name}</h2>}
       <p className={s.description}>{item.description}</p>
       {item.platform === "android" && <StoreBadges />}
       <div className={`actions template-actions ${s.actions}`}>
-        {item.href?.startsWith("mailto:") ? <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>{item.action || "Let’s talk"}</button>
+        {item.doors ? item.doors.map(door => {
+          const target = model.entries.find(e => e.item.id === door.id)?.item;
+          return target && <button key={door.id} className={`cta-button ${door.primary ? "explore-button" : "inquire-button"}`} type="button" onClick={() => select(target)}>{door.label}</button>;
+        })
+        : item.href?.startsWith("mailto:") ? <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>{item.action || "Let’s talk"}</button>
           : item.href ? <Link className="cta-button explore-button" href={item.href}>{item.action || "Explore"}</Link>
           : model.project ? next ? <button className="cta-button explore-button" onClick={() => commit(next)} type="button">Keep exploring</button> : <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>Let’s talk</button>
             : item.children?.length || item.id === "work" ? <button className="cta-button explore-button" type="button" onClick={() => {
               select(item.children?.[0] || model.navigation[0]);
               if (window.matchMedia("(max-width: 760px)").matches) setMobileOpen(false);
-            }}>{item.id === "work" ? "Explore Services" : item.id === "websites" ? "Explore Websites" : item.id === "experience" ? "Explore the work" : "Explore the folder"}</button>
+            }}>{item.id === "websites" ? "Explore websites" : item.id === "experience" ? "Explore the work" : item.id === "work-with-me" ? "See what I offer" : "Take a look"}</button>
               : <button className="cta-button explore-button" type="button" onClick={() => openContact(item)}>Let’s talk</button>}
         {item.related && <Link className="cta-button inquire-button" href={item.related.href}>{item.related.label}</Link>}
         {!!item.photos?.length && <button className="cta-button inquire-button" type="button" onClick={() => { commit(item, "none", false, false); screens.current?.showModal(); }}>View {item.platform ? "app screens" : "screens"}</button>}
         {item.template && <button className="cta-button inquire-button" type="button" onClick={() => openContact(item)}>Inquire</button>}
+        {item.hire && <button className="cta-button inquire-button" type="button" onClick={() => {
+          const hire = model.entries.find(e => e.item.id === "work-with-me")?.item;
+          if (hire) select(hire);
+        }}>Want something like this?</button>}
       </div>
       {statList(item)}
       {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
@@ -274,19 +280,6 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     </section>;
   }
 
-  const mobileCategory = model.navigation.find(item => item.id === mobileSection);
-  const mobileFeed = model.entries.filter(entry => !entry.item.children && entry.ancestors.includes(mobileSection || "")).map(entry => entry.item);
-
-  function mobileHome() {
-    return <div className={s.mobileHome}>
-      <div className={s.mobileIntro}><span>MADE BY KNOPLUS</span><h1>What brings<br />you here?</h1><p>Choose a section. Find something worth exploring.</p></div>
-      {model.navigation.map(item => <button key={item.id} type="button" className={s.sectionCard} style={{ "--bg":item.image } as CSSProperties} onClick={() => { commit(item); setMobileOpen(false); }}>
-        <span className={s.sectionCardLabel}>{item.id === "web-services" ? "WEBSITES & USEFUL TOOLS" : item.id === "experience" ? "WORK I’VE DONE" : "MADE FOR YOUR EVERYDAY"}</span>
-        <span className={s.sectionCardTitle}>{item.name}</span><span className={s.sectionCardDescription}>{item.children?.map(child=>child.name).join(" / ")}</span><span className={s.sectionCardArrow} aria-hidden="true">↗</span>
-      </button>)}
-    </div>;
-  }
-
   useEffect(() => () => window.clearTimeout(mobileScrollTimer.current), []);
 
   // "Choose This Template" on a website template returns here with ?contact=template.
@@ -298,14 +291,14 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     window.history.replaceState(null, "", window.location.pathname + window.location.hash);
   }, []);
 
-  const logo = <Link href="/#work" className="brand brand-logo-link" aria-label="Kno.plus services home">KNOPLUS</Link>;
+  const logo = <Link href="/#work" className="brand brand-logo-link" aria-label="Kno.plus home">KNOPLUS</Link>;
   return <>
     <div className={`app ${s.shell}`}>
       <a href="#service-stage" className={s.skip}>Skip to project preview</a>
       <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<SchemeToggle className={s.mobileScheme} /><button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Menu"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
       <aside inert={isMobile && !mobileOpen} className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
         <div className={`sidebar-brand ${s.desktopBrand}`}>{logo}</div>
-        <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Menu, services and projects">
+        <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Menu, experience, projects and work with me">
           {/* Phone only: the site menu sits above the services, since the desktop Menu button is hidden on phones. */}
           <div className={s.siteLinks}>
             <span className={`nav-label ${s.navLabel}`}>Menu</span>
@@ -316,9 +309,9 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
               <li><button type="button" onClick={() => { setMobileOpen(false); openContact(selected); }}>Contact Us</button></li>
             </ul>
           </div>
-          <Link className={`nav-label ${s.navLabel}`} href="/#work">Services</Link>{rows(model.navigation)}
+          <Link className={`nav-label ${s.navLabel}`} href="/#work">Explore</Link>{rows(model.navigation)}
         </nav>
-        <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><button type="button" onClick={() => openContact(selected)} className="cta-button">Let’s talk</button><Link href="/clients/" prefetch={false} className={s.clientLink}>Are we working with you?<br /><strong>Check here for updates ↗</strong></Link><Link href="/websites" className={s.mainSite}>Website collection ↗</Link></div>
+        <div className={`sidebar-note cta-note ${s.sidebarNote}`}><div className="cta-copy">Know More.<br />Know Better.<br />Knoplus.</div><button type="button" onClick={() => openContact(selected)} className="cta-button">Let’s talk</button><Link href="/clients/" prefetch={false} className={s.clientLink}>Already a client?<br /><strong>Client sign-in ↗</strong></Link></div>
       </aside>
       <main ref={stage} id="service-stage" tabIndex={0} className={`stage ${s.stage}`} data-theme={selected.theme || "service"} data-experience={selected.id.startsWith("experience") || undefined} inert={mobileOpen} onKeyDown={event => {
         if (window.matchMedia("(max-width: 760px)").matches || (event.target as Element).closest("button,a,input,select,textarea")) return;
@@ -330,13 +323,8 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <div className={`preview-bg ${s.background} ${s.desktopBackground}`} style={{ "--bg": displayed.image } as CSSProperties} />
         <div className={`preview-bg-next ${s.background} ${s.desktopBackground} ${crossfade ? "show" : ""}`} style={{ "--bg": selected.image } as CSSProperties} />
         <div ref={desktopContent} className={`content ${s.content} ${s.desktopContent} ${crossfade ? s.fading : ""}`}>{panelCopy(displayed)}</div>
-        <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Services and project previews"}>
-          {model.project ? model.mobilePanels.map((item,index) => mobilePanel(item,index)) : mobileCategory ? <>
-            <div className={s.feedBar}><button type="button" onClick={() => commit(model.overview)}>← All sections</button><span>{mobileCategory.name}</span></div>
-            <div className={s.feedIntro} ref={node => { if(node) mobileSections.current.set(mobileCategory.id,node); else mobileSections.current.delete(mobileCategory.id); }}><span>EXPLORE</span><h1>{mobileCategory.name}</h1><p>{mobileFeed.filter(item => !item.tools).length} projects. Scroll to take a look.</p>{statList(mobileCategory)}{mobileCategory.stats && <p className={s.note}>{mobileCategory.note}</p>}</div>
-            {mobileFeed.map((item,index)=>mobilePanel(item,index+1))}
-            <div className={s.feedEnd}><p>You’ve reached the end of {mobileCategory.name}.</p><button type="button" onClick={() => commit(model.overview)}>Explore another section ↗</button></div>
-          </> : mobileHome()}
+        <div className={s.mobileTrack} ref={mobileTrack} aria-label={model.project ? `${model.project.name} story` : "Experience, projects and work with me"}>
+          {model.mobilePanels.map((item,index) => mobilePanel(item,index))}
         </div>
         <div className={s.stageFooter}>
           <span className={s.scrollHint}>Scroll to explore</span>

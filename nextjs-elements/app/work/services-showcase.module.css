@@ -269,3 +269,15 @@
  .siteLinks a,.siteLinks button{display:flex;align-items:center;min-height:48px;width:100%;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:20px;font-weight:300;line-height:1.2;color:rgb(var(--ink-rgb) / 0.82);cursor:pointer}
  .siteLinks a:hover,.siteLinks button:hover,.siteLinks a:focus-visible,.siteLinks button:focus-visible{color:var(--white);outline:none;text-decoration:underline;text-underline-offset:6px;text-decoration-color:rgb(var(--ink-rgb) / 0.4)}
 }
+
+/* The home headline: the three-line title on the first frame. */
+.shell .headlineTitle { display:block; min-height:0; font-size:clamp(46px,5vw,78px); line-height:1.02; }
+
+/* Phone: the same still frames as desktop. Each frame fills the screen and the scroll settles on one at a time. */
+@media (max-width: 760px) {
+ .shell .mobilePanel { min-height: calc(100svh - 56px); scroll-snap-align: start; scroll-snap-stop: always; scroll-margin-top: 0; border-bottom: 0; padding: 40px 28px 72px; }
+ .shell .mobilePanel .headlineTitle { font-size: clamp(40px, 11vw, 56px); }
+ .shell .stageFooter { display: flex; position: fixed; right: 18px; bottom: 16px; left: auto; z-index: 30; pointer-events: none; }
+ .shell .stageFooter .scrollHint, .shell .stageFooter .paging button, .shell .stageFooter::before { display: none; }
+ .shell .stageFooter .paging { padding: 6px 10px; background: rgb(var(--base-rgb) / 0.72); backdrop-filter: blur(6px); border: var(--stroke) solid var(--line); font-size: 11px; }
+}

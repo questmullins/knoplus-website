@@ -19,8 +19,10 @@ export const metadata: Metadata = {
 
 const corePages = [
   { label: "Home", href: "/" },
-  { label: "Store", href: "/store" },
-  { label: "Websites", href: "/websites" }
+  { label: "Experience", href: "/#experience" },
+  { label: "Projects", href: "/#projects" },
+  { label: "Work with me", href: "/#work-with-me" },
+  { label: "Website collection", href: "/websites" }
 ];
 
 export default function SitemapPage() {
