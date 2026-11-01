@@ -22,6 +22,8 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [contact, setContact] = useState<{ topic: string; template?: string } | null>(null);
+  const [story, setStory] = useState<ServiceItem | null>(null);
+  const storyDialog = useRef<HTMLDialogElement>(null);
   const stage = useRef<HTMLElement>(null);
   const desktopContent = useRef<HTMLDivElement>(null);
   const mobileTrack = useRef<HTMLDivElement>(null);
@@ -88,6 +90,18 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     if (projectSlug && !model.panels.some(p => p.id === item.id)) {
       window.dispatchEvent(new CustomEvent("knoplus:navigate", { detail: `/#${item.id}` }));
       return;
+    }
+    const depth = model.entries.find(e => e.item.id === item.id)?.ancestors.length || 0;
+    if (item.children && depth > 0 && !model.panels.some(p => p.id === item.id)) {
+      // A smaller folder (Apps, Tools) has no window of its own: open it and go to its first project,
+      // unless you are already inside it, in which case the tap just folds it away.
+      const inside = model.entries.find(e => e.item.id === selectedId)?.ancestors.includes(item.id);
+      if (toggle && inside && expanded.has(item.id)) {
+        setExpanded(value => { const next = new Set(value); next.delete(item.id); return next; });
+        return;
+      }
+      const first = model.entries.find(e => e.ancestors.includes(item.id) && model.panels.some(p => p.id === e.item.id))?.item;
+      if (first) { commit(first, "push", true, true); return; }
     }
     commit(item, "push", true, true, toggle);
   }
@@ -160,7 +174,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         mobileLock.current = performance.now() + 500;
         requestAnimationFrame(() => {
           const target = mobileSections.current.get(selectedId);
-          if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 56, behavior: "instant" });
+          if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 92, behavior: "instant" });
         });
       }
     };
@@ -231,19 +245,31 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     </figure>)}</div></div>;
   }
 
-  function panelCopy(item: ServiceItem, mobile = false, index = 0) {
-    const Heading = mobile && index > 0 ? "h2" : "h1";
+  // A window shows a fixed amount, so every window fits one screen: label, title, a short description, one headline
+  // result and the buttons. The full write-up (all results, tools, notes) opens with "Read more".
+  function hasMore(item: ServiceItem) {
+    return !!(item.metrics?.length || item.tools || item.sellingPoints?.length || item.note || item.highlights?.length || item.description.length > 230);
+  }
+
+  function keyResult(item: ServiceItem) {
+    const metric = item.metrics?.find(m => m.headline);
+    return metric && <p className={s.keyResult}><b>{metric.headline}</b> {metric.change}<span>{metric.label}</span></p>;
+  }
+
+  function panelCopy(item: ServiceItem, mobile = false, index = 0, full = false) {
+    const Heading = full || (mobile && index > 0) ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
     return <div className={`copy ${s.copy}`} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}><div className={`copy-anchor ${s.anchor}`}>
       {/* The eyebrow and title fade and slide with the rest of the copy, so a section changes as one piece. */}
       <div className={s.changingDetails}>
       <div className={`eyebrow ${s.eyebrow}`}>{item.label}</div>
-      {item.doors && item.title ? <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={`${s.title} ${s.headlineTitle}`} dangerouslySetInnerHTML={{ __html: item.title }} />
-        : <Heading id={mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>}
+      {item.doors && item.title ? <Heading id={full ? undefined : mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={`${s.title} ${s.headlineTitle}`} dangerouslySetInnerHTML={{ __html: item.title }} />
+        : <Heading id={full ? undefined : mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>}
       {model.project && <h2 className={s.paneTitle}>{item.titleText || item.name}</h2>}
-      <p className={s.description}>{item.description}</p>
-      {item.platform === "android" && <StoreBadges />}
-      <div className={`actions template-actions ${s.actions}`}>
+      <p className={`${s.description} ${full ? "" : s.clamp}`}>{item.description}</p>
+      {!full && keyResult(item)}
+      {item.platform === "android" && !full && <StoreBadges />}
+      {!full && <div className={`actions template-actions ${s.actions}`}>
         {item.doors ? item.doors.map(door => {
           const target = model.entries.find(e => e.item.id === door.id)?.item;
           return target && <button key={door.id} className={`cta-button ${door.primary ? "explore-button" : "inquire-button"}`} type="button" onClick={() => select(target)}>{door.label}</button>;
@@ -263,24 +289,30 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
           const hire = model.entries.find(e => e.item.id === "work-with-me")?.item;
           if (hire) select(hire);
         }}>Want something like this?</button>}
-      </div>
+        {hasMore(item) && <button className="cta-button inquire-button" type="button" onClick={() => setStory(item)}>{item.tools ? "See all the tools" : "Read more"}</button>}
+      </div>}
       {statList(item)}
-      {!!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
-      {item.tools && <Toolkit groups={item.tools} />}
-      {item.note && <p className={s.note}>{item.note}</p>}
-      {results(item)}
+      {full && !!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
+      {full && item.tools && <Toolkit groups={item.tools} />}
+      {full && item.note && <p className={s.note}>{item.note}</p>}
+      {full && results(item)}
       </div>
     </div></div>;
   }
 
   function mobilePanel(item: ServiceItem, index = 1) {
-    return <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} data-experience={item.id.startsWith("experience") || undefined} aria-label={item.name}
+    return <section className={s.mobilePanel} key={item.id} data-panel={item.id} data-theme={item.theme || "service"} data-experience={item.id.startsWith("experience") || undefined} data-break={model.navigation.some(top => top.id === item.id) || undefined} aria-label={item.name}
       ref={node => { if (node) mobileSections.current.set(item.id,node); else mobileSections.current.delete(item.id); }}>
       <div className={`preview-bg ${s.background}`} style={{ "--bg": item.image } as CSSProperties} />{panelCopy(item,true,index)}
     </section>;
   }
 
   useEffect(() => () => window.clearTimeout(mobileScrollTimer.current), []);
+
+  useEffect(() => {
+    const dialog = storyDialog.current;
+    if (story && dialog && !dialog.open) dialog.showModal();
+  }, [story]);
 
   // "Choose This Template" on a website template returns here with ?contact=template.
   useEffect(() => {
@@ -296,6 +328,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     <div className={`app ${s.shell}`}>
       <a href="#service-stage" className={s.skip}>Skip to project preview</a>
       <header className={`mobile-scroll-header ${s.mobileBar}`}>{logo}<SchemeToggle className={s.mobileScheme} /><button ref={browse} type="button" aria-expanded={mobileOpen} aria-controls="service-navigation" onClick={() => setMobileOpen(v => !v)}>{mobileOpen ? "Close" : "Menu"}<span aria-hidden="true">{mobileOpen ? "×" : "+"}</span></button></header>
+      {!model.project && selected.id !== model.overview.id && <WhereBar entries={model.entries} panels={model.panels} selected={selected} />}
       <aside inert={isMobile && !mobileOpen} className={`${s.sidebar} ${mobileOpen ? s.mobileOpen : ""}`}>
         <div className={`sidebar-brand ${s.desktopBrand}`}>{logo}</div>
         <nav ref={navigation} id="service-navigation" className={`template-nav ${s.navigation}`} aria-label="Menu, experience, projects and work with me">
@@ -340,6 +373,41 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       <header><h2 id="screens-heading">{model.project?.name} / {selected.name}</h2><button type="button" aria-label="Close screens" onClick={() => screens.current?.close()}>×</button></header>
       <div>{selected.photos?.map(photo => <Image key={photo.src} src={photo.src} width={photo.width} height={photo.height} alt={photo.alt} unoptimized />)}</div>
     </dialog>
+    <dialog ref={storyDialog} className={`${s.screenDialog} ${s.storyDialog}`} aria-label={story?.name} onClose={() => setStory(null)} onClick={event => { if (event.target === event.currentTarget) storyDialog.current?.close(); }}>
+      <header><h2>{story?.label}</h2><button type="button" aria-label="Close" onClick={() => storyDialog.current?.close()}>×</button></header>
+      {story && <div className={s.storyBody}>{panelCopy(story, true, 1, true)}</div>}
+    </dialog>
     <ContactModal key={contact ? `${contact.topic}:${contact.template || ""}` : "closed"} isOpen={contact !== null} onClose={() => setContact(null)} selectedTemplate={contact?.template || ""} selectedTopic={contact?.topic || ""} />
   </>;
+}
+
+// Phone only: a slim bar under the logo that says where you are, with an icon for the part of the site you are in.
+const whereIcons: Record<string, string> = {
+  experience: "M4 8h16v11H4zM9 8V5h6v3M4 13h16",
+  "experience--automation": "M12 4a8 8 0 1 1-7.4 5M4 4v5h5",
+  "experience--tools": "M5 4l6 15 2-6 6-2z",
+  "experience--builds": "M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8",
+  "experience--toolkit": "M4 6h16M4 12h16M4 18h10",
+  projects: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
+  apps: "M8 3h8v18H8zM11 18h2",
+  tools: "M14 4a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3-3l9-9a4 4 0 0 0-2-2z",
+  "work-with-me": "M4 5h16v11H9l-5 4z",
+  websites: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18",
+  "client-work": "M12 4l2.5 5 5.5.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.5-.8z",
+  "process-automation": "M12 4a8 8 0 1 1-7.4 5M4 4v5h5",
+  "how-it-works": "M5 6h14M5 12h14M5 18h9",
+};
+
+function WhereBar({ entries, panels, selected }: { entries: { item: ServiceItem; ancestors: string[] }[]; panels: ServiceItem[]; selected: ServiceItem }) {
+  const ancestors = entries.find(e => e.item.id === selected.id)?.ancestors || [];
+  const trail = [...ancestors.map(id => entries.find(e => e.item.id === id)?.item).filter(Boolean) as ServiceItem[], ...(ancestors.length ? [] : [selected])];
+  const parent = ancestors.at(-1);
+  const siblings = parent ? entries.filter(e => e.ancestors.at(-1) === parent && panels.some(p => p.id === e.item.id)) : [];
+  const position = siblings.findIndex(e => e.item.id === selected.id);
+  const iconId = [selected.id, ...[...ancestors].reverse()].find(id => whereIcons[id]) || "";
+  return <div className={s.whereBar} aria-live="polite">
+    {iconId && <svg key={iconId} className={s.whereIcon} viewBox="0 0 24 24" aria-hidden="true"><path d={whereIcons[iconId]} /></svg>}
+    <span className={s.whereTrail}>{trail.map(item => item.name).join(" › ")}</span>
+    {siblings.length > 1 && position >= 0 && <span className={s.whereCount}>{position + 1} of {siblings.length}</span>}
+  </div>;
 }

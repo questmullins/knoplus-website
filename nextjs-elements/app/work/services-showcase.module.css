@@ -281,3 +281,30 @@
  .shell .stageFooter .scrollHint, .shell .stageFooter .paging button, .shell .stageFooter::before { display: none; }
  .shell .stageFooter .paging { padding: 6px 10px; background: rgb(var(--base-rgb) / 0.72); backdrop-filter: blur(6px); border: var(--stroke) solid var(--line); font-size: 11px; }
 }
+
+/* Windows show a fixed amount so each one fits one screen; the rest opens with "Read more". */
+.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.keyResult { margin: 22px auto 0; font-size: 15px; color: rgb(var(--ink-rgb) / 0.8); }
+.keyResult b { font: 300 clamp(30px, 3vw, 44px)/1 var(--font-display); color: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); margin-right: 6px; }
+.keyResult span { display: block; margin-top: 6px; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.storyDialog { width: min(820px, calc(100% - 32px)); }
+.storyBody :global(.copy) { width: 100%; }
+.storyBody .title { font-size: clamp(36px, 6vw, 56px); min-height: 0; }
+.storyBody .description { max-width: none; }
+.whereBar { display: none; }
+
+@media (max-width: 760px) {
+ .whereBar { display: flex; align-items: center; gap: 10px; position: fixed; top: 56px; left: 0; right: 0; height: 36px; padding: 0 28px; z-index: 39; background: rgb(var(--base-rgb) / 0.9); backdrop-filter: blur(8px); border-bottom: var(--stroke) solid var(--line); font-size: 11px; letter-spacing: .08em; color: rgb(var(--ink-rgb) / 0.82); }
+ .whereIcon { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; animation: whereIn .35s ease; }
+ .whereTrail { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .whereCount { flex: none; color: var(--muted); }
+ .shell .mobilePanel { min-height: calc(100svh - 92px); padding-top: 28px; padding-bottom: 64px; }
+ .shell .mobilePanel .clamp { -webkit-line-clamp: 5; line-clamp: 5; }
+ .shell .mobilePanel .stats { margin-top: 26px; }
+ .shell .mobilePanel[data-break] .background { display: none; }
+ .shell .mobilePanel[data-break] { border-top: var(--stroke) solid var(--line); }
+ .shell .mobilePanel[data-break] .title { font-size: clamp(52px, 14vw, 72px); }
+ .shell .mobilePanel[data-break] .clamp { -webkit-line-clamp: 3; line-clamp: 3; }
+ .shell .stageFooter { display: none; }
+}
+@keyframes whereIn { from { opacity: 0; transform: scale(.7); } }

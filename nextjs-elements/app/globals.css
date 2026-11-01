@@ -2887,7 +2887,7 @@ section.stage > .content {
 
 /* Phone home: the scroll settles on one still frame at a time, like the desktop panels. */
 @media (max-width: 760px) {
-  html:has(body.revamp-showcase) { scroll-snap-type: y mandatory; scroll-padding-top: 56px; }
+  html:has(body.revamp-showcase) { scroll-snap-type: y mandatory; scroll-padding-top: 92px; }
 }
 @media (max-width: 760px) and (prefers-reduced-motion: reduce) {
   html:has(body.revamp-showcase) { scroll-snap-type: y proximity; }
