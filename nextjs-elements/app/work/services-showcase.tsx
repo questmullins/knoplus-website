@@ -264,7 +264,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
 
   function banners(item: ServiceItem) {
     return <ul className={s.banners}>{item.children!.map(child => <li key={child.id}>
-      <button type="button" className={s.banner} onClick={() => openProject(child)} style={{ "--item-accent": serviceAccent(child) } as CSSProperties}>
+      <button type="button" className={s.banner} onClick={() => openProject(child)}>
         <span className={s.bannerName}>{child.name}</span>
         {tag(child) && <span className={s.bannerTag}>{tag(child)}</span>}
       </button>
@@ -276,7 +276,9 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     const group = !model.project && !full && !!item.children && depth > 0;
     const Heading = full || (mobile && index > 0) ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
-    return <div className={`copy ${s.copy}`} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}><div className={`copy-anchor ${s.anchor}`}>
+    // One shade per part of the site (Experience, Projects, Work with me) for every button and accent in it.
+    const section = model.project ? item : model.navigation.find(top => top.id === (model.entries.find(e => e.item.id === item.id)?.ancestors[0] || item.id)) || item;
+    return <div className={`copy ${s.copy}`} style={{ "--panel-accent": serviceAccent(section) } as CSSProperties}><div className={`copy-anchor ${s.anchor}`}>
       {/* The eyebrow and title fade and slide with the rest of the copy, so a section changes as one piece. */}
       <div className={s.changingDetails}>
       <div className={`eyebrow ${s.eyebrow}`}>{item.label}</div>

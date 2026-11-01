@@ -44,6 +44,9 @@ const websiteItems: ServiceItem[] = [...templates.map(template => ({
   href: template.link, action: "Explore website", highlights: template.features, sellingPoints: template.sellingPoints, template: true,
 }))];
 
+// Every case study ends with "Want something like this?" (the Toolkit is a list of tools, not a project, so it doesn't).
+const withHire = (item: ServiceItem): ServiceItem => item.children ? { ...item, children: item.children.map(withHire) } : item.tools ? item : { ...item, hire: true };
+
 export const serviceOverview: ServiceItem = {
   id: "work", name: "Kno.plus", label: "Quest / Knoplus",
   title: "I build the tools<br />a business <em>runs on.</em>",
@@ -62,7 +65,7 @@ export const services: ServiceItem[] = [
     title: "Better processes.<br />Smarter systems.<br /><em>Less busywork.</em>",
     description: "Inside a growing manufacturer and retailer, I found the slow, repetitive parts of the business and built the tools that took them over. More than forty systems, in three kinds of work.",
     image: "url('/revamp/banners/consulting.webp')", highlights: ["Process improvement", "Custom software", "Workflow automation", "Systems integration", "Data & reporting"],
-    highlightsLabel: "Capabilities", stats: experienceStats.stats, note: experienceStats.note, children: experienceItems.map(item => ({ ...item, hire: true })),
+    highlightsLabel: "Capabilities", stats: experienceStats.stats, note: experienceStats.note, children: experienceItems.map(withHire),
     related: { href: "/#work-with-me", label: "Work with me" },
   },
   {
