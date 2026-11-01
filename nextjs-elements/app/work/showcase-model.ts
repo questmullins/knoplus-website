@@ -20,10 +20,10 @@ export function indexServices(items: ServiceItem[], ancestors: string[] = []): {
 export function buildShowcase(slug?: string) {
   if (!slug) {
     const entries = indexServices(services);
-    // Phone and desktop step through the same windows in the same order. Each part of the site (Experience, Projects,
-    // Work with me) opens with a section break, then a window per project. Smaller folders (Apps, Tools) get no window
-    // of their own: picking one goes straight to its first project.
-    const panels = [serviceOverview, ...entries.filter(e => !e.item.children || e.ancestors.length === 0).map(e => e.item)];
+    // Phone and desktop step through the same windows in the same order: a section break for each part of the site
+    // (Experience, Projects, Work with me), then one window per group inside it (Automation, Apps, Websites…). A group
+    // window lists its projects as banners; a project opens from its banner.
+    const panels = [serviceOverview, ...entries.filter(e => e.ancestors.length <= 1).map(e => e.item)];
     return { navigation: services, entries, overview: serviceOverview, panels, mobilePanels: panels, project: undefined };
   }
   const project = getProject(slug);

@@ -60,7 +60,7 @@ export const services: ServiceItem[] = [
   {
     id: "experience", name: "Experience", label: "Experience / Business systems",
     title: "Better processes.<br />Smarter systems.<br /><em>Less busywork.</em>",
-    description: "I worked inside a growing manufacturer and retailer, finding the slow, repetitive parts of the business and building the tools that took them over. More than forty systems and workflows, grouped by the kind of work: automation behind the scenes, interactive tools people use every day, and full applications.",
+    description: "Inside a growing manufacturer and retailer, I found the slow, repetitive parts of the business and built the tools that took them over. More than forty systems, in three kinds of work.",
     image: "url('/revamp/banners/consulting.webp')", highlights: ["Process improvement", "Custom software", "Workflow automation", "Systems integration", "Data & reporting"],
     highlightsLabel: "Capabilities", stats: experienceStats.stats, note: experienceStats.note, children: experienceItems.map(item => ({ ...item, hire: true })),
     related: { href: "/#work-with-me", label: "Work with me" },

@@ -48,7 +48,14 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   const adjacent = (direction: number) => isMobile ? model.mobilePanels[mobileIndex + direction] : nextPanel(direction);
   const openContact = (item: ServiceItem) => setContact({ topic: model.project?.slug || item.id, template: item.template ? item.name : undefined });
 
-  const commit = useCallback((item: ServiceItem, history: "push" | "replace" | "none" = "push", scroll = true, closeMenu = true, toggle = false) => {
+  const commit = useCallback((picked: ServiceItem, history: "push" | "replace" | "none" = "push", scroll = true, closeMenu = true, toggle = false) => {
+    // A project inside a group has no window of its own: show its group's window and open the project over it.
+    let item = picked;
+    if (!model.project && !picked.children && !model.panels.some(p => p.id === picked.id)) {
+      const ancestors = model.entries.find(e => e.item.id === picked.id)?.ancestors || [];
+      const holder = [...ancestors].reverse().map(id => model.panels.find(p => p.id === id)).find(Boolean);
+      if (holder) { item = holder; setStory(picked); }
+    } else setStory(null);
     setSelectedId(item.id);
     setExpanded(value => {
       const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
@@ -71,8 +78,10 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       window.clearTimeout(mobileScrollTimer.current);
       mobileScrollTimer.current = window.setTimeout(() => {
         // A folder has no frame of its own on the phone, so it goes to the first frame inside it.
-        const first = model.entries.find(e => e.item.id === item.id || (e.ancestors.includes(item.id) && mobileSections.current.has(e.item.id)));
-        const target = mobileSections.current.get(item.id) || (first && mobileSections.current.get(first.item.id));
+        // A project inside a group has no window of its own on the phone: scroll to its group and open it over the top.
+        const ancestors = model.entries.find(e => e.item.id === item.id)?.ancestors || [];
+        const holder = [item.id, ...[...ancestors].reverse()].find(id => mobileSections.current.has(id));
+        const target = holder ? mobileSections.current.get(holder) : undefined;
         window.scrollTo({ top: target ? target.getBoundingClientRect().top + window.scrollY - 56 : 0, behavior: "instant" });
       }, 0);
     }
@@ -91,24 +100,16 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       window.dispatchEvent(new CustomEvent("knoplus:navigate", { detail: `/#${item.id}` }));
       return;
     }
-    const depth = model.entries.find(e => e.item.id === item.id)?.ancestors.length || 0;
-    if (item.children && depth > 0 && !model.panels.some(p => p.id === item.id)) {
-      // A smaller folder (Apps, Tools) has no window of its own: open it and go to its first project,
-      // unless you are already inside it, in which case the tap just folds it away.
-      const inside = model.entries.find(e => e.item.id === selectedId)?.ancestors.includes(item.id);
-      if (toggle && inside && expanded.has(item.id)) {
-        setExpanded(value => { const next = new Set(value); next.delete(item.id); return next; });
-        return;
-      }
-      const first = model.entries.find(e => e.ancestors.includes(item.id) && model.panels.some(p => p.id === e.item.id))?.item;
-      if (first) { commit(first, "push", true, true); return; }
-    }
     commit(item, "push", true, true, toggle);
   }
 
   const nextPanel = useCallback((direction: number) => {
     const current = model.panels.findIndex(item => item.id === selectedId);
     if (current >= 0) return model.panels[current + direction];
+    // An open project steps back to its group, or on to the window after it.
+    const ancestors = model.entries.find(e => e.item.id === selectedId)?.ancestors || [];
+    const holder = [...ancestors].reverse().map(id => model.panels.findIndex(p => p.id === id)).find(index => index >= 0);
+    if (holder !== undefined) return model.panels[direction > 0 ? holder + 1 : holder];
     const descendant = model.entries.find(e => e.ancestors.includes(selectedId) && model.panels.some(p => p.id === e.item.id));
     const first = model.panels.findIndex(p => p.id === descendant?.item.id);
     return first >= 0 ? model.panels[first + (direction > 0 ? 0 : -1)] : undefined;
@@ -245,18 +246,31 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
     </figure>)}</div></div>;
   }
 
-  // A window shows a fixed amount, so every window fits one screen: label, title, a short description, one headline
-  // result and the buttons. The full write-up (all results, tools, notes) opens with "Read more".
-  function hasMore(item: ServiceItem) {
-    return !!(item.metrics?.length || item.tools || item.sellingPoints?.length || item.note || item.highlights?.length || item.description.length > 230);
+  // A group (Automation, Apps, Websites…) is one window listing its projects as thin banners, like Annex.
+  // A project opens from its banner: in the main stage on desktop, over the window on a phone.
+  function tag(item: ServiceItem) {
+    const metric = item.metrics?.find(m => m.headline);
+    return metric ? `${metric.headline} ${metric.change}` : item.platform === "android" ? "Android" : item.template ? "Template" : item.note === "In progress." ? "In progress" : "";
   }
 
-  function keyResult(item: ServiceItem) {
-    const metric = item.metrics?.find(m => m.headline);
-    return metric && <p className={s.keyResult}><b>{metric.headline}</b> {metric.change}<span>{metric.label}</span></p>;
+  function openProject(item: ServiceItem) {
+    setStory(item);
+    window.history.replaceState(null, "", `#${item.id}`);
+  }
+
+  function banners(item: ServiceItem) {
+    return <ul className={s.banners}>{item.children!.map(child => <li key={child.id}>
+      <button type="button" className={s.banner} onClick={() => openProject(child)} style={{ "--bg": child.image, "--item-accent": serviceAccent(child) } as CSSProperties}>
+        <span className={s.bannerName}>{child.name}</span>
+        {tag(child) && <span className={s.bannerTag}>{tag(child)}</span>}
+        <span className={s.bannerArrow} aria-hidden="true">→</span>
+      </button>
+    </li>)}</ul>;
   }
 
   function panelCopy(item: ServiceItem, mobile = false, index = 0, full = false) {
+    const depth = model.entries.find(e => e.item.id === item.id)?.ancestors.length || 0;
+    const group = !model.project && !full && !!item.children && depth > 0;
     const Heading = full || (mobile && index > 0) ? "h2" : "h1";
     const next = model.panels[model.panels.findIndex(p => p.id === item.id) + 1];
     return <div className={`copy ${s.copy}`} style={{ "--panel-accent": serviceAccent(item) } as CSSProperties}><div className={`copy-anchor ${s.anchor}`}>
@@ -266,10 +280,11 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       {item.doors && item.title ? <Heading id={full ? undefined : mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={`${s.title} ${s.headlineTitle}`} dangerouslySetInnerHTML={{ __html: item.title }} />
         : <Heading id={full ? undefined : mobile ? `mobile-title-${item.id}` : "project-title"} tabIndex={-1} className={s.title}>{model.project?.name || item.name}</Heading>}
       {model.project && <h2 className={s.paneTitle}>{item.titleText || item.name}</h2>}
-      <p className={`${s.description} ${full ? "" : s.clamp}`}>{item.description}</p>
-      {!full && keyResult(item)}
-      {item.platform === "android" && !full && <StoreBadges />}
-      {!full && <div className={`actions template-actions ${s.actions}`}>
+      <p className={s.description}>{item.description}</p>
+      {group && banners(item)}
+      {group && item.related && <Link className={s.groupLink} href={item.related.href}>{item.related.label} →</Link>}
+      {item.platform === "android" && <StoreBadges />}
+      {!group && <div className={`actions template-actions ${s.actions}`}>
         {item.doors ? item.doors.map(door => {
           const target = model.entries.find(e => e.item.id === door.id)?.item;
           return target && <button key={door.id} className={`cta-button ${door.primary ? "explore-button" : "inquire-button"}`} type="button" onClick={() => select(target)}>{door.label}</button>;
@@ -289,13 +304,13 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
           const hire = model.entries.find(e => e.item.id === "work-with-me")?.item;
           if (hire) select(hire);
         }}>Want something like this?</button>}
-        {hasMore(item) && <button className="cta-button inquire-button" type="button" onClick={() => setStory(item)}>{item.tools ? "See all the tools" : "Read more"}</button>}
+        {item.tools && !full && <button className="cta-button inquire-button" type="button" onClick={() => setStory(item)}>See all the tools</button>}
       </div>}
-      {statList(item)}
-      {full && !!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
+      {(depth === 0 || full) && statList(item)}
+      {!group && depth > 0 && !!item.highlights?.length && <div className={s.details}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>{!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
       {full && item.tools && <Toolkit groups={item.tools} />}
-      {full && item.note && <p className={s.note}>{item.note}</p>}
-      {full && results(item)}
+      {!group && depth > 0 && item.note && <p className={s.note}>{item.note}</p>}
+      {!group && results(item)}
       </div>
     </div></div>;
   }
@@ -312,6 +327,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   useEffect(() => {
     const dialog = storyDialog.current;
     if (story && dialog && !dialog.open) dialog.showModal();
+    if (!story && dialog?.open) dialog.close();
   }, [story]);
 
   // "Choose This Template" on a website template returns here with ?contact=template.
@@ -373,7 +389,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       <header><h2 id="screens-heading">{model.project?.name} / {selected.name}</h2><button type="button" aria-label="Close screens" onClick={() => screens.current?.close()}>×</button></header>
       <div>{selected.photos?.map(photo => <Image key={photo.src} src={photo.src} width={photo.width} height={photo.height} alt={photo.alt} unoptimized />)}</div>
     </dialog>
-    <dialog ref={storyDialog} className={`${s.screenDialog} ${s.storyDialog}`} aria-label={story?.name} onClose={() => setStory(null)} onClick={event => { if (event.target === event.currentTarget) storyDialog.current?.close(); }}>
+    <dialog ref={storyDialog} className={`${s.screenDialog} ${s.storyDialog}`} aria-label={story?.name} onClose={() => { setStory(null); if (window.location.hash !== `#${selectedId}`) window.history.replaceState(null, "", `#${selectedId}`); }} onClick={event => { if (event.target === event.currentTarget) storyDialog.current?.close(); }}>
       <header><h2>{story?.label}</h2><button type="button" aria-label="Close" onClick={() => storyDialog.current?.close()}>×</button></header>
       {story && <div className={s.storyBody}>{panelCopy(story, true, 1, true)}</div>}
     </dialog>

@@ -308,3 +308,31 @@
  .shell .stageFooter { display: none; }
 }
 @keyframes whereIn { from { opacity: 0; transform: scale(.7); } }
+
+/* Group windows: each project is a thin banner, like Annex's project rows. */
+.banners { list-style: none; margin: 30px auto 0; padding: 0; width: 100%; max-width: 640px; display: grid; gap: 10px; text-align: left; }
+.banner { position: relative; isolation: isolate; overflow: hidden; width: 100%; min-height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 20px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.18); background: var(--black); color: var(--white); cursor: pointer; font: inherit; text-align: left; transition: border-color .3s ease, transform .3s ease; }
+.banner::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--bg) center / cover; opacity: .38; transition: opacity .3s ease, transform .6s cubic-bezier(.22,1,.36,1); }
+.banner::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(var(--base-rgb) / 0.92) 35%, rgb(var(--base-rgb) / 0.55)); }
+.banner:hover, .banner:focus-visible { border-color: var(--item-accent); }
+.banner:hover::before, .banner:focus-visible::before { opacity: .55; transform: scale(1.04); }
+.banner:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+.bannerName { flex: 1; min-width: 0; font: 400 18px/1.25 var(--font-display); letter-spacing: -.01em; }
+.bannerTag { flex: none; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--item-accent) var(--accent-mix), var(--white)); }
+.bannerArrow { flex: none; font-size: 17px; color: rgb(var(--ink-rgb) / 0.7); transition: transform .3s ease; }
+.banner:hover .bannerArrow { transform: translateX(3px); }
+
+/* Phone: a project opens full screen over its group window. */
+@media (max-width: 760px) {
+ .banners { margin-top: 24px; gap: 8px; }
+ .banner { min-height: 58px; padding: 0 16px; }
+ .bannerName { font-size: 16px; }
+ .bannerTag { font-size: 9px; letter-spacing: .1em; }
+ .storyDialog { width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; border: 0; border-radius: 0; padding: 18px 24px 40px; }
+ .storyBody .title { font-size: clamp(38px, 10vw, 52px); }
+ .storyBody .description { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) { .banner::before, .bannerArrow { transition: none; } }
+.storyBody .eyebrow { display: none; }
+.storyBody .title { margin-top: 8px; display: block; line-height: 1.02; }
+.groupLink { display: inline-block; margin-top: 18px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgb(var(--ink-rgb) / 0.8); text-decoration: underline; text-underline-offset: 5px; }
