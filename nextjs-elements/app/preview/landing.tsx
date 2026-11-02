@@ -226,14 +226,14 @@ export function Landing() {
           <p>{experience.description}</p>
         </div>
         {!!experience.stats?.length && <dl className={s.stats}>{experience.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>}
-        <div className={s.tiles}>{groups.map(group => <Link key={group.id} href={`/#${group.id}`} className={s.tile} style={bg(tilePhotos[group.id] || group.image)}>
+        <div className={s.tiles}>{groups.map(group => <button type="button" key={group.id} className={s.tile} onClick={() => open(group, experience)}>
           <div className={s.tileBox}>
             <h3>{group.name}</h3>
             <p>{group.description}</p>
             <ul>{group.children!.map(child => <li key={child.id}>{child.name}</li>)}</ul>
+            <span className={s.thumb} style={bg(tilePhotos[group.id] || group.image)}><span className={s.arrow} aria-hidden="true">→</span></span>
           </div>
-          <span className={s.arrow} aria-hidden="true">→</span>
-        </Link>)}</div>
+        </button>)}</div>
       </section>
 
       {metric && <section className={s.feature} style={shade(experience)}>
@@ -270,20 +270,22 @@ export function Landing() {
           <h2>{plain(work.title)}</h2>
           <p>{work.description}</p>
         </div>
-        <ul className={s.list}>
-          {work.children!.map(item => {
-            const href = item.id === "websites" ? "/websites" : item.id === "client-work" ? item.children?.[0]?.href : undefined;
-            const label = item.id === "client-work" ? `${item.name}: ${item.children?.map(child => child.name).join(", ")}` : item.name;
-            const body = <><span>{label}</span><small>{item.id === "websites" ? `${item.children?.length} templates to start from` : item.id === "how-it-works" ? item.highlights?.join(" → ") : item.highlights?.slice(0, 3).join(" / ")}</small><span className={s.arrow} aria-hidden="true">→</span></>;
-            return <li key={item.id}>{href ? <a href={href}>{body}</a> : <button type="button" onClick={() => talk(item.id)}>{body}</button>}</li>;
-          })}
-        </ul>
-      </section>
-
-      <section className={s.cta} style={shade(work)}>
-        <h2>Have something in mind?</h2>
-        <p>Tell me what you need, and I’ll come back with a plan and a timeline.</p>
-        <div className={s.buttons}>
+        {/* What I make, and how a project goes, side by side; the old closing call to action lives here now. */}
+        <div className={s.hire}>
+          <div className={s.offers}>
+            {work.children!.filter(item => item.id !== "how-it-works").map(item => {
+              const href = item.id === "websites" ? "/websites" : item.id === "client-work" ? item.children?.[0]?.href : undefined;
+              const note = item.id === "websites" ? `${item.children?.length} templates to start from` : item.id === "client-work" ? item.children?.map(child => child.name).join(", ") : item.highlights?.slice(0, 2).join(" / ");
+              const body = <><b>{item.name}</b><small>{note}</small><span aria-hidden="true">{href ? "↗" : "→"}</span></>;
+              return href ? <a key={item.id} href={href}>{body}</a> : <button key={item.id} type="button" onClick={() => talk(item.id)}>{body}</button>;
+            })}
+          </div>
+          <ol className={s.steps}>
+            <span className={s.eyebrow}>How it works</span>
+            {(work.children!.find(item => item.id === "how-it-works")?.highlights || []).map((step, index) => <li key={step}><i>{String(index + 1).padStart(2, "0")}</i>{step}</li>)}
+          </ol>
+        </div>
+        <div className={`${s.buttons} ${s.hireButtons}`}>
           <button type="button" className={s.primary} onClick={() => talk()}>Let’s talk</button>
           <Link className={s.secondary} href="/clients/" prefetch={false}>Client sign-in</Link>
         </div>
