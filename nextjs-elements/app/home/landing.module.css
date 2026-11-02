@@ -384,3 +384,16 @@
 .appMark { overflow: visible; }
 .appMark img, .appMark svg { border-radius: 14px; }
 .appMark { outline: 5px solid rgb(var(--ink-rgb) / 0.92); outline-offset: -2.5px; }
+
+/* In a window, the top bar becomes its bar: the window's path in place of the menu, its count and close before Client sign-in. */
+.barPath { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); flex: 1; min-width: 0; margin-left: 24px; overflow: hidden; white-space: nowrap; text-overflow: clip; }
+.barWindow { display: flex; align-items: center; gap: 16px; }
+.bar[data-window] .barEnd { margin-left: 0; }
+@media (max-width: 900px) { .bar[data-window] .barPath { margin-left: 8px; } }
+/* Phones: only the window's bar shows (path, count, close). */
+@media (max-width: 640px) {
+  .bar[data-window] :is(.logo, .scheme, .barEnd > .primary) { display: none; }
+  .bar[data-window] .barPath { margin-left: 0; font-size: 10px; letter-spacing: .2em; white-space: normal; line-height: 1.4; }
+  .bar[data-window] .barWindow { gap: 12px; }
+  .bar[data-window] .closeBtn { width: 40px; height: 40px; }
+}
