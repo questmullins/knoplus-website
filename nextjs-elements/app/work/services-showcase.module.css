@@ -241,7 +241,7 @@
 }
 
 /* Dark mode: Experience photos sit under a heavier overlay (0.6 instead of the site's 0.45). */
-:global(:root:not([data-scheme="light"])) :is(.stage, .mobilePanel)[data-experience] { --overlay: 0.6; }
+:global(:root:not([data-scheme="light"])) :is(.stage, .mobilePanel)[data-experience] { --overlay: 0.8; }
 
 /* Dark mode: full-ink copy over the photographs (the global p is 74% ink, too faint on bright photos). */
 :global(:root:not([data-scheme="light"])) .description, :global(:root:not([data-scheme="light"])) .details p, :global(:root:not([data-scheme="light"])) .note { color: var(--white); }
@@ -268,4 +268,185 @@
  .siteLinks ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
  .siteLinks a,.siteLinks button{display:flex;align-items:center;min-height:48px;width:100%;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:20px;font-weight:300;line-height:1.2;color:rgb(var(--ink-rgb) / 0.82);cursor:pointer}
  .siteLinks a:hover,.siteLinks button:hover,.siteLinks a:focus-visible,.siteLinks button:focus-visible{color:var(--white);outline:none;text-decoration:underline;text-underline-offset:6px;text-decoration-color:rgb(var(--ink-rgb) / 0.4)}
+}
+
+/* The home headline: the three-line title on the first frame. */
+.shell .headlineTitle { display:block; min-height:0; font-size:clamp(46px,5vw,78px); line-height:1.02; }
+
+/* Phone: the same still frames as desktop. Each frame fills the screen and the scroll settles on one at a time. */
+@media (max-width: 760px) {
+ .shell .mobilePanel { min-height: calc(100svh - 56px); scroll-snap-align: start; scroll-snap-stop: always; scroll-margin-top: 0; border-bottom: 0; padding: 40px 28px 72px; }
+ .shell .mobilePanel .headlineTitle { font-size: clamp(40px, 11vw, 56px); }
+ .shell .stageFooter { display: flex; position: fixed; right: 18px; bottom: 16px; left: auto; z-index: 30; pointer-events: none; }
+ .shell .stageFooter .scrollHint, .shell .stageFooter .paging button, .shell .stageFooter::before { display: none; }
+ .shell .stageFooter .paging { padding: 6px 10px; background: rgb(var(--base-rgb) / 0.72); backdrop-filter: blur(6px); border: var(--stroke) solid var(--line); font-size: 11px; }
+}
+
+/* Windows show a fixed amount so each one fits one screen; the rest opens with "Read more". */
+.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.keyResult { margin: 22px auto 0; font-size: 15px; color: rgb(var(--ink-rgb) / 0.8); }
+.keyResult b { font: 300 clamp(30px, 3vw, 44px)/1 var(--font-display); color: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); margin-right: 6px; }
+.keyResult span { display: block; margin-top: 6px; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.storyDialog { width: min(820px, calc(100% - 32px)); }
+.storyBody :global(.copy) { width: 100%; }
+.storyBody .title { font-size: clamp(36px, 6vw, 56px); min-height: 0; }
+.storyBody .description { max-width: none; }
+.whereBar { display: none; }
+
+@media (max-width: 760px) {
+ .whereBar { display: flex; align-items: center; gap: 10px; position: fixed; top: 56px; left: 0; right: 0; height: 36px; padding: 0 28px; z-index: 39; background: rgb(var(--base-rgb) / 0.9); backdrop-filter: blur(8px); border-bottom: var(--stroke) solid var(--line); font-size: 11px; letter-spacing: .08em; color: rgb(var(--ink-rgb) / 0.82); }
+ .whereIcon { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; animation: whereIn .35s ease; }
+ .whereTrail { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .whereCount { flex: none; color: var(--muted); }
+ .shell .mobilePanel { min-height: calc(100svh - 92px); padding-top: 28px; padding-bottom: 64px; }
+ .shell .mobilePanel .clamp { -webkit-line-clamp: 5; line-clamp: 5; }
+ .shell .mobilePanel .stats { margin-top: 26px; }
+ .shell .mobilePanel[data-break] .background { display: none; }
+ .shell .mobilePanel[data-break] { border-top: var(--stroke) solid var(--line); }
+ .shell .mobilePanel[data-break] .title { font-size: clamp(52px, 14vw, 72px); }
+ .shell .mobilePanel[data-break] .clamp { -webkit-line-clamp: 3; line-clamp: 3; }
+ .shell .stageFooter { display: none; }
+}
+@keyframes whereIn { from { opacity: 0; transform: scale(.7); } }
+
+/* Group windows: each project is a thin banner, like Annex's project rows. */
+.banners { list-style: none; margin: 30px auto 0; padding: 0; width: 100%; max-width: 640px; display: grid; gap: 10px; text-align: left; }
+.banner { position: relative; isolation: isolate; overflow: hidden; width: 100%; min-height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 20px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.18); background: var(--black); color: var(--white); cursor: pointer; font: inherit; text-align: left; transition: border-color .3s ease, transform .3s ease; }
+.banner::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--bg) center / cover; opacity: .38; transition: opacity .3s ease, transform .6s cubic-bezier(.22,1,.36,1); }
+.banner::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(var(--base-rgb) / 0.92) 35%, rgb(var(--base-rgb) / 0.55)); }
+.banner:hover, .banner:focus-visible { border-color: var(--item-accent); }
+.banner:hover::before, .banner:focus-visible::before { opacity: .55; transform: scale(1.04); }
+.banner:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+.bannerName { flex: 1; min-width: 0; font: 400 18px/1.25 var(--font-display); letter-spacing: -.01em; }
+.bannerTag { flex: none; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--item-accent) var(--accent-mix), var(--white)); }
+.bannerArrow { flex: none; font-size: 17px; color: rgb(var(--ink-rgb) / 0.7); transition: transform .3s ease; }
+.banner:hover .bannerArrow { transform: translateX(3px); }
+
+/* Phone: a project opens full screen over its group window. */
+@media (max-width: 760px) {
+ .banners { margin-top: 24px; gap: 8px; }
+ .banner { min-height: 58px; padding: 0 16px; }
+ .bannerName { font-size: 16px; }
+ .bannerTag { font-size: 9px; letter-spacing: .1em; }
+ .storyDialog { width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; border: 0; border-radius: 0; padding: 18px 24px 40px; }
+ .storyBody .title { font-size: clamp(38px, 10vw, 52px); }
+ .storyBody .description { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) { .banner::before, .bannerArrow { transition: none; } }
+.storyBody .eyebrow { display: none; }
+.storyBody .title { margin-top: 8px; display: block; line-height: 1.02; }
+.groupLink { display: inline-block; margin-top: 18px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgb(var(--ink-rgb) / 0.8); text-decoration: underline; text-underline-offset: 5px; }
+
+/* Project buttons in a group window: plain, centred, in the site's line style (no photos). */
+.shell .banners { max-width: 520px; gap: 12px; text-align: center; }
+.shell .banner { flex-direction: column; justify-content: center; gap: 6px; min-height: 60px; padding: 12px 20px; background: rgb(var(--base-rgb) / 0.55); border: var(--stroke) solid rgb(var(--ink-rgb) / 0.32); text-align: center; backdrop-filter: blur(4px); transition: border-color .3s ease, background .3s ease; }
+.shell .banner::before, .shell .banner::after { display: none; }
+.shell .banner:hover, .shell .banner:focus-visible { border-color: rgb(var(--ink-rgb) / 0.82); background: rgb(var(--base-rgb) / 0.8); }
+.shell .bannerName { flex: none; font: 400 17px/1.3 var(--font-body); letter-spacing: .01em; }
+.shell .bannerTag { font-size: 9px; letter-spacing: .22em; }
+@media (max-width: 760px) { .shell .banners { gap: 8px; } .shell .banner { min-height: 54px; padding: 9px 16px; gap: 4px; } }
+
+/* One button style everywhere in a window. The main button is filled with the section's shade (Experience, Projects,
+   Work with me each have one); every other button, project buttons included, is outlined in that shade. */
+.shell .copy { --section-shade: color-mix(in srgb, var(--panel-accent, var(--mint)) var(--accent-mix), var(--white)); }
+.shell .copy :global(.cta-button), .shell .banner {
+  min-height: 44px; padding: 0 18px; border: var(--stroke) solid color-mix(in srgb, var(--section-shade) 55%, transparent);
+  background: color-mix(in srgb, var(--section-shade) 10%, rgb(var(--base-rgb) / 0.5)); color: rgb(var(--ink-rgb) / 0.92);
+  font: 400 10px/1.4 var(--font-body); letter-spacing: .17em; text-transform: uppercase; backdrop-filter: blur(4px);
+  transition: color .25s ease, background .25s ease, border-color .25s ease;
+}
+.shell .copy :global(.cta-button.explore-button) { background: var(--section-shade); border-color: var(--section-shade); color: var(--black); }
+.shell .copy :global(.cta-button):hover, .shell .copy :global(.cta-button):focus-visible, .shell .banner:hover, .shell .banner:focus-visible {
+  background: var(--section-shade); border-color: var(--section-shade); color: var(--black); transform: none; outline: none;
+}
+.shell .copy :global(.cta-button):focus-visible, .shell .banner:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+.shell .banners { max-width: 460px; gap: 10px; }
+.shell .banner { flex-direction: row; justify-content: center; gap: 10px; min-height: 48px; padding: 0 18px; }
+.shell .bannerName { flex: none; font: inherit; letter-spacing: inherit; }
+.shell .bannerTag { font: inherit; letter-spacing: .14em; opacity: .7; }
+.shell .bannerTag::before { content: "·"; margin-right: 10px; }
+.shell .banner { flex-wrap: wrap; row-gap: 2px; padding: 8px 18px; text-align: center; }
+@media (max-width: 760px) {
+ .shell .banners { gap: 8px; }
+ .shell .banner { min-height: 46px; padding: 8px 14px; flex-direction: column; }
+ .shell .bannerTag::before { display: none; }
+}
+
+/* A template's button has an out arrow beside it that opens the template itself. */
+.shell .banners li { display: flex; gap: 8px; }
+.shell .banners li .banner { flex: 1; min-width: 0; }
+.shell .bannerOut { flex: none; width: 48px; display: grid; place-items: center; border: var(--stroke) solid color-mix(in srgb, var(--section-shade) 55%, transparent); background: color-mix(in srgb, var(--section-shade) 10%, rgb(var(--base-rgb) / 0.5)); color: rgb(var(--ink-rgb) / 0.92); font-size: 16px; text-decoration: none; backdrop-filter: blur(4px); transition: background .25s ease, color .25s ease, border-color .25s ease; }
+.shell .bannerOut:hover, .shell .bannerOut:focus-visible { background: var(--section-shade); border-color: var(--section-shade); color: var(--black); outline: none; }
+.shell .bannerOut:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+
+/* Phone: every window is exactly the visible screen (measured with the address bar showing), less the two top bars. */
+@media (max-width: 760px) {
+ .shell .mobilePanel { min-height: calc(var(--window-h, 100svh) - 92px); }
+}
+/* Short laptop screens: the same tightening for the desktop window. */
+@media (min-width: 761px) and (max-height: 760px) {
+ .shell .banners { margin-top: 18px; gap: 8px; }
+ .shell .banner { min-height: 40px; }
+ .shell .headlineTitle { font-size: clamp(40px, 4.4vw, 62px); }
+}
+/* Phone: the four headline numbers sit tighter so the Experience break fits one screen. */
+@media (max-width: 760px) {
+ .shell .mobilePanel .stats { margin-top: 20px; }
+ .shell .mobilePanel .stats > div { padding-top: 12px; padding-bottom: 10px; }
+ .shell .mobilePanel .stats dt { font-size: 26px; }
+ .shell .mobilePanel .stats dd { margin-top: 6px; font-size: 12px; line-height: 1.4; }
+}
+/* Mid-height phones (most phones with the address bar showing). */
+@media (max-width: 760px) and (max-height: 820px) {
+ .shell .mobilePanel { padding-top: 20px; padding-bottom: 48px; }
+ .shell .mobilePanel .eyebrow { min-height: 0; margin-bottom: 16px; }
+ .shell .mobilePanel .title { font-size: clamp(38px, 10.5vw, 54px); }
+ .shell .mobilePanel .description { font-size: 16px; line-height: 1.55; margin-top: 16px; }
+ .shell .mobilePanel .actions { margin-top: 20px; }
+ .shell .banners { margin-top: 18px; gap: 7px; }
+ .shell .banner { min-height: 42px; }
+}
+@media (min-width: 761px) and (max-height: 700px) {
+ .shell .content { padding-top: 60px; padding-bottom: 60px; }
+ .shell .title { font-size: clamp(40px, 4.4vw, 60px); }
+ .shell .description { font-size: 16px; margin-top: 16px; }
+ .shell .eyebrow { margin-bottom: 14px; }
+ .shell .actions { margin-top: 18px; }
+ .shell .details { margin-top: 22px; padding-top: 16px; }
+ .shell .banners { margin-top: 14px; gap: 6px; }
+ .shell .banner { min-height: 36px; }
+}
+
+/* Shorter phones: tighten the window so it still fits. */
+@media (max-width: 760px) and (max-height: 700px) {
+ .shell .mobilePanel { padding-top: 16px; padding-bottom: 40px; }
+ .shell .mobilePanel .eyebrow { min-height: 0; margin-bottom: 12px; }
+ .shell .mobilePanel .title { font-size: clamp(36px, 10vw, 48px); }
+ .shell .mobilePanel[data-break] .title { font-size: clamp(42px, 12vw, 56px); }
+ .shell .mobilePanel .headlineTitle { font-size: clamp(34px, 9.5vw, 44px); }
+ .shell .mobilePanel .description { font-size: 15px; line-height: 1.55; margin-top: 14px; }
+ .shell .mobilePanel .actions { margin-top: 18px; }
+ .shell .mobilePanel .stats { margin-top: 16px; }
+ .shell .mobilePanel .stats dt { font-size: 26px; }
+ .shell .mobilePanel .details { margin-top: 18px; padding-top: 14px; }
+ .shell .banners { margin-top: 16px; gap: 6px; }
+ .shell .banner { min-height: 40px; padding: 6px 12px; }
+ .shell .bannerOut { width: 42px; }
+}
+/* Very short screens (a small phone with the address bar showing). */
+@media (max-width: 760px) and (max-height: 600px) {
+ .shell .mobilePanel { padding-top: 10px; padding-bottom: 28px; }
+ .shell .mobilePanel .eyebrow { display: none; }
+ .shell .mobilePanel .title { font-size: 34px; }
+ .shell .mobilePanel[data-break] .title { font-size: 40px; }
+ .shell .mobilePanel .description { font-size: 14px; line-height: 1.5; margin-top: 10px; }
+ .shell .mobilePanel .actions { margin-top: 14px; }
+ .shell .mobilePanel .actions :global(.cta-button) { min-height: 38px; }
+ .shell .mobilePanel .details { margin-top: 14px; padding-top: 10px; gap: 10px; }
+ .shell .mobilePanel .details p { font-size: 14px; margin-top: 4px; }
+ .shell .mobilePanel .stats { margin-top: 12px; }
+ .shell .mobilePanel .stats dt { font-size: 22px; }
+ .shell .banners { margin-top: 12px; gap: 5px; }
+ .shell .banner { min-height: 36px; padding: 4px 10px; }
+ .shell .bannerOut { width: 38px; }
 }

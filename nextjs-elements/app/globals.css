@@ -19,7 +19,7 @@
   --accent-mix: 100%;
   --shadow: 1;
   /* how strongly photos are washed over (dark scrim or paper wash); 1 is the original strength */
-  --overlay: 0.45;
+  --overlay: 0.72;
   /* lines: 1.5px reads slightly heavier on high-density screens, 2px on standard ones (1.5px rounds down there) */
   --stroke: 1.5px;
   --sidebar-width: 390px;
@@ -37,15 +37,15 @@
 :root[data-scheme="light"] {
   color-scheme: light;
   --ink-rgb: 27 26 24;
-  --base-rgb: 246 243 236;
+  --base-rgb: 238 234 225;
   --accent: #3c3a35;
   --mint: #2f7d6d;
   --good: #2f7d6d;
   --bad: #b3412f;
-  --surface: #ebe7de;
+  --surface: #e3ded3;
   --accent-mix: 52%;
   --shadow: 0.35;
-  --overlay: 0.9;
+  --overlay: 0.74;
 }
 
 * {
@@ -2883,4 +2883,12 @@ section.stage > .content {
 
 .plus.is-open::after {
   display: none;
+}
+
+/* Phone home: the scroll settles on one still frame at a time, like the desktop panels. */
+@media (max-width: 760px) {
+  html:has(body.revamp-showcase) { scroll-snap-type: y mandatory; scroll-padding-top: 92px; }
+}
+@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+  html:has(body.revamp-showcase) { scroll-snap-type: y proximity; }
 }

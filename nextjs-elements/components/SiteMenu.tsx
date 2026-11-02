@@ -14,8 +14,10 @@ type SiteMenuProps = {
 
 export const menuItems = [
   { label: "Home", href: "/" },
-  { label: "Websites", href: "/websites" },
-  { label: "Annex", href: "/annex/" }
+  { label: "Experience", href: "/#experience" },
+  { label: "Projects", href: "/#projects" },
+  { label: "Work with me", href: "/#work-with-me" },
+  { label: "Client sign-in", href: "/clients/" }
 ];
 
 export function SiteMenu({ className = "", hideIcon = false, onContact, onNavigate, showLabel = false }: SiteMenuProps) {

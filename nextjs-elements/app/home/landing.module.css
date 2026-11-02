@@ -1,0 +1,365 @@
+/* Long-scroll home trial, in the site's own tokens: --black is the page, --white the ink, --stroke the line weight.
+   Each part of the site carries its shade (--shade): Experience olive, Projects blue, Work with me mint. */
+.page { --shade: #85cfc0; --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); --gutter: clamp(20px, 5vw, 72px);
+  /* The site locks body scrolling (globals.css), so this page scrolls itself, like the other full pages do. */
+  height: 100vh; height: 100dvh; overflow-x: hidden; overflow-y: auto; scroll-behavior: smooth;
+  background: var(--black); color: var(--white); font-family: var(--font-body); }
+.page section, .page .cta { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); }
+.page a { color: inherit; text-decoration: none; }
+
+/* Top bar */
+.bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 32px; height: 72px; padding: 0 var(--gutter);
+  background: rgb(var(--base-rgb) / 0.88); backdrop-filter: blur(10px); border-bottom: var(--stroke) solid var(--line); }
+.logo { font: 500 22px/1 var(--font-display); letter-spacing: .14em; }
+.nav { display: flex; gap: 30px; margin-left: 24px; }
+.nav a { font-size: 15px; color: rgb(var(--ink-rgb) / 0.78); padding: 6px 0; border-bottom: var(--stroke) solid transparent; transition: color .2s, border-color .2s; }
+.nav a:hover, .nav a:focus-visible { color: var(--white); border-color: currentColor; outline: none; }
+.barEnd { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.quiet { font-size: 13px; color: rgb(var(--ink-rgb) / 0.7); }
+.scheme { width: 40px; height: 40px; display: grid; place-items: center; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.22); background: transparent; color: var(--white); cursor: pointer; }
+
+/* Buttons: one style, filled with the section's shade for the main one, outlined in it otherwise. */
+.primary, .secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px;
+  font: 400 11px/1 var(--font-body); letter-spacing: .17em; text-transform: uppercase; cursor: pointer; transition: background .25s, color .25s, border-color .25s; }
+.primary { background: var(--tone); border: var(--stroke) solid var(--tone); color: var(--black) !important; }
+.secondary { background: transparent; border: var(--stroke) solid color-mix(in srgb, var(--tone) 60%, transparent); color: var(--white); }
+.primary:hover, .primary:focus-visible { background: var(--white); border-color: var(--white); outline: none; }
+.secondary:hover, .secondary:focus-visible { background: var(--tone); border-color: var(--tone); color: var(--black); outline: none; }
+.buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+.eyebrow { display: block; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--tone); }
+
+/* Hero: a side-scrolling rail of windows in the original kno.plus style (full photo, overlay, big Kanit title). */
+.hero { position: relative; overflow: hidden; border-bottom: var(--stroke) solid var(--line); }
+/* Edge to edge: one full-width window at a time, sliding as a loop (see landing.tsx). */
+.rail { display: flex; transition: transform .8s cubic-bezier(.65,0,.35,1); will-change: transform; }
+.win { position: relative; isolation: isolate; flex: 0 0 100%; height: calc(0.9 * clamp(460px, calc(100svh - 72px), 800px));
+  display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+.win::before { content: ""; position: absolute; inset: 0; z-index: -1; transition: transform .8s cubic-bezier(.22,1,.36,1);
+  background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.6 * var(--overlay))), rgb(var(--base-rgb) / calc(0.92 * var(--overlay)))), var(--bg) center / cover; }
+:global(:root[data-scheme="light"]) .win::before { background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.8 * var(--overlay))), rgb(var(--base-rgb) / calc(0.96 * var(--overlay)))), var(--bg) center / cover; }
+.win:hover::before { transform: scale(1.03); }
+.winHit { position: absolute; inset: 0; z-index: 0; border: 0; background: transparent; cursor: pointer; }
+.winHit:focus-visible { outline: 2px solid var(--white); outline-offset: -6px; }
+.winCopy { position: relative; z-index: 1; max-width: 760px; padding: 40px clamp(24px, 5vw, 64px); pointer-events: none; }
+.winCopy :is(a, button) { pointer-events: auto; }
+.winCopy h1, .winCopy h2 { margin: 20px 0 0; font: 300 clamp(44px, 6vw, 92px)/.98 var(--font-display); letter-spacing: -.05em; }
+.winCopy h1 em { font-family: var(--font-script); font-weight: 500; font-style: italic; letter-spacing: -.03em; }
+.winCopy p { max-width: 600px; margin: 24px auto 0; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.65; color: rgb(var(--ink-rgb) / 0.86); }
+.winCopy .buttons { justify-content: center; }
+.winList { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--tone); }
+.intro .winCopy { max-width: 960px; }
+.intro .winCopy h1 { font-size: clamp(44px, 6.4vw, 96px); }
+/* Arrows sit on the windows and appear while the pointer is over them (always shown on touch screens). */
+.stage { position: relative; touch-action: pan-y; }
+.arrowBtn { position: absolute; top: 50%; z-index: 3; width: 52px; height: 52px; margin-top: -26px; display: grid; place-items: center;
+  border: var(--stroke) solid rgb(var(--ink-rgb) / 0.4); background: rgb(var(--base-rgb) / 0.7); backdrop-filter: blur(6px); color: var(--white); font-size: 20px;
+  cursor: pointer; opacity: 0; transition: opacity .25s, border-color .2s, background .2s; }
+.prev { left: var(--gutter); } .next { right: var(--gutter); }
+.stage:hover .arrowBtn:not(:disabled), .arrowBtn:focus-visible { opacity: 1; }
+.arrowBtn:hover { border-color: var(--white); background: rgb(var(--base-rgb) / 0.9); }
+.arrowBtn:disabled { pointer-events: none; }
+@media (hover: none) { .arrowBtn { opacity: .85; } }
+
+/* Appearance trial, set from the floating menu: outlines off or thicker, and rounded corners. */
+.page[data-lines="none"] { --stroke: 0px; }
+.page[data-lines="thick"] { --stroke: 3px; }
+.page[data-round] :is(.primary, .secondary, .scheme, .arrowBtn, .closeBtn, .banners li, .results figure, .tile, .card, .featureImage, .lookBtn, .lookPanel) { border-radius: 14px; }
+.page[data-round] :is(.primary, .secondary, .scheme, .arrowBtn, .closeBtn, .lookBtn) { border-radius: 999px; }
+.page[data-round] .mark { border-radius: 50%; }
+.look { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.lookBtn { width: 52px; height: 52px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.35); background: var(--black); color: var(--white); font: 400 17px/1 var(--font-display); cursor: pointer; box-shadow: 0 10px 30px rgb(0 0 0 / calc(.35 * var(--shadow))); }
+.page[data-lines="none"] :is(.lookBtn, .lookPanel) { border: 0; }
+.lookPanel { display: grid; gap: 12px; min-width: 210px; padding: 18px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.25); background: var(--black); box-shadow: 0 20px 50px rgb(0 0 0 / calc(.4 * var(--shadow))); }
+.lookPanel label { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+.lookPanel input { width: 18px; height: 18px; accent-color: var(--tone); }
+
+/* The sheet: a window opens over the page below the bar, listing its projects as thin banners; a project opens in place. */
+.page[data-locked] { overflow: hidden; }
+.sheet { position: fixed; inset: 72px 0 0; z-index: 30; pointer-events: none; }
+.sheet[data-open] { pointer-events: auto; }
+.sheetInner { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); height: 100%; display: flex; flex-direction: column; background: var(--black);
+  border-top: var(--stroke) solid var(--tone); box-shadow: 0 -30px 80px rgb(0 0 0 / calc(.4 * var(--shadow))); animation: rise .5s cubic-bezier(.22,1,.36,1) both; }
+@keyframes rise { from { transform: translateY(40px); opacity: 0; } }
+.sheetHead { position: relative; flex: none; display: flex; align-items: center; gap: 16px; height: 60px; padding: 0 var(--gutter); border-bottom: var(--stroke) solid var(--line); }
+.sheetHead .eyebrow { flex: 1; min-width: 0; }
+.where { font-size: 12px; letter-spacing: .2em; color: rgb(var(--ink-rgb) / 0.7); }
+.back { border: 0; background: transparent; color: var(--white); font: 400 12px/1 var(--font-body); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; padding: 10px 0; }
+.closeBtn { width: 44px; height: 44px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.3); background: rgb(var(--base-rgb) / 0.6); color: var(--white); font-size: 22px; cursor: pointer; }
+.closeBtn:hover { border-color: var(--white); }
+.sheetBody { flex: 1; overflow-y: auto; overscroll-behavior: contain; scroll-snap-type: y mandatory; }
+/* Each project is a full window: photo under the overlay, copy centered, snapping one at a time like the original home. */
+.frame { position: relative; isolation: isolate; min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 48px var(--gutter); scroll-snap-align: start; overflow: hidden; }
+.frame::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.82 * var(--overlay))), rgb(var(--base-rgb) / calc(0.97 * var(--overlay)))), var(--bg) center / cover; }
+:global(:root[data-scheme="light"]) .frame::before { background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(1 * var(--overlay)))), var(--bg) center / cover; }
+.frame .detail { width: 100%; }
+.detail { max-width: 760px; margin: 0 auto; text-align: center; animation: rise .4s ease both; }
+.detail h2 { margin: 18px 0 0; font: 300 clamp(40px, 5.5vw, 80px)/1 var(--font-display); letter-spacing: -.05em; }
+.lede { max-width: 620px; margin: 22px auto 0; font-size: 18px; line-height: 1.65; color: rgb(var(--ink-rgb) / 0.82); }
+.detail .buttons { justify-content: center; }
+.banners { display: grid; gap: 10px; max-width: 600px; margin: 34px auto 0; padding: 0; list-style: none; text-align: left; }
+.banners li { position: relative; isolation: isolate; display: flex; overflow: hidden; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.2); transition: border-color .25s; }
+.banners li::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--bg) center / cover; opacity: .35; transition: opacity .3s, transform .6s cubic-bezier(.22,1,.36,1); }
+.banners li::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(var(--base-rgb) / 0.94) 35%, rgb(var(--base-rgb) / 0.6)); }
+.banners li:hover { border-color: var(--tone); }
+.banners li:hover::before { opacity: .55; transform: scale(1.04); }
+.banners button { flex: 1; min-width: 0; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 4px 14px; min-height: 64px; padding: 10px 20px; border: 0; background: transparent; color: var(--white); text-align: left; cursor: pointer; }
+.banners button span { flex: 1 1 auto; font: 400 19px/1.25 var(--font-display); letter-spacing: -.01em; }
+.banners button small { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--tone); }
+.banners button b { font-weight: 400; color: rgb(var(--ink-rgb) / 0.7); transition: transform .25s; }
+.banners button:hover b { transform: translateX(3px); }
+.banners li > a { display: grid; place-items: center; width: 56px; border-left: var(--stroke) solid rgb(var(--ink-rgb) / 0.2); color: var(--tone); font-size: 18px; }
+.banners li > a:hover { background: color-mix(in srgb, var(--tone) 18%, transparent); }
+.results { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 34px 0 0; }
+.results figure { margin: 0; flex: 1 1 220px; max-width: 320px; padding: 20px; border: var(--stroke) solid var(--line); }
+.results figcaption { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.results .big { margin: 10px 0 0; font-size: clamp(48px, 6vw, 72px); }
+.facts { display: grid; gap: 18px; margin: 34px auto 0; max-width: 620px; }
+.facts span { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--tone); }
+.facts p { margin: 8px 0 0; font-size: 15px; line-height: 1.7; color: rgb(var(--ink-rgb) / 0.82); }
+.note { margin: 24px 0 0; font-size: 14px; color: var(--muted); }
+
+/* Tool strip, standing in for the usual client logos. */
+.strip { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 32px; padding: 26px var(--gutter); border-bottom: var(--stroke) solid var(--line); }
+.marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee ul { display: flex; gap: 48px; width: max-content; margin: 0; padding: 0; list-style: none; animation: slide 40s linear infinite; }
+.marquee li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: rgb(var(--ink-rgb) / 0.72); white-space: nowrap; }
+.marquee li svg { width: 26px; height: 26px; fill: rgb(var(--ink-rgb) / 0.62); display: block; flex: none; }
+@keyframes slide { to { transform: translateX(calc(-50% - 24px)); } }
+
+/* Sections */
+.section { padding: clamp(72px, 10vw, 128px) var(--gutter); border-bottom: var(--stroke) solid var(--line); }
+.band { background: color-mix(in srgb, var(--shade) 9%, var(--black)); }
+.heading { max-width: 820px; margin: 0 auto; text-align: center; }
+.heading h2 { margin: 18px 0 0; font: 300 clamp(38px, 4.4vw, 64px)/1.05 var(--font-display); letter-spacing: -.045em; }
+.heading p { margin: 22px auto 0; max-width: 640px; font-size: 18px; line-height: 1.65; color: rgb(var(--ink-rgb) / 0.78); }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 1000px; margin: 56px auto 0; border-top: var(--stroke) solid var(--line); }
+.stats div { padding: 22px 20px 0; }
+.stats div + div { border-left: var(--stroke) solid var(--line); }
+.stats dt { font: 300 clamp(32px, 3vw, 46px)/1 var(--font-display); color: var(--tone); }
+.stats dd { margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: rgb(var(--ink-rgb) / 0.8); }
+
+/* Experience: one photo tile per kind of work. */
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 56px; }
+.tile { position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: flex-end; min-height: 440px; padding: 28px; overflow: hidden;
+  border: var(--stroke) solid color-mix(in srgb, var(--tone) 40%, transparent); }
+.tile::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--bg) center / cover; transition: transform .6s cubic-bezier(.22,1,.36,1); }
+.tile::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(.35 * var(--overlay))), rgb(var(--base-rgb) / .94) 62%); }
+.tile:hover::before { transform: scale(1.05); }
+.tile h3 { margin: 0; font: 400 30px/1.1 var(--font-display); letter-spacing: -.03em; }
+.tile p { margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: rgb(var(--ink-rgb) / 0.82); }
+.tile ul { margin: 18px 0 0; padding: 16px 0 0; list-style: none; border-top: var(--stroke) solid var(--line); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--tone); }
+.tile li + li { margin-top: 8px; }
+.arrow { font-size: 18px; transition: transform .25s; }
+.tile .arrow { position: absolute; top: 24px; right: 24px; }
+.tile:hover .arrow, .card:hover .cardFoot span, .list a:hover .arrow, .list button:hover .arrow { transform: translateX(4px); }
+
+/* Featured case study */
+.feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); align-items: center; padding: clamp(72px, 10vw, 128px) var(--gutter); border-bottom: var(--stroke) solid var(--line); }
+.feature h2 { margin: 18px 0 0; font: 300 clamp(34px, 3.6vw, 52px)/1.05 var(--font-display); letter-spacing: -.04em; }
+.big { margin: 28px 0 0; font: 300 clamp(72px, 9vw, 132px)/.9 var(--font-display); letter-spacing: -.05em; color: var(--tone); }
+.big span { display: block; margin-top: 10px; font: 400 13px/1 var(--font-body); letter-spacing: .24em; text-transform: uppercase; color: rgb(var(--ink-rgb) / 0.7); }
+.swap { margin: 22px 0 0; font-size: 16px; color: rgb(var(--ink-rgb) / 0.8); }
+.swap s { color: var(--bad); } .swap b { color: var(--good); font-weight: 500; }
+.feature p:not(.big):not(.swap) { max-width: 560px; margin-top: 20px; font-size: 16px; line-height: 1.7; color: rgb(var(--ink-rgb) / 0.8); }
+.featureImage { min-height: 520px; height: 100%; border: var(--stroke) solid color-mix(in srgb, var(--tone) 40%, transparent); background: var(--bg) center / cover; }
+
+/* Projects: cards with a monogram, like the reference's industry cards. */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 1180px; margin: 56px auto 0; }
+.card { display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto 1fr auto; column-gap: 22px; padding: 26px; background: var(--black);
+  border: var(--stroke) solid color-mix(in srgb, var(--tone) 35%, transparent); transition: border-color .25s; }
+.card:hover, .card:focus-visible { border-color: var(--tone); outline: none; }
+.mark { grid-row: 1 / 4; width: 56px; height: 56px; display: grid; place-items: center; border: var(--stroke) solid var(--tone); color: var(--tone); font: 400 24px/1 var(--font-display); }
+.card h3 { margin: 4px 0 0; font: 400 24px/1.15 var(--font-display); }
+.card p { margin: 10px 0 0; font-size: 15px; line-height: 1.6; color: rgb(var(--ink-rgb) / 0.78); }
+.cardFoot { display: flex; justify-content: space-between; margin-top: 18px; padding-top: 14px; border-top: var(--stroke) solid var(--line); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--tone); }
+.cardFoot span { transition: transform .25s; }
+
+/* Work with me: a ruled list with arrows. */
+.list { max-width: 980px; margin: 56px auto 0; padding: 0; list-style: none; border-top: var(--stroke) solid var(--line); }
+.list li { border-bottom: var(--stroke) solid var(--line); }
+.list a, .list button { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; align-items: center; gap: 24px; padding: 26px 4px; background: none; border: 0; color: var(--white); text-align: left; cursor: pointer; font: inherit; }
+.list a > span:first-child, .list button > span:first-child { font: 400 clamp(22px, 2.2vw, 30px)/1.2 var(--font-display); letter-spacing: -.02em; }
+.list small { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--tone); text-align: right; }
+.list a:hover, .list button:hover, .list a:focus-visible, .list button:focus-visible { background: color-mix(in srgb, var(--tone) 8%, transparent); outline: none; }
+
+/* Call to action and footer */
+.cta { padding: clamp(80px, 10vw, 140px) var(--gutter); text-align: center; background: color-mix(in srgb, var(--shade) 12%, var(--black)); }
+.cta h2 { margin: 0; font: 300 clamp(40px, 5vw, 72px)/1.05 var(--font-display); letter-spacing: -.045em; }
+.cta p { margin: 20px auto 0; max-width: 520px; font-size: 18px; line-height: 1.6; color: rgb(var(--ink-rgb) / 0.8); }
+.cta .buttons { justify-content: center; }
+.footer { display: flex; flex-wrap: wrap; align-items: center; gap: 24px 40px; padding: 40px var(--gutter); border-top: var(--stroke) solid var(--line); }
+.footer nav { display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px; color: rgb(var(--ink-rgb) / 0.75); }
+.footer small { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+/* Tablet and phone */
+@media (max-width: 960px) {
+  .nav { display: none; }
+  .hero, .feature { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: 1fr; }
+  .tile { min-height: 340px; }
+  .cards { grid-template-columns: 1fr; }
+  .featureImage { min-height: 300px; }
+}
+@media (max-width: 640px) {
+  .bar { height: 60px; gap: 12px; }
+  .quiet { display: none; }
+  .barEnd .primary { padding: 0 14px; min-height: 40px; }
+  .win { height: calc(0.9 * (100svh - 60px)); min-height: 470px; }
+  .winCopy { padding: 28px 20px; }
+  .winCopy p { font-size: 16px; }
+  .arrowBtn { width: 40px; height: 40px; margin-top: -20px; font-size: 16px; }
+  .arrowBtn { display: none; }
+  .look { right: 14px; bottom: 14px; }
+  .sheet { inset: 60px 0 0; }
+  .sheetHead { height: 52px; }
+  .frame { padding: 36px 20px; }
+  .banners button { grid-template-columns: 1fr auto; }
+  .banners button span { font-size: 17px; }
+  .banners button small { grid-row: 2; grid-column: 1; }
+  .banners button b { grid-row: 1 / 3; grid-column: 2; }
+  .lede { font-size: 16px; }
+  .strip { grid-template-columns: 1fr; gap: 16px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats div:nth-child(3) { border-left: 0; }
+  .stats div:nth-child(n + 3) { border-top: var(--stroke) solid var(--line); }
+  .list a, .list button { grid-template-columns: 1fr 24px; }
+  .list small { grid-column: 1; grid-row: 2; text-align: left; }
+  .list .arrow { grid-column: 2; grid-row: 1 / 3; }
+  .footer small { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .marquee ul { animation: none; } .tile::before, .window, .arrow { transition: none; } }
+/* Without outlines, outlined buttons get a faint fill so they still read as buttons. */
+.page[data-lines="none"] :is(.secondary, .scheme, .closeBtn) { background: rgb(var(--ink-rgb) / 0.08); }
+.page[data-lines="none"] :is(.secondary, .scheme, .closeBtn):hover { background: var(--tone); color: var(--black); }
+
+/* Project cards: the app's own icon, then its name and a line. */
+.card { text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.appMark { grid-row: 1 / 3; width: 56px; height: 56px; display: grid; place-items: center; overflow: hidden; border-radius: 14px; font: 400 24px/1 var(--font-display);
+  color: var(--black); background: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); }
+.appMark img, .appMark svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+/* The little project window. */
+.peek { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(720px, calc(100% - 32px)); max-height: calc(100dvh - 48px); padding: 0; border: 0; background: var(--black); color: var(--white); overflow: auto;
+  box-shadow: 0 30px 90px rgb(0 0 0 / calc(.5 * var(--shadow) + .2)); }
+.peek::backdrop { background: rgb(0 0 0 / 0.55); backdrop-filter: blur(4px); }
+.peek[open] { animation: rise .35s cubic-bezier(.22,1,.36,1) both; }
+.peekInner { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); padding: 24px 28px 28px; }
+.peekHead { display: grid; grid-template-columns: 56px 1fr 44px; align-items: center; gap: 16px; }
+.peekHead .appMark { grid-row: auto; }
+.peekHead h3 { margin: 0; font: 400 28px/1.1 var(--font-display); letter-spacing: -.02em; }
+.peekHead span { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--tone); }
+.peekText { margin: 20px 0 0; font-size: 16px; line-height: 1.65; color: rgb(var(--ink-rgb) / 0.84); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.chips li { padding: 7px 12px; font-size: 12px; letter-spacing: .06em; background: color-mix(in srgb, var(--tone) 14%, transparent); color: var(--white); }
+.shots { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; margin: 20px 0 0; overflow-x: auto; scrollbar-width: thin; }
+.shots[data-phone] { grid-auto-columns: 130px; }
+.shots img { width: 100%; height: 160px; object-fit: cover; object-position: top; display: block; background: rgb(var(--ink-rgb) / 0.06); }
+.shots[data-phone] img { height: 260px; }
+.soon { align-self: center; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.page[data-round] :is(.peek, :global(.contact-modal-panel)) { border-radius: 20px; }
+.page[data-round] :is(.chips li) { border-radius: 999px; }
+.page[data-round] .shots img { border-radius: 10px; }
+
+/* Tools, outcome and "also includes" in one centered box. */
+.factBox { display: grid; gap: 0; max-width: 640px; margin: 30px auto 0; padding: 4px 24px; text-align: center;
+  background: rgb(var(--base-rgb) / 0.6); backdrop-filter: blur(8px); border: var(--stroke) solid var(--line); }
+.factBox div { padding: 16px 0; }
+.factBox div + div { border-top: 1px solid rgb(var(--ink-rgb) / 0.12); }
+.factBox dt { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--tone); }
+.factBox dd { margin: 8px 0 0; font-size: 15px; line-height: 1.6; color: rgb(var(--ink-rgb) / 0.86); }
+.page[data-round] .factBox { border-radius: 16px; }
+@media (max-width: 640px) {
+  .peekInner { padding: 18px 18px 22px; }
+  .peekHead { grid-template-columns: 48px 1fr 40px; gap: 12px; }
+  .peekHead .appMark { width: 48px; height: 48px; }
+  .peekHead h3 { font-size: 22px; }
+  .factBox { padding: 2px 16px; }
+}
+
+/* Rounded photo boxes clip with clip-path, so the photo layer can't leave a thin light edge around the curve. */
+.page[data-round] :is(.tile, .featureImage, .banners li, .card, .factBox) { clip-path: inset(0 round 14px); }
+.page[data-round] .card { clip-path: inset(0 round 14px); }
+/* "Remove overlays": photos show at full strength; a soft shadow keeps the words readable. */
+.page[data-plain] { --overlay: 0; }
+.page[data-plain] :is(.win, .frame, .tile) :is(h1, h2, h3, p, span, li, dt, dd, figcaption) { text-shadow: 0 1px 14px rgb(var(--base-rgb) / 0.9), 0 0 3px rgb(var(--base-rgb) / 0.6); }
+.page[data-plain] .tile::after { background: linear-gradient(180deg, transparent 35%, rgb(var(--base-rgb) / .6)); }
+
+/* On a project window, everything sits in one box over the photo; its opacity comes from the Aa slider (--panel-a). */
+.frame .detail { max-width: 820px; padding: clamp(28px, 4vw, 48px); background: rgb(var(--base-rgb) / var(--panel-a, .6)); backdrop-filter: blur(10px); border: var(--stroke) solid var(--line); }
+.page[data-round] .frame .detail { border-radius: 22px; }
+.frame .factBox { background: transparent; backdrop-filter: none; border: 0; border-top: 1px solid rgb(var(--ink-rgb) / 0.12); clip-path: none; padding: 4px 0 0; max-width: none; }
+.frame .results figure { background: transparent; }
+.slider { display: grid !important; gap: 8px; }
+.slider span { display: flex; justify-content: space-between; }
+.slider output { font-variant-numeric: tabular-nums; color: var(--tone); }
+.slider input { width: 100%; height: auto; }
+@media (max-width: 640px) { .frame .detail { padding: 24px 18px; } }
+@media (min-width: 641px) { .banners button b { grid-column: 3; } }
+
+/* The same box sits over every photo: rail windows and Experience tiles too. */
+.tileBox { padding: 22px; }
+.tile .tileBox ul { border-top-color: rgb(var(--ink-rgb) / 0.12); }
+.page[data-round] .tileBox { border-radius: 16px; }
+.page[data-plain] .tile::after { background: none; }
+.page[data-plain] :is(.tileBox, .frame .detail) * { text-shadow: none !important; }
+.tile .arrow { width: 36px; height: 36px; display: grid; place-items: center; top: 18px; right: 18px; border-radius: 50%; background: rgb(var(--base-rgb) / var(--panel-a, .85)); }
+
+/* Experience groups as three slices: full-width strips, photo on the right, words on a shaded band on the left. */
+.tiles { grid-template-columns: 1fr; gap: 10px; max-width: 1180px; margin-left: auto; margin-right: auto; }
+.tile { min-height: 0; padding: 0; justify-content: center; }
+.tile::after, .page[data-plain] .tile::after { background: linear-gradient(90deg, rgb(var(--base-rgb) / var(--panel-a, .85)) 0%, rgb(var(--base-rgb) / var(--panel-a, .85)) 70%, rgb(var(--base-rgb) / 0) 97%); }
+.tileBox { display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; gap: 28px; padding: 30px 84px 30px 32px; background: none; backdrop-filter: none; border: 0; border-radius: 0 !important; }
+.tile h3 { font-size: 28px; }
+.tile p { margin: 0; max-width: 520px; }
+.tile .tileBox ul { margin: 0; padding: 0; border: 0; }
+.tile .arrow { top: 50%; margin-top: -18px; right: 24px; }
+.page[data-round] .tile { border-radius: 16px; clip-path: inset(0 round 16px); }
+@media (max-width: 960px) {
+  .tileBox { grid-template-columns: 1fr; gap: 12px; padding: 24px 64px 24px 22px; }
+  .tile::after, .page[data-plain] .tile::after { background: linear-gradient(90deg, rgb(var(--base-rgb) / var(--panel-a, .85)) 55%, rgb(var(--base-rgb) / .35)); }
+  .tile { min-height: 0; }
+  .tile .arrow { right: 14px; }
+}
+
+/* The rail keeps its photo overlay even when "Remove photo overlays" is on. */
+.page[data-plain] .win { --overlay: .72; }
+:global(:root[data-scheme="light"]) .page[data-plain] .win { --overlay: .74; }
+.page[data-plain] .win * { text-shadow: none !important; }
+
+/* Slices without a background photo: the photo sits in its own box at the right end. */
+.tile { width: 100%; font: inherit; color: inherit; text-align: left; cursor: pointer; background: rgb(var(--ink-rgb) / 0.05); }
+.tile::before, .tile::after, .page[data-plain] .tile::after { display: none; }
+.tile:hover { background: rgb(var(--ink-rgb) / 0.08); }
+.tileBox { grid-template-columns: minmax(160px, 220px) minmax(0, 1.4fr) minmax(0, 1fr) 240px; padding: 14px 14px 14px 32px; }
+.thumb { position: relative; height: 104px; background: var(--bg) center / cover; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+.tile:hover .thumb { transform: scale(1.02); }
+.thumb .arrow, .tile .thumb .arrow { position: absolute; top: auto; bottom: 10px; right: 10px; margin: 0; }
+.page[data-round] .thumb { border-radius: 12px; }
+@media (max-width: 960px) {
+  .tileBox { grid-template-columns: 1fr; padding: 22px; }
+  .thumb { height: 120px; order: -1; }
+}
+
+/* Work with me: offers on the left, the four steps on the right, buttons underneath. */
+.hire { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; max-width: 1180px; margin: 48px auto 0; }
+.offers { display: grid; gap: 10px; }
+.offers a, .offers button { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 16px; align-items: center; padding: 20px 24px;
+  background: rgb(var(--ink-rgb) / 0.05); border: var(--stroke) solid var(--line); color: var(--white); font: inherit; text-align: left; cursor: pointer; transition: background .2s; }
+.offers a:hover, .offers button:hover { background: color-mix(in srgb, var(--tone) 14%, transparent); }
+.offers b { font: 400 24px/1.2 var(--font-display); letter-spacing: -.02em; }
+.offers small { grid-row: 2; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--tone); margin-top: 6px; }
+.offers span { grid-row: 1 / 3; grid-column: 2; color: var(--tone); font-size: 18px; }
+.steps { margin: 0; padding: 24px 28px; list-style: none; background: rgb(var(--ink-rgb) / 0.05); border: var(--stroke) solid var(--line); display: grid; align-content: start; gap: 4px; }
+.steps li { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; font: 400 20px/1.3 var(--font-display); }
+.steps li + li { border-top: 1px solid rgb(var(--ink-rgb) / 0.1); }
+.steps i { font: 400 12px/1 var(--font-body); font-style: normal; letter-spacing: .14em; color: var(--tone); }
+.hireButtons { justify-content: center; margin-top: 36px; }
+.page[data-round] :is(.offers a, .offers button, .steps) { border-radius: 16px; }
+@media (max-width: 960px) { .hire { grid-template-columns: 1fr; } }
+
+/* Slices without photos: name, line, projects, arrow. */
+.tileBox { grid-template-columns: minmax(160px, 220px) minmax(0, 1.4fr) minmax(0, 1fr) 36px; padding: 28px 24px 28px 32px; }
+.tile .tileBox .arrow { position: static; margin: 0; }
+@media (max-width: 960px) { .tileBox { grid-template-columns: 1fr 36px; padding: 22px; } .tileBox h3, .tileBox p, .tileBox ul { grid-column: 1; } .tile .tileBox .arrow { grid-column: 2; grid-row: 1; } }
