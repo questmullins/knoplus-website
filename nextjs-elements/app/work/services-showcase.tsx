@@ -226,8 +226,9 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   function rows(items: ServiceItem[], depth = 0) {
     const ancestors = model.entries.find(e => e.item.id === selectedId)?.ancestors || [];
     const listed = (item: ServiceItem) => !!model.project || model.panels.some(p => p.id === item.id) || !!item.children?.some(child => model.panels.some(p => p.id === child.id));
-    const folder = (item: ServiceItem) => !!item.children?.some(listed);
-    return <ul className={s.rows}>{items.filter(item => depth === 0 || listed(item)).map(item => <li key={item.id}>
+    // On the home page the menu is just the three parts of the site; the windows inside them are reached by scrolling.
+    const folder = (item: ServiceItem) => !!model.project && !!item.children?.some(listed);
+    return <ul className={s.rows}>{items.filter(item => depth === 0 || (!!model.project && listed(item))).map(item => <li key={item.id}>
       <button type="button" className={`template-btn ${s.row} ${expanded.has(item.id) && folder(item) ? s.open : ""} ${selectedId === item.id ? s.current : ""} ${ancestors.includes(item.id) ? s.inPath : ""}`}
         style={{ "--depth": depth, "--item-accent": serviceAccent(item) } as CSSProperties} data-depth={depth} aria-expanded={folder(item) ? expanded.has(item.id) : undefined}
         aria-controls={folder(item) ? `folder-${item.id}` : undefined} aria-current={selectedId === item.id ? "true" : undefined} onClick={() => select(item, folder(item))}>
