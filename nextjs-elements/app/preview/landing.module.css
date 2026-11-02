@@ -285,3 +285,15 @@
 .page[data-plain] { --overlay: 0; }
 .page[data-plain] :is(.win, .frame, .tile) :is(h1, h2, h3, p, span, li, dt, dd, figcaption) { text-shadow: 0 1px 14px rgb(var(--base-rgb) / 0.9), 0 0 3px rgb(var(--base-rgb) / 0.6); }
 .page[data-plain] .tile::after { background: linear-gradient(180deg, transparent 35%, rgb(var(--base-rgb) / .6)); }
+
+/* On a project window, everything sits in one box over the photo; its opacity comes from the Aa slider (--panel-a). */
+.frame .detail { max-width: 820px; padding: clamp(28px, 4vw, 48px); background: rgb(var(--base-rgb) / var(--panel-a, .6)); backdrop-filter: blur(10px); border: var(--stroke) solid var(--line); }
+.page[data-round] .frame .detail { border-radius: 22px; }
+.frame .factBox { background: transparent; backdrop-filter: none; border: 0; border-top: 1px solid rgb(var(--ink-rgb) / 0.12); clip-path: none; padding: 4px 0 0; max-width: none; }
+.frame .results figure { background: transparent; }
+.slider { display: grid !important; gap: 8px; }
+.slider span { display: flex; justify-content: space-between; }
+.slider output { font-variant-numeric: tabular-nums; color: var(--tone); }
+.slider input { width: 100%; height: auto; }
+@media (max-width: 640px) { .frame .detail { padding: 24px 18px; } }
+@media (min-width: 641px) { .banners button b { grid-column: 3; } }
