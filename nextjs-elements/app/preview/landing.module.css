@@ -1,7 +1,9 @@
 /* Long-scroll home trial, in the site's own tokens: --black is the page, --white the ink, --stroke the line weight.
    Each part of the site carries its shade (--shade): Experience olive, Projects blue, Work with me mint. */
 .page { --shade: #85cfc0; --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); --gutter: clamp(20px, 5vw, 72px);
-  min-height: 100vh; background: var(--black); color: var(--white); font-family: var(--font-body); }
+  /* The site locks body scrolling (globals.css), so this page scrolls itself, like the other full pages do. */
+  height: 100vh; height: 100dvh; overflow-x: hidden; overflow-y: auto; scroll-behavior: smooth;
+  background: var(--black); color: var(--white); font-family: var(--font-body); }
 .page section, .page .cta { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); }
 .page a { color: inherit; text-decoration: none; }
 
