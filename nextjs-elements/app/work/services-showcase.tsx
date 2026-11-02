@@ -254,7 +254,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   // A project opens from its banner: in the main stage on desktop, over the window on a phone.
   function tag(item: ServiceItem) {
     const metric = item.metrics?.find(m => m.headline);
-    return metric ? `${metric.headline} ${metric.change}` : item.platform === "android" ? "Android" : item.template ? "Template" : item.note === "In progress." ? "In progress" : "";
+    return metric ? `${metric.headline} ${metric.change}` : item.platform === "android" ? "Android" : item.note === "In progress." ? "In progress" : "";
   }
 
   function openProject(item: ServiceItem) {
@@ -268,6 +268,8 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
         <span className={s.bannerName}>{child.name}</span>
         {tag(child) && <span className={s.bannerTag}>{tag(child)}</span>}
       </button>
+      {/* A website template can also be opened straight away, without the window in between. */}
+      {child.template && child.href && <a className={s.bannerOut} href={child.href} aria-label={`Open the ${child.name} template`} title="Open the template">↗</a>}
     </li>)}</ul>;
   }
 
@@ -287,7 +289,7 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
       {model.project && <h2 className={s.paneTitle}>{item.titleText || item.name}</h2>}
       <p className={s.description}>{item.description}</p>
       {group && banners(item)}
-      {group && item.related && <Link className={s.groupLink} href={item.related.href}>{item.related.label} →</Link>}
+      {group && item.related && <div className={`actions template-actions ${s.actions}`}><Link className="cta-button explore-button" href={item.related.href}>{item.related.label} ↗</Link></div>}
       {item.platform === "android" && <StoreBadges />}
       {!group && <div className={`actions template-actions ${s.actions}`}>
         {item.doors ? item.doors.map(door => {
@@ -328,6 +330,23 @@ export function ServicesShowcase({ projectSlug }: { projectSlug?: string }) {
   }
 
   useEffect(() => () => window.clearTimeout(mobileScrollTimer.current), []);
+
+  // Size the windows to the screen people can actually see, with the browser's address bar showing. The height is
+  // measured once and again only when the width changes (a turn of the phone), not while the bar slides in and out,
+  // so the windows don't jump as you scroll.
+  useEffect(() => {
+    let width = 0;
+    const measure = () => {
+      if (window.innerWidth === width) return;
+      width = window.innerWidth;
+      const height = Math.min(window.innerHeight, window.visualViewport?.height || window.innerHeight);
+      document.documentElement.style.setProperty("--window-h", `${Math.round(height)}px`);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", () => { width = 0; window.setTimeout(measure, 250); });
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   useEffect(() => {
     const dialog = storyDialog.current;

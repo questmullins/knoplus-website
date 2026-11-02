@@ -41,7 +41,7 @@ const rose = "url('/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp')";
 const websiteItems: ServiceItem[] = [...templates.map(template => ({
   id: `website-${template.theme}`, name: template.navTitle, label: `Work with me / Websites / ${template.navTitle}`,
   description: template.description, image: template.image, theme: template.theme,
-  href: template.link, action: "Explore website", highlights: template.features, sellingPoints: template.sellingPoints, template: true,
+  href: template.link, action: "Open the template ↗", highlights: template.features, sellingPoints: template.sellingPoints, template: true,
 }))];
 
 // Every case study ends with "Want something like this?" (the Toolkit is a list of tools, not a project, so it doesn't).
@@ -133,7 +133,7 @@ export const services: ServiceItem[] = [
         title: "Modern websites.<br />Some character.<br /><em>Made yours.</em>",
         description: "Start with a template, then make the photographs, words, and details feel like your business.",
         image: "url('/revamp/banners/websites.webp')", highlights: ["Templates", "Customisation", "Practical turnaround"], children: websiteItems,
-        related: { href: "/work/websites", label: "About website building" },
+        related: { href: "/websites", label: "See all templates" },
       },
       {
         id: "process-automation", name: "Custom tools", label: "Work with me / Custom tools & automation",

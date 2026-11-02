@@ -371,3 +371,82 @@
  .shell .banner { min-height: 46px; padding: 8px 14px; flex-direction: column; }
  .shell .bannerTag::before { display: none; }
 }
+
+/* A template's button has an out arrow beside it that opens the template itself. */
+.shell .banners li { display: flex; gap: 8px; }
+.shell .banners li .banner { flex: 1; min-width: 0; }
+.shell .bannerOut { flex: none; width: 48px; display: grid; place-items: center; border: var(--stroke) solid color-mix(in srgb, var(--section-shade) 55%, transparent); background: color-mix(in srgb, var(--section-shade) 10%, rgb(var(--base-rgb) / 0.5)); color: rgb(var(--ink-rgb) / 0.92); font-size: 16px; text-decoration: none; backdrop-filter: blur(4px); transition: background .25s ease, color .25s ease, border-color .25s ease; }
+.shell .bannerOut:hover, .shell .bannerOut:focus-visible { background: var(--section-shade); border-color: var(--section-shade); color: var(--black); outline: none; }
+.shell .bannerOut:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+
+/* Phone: every window is exactly the visible screen (measured with the address bar showing), less the two top bars. */
+@media (max-width: 760px) {
+ .shell .mobilePanel { min-height: calc(var(--window-h, 100svh) - 92px); }
+}
+/* Short laptop screens: the same tightening for the desktop window. */
+@media (min-width: 761px) and (max-height: 760px) {
+ .shell .banners { margin-top: 18px; gap: 8px; }
+ .shell .banner { min-height: 40px; }
+ .shell .headlineTitle { font-size: clamp(40px, 4.4vw, 62px); }
+}
+/* Phone: the four headline numbers sit tighter so the Experience break fits one screen. */
+@media (max-width: 760px) {
+ .shell .mobilePanel .stats { margin-top: 20px; }
+ .shell .mobilePanel .stats > div { padding-top: 12px; padding-bottom: 10px; }
+ .shell .mobilePanel .stats dt { font-size: 26px; }
+ .shell .mobilePanel .stats dd { margin-top: 6px; font-size: 12px; line-height: 1.4; }
+}
+/* Mid-height phones (most phones with the address bar showing). */
+@media (max-width: 760px) and (max-height: 820px) {
+ .shell .mobilePanel { padding-top: 20px; padding-bottom: 48px; }
+ .shell .mobilePanel .eyebrow { min-height: 0; margin-bottom: 16px; }
+ .shell .mobilePanel .title { font-size: clamp(38px, 10.5vw, 54px); }
+ .shell .mobilePanel .description { font-size: 16px; line-height: 1.55; margin-top: 16px; }
+ .shell .mobilePanel .actions { margin-top: 20px; }
+ .shell .banners { margin-top: 18px; gap: 7px; }
+ .shell .banner { min-height: 42px; }
+}
+@media (min-width: 761px) and (max-height: 700px) {
+ .shell .content { padding-top: 60px; padding-bottom: 60px; }
+ .shell .title { font-size: clamp(40px, 4.4vw, 60px); }
+ .shell .description { font-size: 16px; margin-top: 16px; }
+ .shell .eyebrow { margin-bottom: 14px; }
+ .shell .actions { margin-top: 18px; }
+ .shell .details { margin-top: 22px; padding-top: 16px; }
+ .shell .banners { margin-top: 14px; gap: 6px; }
+ .shell .banner { min-height: 36px; }
+}
+
+/* Shorter phones: tighten the window so it still fits. */
+@media (max-width: 760px) and (max-height: 700px) {
+ .shell .mobilePanel { padding-top: 16px; padding-bottom: 40px; }
+ .shell .mobilePanel .eyebrow { min-height: 0; margin-bottom: 12px; }
+ .shell .mobilePanel .title { font-size: clamp(36px, 10vw, 48px); }
+ .shell .mobilePanel[data-break] .title { font-size: clamp(42px, 12vw, 56px); }
+ .shell .mobilePanel .headlineTitle { font-size: clamp(34px, 9.5vw, 44px); }
+ .shell .mobilePanel .description { font-size: 15px; line-height: 1.55; margin-top: 14px; }
+ .shell .mobilePanel .actions { margin-top: 18px; }
+ .shell .mobilePanel .stats { margin-top: 16px; }
+ .shell .mobilePanel .stats dt { font-size: 26px; }
+ .shell .mobilePanel .details { margin-top: 18px; padding-top: 14px; }
+ .shell .banners { margin-top: 16px; gap: 6px; }
+ .shell .banner { min-height: 40px; padding: 6px 12px; }
+ .shell .bannerOut { width: 42px; }
+}
+/* Very short screens (a small phone with the address bar showing). */
+@media (max-width: 760px) and (max-height: 600px) {
+ .shell .mobilePanel { padding-top: 10px; padding-bottom: 28px; }
+ .shell .mobilePanel .eyebrow { display: none; }
+ .shell .mobilePanel .title { font-size: 34px; }
+ .shell .mobilePanel[data-break] .title { font-size: 40px; }
+ .shell .mobilePanel .description { font-size: 14px; line-height: 1.5; margin-top: 10px; }
+ .shell .mobilePanel .actions { margin-top: 14px; }
+ .shell .mobilePanel .actions :global(.cta-button) { min-height: 38px; }
+ .shell .mobilePanel .details { margin-top: 14px; padding-top: 10px; gap: 10px; }
+ .shell .mobilePanel .details p { font-size: 14px; margin-top: 4px; }
+ .shell .mobilePanel .stats { margin-top: 12px; }
+ .shell .mobilePanel .stats dt { font-size: 22px; }
+ .shell .banners { margin-top: 12px; gap: 5px; }
+ .shell .banner { min-height: 36px; padding: 4px 10px; }
+ .shell .bannerOut { width: 38px; }
+}
