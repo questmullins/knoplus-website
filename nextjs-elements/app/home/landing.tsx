@@ -33,10 +33,10 @@ const strip = known.map(icon => toolkit.flatMap(group => group.tools).find(tool 
 const freestyleIcon = <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2d2a32" /><path d="M6 21c4-9 7 5 11-4s5-6 9-7" fill="none" stroke="#ffbf46" strokeWidth="3.2" strokeLinecap="round" /></svg>;
 function AppMark({ item }: { item: ServiceItem }) {
   return <span className={s.appMark} style={{ "--shade": serviceAccent(item) } as CSSProperties} aria-hidden="true">
-    {item.id === "update" ? <img src="/revamp/apps/update/icon.webp" alt="" /> : item.id === "freestyle" ? freestyleIcon : item.name.charAt(0)}
+    {item.id === "update" ? <img src="/revamp/apps/update/icon.webp" alt="" /> : item.id === "rosewave-app" ? <img src="/revamp/rosewave-gallery/photos/blush-of-autumn-04.webp" alt="" /> : item.id === "freestyle" ? freestyleIcon : item.name.charAt(0)}
   </span>;
 }
-const shotsFor = (item: ServiceItem) => (projectCatalog.find(p => p.slug === item.id)?.panes.flatMap(pane => pane.photos) || []).slice(0, 4);
+const shotsFor = (item: ServiceItem) => (projectCatalog.find(p => p.slug === item.id.replace(/-app$/, ""))?.panes.flatMap(pane => pane.photos) || []).slice(0, 4);
 // Tools, outcome and "also includes" sit together in one box under a project.
 function factRows(item: ServiceItem) {
   const rows: [string, string][] = [];
@@ -91,13 +91,14 @@ export function Landing() {
   const touchX = useRef<number | null>(null);
   const paused = useRef(false);
   // Appearance trial: a floating menu flips outlines and corners for the whole page (remembered in this browser only).
-  const [look, setLook] = useState({ lines: "none" as "none" | "normal" | "thick", round: true, plain: true, panel: 85 });
-  const [lookOpen, setLookOpen] = useState(false);
-  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-3") || "null"); if (saved) setLook({ plain: true, panel: 85, ...saved }); } catch {} }, []);
-  const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look-3", JSON.stringify(next)); } catch {} };
   const sheetBody = useRef<HTMLDivElement>(null);
-  const open = (item: ServiceItem, section: ServiceItem) => { setPlace(0); setSheet({ item, section }); };
-  const close = () => setSheet(null);
+  // Opening a window puts its id in the address (kno.plus/#websites), so it can be linked to and shared.
+  const [start, setStart] = useState(0);
+  const open = (item: ServiceItem, section: ServiceItem, at = 0) => {
+    setPlace(at); setStart(at); setSheet({ item, section });
+    window.history.replaceState(null, "", `#${item.children?.[at - 1]?.id || item.id}`);
+  };
+  const close = () => { setSheet(null); window.history.replaceState(null, "", window.location.pathname); };
   const step = (by: number) => { setAnimate(true); setPos(current => Math.max(0, Math.min(count + 1, current + by))); };
   const settle = () => {
     if (pos === 0 || pos === count + 1) { setAnimate(false); setPos(pos === 0 ? count : 1); }
@@ -126,7 +127,29 @@ export function Landing() {
     return () => window.removeEventListener("keydown", key);
   }, [sheet]);
 
-  useEffect(() => { sheetBody.current?.scrollTo({ top: 0 }); }, [sheet]);
+  useEffect(() => { const el = sheetBody.current; el?.scrollTo({ top: start * (el.clientHeight || 0) }); }, [sheet, start]);
+
+  // Links into the page: #experience / #projects / #work-with-me scroll to the section; any group or project id
+  // (#websites, #experience--paperwork, #update…) opens its window, scrolled to that project.
+  useEffect(() => {
+    const follow = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (!id) return;
+      if ([experience, projects, work].some(top => top.id === id)) {
+        setSheet(null);
+        requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }));
+        return;
+      }
+      for (const section of [experience, projects, work]) for (const group of section.children || []) {
+        if (group.id === id) return open(group, section);
+        const index = group.children?.findIndex(child => child.id === id) ?? -1;
+        if (index >= 0) return open(group, section, index + 1);
+      }
+    };
+    follow();
+    window.addEventListener("hashchange", follow);
+    return () => window.removeEventListener("hashchange", follow);
+  }, []);
 
   function detail(item: ServiceItem, section: ServiceItem) {
     return <div className={s.detail}>
@@ -149,9 +172,9 @@ export function Landing() {
     </div>;
   }
 
-  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines={look.lines} data-round={look.round || undefined} data-plain={look.plain || undefined} style={{ "--panel-a": (look.panel ?? 85) / 100 } as CSSProperties}>
+  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines="none" data-round data-plain style={{ "--panel-a": 0.85 } as CSSProperties}>
     <header className={s.bar}>
-      <Link href="/preview" className={s.logo} onClick={event => { if (sheet) { event.preventDefault(); close(); } }}>KNOPLUS</Link>
+      <Link href="/" className={s.logo} onClick={event => { if (sheet) { event.preventDefault(); close(); } }}>KNOPLUS</Link>
       <nav className={s.nav} aria-label="Main">
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
@@ -239,7 +262,7 @@ export function Landing() {
           <p className={s.swap}><s>{metric.before}</s> → <b>{metric.after}</b> {metric.label.toLowerCase()}</p>
           <p>{featured.description}</p>
           <div className={s.buttons}>
-            <Link className={s.primary} href={`/#${featured.id}`}>Read the case study</Link>
+            <a className={s.primary} href={`#${featured.id}`}>Read the case study</a>
             <button type="button" className={s.secondary} onClick={() => talk("process-automation")}>Want something like this?</button>
           </div>
         </div>
@@ -332,7 +355,7 @@ export function Landing() {
         {!!peeked.highlights?.length && <ul className={s.chips}>{peeked.highlights.map(h => <li key={h}>{h}</li>)}</ul>}
         {!!shotsFor(peeked).length && <div className={s.shots} data-phone={peeked.platform === "android" || undefined}>{shotsFor(peeked).map(shot => <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" />)}</div>}
         <div className={s.buttons}>
-          {peeked.platform === "android" ? <a className={s.primary} href={peeked.href}>{peeked.action || "Take a look"}</a>
+          {peeked.platform === "android" ? <a className={s.primary} href={peeked.href} {...(peeked.href?.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}>{peeked.action || "Take a look"}</a>
             : peeked.href?.startsWith("/work/") ? <a className={s.primary} href={peeked.href}>{peeked.action || "About the project"}</a>
             : <a className={s.primary} href={peeked.href} target="_blank" rel="noopener">Open in browser ↗</a>}
           {peeked.related && <a className={s.secondary} href={peeked.related.href}>{peeked.related.label}</a>}
@@ -340,19 +363,6 @@ export function Landing() {
         </div>
       </div>}
     </dialog>
-
-    <div className={s.look}>
-      {lookOpen && <div className={s.lookPanel} role="group" aria-label="Appearance">
-        <span className={s.eyebrow}>Appearance</span>
-        <label><input type="checkbox" checked={look.lines === "none"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "none" : "normal" })} /> Remove outlines</label>
-        <label><input type="checkbox" checked={look.lines === "thick"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "thick" : "normal" })} /> Thicker outlines</label>
-        <label><input type="checkbox" checked={look.round} onChange={e => setLookSaved({ ...look, round: e.target.checked })} /> Round edges</label>
-        <label className={s.slider}><span>Box opacity <output>{look.panel ?? 85}</output></span>
-          <input type="range" min={0} max={100} step={5} value={look.panel ?? 85} onChange={e => setLookSaved({ ...look, panel: Number(e.target.value) })} /></label>
-        <label><input type="checkbox" checked={!!look.plain} onChange={e => setLookSaved({ ...look, plain: e.target.checked })} /> Remove photo overlays</label>
-      </div>}
-      <button type="button" className={s.lookBtn} aria-expanded={lookOpen} onClick={() => setLookOpen(!lookOpen)}>{lookOpen ? "×" : "Aa"}</button>
-    </div>
 
     <ContactModal key={contact || "closed"} isOpen={contact !== null} onClose={() => setContact(null)} selectedTopic={contact || ""} />
   </div>;

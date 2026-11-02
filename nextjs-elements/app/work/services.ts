@@ -77,13 +77,19 @@ export const services: ServiceItem[] = [
       {
         id: "apps", name: "Apps", label: "Projects / Apps",
         description: "Phone apps for everyday life, designed and built from the first sketch to the store listing.",
-        image: "url('/revamp/rosewave-gallery/photos/nyc550-01.webp')", highlights: ["UpDate", "Textualize"],
+        image: "url('/revamp/rosewave-gallery/photos/nyc550-01.webp')", highlights: ["UpDate", "RoseWave", "Textualize"],
         children: [
           {
             id: "update", platform: "android", name: "UpDate", label: "Projects / Apps / UpDate", hire: true,
             description: "UpDate exists so you can step into a date with a plan and some backup, leaving more room to actually enjoy it.",
             image: "url('/revamp/banners/update.webp')", href: "/work/update", action: "Explore UpDate",
             highlights: ["Date plans", "Check-ins", "A little backup"],
+          },
+          {
+            id: "rosewave-app", platform: "android", name: "RoseWave", label: "Projects / Apps / RoseWave", hire: true,
+            description: "Find a photograph you connect with. Make it your wallpaper. Enjoy it every time you pick up your phone.",
+            image: "url('/revamp/rosewave-gallery/photos/blush-of-autumn-04.webp')", href: "https://rosewave.art", action: "Visit RoseWave ↗",
+            highlights: ["Photo wallpapers", "A growing gallery", "Prints of every photo"],
           },
           {
             id: "textualize", platform: "android", name: "Textualize", label: "Projects / Apps / Textualize", hire: true,

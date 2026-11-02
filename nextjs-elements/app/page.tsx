@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { ServicesShowcase } from "./work/services-showcase";
+import { Landing } from "./home/landing";
 
 export const metadata: Metadata = {
-  title: "Web Services & App Services",
+  title: "Quest · websites, apps and business systems",
   description:
-    "Thoughtful websites, web tools, and mobile apps, shaped around the thing you want to change.",
+    "I’m Quest. I build websites, apps, and the systems that take busywork off a team’s plate. See what I’ve done, try what I’ve made, or start something with me.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Kno.plus — Ideas into useful things",
@@ -14,5 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <ServicesShowcase />;
+  return <Landing />;
 }
