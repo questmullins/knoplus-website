@@ -43,44 +43,41 @@ export function Landing() {
   // The open window (a group) and, inside it, the open project. The sheet slides over the page below the bar.
   const [sheet, setSheet] = useState<{ item: ServiceItem; section: ServiceItem } | null>(null);
   const [project, setProject] = useState<ServiceItem | null>(null);
-  const [slide, setSlide] = useState(0);
-  const rail = useRef<HTMLDivElement>(null);
+  // The rail is a loop: [copy of the last window, intro, every group window, copy of the intro]. It sits on a real
+  // window (1…count); when it slides onto a copy, it jumps to the real one without animating, so it never rewinds.
+  const count = railWindows.length + 1;
+  const [pos, setPos] = useState(1);
+  const [animate, setAnimate] = useState(true);
+  const touchX = useRef<number | null>(null);
   const paused = useRef(false);
   // Appearance trial: a floating menu flips outlines and corners for the whole page (remembered in this browser only).
-  const [look, setLook] = useState({ lines: "normal" as "none" | "normal" | "thick", round: false });
+  const [look, setLook] = useState({ lines: "none" as "none" | "normal" | "thick", round: true });
   const [lookOpen, setLookOpen] = useState(false);
-  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look") || "null"); if (saved) setLook(saved); } catch {} }, []);
-  const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look", JSON.stringify(next)); } catch {} };
+  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-2") || "null"); if (saved) setLook(saved); } catch {} }, []);
+  const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look-2", JSON.stringify(next)); } catch {} };
   const sheetBody = useRef<HTMLDivElement>(null);
   const open = (item: ServiceItem, section: ServiceItem) => { setSheet({ item, section }); setProject(item.children ? null : item); };
   const close = () => { setSheet(null); setProject(null); };
-  const go = (index: number) => {
-    const track = rail.current; const target = track?.children[Math.max(0, Math.min(railWindows.length, index))] as HTMLElement | undefined;
-    if (track && target) track.scrollTo({ left: target.offsetLeft - track.offsetLeft - (track.clientWidth - target.clientWidth) / 2, behavior: "smooth" });
+  const step = (by: number) => { setAnimate(true); setPos(current => Math.max(0, Math.min(count + 1, current + by))); };
+  const settle = () => {
+    if (pos === 0 || pos === count + 1) { setAnimate(false); setPos(pos === 0 ? count : 1); }
   };
-
   useEffect(() => {
-    const track = rail.current; if (!track) return;
-    const update = () => {
-      const center = track.scrollLeft + track.clientWidth / 2;
-      let best = 0, gap = Infinity;
-      Array.from(track.children).forEach((child, index) => { const el = child as HTMLElement; const d = Math.abs(el.offsetLeft - track.offsetLeft + el.clientWidth / 2 - center); if (d < gap) { gap = d; best = index; } });
-      setSlide(best);
-    };
-    track.addEventListener("scroll", update, { passive: true });
-    return () => track.removeEventListener("scroll", update);
-  }, []);
+    if (animate) return;
+    const frame = requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
+    return () => cancelAnimationFrame(frame);
+  }, [animate]);
 
   // The rail moves on by itself every 6 seconds, and waits while the pointer is over it, something in it has focus,
-  // a window is open, or the visitor prefers less motion. After the last window it starts again from the first.
+  // a window is open, or the visitor prefers less motion.
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
       if (paused.current || sheet || document.hidden) return;
-      go(slide >= railWindows.length ? 0 : slide + 1);
+      step(1);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [slide, sheet]);
+  }, [sheet]);
 
   useEffect(() => {
     if (!sheet) return;
@@ -134,36 +131,41 @@ export function Landing() {
       <section className={s.hero} aria-label="Kno.plus"
         onPointerEnter={() => { paused.current = true; }} onPointerLeave={() => { paused.current = false; }}
         onFocus={() => { paused.current = true; }} onBlur={() => { paused.current = false; }}>
-        <div className={s.stage}>
-        <button type="button" className={`${s.arrowBtn} ${s.prev}`} aria-label="Previous" onClick={() => go(slide - 1)} disabled={slide === 0}>←</button>
-        <button type="button" className={`${s.arrowBtn} ${s.next}`} aria-label="Next" onClick={() => go(slide + 1)} disabled={slide === railWindows.length}>→</button>
-        <div className={s.rail} ref={rail}>
-          <article className={`${s.win} ${s.intro}`} style={{ ...bg(serviceOverview.image), ...shade(work) }}>
-            <div className={s.winCopy}>
-              <span className={s.eyebrow}>{serviceOverview.label}</span>
-              <h1 dangerouslySetInnerHTML={{ __html: serviceOverview.title || "" }} />
-              <p>{serviceOverview.description}</p>
-              <div className={s.buttons}>
-                <button type="button" className={s.primary} onClick={() => go(1)}>See the work →</button>
-                <button type="button" className={s.secondary} onClick={() => talk()}>Work with me</button>
+        <div className={s.stage}
+          onTouchStart={event => { touchX.current = event.touches[0].clientX; paused.current = true; }}
+          onTouchEnd={event => { const start = touchX.current; touchX.current = null; paused.current = false; if (start === null) return; const dx = event.changedTouches[0].clientX - start; if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1); }}>
+        <button type="button" className={`${s.arrowBtn} ${s.prev}`} aria-label="Previous" onClick={() => step(-1)}>←</button>
+        <button type="button" className={`${s.arrowBtn} ${s.next}`} aria-label="Next" onClick={() => step(1)}>→</button>
+        <div className={s.rail} style={{ transform: `translateX(${-pos * 100}%)`, transition: animate ? undefined : "none" }}
+          onTransitionEnd={event => { if (event.target === event.currentTarget) settle(); }}>
+          {[railWindows.length, ...Array.from({ length: count }, (_, i) => i), 0].map((index, place) => {
+            const copy = place === 0 || place === count + 1;
+            const away = place !== pos;
+            const props = { "aria-hidden": copy || away || undefined, inert: copy || away || undefined } as const;
+            if (index === 0) return <article key={place} {...props} className={`${s.win} ${s.intro}`} style={{ ...bg(serviceOverview.image), ...shade(work) }}>
+              <div className={s.winCopy}>
+                <span className={s.eyebrow}>{serviceOverview.label}</span>
+                {copy ? <h2 dangerouslySetInnerHTML={{ __html: serviceOverview.title || "" }} /> : <h1 dangerouslySetInnerHTML={{ __html: serviceOverview.title || "" }} />}
+                <p>{serviceOverview.description}</p>
+                <div className={s.buttons}>
+                  <button type="button" className={s.primary} onClick={() => step(1)}>See the work →</button>
+                  <button type="button" className={s.secondary} onClick={() => talk()}>Work with me</button>
+                </div>
               </div>
-            </div>
-          </article>
-          {railWindows.map(({ item, section }, index) => <article key={item.id} className={s.win} style={{ ...bg(item.image), ...shade(section) }}>
-            <button type="button" className={s.winHit} aria-label={`Open ${item.name}`} onClick={() => open(item, section)} />
-            <div className={s.winCopy}>
-              <span className={s.eyebrow}>{section.name} / {String(index + 1).padStart(2, "0")}</span>
-              <h2>{item.name}</h2>
-              <p>{item.description}</p>
-              {item.children && <ul className={s.winList}>{item.children.slice(0, 4).map(child => <li key={child.id}>{child.name}</li>)}{item.children.length > 4 && <li>+{item.children.length - 4} more</li>}</ul>}
-              <div className={s.buttons}><button type="button" className={s.primary} onClick={() => open(item, section)}>{item.children ? `Open ${item.name}` : "Take a look"}</button></div>
-            </div>
-          </article>)}
+            </article>;
+            const { item, section } = railWindows[index - 1];
+            return <article key={place} {...props} className={s.win} style={{ ...bg(item.image), ...shade(section) }}>
+              <button type="button" className={s.winHit} aria-label={`Open ${item.name}`} onClick={() => open(item, section)} />
+              <div className={s.winCopy}>
+                <span className={s.eyebrow}>{section.name}</span>
+                <h2>{item.name}</h2>
+                <p>{item.description}</p>
+                {item.children && <ul className={s.winList}>{item.children.slice(0, 4).map(child => <li key={child.id}>{child.name}</li>)}{item.children.length > 4 && <li>+{item.children.length - 4} more</li>}</ul>}
+                <div className={s.buttons}><button type="button" className={s.primary} onClick={() => open(item, section)}>{item.children ? `Open ${item.name}` : "Take a look"}</button></div>
+              </div>
+            </article>;
+          })}
         </div>
-        </div>
-        <div className={s.railBar}>
-          <span>{String(slide + 1).padStart(2, "0")} / {String(railWindows.length + 1).padStart(2, "0")}</span>
-          <div className={s.railDots}>{[null, ...railWindows].map((_, index) => <button type="button" key={index} aria-label={`Go to window ${index + 1}`} data-on={index === slide || undefined} onClick={() => go(index)} />)}</div>
         </div>
       </section>
 
