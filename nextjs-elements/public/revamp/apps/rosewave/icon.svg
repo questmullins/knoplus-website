@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><!-- RoseWave app icon (rosewave repo, android/app/src/main/res/drawable/ic_launcher.xml) -->
+<path fill="#F5E0D1" d="M0,0h108v108h-108z"/>
+<path fill="#EB8070" d="M40,52a14,14 0 1,1 28,0a14,14 0 1,1 -28,0"/>
+<path fill="#EBBAA5" d="M0,58 C18,50 34,60 54,55 C74,50 90,52 108,57 V108 H0 Z"/>
+<path fill="#DF9F8D" d="M0,65 C20,60 38,69 58,64 C78,59 94,62 108,66 V108 H0 Z"/>
+<path fill="#99646C" d="M0,74 C16,69 34,77 52,73 C72,68 90,72 108,76 V108 H0 Z"/>
+<path fill="#5D3C49" d="M0,84 C22,79 40,87 60,82 C80,77 96,81 108,84 V108 H0 Z"/>
+</svg>

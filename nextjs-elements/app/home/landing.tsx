@@ -26,6 +26,13 @@ const groups = experience.children!.filter(item => item.children);
 const featured = find("experience--paperwork")!;
 const metric = featured.metrics?.[0];
 const projectList = projects.children!.flatMap(group => group.children || []);
+// Made by me, sorted by what each thing is: phone apps, things you open in a browser, and the rest.
+const kinds = [
+  { name: "Apps", note: "On your phone", items: projectList.filter(item => item.platform === "android") },
+  { name: "Websites", note: "Open in your browser", items: projectList.filter(item => item.href?.startsWith("/") && !item.href.startsWith("/work/") && item.platform !== "android") },
+];
+const sorted = new Set(kinds.flatMap(kind => kind.items));
+kinds.push({ name: "Other", note: "Plug-ins and works in progress", items: projectList.filter(item => !sorted.has(item)) });
 // Only names most people know on sight; the full list lives in Experience / Toolkit.
 const known = ["python", "javascript", "typescript", "react", "nextdotjs", "nodedotjs", "android", "shopify", "googlesheets", "gmail", "github", "cloudflare"];
 const strip = known.map(icon => toolkit.flatMap(group => group.tools).find(tool => tool.icon === icon)).filter((tool): tool is NonNullable<typeof tool> => !!tool && !!toolIcons[tool.icon!]);
@@ -33,7 +40,7 @@ const strip = known.map(icon => toolkit.flatMap(group => group.tools).find(tool 
 const freestyleIcon = <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2d2a32" /><path d="M6 21c4-9 7 5 11-4s5-6 9-7" fill="none" stroke="#ffbf46" strokeWidth="3.2" strokeLinecap="round" /></svg>;
 function AppMark({ item }: { item: ServiceItem }) {
   return <span className={s.appMark} style={{ "--shade": serviceAccent(item) } as CSSProperties} aria-hidden="true">
-    {item.id === "update" ? <img src="/revamp/apps/update/icon.webp" alt="" /> : item.id === "rosewave-app" ? <img src="/revamp/rosewave-gallery/photos/blush-of-autumn-04.webp" alt="" /> : item.id === "freestyle" ? freestyleIcon : item.name.charAt(0)}
+    {item.id === "update" ? <img src="/revamp/apps/update/icon.webp" alt="" /> : item.id === "rosewave-app" ? <img src="/revamp/apps/rosewave/icon.svg" alt="" /> : item.id === "freestyle" ? freestyleIcon : item.name.charAt(0)}
   </span>;
 }
 const shotsFor = (item: ServiceItem) => (projectCatalog.find(p => p.slug === item.id.replace(/-app$/, ""))?.panes.flatMap(pane => pane.photos) || []).slice(0, 4);
@@ -275,11 +282,14 @@ export function Landing() {
           <h2>{plain(projects.title)}</h2>
           <p>{projects.description}</p>
         </div>
-        <div className={s.cards}>{projectList.map(item => <button type="button" key={item.id} className={s.card} onClick={() => peek(item)}>
-          <AppMark item={item} />
-          <h3>{item.name}</h3>
-          <p>{item.description}</p>
-        </button>)}</div>
+        {kinds.filter(kind => kind.items.length).map(kind => <div key={kind.name} className={s.kind}>
+          <h3 className={s.kindHead}>{kind.name}<small>{kind.note}</small></h3>
+          <div className={s.cards}>{kind.items.map(item => <button type="button" key={item.id} className={s.card} onClick={() => peek(item)}>
+            <AppMark item={item} />
+            <h3>{item.name}</h3>
+            <p>{item.description}</p>
+          </button>)}</div>
+        </div>)}
       </section>
 
       <section id="work-with-me" className={s.section} style={shade(work)}>
