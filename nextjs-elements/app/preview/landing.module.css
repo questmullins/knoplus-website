@@ -69,7 +69,7 @@
 .page[data-round] .mark { border-radius: 50%; }
 .look { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 .lookBtn { width: 52px; height: 52px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.35); background: var(--black); color: var(--white); font: 400 17px/1 var(--font-display); cursor: pointer; box-shadow: 0 10px 30px rgb(0 0 0 / calc(.35 * var(--shadow))); }
-.page[data-lines="none"] .lookBtn, .page[data-lines="none"] .lookPanel { border: 1px solid rgb(var(--ink-rgb) / 0.12); }
+.page[data-lines="none"] :is(.lookBtn, .lookPanel) { border: 0; }
 .lookPanel { display: grid; gap: 12px; min-width: 210px; padding: 18px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.25); background: var(--black); box-shadow: 0 20px 50px rgb(0 0 0 / calc(.4 * var(--shadow))); }
 .lookPanel label { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
 .lookPanel input { width: 18px; height: 18px; accent-color: var(--tone); }
@@ -277,3 +277,11 @@
   .peekHead h3 { font-size: 22px; }
   .factBox { padding: 2px 16px; }
 }
+
+/* Rounded photo boxes clip with clip-path, so the photo layer can't leave a thin light edge around the curve. */
+.page[data-round] :is(.tile, .featureImage, .banners li, .card, .factBox) { clip-path: inset(0 round 14px); }
+.page[data-round] .card { clip-path: inset(0 round 14px); }
+/* "Remove overlays": photos show at full strength; a soft shadow keeps the words readable. */
+.page[data-plain] { --overlay: 0; }
+.page[data-plain] :is(.win, .frame, .tile) :is(h1, h2, h3, p, span, li, dt, dd, figcaption) { text-shadow: 0 1px 14px rgb(var(--base-rgb) / 0.9), 0 0 3px rgb(var(--base-rgb) / 0.6); }
+.page[data-plain] .tile::after { background: linear-gradient(180deg, transparent 35%, rgb(var(--base-rgb) / .6)); }

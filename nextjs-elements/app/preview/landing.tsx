@@ -96,9 +96,9 @@ export function Landing() {
   const touchX = useRef<number | null>(null);
   const paused = useRef(false);
   // Appearance trial: a floating menu flips outlines and corners for the whole page (remembered in this browser only).
-  const [look, setLook] = useState({ lines: "none" as "none" | "normal" | "thick", round: true });
+  const [look, setLook] = useState({ lines: "none" as "none" | "normal" | "thick", round: true, plain: false });
   const [lookOpen, setLookOpen] = useState(false);
-  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-2") || "null"); if (saved) setLook(saved); } catch {} }, []);
+  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-2") || "null"); if (saved) setLook({ plain: false, ...saved }); } catch {} }, []);
   const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look-2", JSON.stringify(next)); } catch {} };
   const sheetBody = useRef<HTMLDivElement>(null);
   const open = (item: ServiceItem, section: ServiceItem) => { setPlace(0); setSheet({ item, section }); };
@@ -154,7 +154,7 @@ export function Landing() {
     </div>;
   }
 
-  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines={look.lines} data-round={look.round || undefined}>
+  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines={look.lines} data-round={look.round || undefined} data-plain={look.plain || undefined}>
     <header className={s.bar}>
       <Link href="/preview" className={s.logo}>KNOPLUS</Link>
       <nav className={s.nav} aria-label="Main">
@@ -347,6 +347,7 @@ export function Landing() {
         <label><input type="checkbox" checked={look.lines === "none"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "none" : "normal" })} /> Remove outlines</label>
         <label><input type="checkbox" checked={look.lines === "thick"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "thick" : "normal" })} /> Thicker outlines</label>
         <label><input type="checkbox" checked={look.round} onChange={e => setLookSaved({ ...look, round: e.target.checked })} /> Round edges</label>
+        <label><input type="checkbox" checked={!!look.plain} onChange={e => setLookSaved({ ...look, plain: e.target.checked })} /> Remove photo overlays</label>
       </div>}
       <button type="button" className={s.lookBtn} aria-expanded={lookOpen} onClick={() => setLookOpen(!lookOpen)}>{lookOpen ? "×" : "Aa"}</button>
     </div>
