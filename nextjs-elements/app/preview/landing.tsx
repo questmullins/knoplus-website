@@ -66,11 +66,6 @@ const photos: Record<string, string> = {
   "experience--commerce-data": "url('/revamp/banners/consulting.webp')",
   "experience--scheduler": "url('/revamp/banners/prepress.webp')",
 };
-const tilePhotos: Record<string, string> = {
-  "experience--automation": "url('/revamp/banners/freestyle.webp')",
-  "experience--tools": "url('/revamp/banners/consulting.webp')",
-  "experience--builds": "url('/revamp/banners/colour.webp')",
-};
 const photo = (item: ServiceItem) => photos[item.id] || item.image;
 const tagFor = (item: ServiceItem) => {
   const m = item.metrics?.find(x => x.headline);
@@ -231,7 +226,7 @@ export function Landing() {
             <h3>{group.name}</h3>
             <p>{group.description}</p>
             <ul>{group.children!.map(child => <li key={child.id}>{child.name}</li>)}</ul>
-            <span className={s.thumb} style={bg(tilePhotos[group.id] || group.image)}><span className={s.arrow} aria-hidden="true">→</span></span>
+            <span className={s.arrow} aria-hidden="true">→</span>
           </div>
         </button>)}</div>
       </section>
@@ -274,10 +269,11 @@ export function Landing() {
         <div className={s.hire}>
           <div className={s.offers}>
             {work.children!.filter(item => item.id !== "how-it-works").map(item => {
-              const href = item.id === "websites" ? "/websites" : item.id === "client-work" ? item.children?.[0]?.href : undefined;
+              // Websites and Custom tools open their windows on this page; client work goes straight to the live site.
+              const href = item.id === "client-work" ? item.children?.[0]?.href : undefined;
               const note = item.id === "websites" ? `${item.children?.length} templates to start from` : item.id === "client-work" ? item.children?.map(child => child.name).join(", ") : item.highlights?.slice(0, 2).join(" / ");
               const body = <><b>{item.name}</b><small>{note}</small><span aria-hidden="true">{href ? "↗" : "→"}</span></>;
-              return href ? <a key={item.id} href={href}>{body}</a> : <button key={item.id} type="button" onClick={() => talk(item.id)}>{body}</button>;
+              return href ? <a key={item.id} href={href}>{body}</a> : <button key={item.id} type="button" onClick={() => open(item, work)}>{body}</button>;
             })}
           </div>
           <ol className={s.steps}>

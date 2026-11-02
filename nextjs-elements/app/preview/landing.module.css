@@ -358,3 +358,8 @@
 .hireButtons { justify-content: center; margin-top: 36px; }
 .page[data-round] :is(.offers a, .offers button, .steps) { border-radius: 16px; }
 @media (max-width: 960px) { .hire { grid-template-columns: 1fr; } }
+
+/* Slices without photos: name, line, projects, arrow. */
+.tileBox { grid-template-columns: minmax(160px, 220px) minmax(0, 1.4fr) minmax(0, 1fr) 36px; padding: 28px 24px 28px 32px; }
+.tile .tileBox .arrow { position: static; margin: 0; }
+@media (max-width: 960px) { .tileBox { grid-template-columns: 1fr 36px; padding: 22px; } .tileBox h3, .tileBox p, .tileBox ul { grid-column: 1; } .tile .tileBox .arrow { grid-column: 2; grid-row: 1; } }
