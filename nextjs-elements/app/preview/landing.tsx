@@ -96,10 +96,10 @@ export function Landing() {
   const touchX = useRef<number | null>(null);
   const paused = useRef(false);
   // Appearance trial: a floating menu flips outlines and corners for the whole page (remembered in this browser only).
-  const [look, setLook] = useState({ lines: "none" as "none" | "normal" | "thick", round: true, plain: false, panel: 60 });
+  const [look, setLook] = useState({ lines: "none" as "none" | "normal" | "thick", round: true, plain: true, panel: 85 });
   const [lookOpen, setLookOpen] = useState(false);
-  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-2") || "null"); if (saved) setLook({ plain: false, panel: 60, ...saved }); } catch {} }, []);
-  const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look-2", JSON.stringify(next)); } catch {} };
+  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-3") || "null"); if (saved) setLook({ plain: true, panel: 85, ...saved }); } catch {} }, []);
+  const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look-3", JSON.stringify(next)); } catch {} };
   const sheetBody = useRef<HTMLDivElement>(null);
   const open = (item: ServiceItem, section: ServiceItem) => { setPlace(0); setSheet({ item, section }); };
   const close = () => setSheet(null);
@@ -154,7 +154,7 @@ export function Landing() {
     </div>;
   }
 
-  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines={look.lines} data-round={look.round || undefined} data-plain={look.plain || undefined} style={{ "--panel-a": (look.panel ?? 60) / 100 } as CSSProperties}>
+  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines={look.lines} data-round={look.round || undefined} data-plain={look.plain || undefined} style={{ "--panel-a": (look.panel ?? 85) / 100 } as CSSProperties}>
     <header className={s.bar}>
       <Link href="/preview" className={s.logo} onClick={event => { if (sheet) { event.preventDefault(); close(); } }}>KNOPLUS</Link>
       <nav className={s.nav} aria-label="Main">
@@ -227,9 +227,11 @@ export function Landing() {
         </div>
         {!!experience.stats?.length && <dl className={s.stats}>{experience.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>}
         <div className={s.tiles}>{groups.map(group => <Link key={group.id} href={`/#${group.id}`} className={s.tile} style={bg(tilePhotos[group.id] || group.image)}>
-          <h3>{group.name}</h3>
-          <p>{group.description}</p>
-          <ul>{group.children!.map(child => <li key={child.id}>{child.name}</li>)}</ul>
+          <div className={s.tileBox}>
+            <h3>{group.name}</h3>
+            <p>{group.description}</p>
+            <ul>{group.children!.map(child => <li key={child.id}>{child.name}</li>)}</ul>
+          </div>
           <span className={s.arrow} aria-hidden="true">→</span>
         </Link>)}</div>
       </section>
@@ -347,8 +349,8 @@ export function Landing() {
         <label><input type="checkbox" checked={look.lines === "none"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "none" : "normal" })} /> Remove outlines</label>
         <label><input type="checkbox" checked={look.lines === "thick"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "thick" : "normal" })} /> Thicker outlines</label>
         <label><input type="checkbox" checked={look.round} onChange={e => setLookSaved({ ...look, round: e.target.checked })} /> Round edges</label>
-        <label className={s.slider}><span>Box opacity <output>{look.panel ?? 60}</output></span>
-          <input type="range" min={0} max={100} step={5} value={look.panel ?? 60} onChange={e => setLookSaved({ ...look, panel: Number(e.target.value) })} /></label>
+        <label className={s.slider}><span>Box opacity <output>{look.panel ?? 85}</output></span>
+          <input type="range" min={0} max={100} step={5} value={look.panel ?? 85} onChange={e => setLookSaved({ ...look, panel: Number(e.target.value) })} /></label>
         <label><input type="checkbox" checked={!!look.plain} onChange={e => setLookSaved({ ...look, plain: e.target.checked })} /> Remove photo overlays</label>
       </div>}
       <button type="button" className={s.lookBtn} aria-expanded={lookOpen} onClick={() => setLookOpen(!lookOpen)}>{lookOpen ? "×" : "Aa"}</button>

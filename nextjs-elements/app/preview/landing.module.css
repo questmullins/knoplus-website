@@ -297,3 +297,15 @@
 .slider input { width: 100%; height: auto; }
 @media (max-width: 640px) { .frame .detail { padding: 24px 18px; } }
 @media (min-width: 641px) { .banners button b { grid-column: 3; } }
+
+/* The same box sits over every photo: rail windows and Experience tiles too. */
+.winCopy, .tileBox { background: rgb(var(--base-rgb) / var(--panel-a, .85)); backdrop-filter: blur(10px); border: var(--stroke) solid var(--line); }
+.winCopy { max-width: 820px; margin: 0 24px; padding: clamp(28px, 4vw, 52px); }
+.tileBox { padding: 22px; }
+.tile .tileBox ul { border-top-color: rgb(var(--ink-rgb) / 0.12); }
+.page[data-round] :is(.winCopy, .tileBox) { border-radius: 22px; }
+.page[data-round] .tileBox { border-radius: 16px; }
+.page[data-plain] .tile::after { background: none; }
+.page[data-plain] :is(.winCopy, .tileBox, .frame .detail) * { text-shadow: none !important; }
+@media (max-width: 640px) { .winCopy { margin: 0 14px; padding: 24px 18px; } .tileBox { padding: 18px; } }
+.tile .arrow { width: 36px; height: 36px; display: grid; place-items: center; top: 18px; right: 18px; border-radius: 50%; background: rgb(var(--base-rgb) / var(--panel-a, .85)); }
