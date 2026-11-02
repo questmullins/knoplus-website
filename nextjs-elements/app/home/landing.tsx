@@ -134,7 +134,17 @@ export function Landing() {
     return () => window.removeEventListener("keydown", key);
   }, [sheet]);
 
-  useEffect(() => { const el = sheetBody.current; el?.scrollTo({ top: start * (el.clientHeight || 0) }); }, [sheet, start]);
+  // Frames can be taller than the screen, so positions come from the frames themselves, not from multiples of its height.
+  const frameTop = (index: number) => (sheetBody.current?.children[index] as HTMLElement | undefined)?.offsetTop || 0;
+  const goTo = (index: number) => sheetBody.current?.scrollTo({ top: frameTop(index), behavior: "smooth" });
+  const track = (el: HTMLDivElement) => {
+    const frames = Array.from(el.children) as HTMLElement[];
+    const line = el.scrollTop + el.clientHeight / 2;
+    let at = 0;
+    frames.forEach((frame, index) => { if (frame.offsetTop <= line) at = index; });
+    setPlace(at);
+  };
+  useEffect(() => { const el = sheetBody.current; el?.scrollTo({ top: frameTop(start) }); }, [sheet, start]);
 
   // Links into the page: #experience / #projects / #work-with-me scroll to the section; any group or project id
   // (#websites, #experience--paperwork, #update…) opens its window, scrolled to that project.
@@ -180,14 +190,18 @@ export function Landing() {
   }
 
   return <div className={s.page} data-locked={sheet ? true : undefined} data-lines="none" data-round data-plain style={{ "--panel-a": 0.85 } as CSSProperties}>
-    <header className={s.bar}>
+    <header className={s.bar} data-window={sheet ? true : undefined}>
       <Link href="/" className={s.logo} onClick={event => { if (sheet) { event.preventDefault(); close(); } }}>KNOPLUS</Link>
-      <nav className={s.nav} aria-label="Main">
+      {sheet ? <span className={`${s.eyebrow} ${s.barPath}`} style={shade(sheet.section)}>{sheet.item.label}</span> : <nav className={s.nav} aria-label="Main">
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
         <a href="#work-with-me">Work with me</a>
-      </nav>
+      </nav>}
       <div className={s.barEnd}>
+        {sheet && <span className={s.barWindow}>
+          {sheet.item.children && <span className={s.where}>{String(place + 1).padStart(2, "0")} / {String(sheet.item.children.length + 1).padStart(2, "0")}</span>}
+          <button type="button" className={s.closeBtn} aria-label="Close" onClick={close}>×</button>
+        </span>}
         <Link href="/clients/" prefetch={false} className={s.quiet}>Client sign-in</Link>
         <SchemeToggle className={s.scheme} />
         <button type="button" className={s.primary} onClick={() => talk()}>Let’s talk</button>
@@ -330,20 +344,15 @@ export function Landing() {
     {/* Opening a window slides a sheet up over the rest of the page, like a project opening over its window on the home. */}
     <div className={s.sheet} data-open={sheet ? true : undefined} aria-hidden={!sheet} inert={!sheet}>
       {sheet && <div className={s.sheetInner} style={shade(sheet.section)}>
-        {/* A slim bar says where you are; below it, the original kno.plus scroll: one full window per project. */}
-        <div className={s.sheetHead}>
-          <span className={s.eyebrow}>{sheet.item.label}</span>
-          {sheet.item.children && <span className={s.where}>{String(place + 1).padStart(2, "0")} / {String(sheet.item.children.length + 1).padStart(2, "0")}</span>}
-          <button type="button" className={s.closeBtn} aria-label="Close" onClick={close}>×</button>
-        </div>
-        <div className={s.sheetBody} ref={sheetBody} onScroll={event => { const el = event.currentTarget; setPlace(Math.round(el.scrollTop / el.clientHeight)); }}>
+        {/* The top bar says where you are (see the header); below it, the original kno.plus scroll: one full window per project. */}
+        <div className={s.sheetBody} ref={sheetBody} onScroll={event => track(event.currentTarget)}>
           <section className={s.frame} style={bg(photo(sheet.item))}>
             {sheet.item.children ? <div className={s.detail}>
               <span className={s.eyebrow}>{sheet.section.name}</span>
               <h2>{sheet.item.name}</h2>
               <p className={s.lede}>{sheet.item.description}</p>
               <ul className={s.banners}>{sheet.item.children.map((child, index) => <li key={child.id} style={bg(photo(child))}>
-                <button type="button" onClick={() => { const el = sheetBody.current; el?.scrollTo({ top: (index + 1) * el.clientHeight, behavior: "smooth" }); }}><span>{child.name}</span>{tagFor(child) && <small>{tagFor(child)}</small>}<b aria-hidden="true">↓</b></button>
+                <button type="button" onClick={() => goTo(index + 1)}><span>{child.name}</span>{tagFor(child) && <small>{tagFor(child)}</small>}<b aria-hidden="true">↓</b></button>
                 {child.template && child.href && <a href={child.href} aria-label={`Open the ${child.name} template`} title="Open the template">↗</a>}
               </li>)}</ul>
               {sheet.item.related && <div className={s.buttons}><a className={s.secondary} href={sheet.item.related.href}>{sheet.item.related.label} ↗</a></div>}
