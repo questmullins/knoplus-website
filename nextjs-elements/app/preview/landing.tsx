@@ -42,7 +42,7 @@ export function Landing() {
   const talk = (topic = "other") => setContact(topic);
   // The open window (a group) and, inside it, the open project. The sheet slides over the page below the bar.
   const [sheet, setSheet] = useState<{ item: ServiceItem; section: ServiceItem } | null>(null);
-  const [project, setProject] = useState<ServiceItem | null>(null);
+  const [place, setPlace] = useState(0);
   // The rail is a loop: [copy of the last window, intro, every group window, copy of the intro]. It sits on a real
   // window (1…count); when it slides onto a copy, it jumps to the real one without animating, so it never rewinds.
   const count = railWindows.length + 1;
@@ -56,8 +56,8 @@ export function Landing() {
   useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look-2") || "null"); if (saved) setLook(saved); } catch {} }, []);
   const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look-2", JSON.stringify(next)); } catch {} };
   const sheetBody = useRef<HTMLDivElement>(null);
-  const open = (item: ServiceItem, section: ServiceItem) => { setSheet({ item, section }); setProject(item.children ? null : item); };
-  const close = () => { setSheet(null); setProject(null); };
+  const open = (item: ServiceItem, section: ServiceItem) => { setPlace(0); setSheet({ item, section }); };
+  const close = () => setSheet(null);
   const step = (by: number) => { setAnimate(true); setPos(current => Math.max(0, Math.min(count + 1, current + by))); };
   const settle = () => {
     if (pos === 0 || pos === count + 1) { setAnimate(false); setPos(pos === 0 ? count : 1); }
@@ -81,12 +81,12 @@ export function Landing() {
 
   useEffect(() => {
     if (!sheet) return;
-    const key = (event: KeyboardEvent) => { if (event.key === "Escape") { if (project && sheet.item.children) setProject(null); else close(); } };
+    const key = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [sheet, project]);
+  }, [sheet]);
 
-  useEffect(() => { sheetBody.current?.scrollTo({ top: 0 }); }, [project, sheet]);
+  useEffect(() => { sheetBody.current?.scrollTo({ top: 0 }); }, [sheet]);
 
   function detail(item: ServiceItem, section: ServiceItem) {
     return <div className={s.detail}>
@@ -255,21 +255,26 @@ export function Landing() {
     {/* Opening a window slides a sheet up over the rest of the page, like a project opening over its window on the home. */}
     <div className={s.sheet} data-open={sheet ? true : undefined} aria-hidden={!sheet} inert={!sheet}>
       {sheet && <div className={s.sheetInner} style={shade(sheet.section)}>
-        <div className={s.sheetHead} style={bg(sheet.item.image)}>
-          {project && sheet.item.children ? <button type="button" className={s.back} onClick={() => setProject(null)}>← {sheet.item.name}</button> : <span />}
+        {/* A slim bar says where you are; below it, the original kno.plus scroll: one full window per project. */}
+        <div className={s.sheetHead}>
+          <span className={s.eyebrow}>{sheet.item.label}</span>
+          {sheet.item.children && <span className={s.where}>{String(place + 1).padStart(2, "0")} / {String(sheet.item.children.length + 1).padStart(2, "0")}</span>}
           <button type="button" className={s.closeBtn} aria-label="Close" onClick={close}>×</button>
         </div>
-        <div className={s.sheetBody} ref={sheetBody}>
-          {project ? detail(project, sheet.section) : <div className={s.detail}>
-            <span className={s.eyebrow}>{sheet.item.label}</span>
-            <h2>{sheet.item.name}</h2>
-            <p className={s.lede}>{sheet.item.description}</p>
-            <ul className={s.banners}>{sheet.item.children!.map(child => <li key={child.id} style={bg(child.image)}>
-              <button type="button" onClick={() => setProject(child)}><span>{child.name}</span>{tagFor(child) && <small>{tagFor(child)}</small>}<b aria-hidden="true">→</b></button>
-              {child.template && child.href && <a href={child.href} aria-label={`Open the ${child.name} template`} title="Open the template">↗</a>}
-            </li>)}</ul>
-            {sheet.item.related && <div className={s.buttons}><a className={s.secondary} href={sheet.item.related.href}>{sheet.item.related.label} ↗</a></div>}
-          </div>}
+        <div className={s.sheetBody} ref={sheetBody} onScroll={event => { const el = event.currentTarget; setPlace(Math.round(el.scrollTop / el.clientHeight)); }}>
+          <section className={s.frame} style={bg(sheet.item.image)}>
+            {sheet.item.children ? <div className={s.detail}>
+              <span className={s.eyebrow}>{sheet.section.name}</span>
+              <h2>{sheet.item.name}</h2>
+              <p className={s.lede}>{sheet.item.description}</p>
+              <ul className={s.banners}>{sheet.item.children.map((child, index) => <li key={child.id} style={bg(child.image)}>
+                <button type="button" onClick={() => { const el = sheetBody.current; el?.scrollTo({ top: (index + 1) * el.clientHeight, behavior: "smooth" }); }}><span>{child.name}</span>{tagFor(child) && <small>{tagFor(child)}</small>}<b aria-hidden="true">↓</b></button>
+                {child.template && child.href && <a href={child.href} aria-label={`Open the ${child.name} template`} title="Open the template">↗</a>}
+              </li>)}</ul>
+              {sheet.item.related && <div className={s.buttons}><a className={s.secondary} href={sheet.item.related.href}>{sheet.item.related.label} ↗</a></div>}
+            </div> : detail(sheet.item, sheet.section)}
+          </section>
+          {sheet.item.children?.map(child => <section key={child.id} className={s.frame} style={bg(child.image)}>{detail(child, sheet.section)}</section>)}
         </div>
       </div>}
     </div>

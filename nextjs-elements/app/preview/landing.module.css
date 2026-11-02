@@ -82,12 +82,18 @@
 .sheetInner { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); height: 100%; display: flex; flex-direction: column; background: var(--black);
   border-top: var(--stroke) solid var(--tone); box-shadow: 0 -30px 80px rgb(0 0 0 / calc(.4 * var(--shadow))); animation: rise .5s cubic-bezier(.22,1,.36,1) both; }
 @keyframes rise { from { transform: translateY(40px); opacity: 0; } }
-.sheetHead { position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 120px; padding: 0 var(--gutter);
-  background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.55 * var(--overlay))), var(--black)), var(--bg) center / cover; }
+.sheetHead { position: relative; flex: none; display: flex; align-items: center; gap: 16px; height: 60px; padding: 0 var(--gutter); border-bottom: var(--stroke) solid var(--line); }
+.sheetHead .eyebrow { flex: 1; min-width: 0; }
+.where { font-size: 12px; letter-spacing: .2em; color: rgb(var(--ink-rgb) / 0.7); }
 .back { border: 0; background: transparent; color: var(--white); font: 400 12px/1 var(--font-body); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; padding: 10px 0; }
 .closeBtn { width: 44px; height: 44px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.3); background: rgb(var(--base-rgb) / 0.6); color: var(--white); font-size: 22px; cursor: pointer; }
 .closeBtn:hover { border-color: var(--white); }
-.sheetBody { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 80px; }
+.sheetBody { flex: 1; overflow-y: auto; overscroll-behavior: contain; scroll-snap-type: y mandatory; }
+/* Each project is a full window: photo under the overlay, copy centered, snapping one at a time like the original home. */
+.frame { position: relative; isolation: isolate; min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 48px var(--gutter); scroll-snap-align: start; overflow: hidden; }
+.frame::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.82 * var(--overlay))), rgb(var(--base-rgb) / calc(0.97 * var(--overlay)))), var(--bg) center / cover; }
+:global(:root[data-scheme="light"]) .frame::before { background: linear-gradient(180deg, rgb(var(--base-rgb) / calc(0.9 * var(--overlay))), rgb(var(--base-rgb) / calc(1 * var(--overlay)))), var(--bg) center / cover; }
+.frame .detail { width: 100%; }
 .detail { max-width: 760px; margin: 0 auto; text-align: center; animation: rise .4s ease both; }
 .detail h2 { margin: 18px 0 0; font: 300 clamp(40px, 5.5vw, 80px)/1 var(--font-display); letter-spacing: -.05em; }
 .lede { max-width: 620px; margin: 22px auto 0; font-size: 18px; line-height: 1.65; color: rgb(var(--ink-rgb) / 0.82); }
@@ -207,7 +213,8 @@
   .arrowBtn { display: none; }
   .look { right: 14px; bottom: 14px; }
   .sheet { inset: 60px 0 0; }
-  .sheetHead { height: 88px; }
+  .sheetHead { height: 52px; }
+  .frame { padding: 36px 20px; }
   .banners button { grid-template-columns: 1fr auto; }
   .banners button span { font-size: 17px; }
   .banners button small { grid-row: 2; grid-column: 1; }
