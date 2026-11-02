@@ -67,7 +67,6 @@
 .page[data-round] :is(.primary, .secondary, .scheme, .arrowBtn, .closeBtn, .banners li, .results figure, .tile, .card, .featureImage, .lookBtn, .lookPanel) { border-radius: 14px; }
 .page[data-round] :is(.primary, .secondary, .scheme, .arrowBtn, .closeBtn, .lookBtn) { border-radius: 999px; }
 .page[data-round] .mark { border-radius: 50%; }
-.page[data-round] .sheetInner { border-radius: 20px 20px 0 0; overflow: hidden; }
 .look { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 .lookBtn { width: 52px; height: 52px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.35); background: var(--black); color: var(--white); font: 400 17px/1 var(--font-display); cursor: pointer; box-shadow: 0 10px 30px rgb(0 0 0 / calc(.35 * var(--shadow))); }
 .page[data-lines="none"] .lookBtn, .page[data-lines="none"] .lookPanel { border: 1px solid rgb(var(--ink-rgb) / 0.12); }

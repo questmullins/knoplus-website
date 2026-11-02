@@ -30,7 +30,29 @@ const bg = (image: string) => ({ "--bg": image } as CSSProperties);
 const shade = (item: ServiceItem) => ({ "--shade": serviceAccent(item) } as CSSProperties);
 // The hero rail: the intro, then every group window from the windows home (Automation, Apps, Websites…), side by side.
 // Each window keeps the shade of the part of the site it belongs to.
-const railWindows = [experience, projects, work].flatMap(section => section.children!.filter(item => !item.tools).map(item => ({ item, section })));
+// Only the strongest windows ride the rail: the measured automation work, the apps, the websites and the client work.
+const railPicks = ["experience--automation", "apps", "websites", "client-work"];
+const railWindows = railPicks.map(id => {
+  const section = [experience, projects, work].find(top => top.children!.some(item => item.id === id))!;
+  return { item: section.children!.find(item => item.id === id)!, section };
+});
+// Photos for this page, so the windows don't repeat the same laptop shots: people, a phone, a desk, Quest's own photography.
+const photos: Record<string, string> = {
+  intro: "url('/revamp/rosewave-gallery/photos/dreaming-of-a-wave-05.webp')",
+  "experience--automation": "url('/revamp/banners/process.webp')",
+  apps: "url('/revamp/banners/phone.webp')",
+  websites: "url('/revamp/banners/websites.webp')",
+  "client-work": "url('/revamp/rosewave-gallery/photos/blush-of-autumn-04.webp')",
+  rosewave: "url('/revamp/rosewave-gallery/photos/nyc550-08.webp')",
+  "experience--commerce-data": "url('/revamp/banners/consulting.webp')",
+  "experience--scheduler": "url('/revamp/banners/prepress.webp')",
+};
+const tilePhotos: Record<string, string> = {
+  "experience--automation": "url('/revamp/banners/freestyle.webp')",
+  "experience--tools": "url('/revamp/banners/consulting.webp')",
+  "experience--builds": "url('/revamp/banners/colour.webp')",
+};
+const photo = (item: ServiceItem) => photos[item.id] || item.image;
 const tagFor = (item: ServiceItem) => {
   const m = item.metrics?.find(x => x.headline);
   return m ? `${m.headline} ${m.change}` : item.platform === "android" ? "Android" : item.note === "In progress." ? "In progress" : "";
@@ -142,7 +164,7 @@ export function Landing() {
             const copy = place === 0 || place === count + 1;
             const away = place !== pos;
             const props = { "aria-hidden": copy || away || undefined, inert: copy || away || undefined } as const;
-            if (index === 0) return <article key={place} {...props} className={`${s.win} ${s.intro}`} style={{ ...bg(serviceOverview.image), ...shade(work) }}>
+            if (index === 0) return <article key={place} {...props} className={`${s.win} ${s.intro}`} style={{ ...bg(photos.intro), ...shade(work) }}>
               <div className={s.winCopy}>
                 <span className={s.eyebrow}>{serviceOverview.label}</span>
                 {copy ? <h2 dangerouslySetInnerHTML={{ __html: serviceOverview.title || "" }} /> : <h1 dangerouslySetInnerHTML={{ __html: serviceOverview.title || "" }} />}
@@ -154,7 +176,7 @@ export function Landing() {
               </div>
             </article>;
             const { item, section } = railWindows[index - 1];
-            return <article key={place} {...props} className={s.win} style={{ ...bg(item.image), ...shade(section) }}>
+            return <article key={place} {...props} className={s.win} style={{ ...bg(photo(item)), ...shade(section) }}>
               <button type="button" className={s.winHit} aria-label={`Open ${item.name}`} onClick={() => open(item, section)} />
               <div className={s.winCopy}>
                 <span className={s.eyebrow}>{section.name}</span>
@@ -183,7 +205,7 @@ export function Landing() {
           <p>{experience.description}</p>
         </div>
         {!!experience.stats?.length && <dl className={s.stats}>{experience.stats.map(stat => <div key={stat.label}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}</dl>}
-        <div className={s.tiles}>{groups.map(group => <Link key={group.id} href={`/#${group.id}`} className={s.tile} style={bg(group.image)}>
+        <div className={s.tiles}>{groups.map(group => <Link key={group.id} href={`/#${group.id}`} className={s.tile} style={bg(tilePhotos[group.id] || group.image)}>
           <h3>{group.name}</h3>
           <p>{group.description}</p>
           <ul>{group.children!.map(child => <li key={child.id}>{child.name}</li>)}</ul>
@@ -262,19 +284,19 @@ export function Landing() {
           <button type="button" className={s.closeBtn} aria-label="Close" onClick={close}>×</button>
         </div>
         <div className={s.sheetBody} ref={sheetBody} onScroll={event => { const el = event.currentTarget; setPlace(Math.round(el.scrollTop / el.clientHeight)); }}>
-          <section className={s.frame} style={bg(sheet.item.image)}>
+          <section className={s.frame} style={bg(photo(sheet.item))}>
             {sheet.item.children ? <div className={s.detail}>
               <span className={s.eyebrow}>{sheet.section.name}</span>
               <h2>{sheet.item.name}</h2>
               <p className={s.lede}>{sheet.item.description}</p>
-              <ul className={s.banners}>{sheet.item.children.map((child, index) => <li key={child.id} style={bg(child.image)}>
+              <ul className={s.banners}>{sheet.item.children.map((child, index) => <li key={child.id} style={bg(photo(child))}>
                 <button type="button" onClick={() => { const el = sheetBody.current; el?.scrollTo({ top: (index + 1) * el.clientHeight, behavior: "smooth" }); }}><span>{child.name}</span>{tagFor(child) && <small>{tagFor(child)}</small>}<b aria-hidden="true">↓</b></button>
                 {child.template && child.href && <a href={child.href} aria-label={`Open the ${child.name} template`} title="Open the template">↗</a>}
               </li>)}</ul>
               {sheet.item.related && <div className={s.buttons}><a className={s.secondary} href={sheet.item.related.href}>{sheet.item.related.label} ↗</a></div>}
             </div> : detail(sheet.item, sheet.section)}
           </section>
-          {sheet.item.children?.map(child => <section key={child.id} className={s.frame} style={bg(child.image)}>{detail(child, sheet.section)}</section>)}
+          {sheet.item.children?.map(child => <section key={child.id} className={s.frame} style={bg(photo(child))}>{detail(child, sheet.section)}</section>)}
         </div>
       </div>}
     </div>
