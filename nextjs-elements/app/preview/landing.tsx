@@ -6,6 +6,7 @@ import { ContactModal } from "@/components/ContactModal";
 import { SchemeToggle } from "@/components/SchemeToggle";
 import { toolIcons } from "@/data/tool-icons";
 import { toolkit } from "@/data/toolkit";
+import { projectCatalog } from "../work/project-catalog";
 import { serviceAccent, serviceOverview, services, type ServiceItem } from "../work/services";
 import s from "./landing.module.css";
 
@@ -25,7 +26,25 @@ const groups = experience.children!.filter(item => item.children);
 const featured = find("experience--paperwork")!;
 const metric = featured.metrics?.[0];
 const projectList = projects.children!.flatMap(group => group.children || []);
-const strip = toolkit.flatMap(group => group.tools).filter(tool => tool.icon && toolIcons[tool.icon]).slice(0, 18);
+// Only names most people know on sight; the full list lives in Experience / Toolkit.
+const known = ["python", "javascript", "typescript", "react", "nextdotjs", "nodedotjs", "android", "shopify", "googlesheets", "gmail", "github", "cloudflare"];
+const strip = known.map(icon => toolkit.flatMap(group => group.tools).find(tool => tool.icon === icon)).filter((tool): tool is NonNullable<typeof tool> => !!tool && !!toolIcons[tool.icon!]);
+// Each project's own icon where it has one; otherwise a monogram tile in its shade.
+const freestyleIcon = <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2d2a32" /><path d="M6 21c4-9 7 5 11-4s5-6 9-7" fill="none" stroke="#ffbf46" strokeWidth="3.2" strokeLinecap="round" /></svg>;
+function AppMark({ item }: { item: ServiceItem }) {
+  return <span className={s.appMark} style={{ "--shade": serviceAccent(item) } as CSSProperties} aria-hidden="true">
+    {item.id === "update" ? <img src="/revamp/apps/update/icon.webp" alt="" /> : item.id === "freestyle" ? freestyleIcon : item.name.charAt(0)}
+  </span>;
+}
+const shotsFor = (item: ServiceItem) => (projectCatalog.find(p => p.slug === item.id)?.panes.flatMap(pane => pane.photos) || []).slice(0, 4);
+// Tools, outcome and "also includes" sit together in one box under a project.
+function factRows(item: ServiceItem) {
+  const rows: [string, string][] = [];
+  if (item.highlights?.length) rows.push([item.highlightsLabel || "Features", item.highlights.join(" / ")]);
+  if (item.sellingPoints?.length) rows.push([item.sellingPointsLabel || "Made for", item.sellingPoints.join(" / ")]);
+  if (item.note) { const m = /^also includes:\s*/i.exec(item.note); rows.push(m ? ["Also includes", item.note.slice(m[0].length)] : ["Note", item.note]); }
+  return rows;
+}
 const bg = (image: string) => ({ "--bg": image } as CSSProperties);
 const shade = (item: ServiceItem) => ({ "--shade": serviceAccent(item) } as CSSProperties);
 // The hero rail: the intro, then every group window from the windows home (Automation, Apps, Websites…), side by side.
@@ -65,6 +84,10 @@ export function Landing() {
   // The open window (a group) and, inside it, the open project. The sheet slides over the page below the bar.
   const [sheet, setSheet] = useState<{ item: ServiceItem; section: ServiceItem } | null>(null);
   const [place, setPlace] = useState(0);
+  // A project card opens a small window: what it is, a few screens, and a button to open it.
+  const [peeked, setPeeked] = useState<ServiceItem | null>(null);
+  const peekDialog = useRef<HTMLDialogElement>(null);
+  const peek = (item: ServiceItem) => { setPeeked(item); peekDialog.current?.showModal(); };
   // The rail is a loop: [copy of the last window, intro, every group window, copy of the intro]. It sits on a real
   // window (1…count); when it slides onto a copy, it jumps to the real one without animating, so it never rewinds.
   const count = railWindows.length + 1;
@@ -120,9 +143,7 @@ export function Landing() {
         {m.headline && <p className={s.big}>{m.headline}<span>{m.change}</span></p>}
         <p className={s.swap}><s>{m.before}</s> → <b>{m.after}</b></p>
       </figure>)}</div>}
-      {!!item.highlights?.length && <div className={s.facts}><div><span>{item.highlightsLabel || "Features"}</span><p>{item.highlights.join(" / ")}</p></div>
-        {!!item.sellingPoints?.length && <div><span>{item.sellingPointsLabel || "Made for"}</span><p>{item.sellingPoints.join(" / ")}</p></div>}</div>}
-      {item.note && <p className={s.note}>{item.note}</p>}
+      {!!factRows(item).length && <dl className={s.factBox}>{factRows(item).map(([label, text]) => <div key={label}><dt>{label}</dt><dd>{text}</dd></div>)}</dl>}
       <div className={s.buttons}>
         {item.href && !item.href.startsWith("mailto:") ? <a className={s.primary} href={item.href}>{item.action || "Take a look"}</a>
           : <button type="button" className={s.primary} onClick={() => talk(section.id === "experience" ? "process-automation" : item.id)}>{item.action || "Let’s talk"}</button>}
@@ -193,8 +214,8 @@ export function Landing() {
 
       <section className={s.strip} aria-label="Some of the tools I build with">
         <span className={s.eyebrow}>Built with</span>
-        <div className={s.marquee}><ul>{[...strip, ...strip].map((tool, index) => <li key={index} aria-hidden={index >= strip.length || undefined} title={tool.name}>
-          <svg viewBox="0 0 24 24"><path d={toolIcons[tool.icon!].path} /></svg>
+        <div className={s.marquee}><ul>{[...strip, ...strip].map((tool, index) => <li key={index} aria-hidden={index >= strip.length || undefined}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={toolIcons[tool.icon!].path} /></svg><span>{tool.name}</span>
         </li>)}</ul></div>
       </section>
 
@@ -234,12 +255,11 @@ export function Landing() {
           <h2>{plain(projects.title)}</h2>
           <p>{projects.description}</p>
         </div>
-        <div className={s.cards}>{projectList.map(item => <Link key={item.id} href={item.related?.href || item.href || "/"} className={s.card}>
-          <span className={s.mark} aria-hidden="true">{item.name.charAt(0)}</span>
+        <div className={s.cards}>{projectList.map(item => <button type="button" key={item.id} className={s.card} onClick={() => peek(item)}>
+          <AppMark item={item} />
           <h3>{item.name}</h3>
           <p>{item.description}</p>
-          <span className={s.cardFoot}>{item.platform === "android" ? "Android app" : item.note === "In progress." ? "In progress" : "Runs in your browser"}<span aria-hidden="true">→</span></span>
-        </Link>)}</div>
+        </button>)}</div>
       </section>
 
       <section id="work-with-me" className={s.section} style={shade(work)}>
@@ -300,6 +320,26 @@ export function Landing() {
         </div>
       </div>}
     </div>
+
+    <dialog ref={peekDialog} className={s.peek} aria-label={peeked?.name} onClose={() => setPeeked(null)} onClick={event => { if (event.target === event.currentTarget) peekDialog.current?.close(); }}>
+      {peeked && <div className={s.peekInner} style={shade(projects)}>
+        <header className={s.peekHead}>
+          <AppMark item={peeked} />
+          <div><h3>{peeked.name}</h3><span>{peeked.platform === "android" ? "Android app" : "Web tool"}{peeked.note === "In progress." || peeked.note?.includes("development") ? " · in progress" : ""}</span></div>
+          <button type="button" className={s.closeBtn} aria-label="Close" onClick={() => peekDialog.current?.close()}>×</button>
+        </header>
+        <p className={s.peekText}>{peeked.description}</p>
+        {!!peeked.highlights?.length && <ul className={s.chips}>{peeked.highlights.map(h => <li key={h}>{h}</li>)}</ul>}
+        {!!shotsFor(peeked).length && <div className={s.shots} data-phone={peeked.platform === "android" || undefined}>{shotsFor(peeked).map(shot => <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" />)}</div>}
+        <div className={s.buttons}>
+          {peeked.platform === "android" ? <a className={s.primary} href={peeked.href}>{peeked.action || "Take a look"}</a>
+            : peeked.href?.startsWith("/work/") ? <a className={s.primary} href={peeked.href}>{peeked.action || "About the project"}</a>
+            : <a className={s.primary} href={peeked.href} target="_blank" rel="noopener">Open in browser ↗</a>}
+          {peeked.related && <a className={s.secondary} href={peeked.related.href}>{peeked.related.label}</a>}
+          {peeked.platform === "android" && <span className={s.soon}>Coming soon to Google Play</span>}
+        </div>
+      </div>}
+    </dialog>
 
     <div className={s.look}>
       {lookOpen && <div className={s.lookPanel} role="group" aria-label="Appearance">

@@ -123,7 +123,8 @@
 .strip { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 32px; padding: 26px var(--gutter); border-bottom: var(--stroke) solid var(--line); }
 .marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .marquee ul { display: flex; gap: 48px; width: max-content; margin: 0; padding: 0; list-style: none; animation: slide 40s linear infinite; }
-.marquee li svg { width: 28px; height: 28px; fill: rgb(var(--ink-rgb) / 0.6); display: block; }
+.marquee li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: rgb(var(--ink-rgb) / 0.72); white-space: nowrap; }
+.marquee li svg { width: 26px; height: 26px; fill: rgb(var(--ink-rgb) / 0.62); display: block; flex: none; }
 @keyframes slide { to { transform: translateX(calc(-50% - 24px)); } }
 
 /* Sections */
@@ -232,3 +233,47 @@
 /* Without outlines, outlined buttons get a faint fill so they still read as buttons. */
 .page[data-lines="none"] :is(.secondary, .scheme, .closeBtn) { background: rgb(var(--ink-rgb) / 0.08); }
 .page[data-lines="none"] :is(.secondary, .scheme, .closeBtn):hover { background: var(--tone); color: var(--black); }
+
+/* Project cards: the app's own icon, then its name and a line. */
+.card { text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.appMark { grid-row: 1 / 3; width: 56px; height: 56px; display: grid; place-items: center; overflow: hidden; border-radius: 14px; font: 400 24px/1 var(--font-display);
+  color: var(--black); background: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); }
+.appMark img, .appMark svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+/* The little project window. */
+.peek { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(720px, calc(100% - 32px)); max-height: calc(100dvh - 48px); padding: 0; border: 0; background: var(--black); color: var(--white); overflow: auto;
+  box-shadow: 0 30px 90px rgb(0 0 0 / calc(.5 * var(--shadow) + .2)); }
+.peek::backdrop { background: rgb(0 0 0 / 0.55); backdrop-filter: blur(4px); }
+.peek[open] { animation: rise .35s cubic-bezier(.22,1,.36,1) both; }
+.peekInner { --tone: color-mix(in srgb, var(--shade) var(--accent-mix), var(--white)); padding: 24px 28px 28px; }
+.peekHead { display: grid; grid-template-columns: 56px 1fr 44px; align-items: center; gap: 16px; }
+.peekHead .appMark { grid-row: auto; }
+.peekHead h3 { margin: 0; font: 400 28px/1.1 var(--font-display); letter-spacing: -.02em; }
+.peekHead span { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--tone); }
+.peekText { margin: 20px 0 0; font-size: 16px; line-height: 1.65; color: rgb(var(--ink-rgb) / 0.84); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.chips li { padding: 7px 12px; font-size: 12px; letter-spacing: .06em; background: color-mix(in srgb, var(--tone) 14%, transparent); color: var(--white); }
+.shots { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; margin: 20px 0 0; overflow-x: auto; scrollbar-width: thin; }
+.shots[data-phone] { grid-auto-columns: 130px; }
+.shots img { width: 100%; height: 160px; object-fit: cover; object-position: top; display: block; background: rgb(var(--ink-rgb) / 0.06); }
+.shots[data-phone] img { height: 260px; }
+.soon { align-self: center; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.page[data-round] :is(.peek, :global(.contact-modal-panel)) { border-radius: 20px; }
+.page[data-round] :is(.chips li) { border-radius: 999px; }
+.page[data-round] .shots img { border-radius: 10px; }
+
+/* Tools, outcome and "also includes" in one centered box. */
+.factBox { display: grid; gap: 0; max-width: 640px; margin: 30px auto 0; padding: 4px 24px; text-align: center;
+  background: rgb(var(--base-rgb) / 0.6); backdrop-filter: blur(8px); border: var(--stroke) solid var(--line); }
+.factBox div { padding: 16px 0; }
+.factBox div + div { border-top: 1px solid rgb(var(--ink-rgb) / 0.12); }
+.factBox dt { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--tone); }
+.factBox dd { margin: 8px 0 0; font-size: 15px; line-height: 1.6; color: rgb(var(--ink-rgb) / 0.86); }
+.page[data-round] .factBox { border-radius: 16px; }
+@media (max-width: 640px) {
+  .peekInner { padding: 18px 18px 22px; }
+  .peekHead { grid-template-columns: 48px 1fr 40px; gap: 12px; }
+  .peekHead .appMark { width: 48px; height: 48px; }
+  .peekHead h3 { font-size: 22px; }
+  .factBox { padding: 2px 16px; }
+}
