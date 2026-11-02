@@ -363,3 +363,11 @@
 .tileBox { grid-template-columns: minmax(160px, 220px) minmax(0, 1.4fr) minmax(0, 1fr) 36px; padding: 28px 24px 28px 32px; }
 .tile .tileBox .arrow { position: static; margin: 0; }
 @media (max-width: 960px) { .tileBox { grid-template-columns: 1fr 36px; padding: 22px; } .tileBox h3, .tileBox p, .tileBox ul { grid-column: 1; } .tile .tileBox .arrow { grid-column: 2; grid-row: 1; } }
+
+/* Made by me, grouped by kind: Apps, Websites, Other. */
+.kind { max-width: 1180px; margin: 56px auto 0; }
+.kind .cards { margin-top: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kindHead { display: flex; align-items: baseline; gap: 14px; margin: 0; font: 400 28px/1.1 var(--font-display); }
+.kindHead small { font: 500 12px/1 var(--font-body, inherit); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 1000px) { .kind .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .kind { margin-top: 40px; } .kind .cards { grid-template-columns: 1fr; } }
