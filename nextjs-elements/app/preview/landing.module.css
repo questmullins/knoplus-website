@@ -34,7 +34,7 @@
 .rail { display: flex; gap: 16px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
   padding: 0 var(--gutter); scroll-padding: 0 var(--gutter); }
 .rail::-webkit-scrollbar { display: none; }
-.win { position: relative; isolation: isolate; flex: 0 0 min(1120px, calc(100% - 2 * var(--gutter) - 64px)); height: clamp(460px, calc(100svh - 72px - 110px), 760px);
+.win { position: relative; isolation: isolate; flex: 0 0 min(1120px, calc(100% - 2 * var(--gutter) - 64px)); height: calc(0.9 * clamp(460px, calc(100svh - 72px - 110px), 760px));
   scroll-snap-align: center; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
   border: var(--stroke) solid color-mix(in srgb, var(--tone) 45%, transparent); }
 .win::before { content: ""; position: absolute; inset: 0; z-index: -1; transition: transform .8s cubic-bezier(.22,1,.36,1);
@@ -53,13 +53,34 @@
 .intro .winCopy { max-width: 960px; }
 .intro .winCopy h1 { font-size: clamp(44px, 6.4vw, 96px); }
 .railBar { display: flex; align-items: center; gap: 18px; padding: 18px var(--gutter) 0; font-size: 12px; letter-spacing: .2em; color: rgb(var(--ink-rgb) / 0.7); }
-.railBar button { width: 44px; height: 44px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.3); background: transparent; color: var(--white); font-size: 18px; cursor: pointer; transition: border-color .2s, opacity .2s; }
-.railBar button:hover:not(:disabled) { border-color: var(--white); }
-.railBar button:disabled { opacity: .3; cursor: default; }
-.railBar button:last-child { margin-left: 0; }
 .railDots { flex: 1; display: flex; gap: 6px; }
-.railDots i { flex: 1; max-width: 48px; height: var(--stroke); background: rgb(var(--ink-rgb) / 0.2); transition: background .3s; }
-.railDots i[data-on] { background: var(--white); }
+.railDots button { flex: 1; max-width: 48px; height: 20px; padding: 0; border: 0; cursor: pointer; background: linear-gradient(rgb(var(--ink-rgb) / 0.2), rgb(var(--ink-rgb) / 0.2)) center / 100% max(var(--stroke), 2px) no-repeat; transition: background .3s; }
+.railDots button[data-on] { background: linear-gradient(var(--white), var(--white)) center / 100% max(var(--stroke), 2px) no-repeat; }
+/* Arrows sit on the windows and appear while the pointer is over them (always shown on touch screens). */
+.stage { position: relative; }
+.arrowBtn { position: absolute; top: 50%; z-index: 3; width: 52px; height: 52px; margin-top: -26px; display: grid; place-items: center;
+  border: var(--stroke) solid rgb(var(--ink-rgb) / 0.4); background: rgb(var(--base-rgb) / 0.7); backdrop-filter: blur(6px); color: var(--white); font-size: 20px;
+  cursor: pointer; opacity: 0; transition: opacity .25s, border-color .2s, background .2s; }
+.prev { left: calc(var(--gutter) + 16px); } .next { right: calc(var(--gutter) + 16px); }
+.stage:hover .arrowBtn:not(:disabled), .arrowBtn:focus-visible { opacity: 1; }
+.arrowBtn:hover { border-color: var(--white); background: rgb(var(--base-rgb) / 0.9); }
+.arrowBtn:disabled { pointer-events: none; }
+@media (hover: none) { .arrowBtn:not(:disabled) { opacity: .85; } }
+
+/* Appearance trial, set from the floating menu: outlines off or thicker, and rounded corners. */
+.page[data-lines="none"] { --stroke: 0px; }
+.page[data-lines="thick"] { --stroke: 3px; }
+.page[data-round] :is(.win, .primary, .secondary, .scheme, .arrowBtn, .closeBtn, .banners li, .results figure, .tile, .card, .featureImage, .lookBtn, .lookPanel) { border-radius: 14px; }
+.page[data-round] :is(.primary, .secondary, .scheme, .arrowBtn, .closeBtn, .lookBtn) { border-radius: 999px; }
+.page[data-round] .mark { border-radius: 50%; }
+.page[data-round] .sheetInner { border-radius: 20px 20px 0 0; overflow: hidden; }
+.page[data-round] .rail { padding-bottom: 2px; }
+.look { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.lookBtn { width: 52px; height: 52px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.35); background: var(--black); color: var(--white); font: 400 17px/1 var(--font-display); cursor: pointer; box-shadow: 0 10px 30px rgb(0 0 0 / calc(.35 * var(--shadow))); }
+.page[data-lines="none"] .lookBtn, .page[data-lines="none"] .lookPanel { border: 1px solid rgb(var(--ink-rgb) / 0.12); }
+.lookPanel { display: grid; gap: 12px; min-width: 210px; padding: 18px; border: var(--stroke) solid rgb(var(--ink-rgb) / 0.25); background: var(--black); box-shadow: 0 20px 50px rgb(0 0 0 / calc(.4 * var(--shadow))); }
+.lookPanel label { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+.lookPanel input { width: 18px; height: 18px; accent-color: var(--tone); }
 
 /* The sheet: a window opens over the page below the bar, listing its projects as thin banners; a project opens in place. */
 .page[data-locked] { overflow: hidden; }
@@ -189,10 +210,13 @@
   .hero { padding-top: 16px; }
   .rail { gap: 10px; }
   .rail { padding: 0 16px; scroll-padding: 0 16px; }
-  .win { flex-basis: calc(100% - 40px); height: calc(100svh - 60px - 96px); min-height: 520px; }
+  .win { flex-basis: calc(100% - 40px); height: calc(0.9 * (100svh - 60px - 96px)); min-height: 470px; }
   .winCopy { padding: 28px 20px; }
   .winCopy p { font-size: 16px; }
   .railBar { gap: 12px; }
+  .arrowBtn { width: 40px; height: 40px; margin-top: -20px; font-size: 16px; }
+  .prev { left: 24px; } .next { right: 24px; }
+  .look { right: 14px; bottom: 14px; }
   .sheet { inset: 60px 0 0; }
   .sheetHead { height: 88px; }
   .banners button { grid-template-columns: 1fr auto; }

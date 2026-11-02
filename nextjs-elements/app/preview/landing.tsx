@@ -45,6 +45,12 @@ export function Landing() {
   const [project, setProject] = useState<ServiceItem | null>(null);
   const [slide, setSlide] = useState(0);
   const rail = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
+  // Appearance trial: a floating menu flips outlines and corners for the whole page (remembered in this browser only).
+  const [look, setLook] = useState({ lines: "normal" as "none" | "normal" | "thick", round: false });
+  const [lookOpen, setLookOpen] = useState(false);
+  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem("kno-preview-look") || "null"); if (saved) setLook(saved); } catch {} }, []);
+  const setLookSaved = (next: typeof look) => { setLook(next); try { localStorage.setItem("kno-preview-look", JSON.stringify(next)); } catch {} };
   const sheetBody = useRef<HTMLDivElement>(null);
   const open = (item: ServiceItem, section: ServiceItem) => { setSheet({ item, section }); setProject(item.children ? null : item); };
   const close = () => { setSheet(null); setProject(null); };
@@ -64,6 +70,17 @@ export function Landing() {
     track.addEventListener("scroll", update, { passive: true });
     return () => track.removeEventListener("scroll", update);
   }, []);
+
+  // The rail moves on by itself every 6 seconds, and waits while the pointer is over it, something in it has focus,
+  // a window is open, or the visitor prefers less motion. After the last window it starts again from the first.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => {
+      if (paused.current || sheet || document.hidden) return;
+      go(slide >= railWindows.length ? 0 : slide + 1);
+    }, 6000);
+    return () => window.clearInterval(timer);
+  }, [slide, sheet]);
 
   useEffect(() => {
     if (!sheet) return;
@@ -97,7 +114,7 @@ export function Landing() {
     </div>;
   }
 
-  return <div className={s.page} data-locked={sheet ? true : undefined}>
+  return <div className={s.page} data-locked={sheet ? true : undefined} data-lines={look.lines} data-round={look.round || undefined}>
     <header className={s.bar}>
       <Link href="/preview" className={s.logo}>KNOPLUS</Link>
       <nav className={s.nav} aria-label="Main">
@@ -114,7 +131,12 @@ export function Landing() {
 
     <main>
       {/* The hero is a side-scrolling rail of windows in the original kno.plus style: the intro first, then each group. */}
-      <section className={s.hero} aria-label="Kno.plus">
+      <section className={s.hero} aria-label="Kno.plus"
+        onPointerEnter={() => { paused.current = true; }} onPointerLeave={() => { paused.current = false; }}
+        onFocus={() => { paused.current = true; }} onBlur={() => { paused.current = false; }}>
+        <div className={s.stage}>
+        <button type="button" className={`${s.arrowBtn} ${s.prev}`} aria-label="Previous" onClick={() => go(slide - 1)} disabled={slide === 0}>←</button>
+        <button type="button" className={`${s.arrowBtn} ${s.next}`} aria-label="Next" onClick={() => go(slide + 1)} disabled={slide === railWindows.length}>→</button>
         <div className={s.rail} ref={rail}>
           <article className={`${s.win} ${s.intro}`} style={{ ...bg(serviceOverview.image), ...shade(work) }}>
             <div className={s.winCopy}>
@@ -138,11 +160,10 @@ export function Landing() {
             </div>
           </article>)}
         </div>
+        </div>
         <div className={s.railBar}>
-          <button type="button" aria-label="Previous" onClick={() => go(slide - 1)} disabled={slide === 0}>←</button>
           <span>{String(slide + 1).padStart(2, "0")} / {String(railWindows.length + 1).padStart(2, "0")}</span>
-          <div className={s.railDots}>{[null, ...railWindows].map((_, index) => <i key={index} data-on={index === slide || undefined} />)}</div>
-          <button type="button" aria-label="Next" onClick={() => go(slide + 1)} disabled={slide === railWindows.length}>→</button>
+          <div className={s.railDots}>{[null, ...railWindows].map((_, index) => <button type="button" key={index} aria-label={`Go to window ${index + 1}`} data-on={index === slide || undefined} onClick={() => go(index)} />)}</div>
         </div>
       </section>
 
@@ -249,6 +270,16 @@ export function Landing() {
           </div>}
         </div>
       </div>}
+    </div>
+
+    <div className={s.look}>
+      {lookOpen && <div className={s.lookPanel} role="group" aria-label="Appearance">
+        <span className={s.eyebrow}>Appearance</span>
+        <label><input type="checkbox" checked={look.lines === "none"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "none" : "normal" })} /> Remove outlines</label>
+        <label><input type="checkbox" checked={look.lines === "thick"} onChange={e => setLookSaved({ ...look, lines: e.target.checked ? "thick" : "normal" })} /> Thicker outlines</label>
+        <label><input type="checkbox" checked={look.round} onChange={e => setLookSaved({ ...look, round: e.target.checked })} /> Round edges</label>
+      </div>}
+      <button type="button" className={s.lookBtn} aria-expanded={lookOpen} onClick={() => setLookOpen(!lookOpen)}>{lookOpen ? "×" : "Aa"}</button>
     </div>
 
     <ContactModal key={contact || "closed"} isOpen={contact !== null} onClose={() => setContact(null)} selectedTopic={contact || ""} />
