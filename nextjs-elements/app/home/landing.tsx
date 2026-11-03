@@ -29,7 +29,7 @@ const projectList = projects.children!.flatMap(group => group.children || []);
 // Made by me, sorted by what each thing is: phone apps, things you open in a browser, and the rest.
 const kinds = [
   { name: "Apps", tag: "App", note: "On your phone", items: projectList.filter(item => item.platform === "android") },
-  { name: "Websites", tag: "Website", note: "Open in your browser", items: projectList.filter(item => item.href?.startsWith("/") && !item.href.startsWith("/work/") && item.platform !== "android") },
+  { name: "Websites", tag: "Website", note: "Open in your browser", items: projectList.filter(item => item.href?.startsWith("/") && !item.href.startsWith("/#") && item.platform !== "android") },
 ];
 const sorted = new Set(kinds.flatMap(kind => kind.items));
 kinds.push({ name: "Other", tag: "Plug-in", note: "Plug-ins and more", items: projectList.filter(item => !sorted.has(item)) });
@@ -240,7 +240,8 @@ export function Landing() {
       </figure>)}</div>}
       {!!factRows(item).length && <dl className={s.factBox}>{factRows(item).map(([label, text]) => <div key={label}><dt>{label}</dt><dd>{text}</dd></div>)}</dl>}
       <div className={s.buttons}>
-        {item.href && !item.href.startsWith("mailto:") ? <a className={s.primary} href={item.href}>{item.action || "Take a look"}</a>
+        {/* A link to this same window (an app's "/#update") has nothing to add here, so it isn't shown. */}
+        {item.href === `/#${item.id}` ? null : item.href && !item.href.startsWith("mailto:") ? <a className={s.primary} href={item.href}>{item.action || "Take a look"}</a>
           : <button type="button" className={s.primary} onClick={() => talk(section.id === "experience" ? "process-automation" : item.id)}>{item.action || "Let’s talk"}</button>}
         {item.related && <a className={s.secondary} href={item.related.href}>{item.related.label}</a>}
         {item.template && <button type="button" className={s.secondary} onClick={() => talk("website-template")}>Inquire</button>}
@@ -436,8 +437,9 @@ export function Landing() {
         {!!peeked.highlights?.length && <ul className={s.chips}>{peeked.highlights.map(h => <li key={h}>{h}</li>)}</ul>}
         {!!shotsFor(peeked).length && <div className={s.shots} data-phone={peeked.platform === "android" || undefined}>{shotsFor(peeked).map(shot => <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" />)}</div>}
         <div className={s.buttons}>
-          {peeked.platform === "android" ? <a className={s.primary} href={peeked.href} {...(peeked.href?.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}>{peeked.action || "Take a look"}</a>
-            : peeked.href?.startsWith("/work/") ? <a className={s.primary} href={peeked.href}>{peeked.action || "About the project"}</a>
+          {/* "/#<id>" opens the project's window on this page, so the pop-up closes first. */}
+          {peeked.platform === "android" ? <a className={s.primary} href={peeked.href} onClick={() => peekDialog.current?.close()} {...(peeked.href?.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}>{peeked.action || "Take a look"}</a>
+            : peeked.href?.startsWith("/#") ? <a className={s.primary} href={peeked.href} onClick={() => peekDialog.current?.close()}>{peeked.action || "About the project"}</a>
             : <a className={s.primary} href={peeked.href} target="_blank" rel="noopener">Open in browser ↗</a>}
           {peeked.related && <a className={s.secondary} href={peeked.related.href}>{peeked.related.label}</a>}
           {peeked.platform === "android" && <span className={s.soon}>Coming soon to Google Play</span>}
