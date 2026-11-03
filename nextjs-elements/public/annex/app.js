@@ -375,7 +375,7 @@ function assetForm(a, accounts) {
       h("label", {}, "Kind", h("select", { name: "kind" }, Object.keys(KIND).map((k) => h("option", { value: k, selected: v.kind === k, text: k[0].toUpperCase() + k.slice(1) })))),
       h("label", {}, "Status", h("input", { name: "status", value: v.status, placeholder: "Selling, In development…" })),
       h("label", {}, "Sales from", h("select", { name: "account" }, h("option", { value: "", text: "Not connected" }), (accounts || []).map((c) => h("option", { value: c.id, selected: v.account === c.id, text: c.name })))),
-      h("label", {}, "Link", h("input", { name: "link", value: v.link, placeholder: "/work/update" })),
+      h("label", {}, "Link", h("input", { name: "link", value: v.link, placeholder: "/#update" })),
       h("label", {}, "Picture", h("input", { name: "image", value: v.image, placeholder: "/revamp/banners/update.webp" })),
       h("label", {}, "Color", h("input", { name: "tone", type: "color", value: v.tone })),
       h("label", {}, "Order on the page", h("input", { name: "sort", type: "number", min: "0", max: "999", value: String(v.sort) }))),

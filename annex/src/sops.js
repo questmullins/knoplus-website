@@ -189,7 +189,7 @@ export const SOPS = [
           "On the RoseWave server, the variable **SITE_ORIGIN** must include `https://kno.plus`.",
           "After changing either one, redeploy.",
         ],
-        go: [go("Open the store", "/store"), go("Cloudflare › settings", CF + "/settings")],
+        go: [go("Open the store", "https://rosewave.art/"), go("Cloudflare › settings", CF + "/settings")],
       },
     ],
   },

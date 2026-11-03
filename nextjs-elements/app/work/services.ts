@@ -82,7 +82,7 @@ export const services: ServiceItem[] = [
           {
             id: "update", platform: "android", name: "UpDate", label: "Projects / Apps / UpDate", hire: true,
             description: "UpDate exists so you can step into a date with a plan and some backup, leaving more room to actually enjoy it.",
-            image: "url('/revamp/banners/update.webp')", href: "/work/update", action: "Explore UpDate",
+            image: "url('/revamp/banners/update.webp')", href: "/#update", action: "Explore UpDate",
             highlights: ["Date plans", "Check-ins", "A little backup"],
           },
           {
@@ -94,7 +94,7 @@ export const services: ServiceItem[] = [
           {
             id: "textualize", platform: "android", name: "Textualize", label: "Projects / Apps / Textualize", hire: true,
             description: "The things you do on your phone, in your own words. Textualize turns app actions into styled text shortcuts and home-screen boards, with room to make them feel like you.",
-            image: "url('/revamp/banners/textualize.webp')", href: "/work/textualize", action: "About Textualize",
+            image: "url('/revamp/banners/textualize.webp')", href: "/#textualize", action: "About Textualize",
             highlights: ["Text shortcuts", "Home-screen boards", "Typography & styling"], note: "Android app in development.",
           },
         ],
@@ -108,20 +108,18 @@ export const services: ServiceItem[] = [
             id: "freestyle", name: "Freestyle", label: "Projects / Tools / Freestyle", hire: true,
             description: "I needed a swimlane diagram for work and kept finding services that wanted payment. Freestyle grew from finding a way around that. Finish your diagram and export it without reaching for a credit card.",
             image: "url('/revamp/banners/freestyle.webp')", href: "/webtools/freestyle/", action: "Open Freestyle",
-            related: { href: "/work/freestyle", label: "About the project" },
             highlights: ["Board view", "Swimlanes", "Free image export"],
           },
           {
             id: "instapost", name: "Insta-Post Maker", label: "Projects / Tools / Insta-Post Maker", hire: true,
             description: "You have the photographs and something you want to share. Insta-Post Maker exists so arranging them into a post feels quick and enjoyable.",
             image: "url('/revamp/banners/instapost.webp')", href: "/instapost/index.html", action: "Open Insta-Post Maker",
-            related: { href: "/work/instapost", label: "About the project" },
             highlights: ["Your photographs", "Your words", "Ready to share"],
           },
           {
             id: "prepress-assistant", name: "Prepress Assistant", label: "Projects / Tools / Prepress Assistant", hire: true,
             description: "Practical tools for the production tasks that interrupt a designer’s concentration, including barcode and annotation work.",
-            image: "url('/revamp/banners/prepress.webp')", href: "/work/prepress-assistant", action: "About the project",
+            image: "url('/revamp/banners/prepress.webp')", href: "/#prepress-assistant", action: "About the project",
             highlights: ["Barcodes", "Annotations", "Production checks"], note: "In progress.",
           },
         ],
@@ -139,7 +137,6 @@ export const services: ServiceItem[] = [
         title: "Modern websites.<br />Some character.<br /><em>Made yours.</em>",
         description: "Start with a template, then make the photographs, words, and details feel like your business.",
         image: "url('/revamp/banners/websites.webp')", highlights: ["Templates", "Customisation", "Practical turnaround"], children: websiteItems,
-        related: { href: "/websites", label: "See all templates" },
       },
       {
         id: "process-automation", name: "Custom tools", label: "Work with me / Custom tools & automation",

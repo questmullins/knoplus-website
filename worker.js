@@ -11,21 +11,32 @@ const OFFERINGS = offeringGroups.flatMap(group => group.options.map(option => op
 const TEMPLATE_OFFERING = "Website from a template";
 
 // Pages that moved when the project showcase became the home page (assets under /revamp/ stay where they are).
+// Old project page addresses and the home page window each one now opens.
+const OLD_PROJECTS = { update: "update", textualize: "textualize", freestyle: "freestyle", instapost: "instapost", "prepress-assistant": "prepress-assistant", websites: "websites", "web-services": "websites", "app-services": "apps", "web-apps": "tools", consulting: "experience", "process-automation": "experience" };
+
 function movedTo(path) {
   if (/\.[a-z0-9]+$/i.test(path)) return "";
   const p = path.replace(/\/+$/, "") || "/";
   if (p === "/revamp" || p === "/work") return "/";
   if (p === "/manage") return "/annex/";
-  if (p === "/pricing") return "/websites";
+  // The older pages in the sidebar look are retired; each forwards to its place on the home page (or RoseWave's own site).
+  if (p === "/pricing" || p === "/websites" || p === "/small-business-websites" || p === "/automotive-website-templates" || p === "/home-services-website-templates") return "/#websites";
+  if (p === "/website-care-plans") return "/#work-with-me";
+  if (p === "/sitemap") return "/";
+  if (p === "/store" || p.startsWith("/store/")) return "https://rosewave.art/";
   if (p === "/about" || p === "/process") return "/";
   // The long-scroll home was trialled at /preview before it became the home page.
   if (p === "/preview") return "/";
   // The three parts of the home page have their own short addresses.
   if (p === "/experience" || p === "/projects" || p === "/work-with-me") return "/#" + p.slice(1);
   const gallery = /^\/revamp\/rosewave\/gallery(\/.*)?$/.exec(p);
-  if (gallery) return "/store" + (gallery[1] || "");
-  const project = /^\/revamp\/([a-z0-9-]+)(?:\/horizontal)?$/.exec(p);
-  return project ? "/work/" + project[1] : "";
+  if (gallery) return "https://rosewave.art/";
+  // The old project pages (/work/<project>, and /revamp/<project> before them) were the windows home. They are retired:
+  // each opens its window on the home page instead, and anything unknown lands on Projects.
+  const project = /^\/(?:work|revamp)\/([a-z0-9-]+)(?:\/horizontal)?$/.exec(p);
+  if (!project) return "";
+  if (project[1] === "rosewave") return "https://rosewave.art/";
+  return "/#" + (OLD_PROJECTS[project[1]] || "projects");
 }
 
 export default {
@@ -41,7 +52,11 @@ export default {
     const clientResponse = await handleClients(request, env);
     if (clientResponse) return clientResponse;
     const moved = movedTo(url.pathname);
-    if (moved) return Response.redirect(url.origin + moved + url.search, 301);
+    if (moved) {
+      if (/^https?:/.test(moved)) return Response.redirect(moved, 301);
+      const [path, hash] = moved.split("#");
+      return Response.redirect(url.origin + path + url.search + (hash ? "#" + hash : ""), 301);
+    }
 
     if (url.pathname === "/update-config" || url.pathname === "/update-config/") {
       if (request.method !== "GET" && request.method !== "HEAD") {

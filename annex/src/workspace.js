@@ -5,8 +5,8 @@ import { addDays, dayOf, fail, json, readJson } from "./util.js";
 const ID = /^[a-z0-9][a-z0-9-]{0,30}$/;
 const KINDS = ["store", "app", "service", "tool"];
 const FIRST = [
-  ["rosewave", "RoseWave", "store", "Selling", "rosewave", "/store", "/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp", "#edb3a4", "Photography app, memberships and the print store", 1],
-  ["update", "UpDate", "app", "In development", "", "/work/update", "/revamp/banners/update.webp", "#c5aceb", "Date planning and safety app for Android", 2],
+  ["rosewave", "RoseWave", "store", "Selling", "rosewave", "https://rosewave.art/", "/revamp/rosewave-gallery/photos/blush-of-autumn-01.webp", "#edb3a4", "Photography app, memberships and the print store", 1],
+  ["update", "UpDate", "app", "In development", "", "/#update", "/revamp/banners/update.webp", "#c5aceb", "Date planning and safety app for Android", 2],
   ["websites", "Client websites", "service", "Taking clients", "", "/websites", "/revamp/banners/websites.webp", "#85cfc0", "Websites made for small businesses", 3],
 ];
 
