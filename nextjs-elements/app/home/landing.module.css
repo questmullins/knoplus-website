@@ -397,3 +397,33 @@
   .bar[data-window] .barWindow { gap: 12px; }
   .bar[data-window] .closeBtn { width: 40px; height: 40px; }
 }
+
+/* Wide displays: everything stays in a 1440px column, and the photo rail becomes a rounded panel the same width,
+   so the page doesn't stretch thin and wide across a big screen. */
+@media (min-width: 1600px) {
+  .page { --gutter: max(72px, calc((100% - 1440px) / 2)); }
+  .hero { max-width: 1440px; margin: 20px auto 0; border-bottom: 0; border-radius: 20px; clip-path: inset(0 round 20px); }
+  .win { height: min(720px, calc(0.9 * (100svh - 92px))); }
+  .strip { margin-top: 8px; }
+}
+
+/* App icons (overrides the ring above): a thinner ring in the icon's own edge colour, centred on its edge. */
+.appMark { outline: 3px solid var(--ring, color-mix(in srgb, var(--shade) var(--accent-mix), #000 38%)); outline-offset: -1.5px; }
+
+/* Made by me: one grid, with the kinds as tags you can filter by. */
+.kindTabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 40px auto 0; }
+.kindTabs button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: rgb(var(--ink-rgb) / 0.06);
+  color: rgb(var(--ink-rgb) / 0.78); font: 500 11px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: background .2s, color .2s; }
+.kindTabs button span { opacity: .6; letter-spacing: .05em; }
+.kindTabs button:hover { color: var(--white); background: rgb(var(--ink-rgb) / 0.1); }
+.kindTabs button[aria-pressed="true"] { background: var(--tone); color: var(--black); }
+.kindTabs button[aria-pressed="true"] span { opacity: .75; }
+.madeGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 28px; }
+.madeGrid .card { grid-template-columns: 56px 1fr; grid-template-rows: auto auto 1fr; }
+.madeGrid .card h3 { grid-column: 2; }
+.madeGrid .card p { grid-column: 1 / -1; margin-top: 18px; }
+.tagRow { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag { padding: 5px 10px; border-radius: 999px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--white); background: color-mix(in srgb, var(--tone) 16%, transparent); }
+.tagSoft { background: rgb(var(--ink-rgb) / 0.06); color: rgb(var(--ink-rgb) / 0.7); }
+@media (max-width: 1000px) { .madeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .madeGrid { grid-template-columns: 1fr; } .kindTabs { justify-content: flex-start; } }

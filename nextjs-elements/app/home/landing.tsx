@@ -28,18 +28,21 @@ const metric = featured.metrics?.[0];
 const projectList = projects.children!.flatMap(group => group.children || []);
 // Made by me, sorted by what each thing is: phone apps, things you open in a browser, and the rest.
 const kinds = [
-  { name: "Apps", note: "On your phone", items: projectList.filter(item => item.platform === "android") },
-  { name: "Websites", note: "Open in your browser", items: projectList.filter(item => item.href?.startsWith("/") && !item.href.startsWith("/work/") && item.platform !== "android") },
+  { name: "Apps", tag: "App", note: "On your phone", items: projectList.filter(item => item.platform === "android") },
+  { name: "Websites", tag: "Website", note: "Open in your browser", items: projectList.filter(item => item.href?.startsWith("/") && !item.href.startsWith("/work/") && item.platform !== "android") },
 ];
 const sorted = new Set(kinds.flatMap(kind => kind.items));
-kinds.push({ name: "Other", note: "Plug-ins and works in progress", items: projectList.filter(item => !sorted.has(item)) });
+kinds.push({ name: "Other", tag: "Plug-in", note: "Plug-ins and more", items: projectList.filter(item => !sorted.has(item)) });
+const kindOf = (item: ServiceItem) => kinds.find(kind => kind.items.includes(item))!;
+// Each icon's ring is its own edge colour, so the ring reads as part of the icon.
+const rings: Record<string, string> = { update: "#1a1532", "rosewave-app": "#5d3c49", freestyle: "#2d2a32" };
 // Only names most people know on sight; the full list lives in Experience / Toolkit.
 const known = ["python", "javascript", "typescript", "react", "nextdotjs", "nodedotjs", "android", "shopify", "googlesheets", "gmail", "github", "cloudflare"];
 const strip = known.map(icon => toolkit.flatMap(group => group.tools).find(tool => tool.icon === icon)).filter((tool): tool is NonNullable<typeof tool> => !!tool && !!toolIcons[tool.icon!]);
 // Each project's own icon where it has one; otherwise a monogram tile in its shade.
 const freestyleIcon = <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2d2a32" /><path d="M6 21c4-9 7 5 11-4s5-6 9-7" fill="none" stroke="#ffbf46" strokeWidth="3.2" strokeLinecap="round" /></svg>;
 function AppMark({ item }: { item: ServiceItem }) {
-  return <span className={s.appMark} style={{ "--shade": serviceAccent(item) } as CSSProperties} aria-hidden="true">
+  return <span className={s.appMark} style={{ "--shade": serviceAccent(item), ...(rings[item.id] ? { "--ring": rings[item.id] } : {}) } as CSSProperties} aria-hidden="true">
     {item.id === "update" ? <img src="/revamp/apps/update/icon.webp" alt="" /> : item.id === "rosewave-app" ? <img src="/revamp/apps/rosewave/icon.svg" alt="" /> : item.id === "freestyle" ? freestyleIcon : item.name.charAt(0)}
   </span>;
 }
@@ -86,6 +89,7 @@ export function Landing() {
   // The open window (a group) and, inside it, the open project. The sheet slides over the page below the bar.
   const [sheet, setSheet] = useState<{ item: ServiceItem; section: ServiceItem } | null>(null);
   const [place, setPlace] = useState(0);
+  const [kindShown, setKindShown] = useState("All");
   // A project card opens a small window: what it is, a few screens, and a button to open it.
   const [peeked, setPeeked] = useState<ServiceItem | null>(null);
   const peekDialog = useRef<HTMLDialogElement>(null);
@@ -296,14 +300,16 @@ export function Landing() {
           <h2>{plain(projects.title)}</h2>
           <p>{projects.description}</p>
         </div>
-        {kinds.filter(kind => kind.items.length).map(kind => <div key={kind.name} className={s.kind}>
-          <h3 className={s.kindHead}>{kind.name}<small>{kind.note}</small></h3>
-          <div className={s.cards}>{kind.items.map(item => <button type="button" key={item.id} className={s.card} onClick={() => peek(item)}>
-            <AppMark item={item} />
-            <h3>{item.name}</h3>
-            <p>{item.description}</p>
-          </button>)}</div>
-        </div>)}
+        {/* One grid; the kinds are tags on each card and a filter above it. */}
+        <div className={s.kindTabs} role="group" aria-label="Show">
+          {[{ name: "All", items: projectList }, ...kinds].filter(kind => kind.items.length).map(kind => <button key={kind.name} type="button" aria-pressed={kindShown === kind.name} onClick={() => setKindShown(kind.name)}>{kind.name} <span>{kind.items.length}</span></button>)}
+        </div>
+        <div className={`${s.cards} ${s.madeGrid}`}>{(kinds.find(kind => kind.name === kindShown)?.items || projectList).map(item => <button type="button" key={item.id} className={s.card} onClick={() => peek(item)}>
+          <AppMark item={item} />
+          <h3>{item.name}</h3>
+          <span className={s.tagRow}><span className={s.tag}>{kindOf(item).tag}</span><span className={`${s.tag} ${s.tagSoft}`}>{kindOf(item).note}</span></span>
+          <p>{item.description}</p>
+        </button>)}</div>
       </section>
 
       <section id="work-with-me" className={s.section} style={shade(work)}>
