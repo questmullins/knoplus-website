@@ -22,7 +22,7 @@
     rounded: false,
     frame: false,
     frameColor: "black",
-    frameMat: true,
+    frameWidth: 26,
     labelStyle: "corner",
     labelBefore: "Before",
     labelAfter: "After",
@@ -224,6 +224,79 @@
     }
   }
 
+  // Lime plaster: broad, soft trowel sweeps lighter and darker than the wall, then a fine grit.
+  function plaster(c, w, h, rng, dark, light, alpha) {
+    const s = w / 1080;
+    const count = Math.round((140 * (w * h)) / (1080 * 1350));
+    for (let i = 0; i < count; i++) {
+      const x = rng() * w;
+      const y = rng() * h;
+      const r = (60 + rng() * 220) * s;
+      c.save();
+      c.translate(x, y);
+      c.rotate(rng() * Math.PI);
+      c.scale(1, 0.25 + rng() * 0.35);
+      const g = c.createRadialGradient(0, 0, 0, 0, 0, r);
+      g.addColorStop(0, `rgba(${rng() < 0.5 ? dark : light},${alpha * (0.4 + rng() * 0.6)})`);
+      g.addColorStop(1, `rgba(${dark},0)`);
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(0, 0, r, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    }
+  }
+
+  // Wood: upright boards, each its own shade, with wavy grain lines along them, the odd knot, and a seam between.
+  function wood(c, w, h, rng, base, dark) {
+    const s = w / 1080;
+    const boards = 5;
+    const bw = w / boards;
+    const [r0, g0, b0] = base;
+    for (let i = 0; i < boards; i++) {
+      const x0 = i * bw;
+      const shade = 0.88 + rng() * 0.22;
+      c.save();
+      c.beginPath();
+      c.rect(x0, 0, bw, h);
+      c.clip();
+      c.fillStyle = `rgb(${Math.min(255, r0 * shade)},${Math.min(255, g0 * shade)},${Math.min(255, b0 * shade)})`;
+      c.fillRect(x0, 0, bw, h);
+      const lines = 70;
+      const phase = rng() * 10;
+      for (let k = 0; k < lines; k++) {
+        const gx = x0 + rng() * bw;
+        const amp = (2 + rng() * 8) * s;
+        const freq = (0.002 + rng() * 0.004) / s;
+        c.strokeStyle = `rgba(${dark},${0.04 + rng() * 0.12})`;
+        c.lineWidth = (0.5 + rng() * 2.2) * s;
+        c.beginPath();
+        for (let y = -20 * s; y <= h + 20 * s; y += 18 * s) {
+          const xx = gx + Math.sin(y * freq + phase + k * 0.13) * amp;
+          if (y < 0) c.moveTo(xx, y);
+          else c.lineTo(xx, y);
+        }
+        c.stroke();
+      }
+      if (rng() < 0.6) {
+        const kx = x0 + bw * (0.25 + rng() * 0.5);
+        const ky = h * (0.1 + rng() * 0.8);
+        for (let ring = 1; ring <= 6; ring++) {
+          c.strokeStyle = `rgba(${dark},${0.22 - ring * 0.025})`;
+          c.lineWidth = 1.4 * s;
+          c.beginPath();
+          c.ellipse(kx, ky, ring * 3.2 * s, ring * 9 * s, 0, 0, Math.PI * 2);
+          c.stroke();
+        }
+      }
+      c.restore();
+      c.fillStyle = `rgba(${dark},0.45)`;
+      c.fillRect(x0 - 1.5 * s, 0, 3 * s, h);
+      c.fillStyle = "rgba(255,255,255,0.08)";
+      c.fillRect(x0 + 1.5 * s, 0, 2 * s, h);
+    }
+  }
+
   function noise(c, w, h, rng, amount) {
     const data = c.getImageData(0, 0, w, h);
     const px = data.data;
@@ -356,6 +429,34 @@
         noise(c, w, h, rng, 7);
       }
     },
+    plaster: {
+      name: "Plaster",
+      text: "#3b342d",
+      sub: "#6e6458",
+      pill: "rgba(240,234,224,0.94)",
+      placeholder: "rgba(110,95,80,0.08)",
+      light: true,
+      paint(c, w, h, rng) {
+        fill(c, w, h, "#e7ded1");
+        plaster(c, w, h, rng, "150,128,104", "255,252,246", 0.22);
+        mottle(c, w, h, rng, "140,118,95", 0.03, 18);
+        speckle(c, w, h, rng, "120,100,80", 0.1, 1600, 0.9);
+        noise(c, w, h, rng, 12);
+      }
+    },
+    wood: {
+      name: "Wood",
+      text: "#fbf0e0",
+      sub: "#ead2b4",
+      pill: "rgba(70,42,24,0.88)",
+      placeholder: "rgba(255,235,210,0.08)",
+      light: false,
+      paint(c, w, h, rng) {
+        wood(c, w, h, rng, [168, 117, 74], "70,38,18");
+        vignette(c, w, h, 0.3);
+        noise(c, w, h, rng, 12);
+      }
+    },
     custom: {
       name: "Your own",
       get text() { return isLight(state.customBg) ? "#2f2924" : "#f4ede3"; },
@@ -383,6 +484,14 @@
           case "speckle":
             speckle(c, w, h, rng, dark, 0.22, 2600, 1.6);
             noise(c, w, h, rng, 6);
+            break;
+          case "plaster":
+            plaster(c, w, h, rng, dark, "255,255,255", 0.1);
+            noise(c, w, h, rng, 10);
+            break;
+          case "wood":
+            wood(c, w, h, rng, hexToRgb(bg), "40,22,10");
+            noise(c, w, h, rng, 10);
             break;
           case "image":
             if (textureImage) drawCoverImage(c, textureImage, 0, 0, w, h);
@@ -764,27 +873,26 @@
     c.restore();
   }
 
-  // A frame about as thick as a 1 inch frame on a 12 x 18 print, and a 1.5 times wider white mat when the mat is on.
-  // The sides keep the proportions they have in the frame's picture.
+  // The frame is Frame thickness pixels wide on a 1080 wide post (never more than a fifth of the photo's short side),
+  // the photo sitting straight inside it. The sides keep the proportions they have in the frame's picture.
   function frameBox(cell, W) {
     const f = FRAMES[state.frameColor];
-    const fr = Math.max(W * 0.016, Math.min(W * 0.04, Math.min(cell.w, cell.h) * 0.06));
+    const fr = Math.min((state.frameWidth * W) / 1080, Math.min(cell.w, cell.h) * 0.2);
     const k = fr / ((f.s[0] + f.s[1] + f.s[2] + f.s[3]) / 4);
     const [t, r, b, l] = f.s.map((v) => v * k);
-    const mat = state.frameMat ? fr * 1.5 : 0;
     return {
-      id: state.frameColor, x: cell.x, y: cell.y, w: cell.w, h: cell.h, t, r, b, l, mat,
-      photo: { x: cell.x + l + mat, y: cell.y + t + mat, w: cell.w - l - r - mat * 2, h: cell.h - t - b - mat * 2 }
+      id: state.frameColor, x: cell.x, y: cell.y, w: cell.w, h: cell.h, t, r, b, l,
+      photo: { x: cell.x + l, y: cell.y + t, w: cell.w - l - r, h: cell.h - t - b }
     };
   }
 
-  // The frame's shadow on the post, and the mat (or the frame's own colour behind the photo without one).
+  // The frame's shadow on the post, falling a little more from a thicker frame.
   function drawFrameBack(c, f, W) {
     c.save();
     c.shadowColor = "rgba(30,22,16,0.32)";
-    c.shadowBlur = W * 0.02;
-    c.shadowOffsetY = W * 0.008;
-    c.fillStyle = f.mat ? "#fbfaf7" : FRAMES[f.id].color;
+    c.shadowBlur = W * 0.012 + f.t * 0.5;
+    c.shadowOffsetY = W * 0.004 + f.t * 0.15;
+    c.fillStyle = FRAMES[f.id].color;
     c.fillRect(f.x, f.y, f.w, f.h);
     c.restore();
   }
@@ -793,17 +901,15 @@
   // While the picture loads, a flat band in the frame's colour stands in.
   function drawFrame(c, f) {
     const p = f.photo;
-    if (f.mat) {
-      // where the mat is cut, a thin shadow falls onto the photo
-      c.save();
-      c.beginPath();
-      c.rect(p.x, p.y, p.w, p.h);
-      c.clip();
-      c.strokeStyle = "rgba(0,0,0,0.22)";
-      c.lineWidth = Math.max(2, f.mat * 0.12);
-      c.strokeRect(p.x, p.y, p.w, p.h);
-      c.restore();
-    }
+    // the frame's inner edge casts a thin shadow onto the photo
+    c.save();
+    c.beginPath();
+    c.rect(p.x, p.y, p.w, p.h);
+    c.clip();
+    c.strokeStyle = "rgba(0,0,0,0.25)";
+    c.lineWidth = Math.max(2, f.t * 0.2);
+    c.strokeRect(p.x, p.y, p.w, p.h);
+    c.restore();
     const img = frameImage(f.id);
     const ix = [f.x, f.x + f.l, f.x + f.w - f.r, f.x + f.w];
     const iy = [f.y, f.y + f.t, f.y + f.h - f.b, f.y + f.h];
@@ -1343,7 +1449,7 @@
   });
 
   // Changes that reshape the post get a short transition in the preview.
-  const RESHAPE = ["mode", "baArrange", "baSwap", "showLayout", "style", "placement", "labelStyle", "customTexture", "rounded", "frame", "frameMat"];
+  const RESHAPE = ["mode", "baArrange", "baSwap", "showLayout", "style", "placement", "labelStyle", "customTexture", "rounded", "frame"];
 
   function setState(key, value) {
     if (state[key] === value) return;
