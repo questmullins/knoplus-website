@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Working Examples | Knoplus</title>
+  <meta name="description" content="Tools I built for a packaging manufacturer's prepress, sales and production teams, rebuilt to run in your browser on made-up data. Each one produces real output.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+  <style>
+    .more { columns: 3 220px; gap: 24px; margin: 18px 0 0; padding: 0; list-style: none; }
+    .more li { break-inside: avoid; padding: 10px 0; border-top: 1px solid var(--line); }
+    .more a { text-decoration: none; }
+    .more a:hover b { color: var(--tone); }
+    .more small { display: block; color: var(--muted); }
+    .card .out { font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body data-name="Working examples">
+<main>
+  <div class="intro">
+    <span class="eyebrow">Experience</span>
+    <h1>Working examples</h1>
+    <p>Tools I built for a packaging manufacturer’s prepress, sales and production teams. The originals ran on the company’s own data, so these are rebuilt to run in your browser on made-up records. Every one of them gives you something real at the end: vector art, an Illustrator script, a printable label or an answer you can paste into a quote.</p>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <section class="box" style="margin-top:16px">
+    <h2>Also in the code</h2>
+    <p class="note">The rest of the set, sanitized the same way. Each one opens in a browser and runs on its own made-up records.</p>
+    <ul class="more" id="more"></ul>
+  </section>
+</main>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const demos = [
+    ['annotation', 'Print annotation builder', 'Prepress', 'Load a product by its barcode and get the annotation sheet that goes to the printer: specs, a scannable UPC and every ink by panel.', 'SVG, Illustrator script, PDF'],
+    ['barcode', 'Barcode maker', 'Prepress', 'Type a UPC and get print-ready bars with the check digit worked out, magnification and bar width reduction.', 'SVG, Illustrator script'],
+    ['dieline', 'Mockup dieline', 'Prepress', 'Pick a mockup request or type a size, and get the bag laid flat with panels, seals, folds and zipper.', 'SVG, Illustrator script'],
+    ['fill', 'Fill planner', 'Engineering', 'How much test bead stands in for a product, and which stock bag holds it, worked out from a log of known good fills.', 'Bead weight, bag size'],
+    ['made-before', 'Have we made it before?', 'Sales', 'Search past bags by layers, format, size and weight, and get a yes or no with the closest matches.', 'An answer to paste into a quote'],
+    ['labels', 'Press sheet labels', 'Production', 'Find an order line, check its press sheet in, and print filing labels with the approved colour standard.', 'Printable labels'],
+  ];
+  document.getElementById('cards').innerHTML = demos.map(([slug, name, team, text, out]) => `<a class="card" href="/examples/${slug}/"><span class="eyebrow" style="margin:0;padding:0">${team}</span><h2>${name}</h2><p>${text}</p><span class="out">Gives you: ${out}</span><span class="eyebrow">Try it →</span></a>`).join('');
+  const more = [
+    ['swimlane-creator', 'Swimlane Creator', 'Sketch a process, get a swimlane diagram (now Freestyle)'],
+    ['mockup-request-form', 'Mockup request form', 'Step-by-step request with validation'],
+    ['sample-review', 'Sample review', 'Phone checklist for production samples'],
+    ['field-id-explorer', 'Field ID explorer', 'A table’s fields and IDs, ready for developers'],
+    ['artwork-gallery', 'Artwork gallery', 'Visual search of past artwork'],
+    ['artwork-reviewer', 'Artwork reviewer', 'Compare two versions side by side or overlaid'],
+    ['art-revision-lookup', 'Art revision lookup', 'Every revision of a product, newest first'],
+    ['checklist-testing', 'Art checklists', 'Tasks by department, with timers'],
+    ['density-calculator', 'Density calculator', 'Product density from weighed samples'],
+    ['font-jammer', 'Font Jammer', 'Bulk font upload with character checks'],
+    ['layer-jammer', 'Layer Jammer', 'Bulk-load material layers from a pasted list'],
+    ['press-sheet-scan', 'Press sheet scan', 'Scan a sheet, pick the PO, record colour notes'],
+    ['apps-hub', 'Apps hub', 'Every internal app in one place, with favourites'],
+    ['tool-downloads', 'Tool downloads', 'Desktop tools with direct downloads'],
+    ['illustrator-annotation-panel', 'Illustrator panels', 'Annotation, barcode and sign-in panels for Illustrator'],
+  ];
+  const code = 'https://github.com/questmullins/work-examples/tree/HEAD/';
+  document.getElementById('more').innerHTML = more.map(([dir, name, text]) => `<li><a href="${code}${dir}"><b>${name} ↗</b><small>${text}</small></a></li>`).join('');
+})();
+</script>
+</body>
+</html>

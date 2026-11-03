@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fill Planner | Knoplus</title>
+  <meta name="description" content="Work out how much test fill simulates a product, and which bag size holds it, from a log of known good fills. A working example rebuilt with made-up data.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+  <style>
+    .tabs { margin-bottom: 16px; }
+    [data-tab][hidden] { display: none; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+    th { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 400; border-top: 0; }
+    td.n, th.n { text-align: right; white-space: nowrap; }
+    .scroll { overflow-x: auto; }
+    .sizes { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+    .sizes li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 10px; background: var(--box-2); }
+    .sizes li.best { background: color-mix(in srgb, var(--tone) 22%, transparent); }
+    .sizes small { color: var(--muted); display: block; }
+  </style>
+</head>
+<body data-name="Fill planner" data-code="fill-recordings">
+<main>
+  <div class="intro">
+    <span class="eyebrow">Working example · Engineering</span>
+    <h1>Fill planner</h1>
+    <p>Before a customer sends real product, sample bags get filled with test beads to see how they'll look and stand. These tools worked out how much bead stands in for a product, logged every fill that looked right, and used that log to say which bag a new product needs. Three of them are folded into one here.</p>
+  </div>
+
+  <div class="seg tabs" id="tabs" data-value="simulate">
+    <button type="button" data-value="simulate">Simulate a product</button>
+    <button type="button" data-value="plan">Plan a bag</button>
+    <button type="button" data-value="log">Known good fills</button>
+  </div>
+
+  <!-- Simulate a product -->
+  <div class="layout" data-tab="simulate">
+    <div class="stack">
+      <section class="box">
+        <h2>The product</h2>
+        <div class="row">
+          <label class="field"><span>Density</span><div class="unit"><input id="sDensity" type="number" step="0.1" value="28"><em>lb/ft³</em></div></label>
+          <label class="field"><span>Weight in the bag</span><div class="unit"><input id="sWeight" type="number" step="0.1" value="25"><em id="sUnitLabel">lb</em></div></label>
+        </div>
+        <div class="seg" id="sUnit" data-value="lb" style="margin-top:12px"><button type="button" data-value="lb">lb</button><button type="button" data-value="oz">oz</button><button type="button" data-value="kg">kg</button></div>
+      </section>
+      <section class="box">
+        <h3>Don’t know the density? Weigh a sample.</h3>
+        <p class="note">Level a container with product, weigh it, and take off the empty container’s weight.</p>
+        <div class="row">
+          <label class="field"><span>Container</span><select id="cup"><option value="0.0334201">1 quart</option><option value="0.0083550">1 cup</option><option value="0.1336806">1 gallon</option><option value="0.0353147">1 litre</option></select></label>
+          <label class="field"><span>Product weight</span><div class="unit"><input id="sample" type="number" step="0.01" placeholder="e.g. 0.95"><em>lb</em></div></label>
+        </div>
+        <div class="buttons"><button class="btn-2" id="useSample" type="button" disabled>Use this density</button></div>
+        <p class="status" id="sampleMsg" hidden></p>
+      </section>
+    </div>
+    <section class="box sticky">
+      <span class="eyebrow">Test bead to use</span>
+      <p class="big" id="sBead">–</p>
+      <p class="note" id="sNote"></p>
+      <ul class="facts" id="sFacts"></ul>
+    </section>
+  </div>
+
+  <!-- Plan a bag -->
+  <div class="layout" data-tab="plan" hidden>
+    <div class="stack">
+      <section class="box">
+        <h2>What do you know?</h2>
+        <p class="note">Give any two of weight, density and bag. The planner works out the third from fills that were logged for the same kind of bag.</p>
+        <label class="field"><span>Format</span><select id="pFormat"><option>Quad Seal Bag</option><option>Stand-Up Pouch</option></select></label>
+        <div class="seg" id="pSolve" data-value="size" style="margin-top:16px"><button type="button" data-value="size">Find the bag</button><button type="button" data-value="weight">Most it holds</button><button type="button" data-value="density">Lightest product</button></div>
+        <div class="row">
+          <label class="field" data-need="size density"><span>Product weight</span><div class="unit"><input id="pWeight" type="number" step="0.1" value="5"><em>lb</em></div></label>
+          <label class="field" data-need="size weight"><span>Density</span><div class="unit"><input id="pDensity" type="number" step="0.5" value="32"><em>lb/ft³</em></div></label>
+        </div>
+        <div class="row" data-need="weight density">
+          <label class="field"><span>Width</span><div class="unit"><input id="pW" type="number" step="0.125" value="9.5"><em>in</em></div></label>
+          <label class="field"><span>Height</span><div class="unit"><input id="pH" type="number" step="0.125" value="15"><em>in</em></div></label>
+          <label class="field"><span>Gusset</span><div class="unit"><input id="pG" type="number" step="0.125" value="4"><em>in</em></div></label>
+        </div>
+      </section>
+    </div>
+    <section class="box sticky">
+      <span class="eyebrow" id="pEyebrow"></span>
+      <p class="big" id="pBig">–</p>
+      <p class="note" id="pNote"></p>
+      <ul class="sizes" id="pSizes"></ul>
+      <ul class="facts" id="pFacts"></ul>
+    </section>
+  </div>
+
+  <!-- Log -->
+  <section class="box" data-tab="log" hidden>
+    <h2>Known good fills</h2>
+    <p class="note">Every row is a real bag, filled with bead until it looked right. Volume factor is how much of the bag’s width × gusset × height a full bag actually holds; the planner averages it by format.</p>
+    <div class="scroll" style="margin-top:16px"><table id="log"></table></div>
+  </section>
+</main>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const { $, $$, fills, products, BEAD_DENSITY, fmt, inches, esc, seg } = Kit;
+  const PER_LB = { lb: 1, oz: 1 / 16, kg: 2.20462 };
+
+  const tabs = seg($('#tabs'), v => { $$('[data-tab]').forEach(el => { el.hidden = el.dataset.tab !== v; }); });
+
+  // ---- Simulate a product: same density in, same weight out, so bead lb = product volume × bead density.
+  const unit = seg($('#sUnit'), v => { $('#sUnitLabel').textContent = v; simulate(); });
+  function simulate() {
+    const d = +$('#sDensity').value, wLb = +$('#sWeight').value * PER_LB[unit.value];
+    if (!(d > 0 && wLb > 0)) { $('#sBead').textContent = '–'; return; }
+    const vol = wLb / d, bead = vol * BEAD_DENSITY;
+    $('#sBead').innerHTML = `${fmt(bead)}<small>lb of bead</small>`;
+    $('#sNote').textContent = `Fill the bag with this much bead and it will take up the same room as ${fmt(wLb)} lb of a ${fmt(d, 1)} lb/ft³ product.`;
+    $('#sFacts').innerHTML = [
+      ['Product weight', 'In pounds', `${fmt(wLb)} lb`],
+      ['Room it takes up', 'Weight ÷ density', `${fmt(vol, 3)} ft³ (${fmt(vol * 1728, 0)} in³)`],
+      ['Bead needed', `Room × bead density (${BEAD_DENSITY} lb/ft³)`, `${fmt(bead)} lb`],
+      ['Bag will feel', d > BEAD_DENSITY ? 'Bead is lighter than the product' : 'Bead is heavier than the product', d > BEAD_DENSITY ? `${fmt((1 - BEAD_DENSITY / d) * 100, 0)}% lighter` : `${fmt((BEAD_DENSITY / d - 1) * 100, 0)}% heavier`],
+    ].map(([k, s, v]) => `<li><span>${k}<small>${s}</small></span><b>${v}</b></li>`).join('');
+  }
+  function sample() {
+    const v = +$('#cup').value, w = +$('#sample').value, ok = w > 0;
+    $('#useSample').disabled = !ok;
+    const m = $('#sampleMsg');
+    if (ok) { m.hidden = false; m.dataset.kind = 'good'; m.textContent = `That works out to ${fmt(w / v, 1)} lb/ft³.`; } else m.hidden = true;
+  }
+  $('#useSample').addEventListener('click', () => { $('#sDensity').value = (+$('#sample').value / +$('#cup').value).toFixed(1); simulate(); });
+
+  // ---- Plan a bag, from the log: a full bag holds (volume factor × fill height) of its width × gusset × height.
+  const solve = seg($('#pSolve'), plan);
+  const fillFor = format => {
+    const rows = fills.filter(f => f.product.format === format), eff = rows.map(f => f.factor * f.fillPct / 100);
+    return { n: rows.length, eff: eff.reduce((a, b) => a + b, 0) / eff.length, lo: Math.min(...eff), hi: Math.max(...eff) };
+  };
+  function plan() {
+    const what = solve.value, format = $('#pFormat').value, k = fillFor(format);
+    $$('[data-need]').forEach(el => { el.hidden = !el.dataset.need.split(' ').includes(what); });
+    const w = +$('#pWeight').value, d = +$('#pDensity').value, basis = +$('#pW').value * +$('#pH').value * +$('#pG').value / 1728;
+    $('#pSizes').innerHTML = ''; $('#pFacts').innerHTML = '';
+    const facts = [['Volume factor for ' + format.toLowerCase() + 's', `Average of ${k.n} logged fills`, `${fmt(k.eff * 100, 0)}% (${fmt(k.lo * 100, 0)}–${fmt(k.hi * 100, 0)}%)`]];
+    if (what === 'size') {
+      if (!(w > 0 && d > 0)) return;
+      const need = w / d / k.eff;
+      $('#pEyebrow').textContent = 'Smallest bag that holds it';
+      const sizes = [];
+      products.filter(p => p.format === format).forEach(p => { const key = `${p.w}×${p.h}×${p.g}`; if (!sizes.some(s => s.key === key)) sizes.push({ key, p, basis: p.w * p.h * p.g / 1728 }); });
+      sizes.sort((a, b) => a.basis - b.basis);
+      const fit = sizes.filter(s => s.basis >= need);
+      const best = fit[0];
+      $('#pBig').innerHTML = best ? `${inches(best.p.w)} × ${inches(best.p.h)} <small>× ${inches(best.p.g)} gusset</small>` : 'Bigger than any stock size';
+      $('#pNote').textContent = `${fmt(w, 1)} lb at ${fmt(d, 1)} lb/ft³ takes ${fmt(w / d * 1728, 0)} in³, so the bag needs about ${fmt(need * 1728, 0)} in³ of width × gusset × height.`;
+      $('#pSizes').innerHTML = sizes.map(s => {
+        const pct = (w / d) / (s.basis * k.eff) * 100;
+        return `<li class="${s === best ? 'best' : ''}"><span>${inches(s.p.w)} × ${inches(s.p.h)} × ${inches(s.p.g)}<small>Stock size, last used for ${esc(s.p.weight)} ${esc(s.p.name)}</small></span><b>${pct > 100 ? 'Too small' : fmt(pct, 0) + '% full'}</b></li>`;
+      }).join('');
+    } else if (what === 'weight') {
+      if (!(d > 0 && basis > 0)) return;
+      const max = basis * k.eff * d;
+      $('#pEyebrow').textContent = 'Most this bag holds';
+      $('#pBig').innerHTML = `${fmt(max, 1)}<small>lb</small>`;
+      $('#pNote').textContent = `Of a ${fmt(d, 1)} lb/ft³ product, filled to the height the logged bags were.`;
+      facts.push(['Bag basis', 'Width × gusset × height', `${fmt(basis * 1728, 0)} in³`], ['Room for product', 'Basis × volume factor', `${fmt(basis * k.eff * 1728, 0)} in³`]);
+    } else {
+      if (!(w > 0 && basis > 0)) return;
+      const min = w / (basis * k.eff);
+      $('#pEyebrow').textContent = 'Lightest product that fits';
+      $('#pBig').innerHTML = `${fmt(min, 1)}<small>lb/ft³</small>`;
+      $('#pNote').textContent = `${fmt(w, 1)} lb fits in this bag if the product is at least this dense. Anything fluffier needs a bigger bag.`;
+      facts.push(['Bag basis', 'Width × gusset × height', `${fmt(basis * 1728, 0)} in³`]);
+    }
+    $('#pFacts').innerHTML = facts.map(([a, b, c]) => `<li><span>${a}<small>${b}</small></span><b>${c}</b></li>`).join('');
+  }
+
+  // ---- The log
+  $('#log').innerHTML = `<thead><tr><th>Bag</th><th>Size</th><th class="n">Product</th><th class="n">Bead</th><th class="n">Fill height</th><th class="n">Volume factor</th><th class="n">Density it simulates</th><th>Logged</th></tr></thead><tbody>` +
+    fills.map(f => `<tr><td>${esc(f.product.brand)}<br><small style="color:var(--muted)">${esc(f.product.name)} · ${esc(f.product.format)}</small></td><td>${inches(f.product.w)} × ${inches(f.product.h)} × ${inches(f.product.g)}</td>
+      <td class="n">${esc(f.product.weight)}</td><td class="n">${fmt(f.beadLb)} lb</td><td class="n">${f.fillPct}%</td><td class="n">${fmt(f.factor * 100, 0)}%</td><td class="n">${fmt(f.density, 1)} lb/ft³</td><td>${f.date}<br><small style="color:var(--muted)">${esc(f.by)}</small></td></tr>`).join('') + '</tbody>';
+
+  document.querySelector('main').addEventListener('input', e => {
+    if (e.target.closest('[data-tab="simulate"]')) { simulate(); sample(); }
+    if (e.target.closest('[data-tab="plan"]')) plan();
+  });
+  $('#pFormat').addEventListener('change', plan);
+  simulate(); plan();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Press Sheet Labels | Knoplus</title>
+  <meta name="description" content="Find an order line by its PO and barcode, check its press sheet in, and print filing labels with the approved colour standard, one label per page. A working example rebuilt with made-up data.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+  <style>
+    /* A label is 3.5 × 1.125 in, drawn in real inches so screen and printer agree. */
+    .label { width: 3.5in; height: 1.125in; padding: .07in .1in; background: #fff; color: #111; font: 7.2pt/1.2 Helvetica, Arial, sans-serif; display: grid; grid-template-columns: 1fr auto; gap: 0 .08in; overflow: hidden; }
+    .label .top { grid-column: 1 / -1; display: flex; justify-content: space-between; font-weight: 700; font-size: 9pt; }
+    .label .std { font-size: 6.2pt; }
+    .label .std b { display: block; font-size: 5.6pt; letter-spacing: .04em; }
+    .label .meta { grid-column: 1 / -1; display: flex; justify-content: space-between; font-size: 5.8pt; color: #444; align-self: end; }
+    .label svg { width: .95in; height: auto; align-self: start; margin-top: .03in; }
+    .stage { display: grid; place-items: center; padding: 28px 12px; border-radius: 10px; background: rgb(var(--ink-rgb) / .08); overflow-x: auto; }
+    .stage .label { box-shadow: 0 6px 24px rgb(0 0 0 / .25); transform: scale(1.25); transform-origin: center; margin: .15in 0; }
+    .batch { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+    .batch li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--box-2); }
+    .batch small { color: var(--muted); display: block; }
+    .batch button { border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+    .lines { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+    .lines button { width: 100%; text-align: left; border: 0; border-radius: 10px; padding: 10px 14px; background: var(--box-2); cursor: pointer; }
+    .lines button[aria-pressed="true"] { background: color-mix(in srgb, var(--tone) 28%, transparent); }
+    .lines small { color: var(--muted); }
+    #printArea { display: none; }
+    @media print {
+      @page { size: 3.5in 1.125in; margin: 0; }
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block; }
+      #printArea .label { page-break-after: always; break-after: page; }
+    }
+  </style>
+</head>
+<body data-name="Press sheet labels" data-code="press-sheet-label-maker">
+<main>
+  <div class="intro">
+    <span class="eyebrow">Working example · Production</span>
+    <h1>Press sheet labels</h1>
+    <p>Every job’s approved press sheet is filed for the next run, labelled with its barcode, filing number and the colour standard the customer signed off on. Those labels were hand-written. The original tool found the order line, filled the label in and printed a batch on a label printer. This one prints to whatever printer you have, or to PDF.</p>
+  </div>
+
+  <div class="layout wide-left">
+    <div class="stack">
+      <section class="box">
+        <h2>Find an order line</h2>
+        <div class="row">
+          <label class="field"><span>Customer PO</span><input id="po" type="text" list="poList" placeholder="e.g. 144917 B"></label>
+          <label class="field"><span>Last 5 of the barcode</span><input id="last5" type="text" inputmode="numeric" maxlength="5" placeholder="optional"></label>
+        </div>
+        <datalist id="poList"></datalist>
+        <p class="status" id="msg" hidden></p>
+        <ul class="lines" id="lines"></ul>
+      </section>
+
+      <section class="box" id="editor" hidden>
+        <h2>The label</h2>
+        <p class="note">Filled in from the order. Edit anything before adding it.</p>
+        <div class="row">
+          <label class="field"><span>Barcode</span><input id="fBarcode" type="text"></label>
+          <label class="field"><span>Filing #</span><input id="fFiling" type="text"></label>
+        </div>
+        <label class="field"><span>Approved colour standard</span><textarea id="fStd"></textarea></label>
+        <label class="field"><span>Checked in by</span><input id="fBy" type="text" value="QM"></label>
+        <div class="stage" style="margin-top:18px" id="preview"></div>
+        <div class="buttons"><button class="btn" id="add" type="button">Add to batch</button><button class="btn-2" id="addAll" type="button">Add every line on this PO</button></div>
+      </section>
+    </div>
+
+    <section class="box sticky">
+      <h2>Print batch <small id="count" style="font:14px var(--font-body);color:var(--muted)"></small></h2>
+      <ul class="batch" id="batch"></ul>
+      <div class="empty" id="batchEmpty" style="min-height:160px"><div><h3>No labels yet</h3><p>Find an order line, check the label, then add it.</p></div></div>
+      <div class="buttons"><button class="btn" id="print" type="button" disabled>Print labels</button><button class="btn-2" id="clearBatch" type="button" disabled>Clear</button></div>
+      <p class="note" style="margin-top:12px">One 3.5 × 1.125 in label per page, sized for a label printer. Choose “Save as PDF” in the print window to keep a copy.</p>
+    </section>
+  </div>
+</main>
+<div id="printArea"></div>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const { $, orders, upcSvg, esc, setStatus } = Kit;
+  let order = null, line = null;
+  const batch = [];
+  $('#poList').innerHTML = orders.map(o => `<option value="${o.po}">`).join('');
+
+  const today = () => new Date().toISOString().slice(0, 10);
+  function labelFor(o, item, edits = {}) {
+    const p = item.product;
+    return { po: o.po, upc: p.upc, barcode: edits.barcode ?? p.last5, filing: edits.filing ?? p.filing, std: edits.std ?? item.color, by: edits.by ?? $('#fBy').value,
+      item: `${p.brand}: ${p.name} ${p.weight}`, date: today() };
+  }
+  function labelHtml(l) {
+    const code = upcSvg(l.upc, { x: 1, height: 20, digitsOn: false });
+    return `<div class="label"><div class="top"><span>Barcode: ${esc(l.barcode)}</span><span>Filing: ${esc(l.filing)}</span></div>
+      <div class="std"><b>APPROVED COLOR STANDARD:</b>${esc(l.std)}</div>
+      <svg viewBox="0 0 ${code.width} ${code.height}">${code.svg}</svg>
+      <div class="meta"><span>PO ${esc(l.po)} · ${esc(l.item)}</span><span>In ${l.date}${l.by ? ' · ' + esc(l.by) : ''}</span></div></div>`;
+  }
+
+  function find() {
+    const po = $('#po').value.trim().toUpperCase().replace(/\s+/g, ' '), l5 = $('#last5').value.replace(/\D/g, '');
+    order = orders.find(o => o.po === po || o.po.replace(' ', '') === po.replace(' ', ''));
+    $('#lines').innerHTML = '';
+    if (!po) { setStatus($('#msg'), ''); $('#editor').hidden = true; return; }
+    if (!order) { setStatus($('#msg'), 'No order with that PO yet. Pick one from the list as you type.', ''); $('#editor').hidden = true; return; }
+    const items = order.items.filter(i => !l5 || l5.length < 5 || i.product.last5 === l5);
+    if (!items.length) { setStatus($('#msg'), `PO ${order.po} has no line ending in ${l5}.`, 'bad'); $('#editor').hidden = true; return; }
+    setStatus($('#msg'), `PO ${order.po}, entered ${order.date}: ${order.items.length} ${order.items.length === 1 ? 'line' : 'lines'}.`, 'good');
+    $('#lines').innerHTML = items.map(i => `<li><button type="button" data-l5="${i.product.last5}"><b>${esc(i.product.brand)}: ${esc(i.product.name)}</b> <small>· ${esc(i.product.weight)} · ends ${i.product.last5} · ${i.qty.toLocaleString()} bags</small></button></li>`).join('');
+    pick(items[0]);
+  }
+  function pick(item) {
+    line = item;
+    document.querySelectorAll('#lines button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.l5 === item.product.last5)));
+    const l = labelFor(order, item);
+    $('#fBarcode').value = l.barcode; $('#fFiling').value = l.filing; $('#fStd').value = l.std;
+    $('#editor').hidden = false;
+    preview();
+  }
+  const current = () => labelFor(order, line, { barcode: $('#fBarcode').value, filing: $('#fFiling').value, std: $('#fStd').value, by: $('#fBy').value });
+  function preview() { if (line) $('#preview').innerHTML = labelHtml(current()); }
+
+  function drawBatch() {
+    $('#batch').innerHTML = batch.map((l, i) => `<li><span>${esc(l.barcode)} · ${esc(l.filing)}<small>PO ${esc(l.po)} · ${esc(l.item)}</small></span><button type="button" aria-label="Remove" data-i="${i}">×</button></li>`).join('');
+    $('#batchEmpty').hidden = !!batch.length;
+    $('#count').textContent = batch.length ? `${batch.length} ${batch.length === 1 ? 'label' : 'labels'}` : '';
+    $('#print').disabled = $('#clearBatch').disabled = !batch.length;
+    $('#printArea').innerHTML = batch.map(labelHtml).join('');
+  }
+
+  $('#po').addEventListener('input', find);
+  $('#last5').addEventListener('input', find);
+  $('#lines').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pick(order.items.find(i => i.product.last5 === b.dataset.l5)); });
+  $('#editor').addEventListener('input', preview);
+  $('#add').addEventListener('click', () => { batch.push(current()); drawBatch(); });
+  $('#addAll').addEventListener('click', () => { order.items.forEach(i => batch.push(i === line ? current() : labelFor(order, i))); drawBatch(); });
+  $('#batch').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if (b) { batch.splice(+b.dataset.i, 1); drawBatch(); } });
+  $('#clearBatch').addEventListener('click', () => { batch.length = 0; drawBatch(); });
+  $('#print').addEventListener('click', () => window.print());
+  $('#po').value = orders[1].po;
+  find(); drawBatch();
+})();
+</script>
+</body>
+</html>
