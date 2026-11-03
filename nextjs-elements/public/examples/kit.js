@@ -113,15 +113,18 @@
       const w = (i - start) * x - bwr;
       out += `<rect x="${(ox + quiet + start * x + bwr / 2).toFixed(4)}" y="${oy.toFixed(4)}" width="${w.toFixed(4)}" height="${(height + (long ? 5 * x : 0)).toFixed(4)}" fill="${color}"/>`;
     }
+    // Human-readable digits, laid out like a printed UPC-A: the short bars stop just above the digits, the guard bars
+    // and the first and last digit's bars run down between the two groups, and the outer digits sit in the quiet zones.
+    // Each group is squeezed to fit its gap (textLength), so no font can push it into the bars.
+    const size = 9 * x, top = oy + height + 0.25 * x, base = top + 0.72 * size;
     if (digitsOn) {
-      const size = 8 * x * 1.1, y = oy + height + 5 * x + size * 0.12, t = (cx, d, anchor = 'middle', s = size) =>
-        `<text x="${cx.toFixed(3)}" y="${y.toFixed(3)}" font-family="${font}" font-size="${s.toFixed(3)}" text-anchor="${anchor}" fill="${color}">${d}</text>`;
-      out += t(ox + quiet - x, digits[0], 'end', size * 0.8);
-      out += t(ox + quiet + (3 + 21) * x, digits.slice(1, 6).split('').join(' '));
-      out += t(ox + quiet + (50 + 21) * x, digits.slice(6, 11).split('').join(' '));
-      out += t(ox + quiet + 96 * x, digits[11], 'start', size * 0.8);
+      const t = (cx, d, anchor, s, fit) => `<text x="${cx.toFixed(3)}" y="${base.toFixed(3)}" font-family="${font}" font-size="${s.toFixed(3)}" text-anchor="${anchor}" fill="${color}"${fit ? ` textLength="${fit.toFixed(3)}" lengthAdjust="spacingAndGlyphs"` : ''}>${d}</text>`;
+      out += t(ox + quiet - 1.5 * x, digits[0], 'end', size * 0.75);
+      out += t(ox + quiet + 27 * x, digits.slice(1, 6), 'middle', size, 30 * x);
+      out += t(ox + quiet + 67 * x, digits.slice(6, 11), 'middle', size, 30 * x);
+      out += t(ox + quiet + 96.5 * x, digits[11], 'start', size * 0.75);
     }
-    return { svg: out, width: 113 * x, height: height + 5 * x + (digitsOn ? 8 * x * 0.3 : 0) };
+    return { svg: out, width: 113 * x, height: digitsOn ? Math.max(height + 5 * x, base - oy + 0.25 * size) : height + 5 * x };
   }
 
   // ---- Helpers -------------------------------------------------------------------------------------------------------

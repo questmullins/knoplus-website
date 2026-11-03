@@ -47,7 +47,6 @@
   ];
   document.getElementById('cards').innerHTML = demos.map(([slug, name, team, text, out]) => `<a class="card" href="/examples/${slug}/"><span class="eyebrow" style="margin:0;padding:0">${team}</span><h2>${name}</h2><p>${text}</p><span class="out">Gives you: ${out}</span><span class="eyebrow">Try it →</span></a>`).join('');
   const more = [
-    ['swimlane-creator', 'Swimlane Creator', 'Sketch a process, get a swimlane diagram (now Freestyle)'],
     ['mockup-request-form', 'Mockup request form', 'Step-by-step request with validation'],
     ['sample-review', 'Sample review', 'Phone checklist for production samples'],
     ['field-id-explorer', 'Field ID explorer', 'A table’s fields and IDs, ready for developers'],
@@ -64,7 +63,9 @@
     ['illustrator-annotation-panel', 'Illustrator panels', 'Annotation, barcode and sign-in panels for Illustrator'],
   ];
   const code = 'https://github.com/questmullins/work-examples/tree/HEAD/';
-  document.getElementById('more').innerHTML = more.map(([dir, name, text]) => `<li><a href="${code}${dir}"><b>${name} ↗</b><small>${text}</small></a></li>`).join('');
+  // Swimlane Creator grew into Freestyle, which has its own repo and runs live on kno.plus, so it is listed as Freestyle.
+  const freestyle = `<li><a href="https://github.com/questmullins/freestyle"><b>Freestyle ↗</b><small>Sketch a process, get a swimlane diagram. The public version of Swimlane Creator.</small></a> <a href="/webtools/freestyle/" style="font-size:12px;color:var(--tone)">Try it live →</a></li>`;
+  document.getElementById('more').innerHTML = freestyle + more.map(([dir, name, text]) => `<li><a href="${code}${dir}"><b>${name} ↗</b><small>${text}</small></a></li>`).join('');
 })();
 </script>
 </body>

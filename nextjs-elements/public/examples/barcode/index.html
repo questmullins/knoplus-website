@@ -120,7 +120,7 @@
 (function () {
     var MM = 72 / 25.4, X = ${s.x} * MM, BAR = ${s.bar} * MM, BWR = ${s.bwr} * MM, QUIET = 9 * X;
     var runs = ${JSON.stringify(runs)}; // [first module, width in modules, guard bar]
-    var doc = app.documents.add(DocumentColorSpace.CMYK, 113 * X + 4 * X, BAR + 12 * X);
+    var doc = app.documents.add(DocumentColorSpace.CMYK, 113 * X + 4 * X, BAR + 16 * X);
     var layer = doc.layers[0]; layer.name = "Barcode";
     var k = new CMYKColor(); k.black = 100;
     var top = doc.height - 2 * X, left = 2 * X;
@@ -129,11 +129,23 @@
         var bar = layer.pathItems.rectangle(top, left + QUIET + r[0] * X + BWR / 2, r[1] * X - BWR, h);
         bar.filled = true; bar.fillColor = k; bar.stroked = false;
     }${s.digits ? `
-    var text = layer.textFrames.add();
-    text.contents = "${digits.replace(/^(\d)(\d{5})(\d{5})(\d)$/, '$1  $2  $3  $4')}";
-    text.textRange.characterAttributes.size = 8 * X * 1.1;
-    text.textRange.characterAttributes.fillColor = k;
-    text.position = [left, top - BAR - 1.5 * X];` : ''}
+    // Digits as printed on a UPC-A: first and last in the quiet zones, two groups of five under the short bars.
+    var SIZE = 9 * X, BASE = top - BAR - 0.25 * X - 0.72 * SIZE;
+    function digit(text, x, size, just) {
+        var t = layer.textFrames.pointText([x, BASE]);
+        t.contents = text;
+        t.textRange.characterAttributes.size = size;
+        t.textRange.characterAttributes.fillColor = k;
+        t.textRange.paragraphAttributes.justification = just;
+        return t;
+    }
+    digit("${digits[0]}", left + QUIET - 1.5 * X, SIZE * 0.75, Justification.RIGHT);
+    var a = digit("${digits.slice(1, 6)}", left + QUIET + 27 * X, SIZE, Justification.CENTER);
+    var b = digit("${digits.slice(6, 11)}", left + QUIET + 67 * X, SIZE, Justification.CENTER);
+    digit("${digits[11]}", left + QUIET + 96.5 * X, SIZE * 0.75, Justification.LEFT);
+    // Squeeze a group that a wide font makes longer than its gap.
+    var groups = [a, b];
+    for (var g = 0; g < 2; g++) if (groups[g].width > 30 * X) groups[g].textRange.characterAttributes.horizontalScale = 100 * 30 * X / groups[g].width;` : ''}
 })();
 `;
   }
