@@ -20,6 +20,9 @@
     showLayout: "",
     gap: 22,
     rounded: false,
+    frame: false,
+    frameColor: "black",
+    frameWidth: 26,
     labelStyle: "corner",
     labelBefore: "Before",
     labelAfter: "After",
@@ -46,6 +49,30 @@
 
   // Starting label size for each label style, applied when the style changes.
   const LABEL_SIZES = { vertical: 34, overlay: 64, corner: 30, below: 34, badge: 26 };
+
+  // RoseWave's classic frames: photos of Prodigi's frames, cut by RoseWave's make_frames.py so each side is about
+  // 40px thick and the opening is clear. s is how thick each side is in the picture (top, right, bottom, left), so the
+  // corners are drawn as photographed and only the sides stretch. color stands in while the picture loads.
+  const FRAMES = {
+    black: { name: "Black", s: [40, 40, 40, 40], color: "#1f1b1c" },
+    white: { name: "White", s: [41, 39, 40, 41], color: "#f1eee8" },
+    natural: { name: "Natural", s: [41, 39, 40, 41], color: "#c79a6b" },
+    brown: { name: "Brown", s: [39, 40, 40, 41], color: "#5a3a26" },
+    darkgrey: { name: "Dark grey", s: [40, 40, 40, 40], color: "#4a4a4a" },
+    lightgrey: { name: "Light grey", s: [40, 38, 39, 43], color: "#b9b9b6" },
+    gold: { name: "Gold", s: [39, 41, 41, 39], color: "#b8933f" },
+    silver: { name: "Silver", s: [41, 37, 41, 40], color: "#bfc2c4" }
+  };
+  const frameImages = {};
+  function frameImage(id) {
+    if (!frameImages[id]) {
+      const img = new Image();
+      img.onload = () => update();
+      img.src = `frames/${id}.webp`;
+      frameImages[id] = img;
+    }
+    return frameImages[id];
+  }
 
   const EMOJIS = ["✨", "🤍", "💕", "🌸", "💫", "🔥", "😍", "👏", "🖤", "🌿", "👇", "➡️"];
 
@@ -88,6 +115,7 @@
         if (key in saved && typeof saved[key] === typeof DEFAULTS[key]) prefs[key] = saved[key];
       }
       if (!SIZES[prefs.ratio]) delete prefs.ratio;
+      if (prefs.frameColor && !FRAMES[prefs.frameColor]) delete prefs.frameColor;
       return prefs;
     } catch {
       return {};
@@ -193,6 +221,79 @@
       c.beginPath();
       c.arc(rng() * w, rng() * h, (0.4 + rng() * maxR) * s, 0, Math.PI * 2);
       c.fill();
+    }
+  }
+
+  // Lime plaster: broad, soft trowel sweeps lighter and darker than the wall, then a fine grit.
+  function plaster(c, w, h, rng, dark, light, alpha) {
+    const s = w / 1080;
+    const count = Math.round((140 * (w * h)) / (1080 * 1350));
+    for (let i = 0; i < count; i++) {
+      const x = rng() * w;
+      const y = rng() * h;
+      const r = (60 + rng() * 220) * s;
+      c.save();
+      c.translate(x, y);
+      c.rotate(rng() * Math.PI);
+      c.scale(1, 0.25 + rng() * 0.35);
+      const g = c.createRadialGradient(0, 0, 0, 0, 0, r);
+      g.addColorStop(0, `rgba(${rng() < 0.5 ? dark : light},${alpha * (0.4 + rng() * 0.6)})`);
+      g.addColorStop(1, `rgba(${dark},0)`);
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(0, 0, r, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    }
+  }
+
+  // Wood: upright boards, each its own shade, with wavy grain lines along them, the odd knot, and a seam between.
+  function wood(c, w, h, rng, base, dark) {
+    const s = w / 1080;
+    const boards = 5;
+    const bw = w / boards;
+    const [r0, g0, b0] = base;
+    for (let i = 0; i < boards; i++) {
+      const x0 = i * bw;
+      const shade = 0.88 + rng() * 0.22;
+      c.save();
+      c.beginPath();
+      c.rect(x0, 0, bw, h);
+      c.clip();
+      c.fillStyle = `rgb(${Math.min(255, r0 * shade)},${Math.min(255, g0 * shade)},${Math.min(255, b0 * shade)})`;
+      c.fillRect(x0, 0, bw, h);
+      const lines = 70;
+      const phase = rng() * 10;
+      for (let k = 0; k < lines; k++) {
+        const gx = x0 + rng() * bw;
+        const amp = (2 + rng() * 8) * s;
+        const freq = (0.002 + rng() * 0.004) / s;
+        c.strokeStyle = `rgba(${dark},${0.04 + rng() * 0.12})`;
+        c.lineWidth = (0.5 + rng() * 2.2) * s;
+        c.beginPath();
+        for (let y = -20 * s; y <= h + 20 * s; y += 18 * s) {
+          const xx = gx + Math.sin(y * freq + phase + k * 0.13) * amp;
+          if (y < 0) c.moveTo(xx, y);
+          else c.lineTo(xx, y);
+        }
+        c.stroke();
+      }
+      if (rng() < 0.6) {
+        const kx = x0 + bw * (0.25 + rng() * 0.5);
+        const ky = h * (0.1 + rng() * 0.8);
+        for (let ring = 1; ring <= 6; ring++) {
+          c.strokeStyle = `rgba(${dark},${0.22 - ring * 0.025})`;
+          c.lineWidth = 1.4 * s;
+          c.beginPath();
+          c.ellipse(kx, ky, ring * 3.2 * s, ring * 9 * s, 0, 0, Math.PI * 2);
+          c.stroke();
+        }
+      }
+      c.restore();
+      c.fillStyle = `rgba(${dark},0.45)`;
+      c.fillRect(x0 - 1.5 * s, 0, 3 * s, h);
+      c.fillStyle = "rgba(255,255,255,0.08)";
+      c.fillRect(x0 + 1.5 * s, 0, 2 * s, h);
     }
   }
 
@@ -328,6 +429,34 @@
         noise(c, w, h, rng, 7);
       }
     },
+    plaster: {
+      name: "Plaster",
+      text: "#3b342d",
+      sub: "#6e6458",
+      pill: "rgba(240,234,224,0.94)",
+      placeholder: "rgba(110,95,80,0.08)",
+      light: true,
+      paint(c, w, h, rng) {
+        fill(c, w, h, "#e7ded1");
+        plaster(c, w, h, rng, "150,128,104", "255,252,246", 0.22);
+        mottle(c, w, h, rng, "140,118,95", 0.03, 18);
+        speckle(c, w, h, rng, "120,100,80", 0.1, 1600, 0.9);
+        noise(c, w, h, rng, 12);
+      }
+    },
+    wood: {
+      name: "Wood",
+      text: "#fbf0e0",
+      sub: "#ead2b4",
+      pill: "rgba(70,42,24,0.88)",
+      placeholder: "rgba(255,235,210,0.08)",
+      light: false,
+      paint(c, w, h, rng) {
+        wood(c, w, h, rng, [168, 117, 74], "70,38,18");
+        vignette(c, w, h, 0.3);
+        noise(c, w, h, rng, 12);
+      }
+    },
     custom: {
       name: "Your own",
       get text() { return isLight(state.customBg) ? "#2f2924" : "#f4ede3"; },
@@ -355,6 +484,14 @@
           case "speckle":
             speckle(c, w, h, rng, dark, 0.22, 2600, 1.6);
             noise(c, w, h, rng, 6);
+            break;
+          case "plaster":
+            plaster(c, w, h, rng, dark, "255,255,255", 0.1);
+            noise(c, w, h, rng, 10);
+            break;
+          case "wood":
+            wood(c, w, h, rng, hexToRgb(bg), "40,22,10");
+            noise(c, w, h, rng, 10);
             break;
           case "image":
             if (textureImage) drawCoverImage(c, textureImage, 0, 0, w, h);
@@ -684,8 +821,15 @@
     }
 
     cells = rects.map((r, i) => ({ ...r, slot: list[i] }));
-    const radius = state.rounded ? W * 0.028 : 0;
+    // Framed, each spot is the whole frame: the frame's sides, then the mat, then the photo inside them
+    const framed = state.frame && FRAMES[state.frameColor] ? cells.map((cell) => frameBox(cell, W)) : null;
+    if (framed) {
+      framed.forEach((f) => drawFrameBack(c, f, W));
+      cells = cells.map((cell, i) => ({ ...cell, ...framed[i].photo }));
+    }
+    const radius = state.rounded && !framed ? W * 0.028 : 0;
     cells.forEach((cell) => drawCell(c, cell, st, radius, W, labels));
+    if (framed) framed.forEach((f) => drawFrame(c, f));
 
     groupBoxes.forEach((g, gi) => {
       if (labels !== "vertical" && labels !== "below") return;
@@ -729,10 +873,71 @@
     c.restore();
   }
 
+  // The frame is Frame thickness pixels wide on a 1080 wide post (never more than a fifth of the photo's short side),
+  // the photo sitting straight inside it. The sides keep the proportions they have in the frame's picture.
+  function frameBox(cell, W) {
+    const f = FRAMES[state.frameColor];
+    const fr = Math.min((state.frameWidth * W) / 1080, Math.min(cell.w, cell.h) * 0.2);
+    const k = fr / ((f.s[0] + f.s[1] + f.s[2] + f.s[3]) / 4);
+    const [t, r, b, l] = f.s.map((v) => v * k);
+    return {
+      id: state.frameColor, x: cell.x, y: cell.y, w: cell.w, h: cell.h, t, r, b, l,
+      photo: { x: cell.x + l, y: cell.y + t, w: cell.w - l - r, h: cell.h - t - b }
+    };
+  }
+
+  // The frame's shadow on the post, falling a little more from a thicker frame.
+  function drawFrameBack(c, f, W) {
+    c.save();
+    c.shadowColor = "rgba(30,22,16,0.32)";
+    c.shadowBlur = W * 0.012 + f.t * 0.5;
+    c.shadowOffsetY = W * 0.004 + f.t * 0.15;
+    c.fillStyle = FRAMES[f.id].color;
+    c.fillRect(f.x, f.y, f.w, f.h);
+    c.restore();
+  }
+
+  // The frame's picture cut in nine: corners as they are, sides stretched, the middle left out.
+  // While the picture loads, a flat band in the frame's colour stands in.
+  function drawFrame(c, f) {
+    const p = f.photo;
+    // the frame's inner edge casts a thin shadow onto the photo
+    c.save();
+    c.beginPath();
+    c.rect(p.x, p.y, p.w, p.h);
+    c.clip();
+    c.strokeStyle = "rgba(0,0,0,0.25)";
+    c.lineWidth = Math.max(2, f.t * 0.2);
+    c.strokeRect(p.x, p.y, p.w, p.h);
+    c.restore();
+    const img = frameImage(f.id);
+    const ix = [f.x, f.x + f.l, f.x + f.w - f.r, f.x + f.w];
+    const iy = [f.y, f.y + f.t, f.y + f.h - f.b, f.y + f.h];
+    if (!img.complete || !img.naturalWidth) {
+      c.save();
+      c.fillStyle = FRAMES[f.id].color;
+      c.beginPath();
+      c.rect(ix[0], iy[0], f.w, f.h);
+      c.rect(ix[1], iy[1], ix[2] - ix[1], iy[2] - iy[1]);
+      c.fill("evenodd");
+      c.restore();
+      return;
+    }
+    const [t, r, b, l] = FRAMES[f.id].s;
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const sx = [0, l, iw - r, iw], sy = [0, t, ih - b, ih];
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (i === 1 && j === 1) continue;
+        c.drawImage(img, sx[i], sy[j], sx[i + 1] - sx[i], sy[j + 1] - sy[j], ix[i], iy[j], ix[i + 1] - ix[i], iy[j + 1] - iy[j]);
+      }
+    }
+  }
+
   function drawCell(c, cell, st, radius, W, labels) {
     const photo = cell.slot.photo;
     c.save();
-    if (photo && st.light) {
+    if (photo && st.light && !state.frame) {
       c.save();
       c.shadowColor = "rgba(60,45,30,0.22)";
       c.shadowBlur = W * 0.022;
@@ -1244,7 +1449,7 @@
   });
 
   // Changes that reshape the post get a short transition in the preview.
-  const RESHAPE = ["mode", "baArrange", "baSwap", "showLayout", "style", "placement", "labelStyle", "customTexture", "rounded"];
+  const RESHAPE = ["mode", "baArrange", "baSwap", "showLayout", "style", "placement", "labelStyle", "customTexture", "rounded", "frame"];
 
   function setState(key, value) {
     if (state[key] === value) return;
@@ -1343,6 +1548,10 @@
     $("#custom-panel").hidden = state.style !== "custom";
     $("#texture-upload").hidden = state.customTexture !== "image";
     $("#labels-section").hidden = state.mode !== "ba";
+    $("#frame-options").hidden = !state.frame;
+    $("#rounded-toggle").hidden = state.frame;
+    $$("[data-frame]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.frame === state.frameColor)));
+    $("#frame-name").textContent = `${FRAMES[state.frameColor].name} frame`;
     $("#label-options").hidden = state.labelStyle === "none";
     $$("[data-color]").forEach((b) => {
       const key = b.dataset.color;
@@ -1406,6 +1615,28 @@
     if (clean !== handleInput.value) handleInput.value = clean;
     setState("handle", clean);
   });
+
+  // Frame colours: each swatch is a little frame drawn from the same picture as the post's frame
+  const frameSwatches = $("#frame-swatches");
+  Object.entries(FRAMES).forEach(([id, f]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.frame = id;
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-label", f.name);
+    b.title = f.name;
+    const i = document.createElement("i");
+    i.style.borderColor = f.color;
+    i.style.borderImage = `url("frames/${id}.webp") ${f.s.join(" ")} / 7px stretch`;
+    b.appendChild(i);
+    b.addEventListener("click", () => {
+      haptic();
+      frameImage(id);
+      setState("frameColor", id);
+    });
+    frameSwatches.appendChild(b);
+  });
+  if (state.frame) frameImage(state.frameColor);
 
   $("#match-font").addEventListener("click", () => setState("handleFont", state.captionFont));
 
