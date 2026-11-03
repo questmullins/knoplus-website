@@ -437,3 +437,8 @@
 .frame > * { transition: opacity .6s ease .1s, transform .8s cubic-bezier(.22,1,.36,1) .05s; opacity: .2; transform: translateY(18px); }
 .frame[data-on] > * { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .frame::before, .frame > * { transition: none; transform: none; opacity: 1; } }
+
+/* Every Experience slice is the same height: rows share the tallest slice's height, and lists stop at three names. */
+.tiles { grid-auto-rows: 1fr; }
+.tile .tileBox { height: 100%; }
+.tile li.more { opacity: .7; }

@@ -23,8 +23,8 @@ const experience = find("experience")!;
 const projects = find("projects")!;
 const work = find("work-with-me")!;
 const groups = experience.children!.filter(item => item.children);
-const featured = find("experience--paperwork")!;
-const metric = featured.metrics?.[0];
+// Every Experience project with a measured result can be the featured case study; one is picked at random on each visit.
+const featurable = groups.flatMap(group => group.children || []).filter(item => item.metrics?.length);
 const projectList = projects.children!.flatMap(group => group.children || []);
 // Made by me, sorted by what each thing is: phone apps, things you open in a browser, and the rest.
 const kinds = [
@@ -90,6 +90,10 @@ export function Landing() {
   const [sheet, setSheet] = useState<{ item: ServiceItem; section: ServiceItem } | null>(null);
   const [place, setPlace] = useState(0);
   const [kindShown, setKindShown] = useState("All");
+  const [pick, setPick] = useState(0);
+  useEffect(() => { setPick(Math.floor(Math.random() * featurable.length)); }, []);
+  const featured = featurable[pick];
+  const metric = featured?.metrics?.[0];
   // A project card opens a small window: what it is, a few screens, and a button to open it.
   const [peeked, setPeeked] = useState<ServiceItem | null>(null);
   const peekDialog = useRef<HTMLDialogElement>(null);
@@ -330,13 +334,13 @@ export function Landing() {
           <div className={s.tileBox}>
             <h3>{group.name}</h3>
             <p>{group.description}</p>
-            <ul>{group.children!.map(child => <li key={child.id}>{child.name}</li>)}</ul>
+            <ul>{group.children!.slice(0, 3).map(child => <li key={child.id}>{child.name}</li>)}{group.children!.length > 3 && <li className={s.more}>+ {group.children!.length - 3} more</li>}</ul>
             <span className={s.arrow} aria-hidden="true">→</span>
           </div>
         </button>)}</div>
       </section>
 
-      {metric && <section className={s.feature} style={shade(experience)}>
+      {featured && metric && <section key={featured.id} className={s.feature} style={shade(experience)}>
         <div>
           <span className={s.eyebrow}>Featured case study</span>
           <h2>{featured.name}</h2>
