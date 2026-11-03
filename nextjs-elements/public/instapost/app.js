@@ -24,6 +24,7 @@
     frameColor: "black",
     frameWidth: 26,
     frameTint: "",
+    font: "serif",
     customFonts: false,
     textShadow: true,
     textEmboss: true,
@@ -610,9 +611,9 @@
   }
 
   // Every piece of text uses one font until Custom fonts is switched on; then each keeps its own choice.
-  const BASE_FONT = "serif";
+  // One font for all the text, picked first; Custom fonts lets the text, labels and handle each have their own.
   function fontKey(which) {
-    return state.customFonts ? state[which] : BASE_FONT;
+    return state.customFonts ? state[which] : state.font;
   }
 
   function fontString(key, size, weight) {
@@ -1595,6 +1596,8 @@
     if (key === "ratio") transition(true);
     else if (RESHAPE.includes(key)) transition(false);
     state[key] = value;
+    // picking the one font sets every font to it, so Custom fonts starts from there
+    if (key === "font") state.captionFont = state.labelFont = state.handleFont = value;
     if (key === "labelStyle" && LABEL_SIZES[value]) state.labelSize = LABEL_SIZES[value];
     if (key === "customBg" || key === "customTexture") paintSwatches();
     if (key === "mode") renderTray();
