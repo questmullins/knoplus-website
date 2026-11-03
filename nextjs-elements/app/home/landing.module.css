@@ -427,3 +427,13 @@
 .tagSoft { background: rgb(var(--ink-rgb) / 0.06); color: rgb(var(--ink-rgb) / 0.7); }
 @media (max-width: 1000px) { .madeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .madeGrid { grid-template-columns: 1fr; } .kindTabs { justify-content: flex-start; } }
+
+/* Moving between windows, after the original kno.plus: the window you arrive at settles in (its photo eases from a slight zoom,
+   its box rises and fades up) while the one you leave dims. Computers move one window per wheel turn (see goTo in landing.tsx). */
+@media (pointer: fine) and (min-width: 761px) { .sheetBody { scroll-snap-type: none; } }
+.sheetBody[data-gliding] { scroll-snap-type: none; }
+.frame::before { transition: transform 1.1s cubic-bezier(.22,1,.36,1), opacity .8s ease; transform: scale(1.05); opacity: .55; }
+.frame[data-on]::before { transform: none; opacity: 1; }
+.frame > * { transition: opacity .6s ease .1s, transform .8s cubic-bezier(.22,1,.36,1) .05s; opacity: .2; transform: translateY(18px); }
+.frame[data-on] > * { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .frame::before, .frame > * { transition: none; transform: none; opacity: 1; } }

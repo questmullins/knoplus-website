@@ -140,7 +140,63 @@ export function Landing() {
 
   // Frames can be taller than the screen, so positions come from the frames themselves, not from multiples of its height.
   const frameTop = (index: number) => (sheetBody.current?.children[index] as HTMLElement | undefined)?.offsetTop || 0;
-  const goTo = (index: number) => sheetBody.current?.scrollTo({ top: frameTop(index), behavior: "smooth" });
+  // Moving between windows glides with an ease in and out, like the original kno.plus windows, instead of the browser's quick smooth scroll.
+  const glide = useRef(0);
+  const placeRef = useRef(0);
+  placeRef.current = place;
+  const goTo = (index: number) => {
+    const el = sheetBody.current;
+    if (!el) return;
+    const frames = el.children.length;
+    const to = Math.max(0, Math.min(frames - 1, index));
+    // Going back lands on the end of the window before, so a tall window is read upward from where it was left.
+    const target = el.children[to] as HTMLElement | undefined;
+    const top = to < placeRef.current && target ? Math.max(target.offsetTop, target.offsetTop + target.offsetHeight - el.clientHeight) : frameTop(to);
+    const from = el.scrollTop, started = performance.now(), length = 760;
+    cancelAnimationFrame(glide.current);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.scrollTop = top; return; }
+    el.dataset.gliding = "";
+    const ease = (x: number) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - started) / length);
+      el.scrollTop = from + (top - from) * ease(progress);
+      if (progress < 1) glide.current = requestAnimationFrame(step); else delete el.dataset.gliding;
+    };
+    glide.current = requestAnimationFrame(step);
+  };
+  // Computers: one wheel turn or arrow key moves one whole window (a window taller than the screen scrolls through first).
+  const wheelLock = useRef(0);
+  useEffect(() => {
+    const el = sheetBody.current;
+    if (!sheet || !el) return;
+    const fine = window.matchMedia("(pointer: fine) and (min-width: 761px)");
+    const move = (direction: number, event?: Event) => {
+      const frame = el.children[placeRef.current] as HTMLElement | undefined;
+      if (frame) {
+        const roomBelow = frame.offsetTop + frame.offsetHeight - (el.scrollTop + el.clientHeight);
+        const roomAbove = el.scrollTop - frame.offsetTop;
+        if ((direction > 0 && roomBelow > 3) || (direction < 0 && roomAbove > 3)) return false;
+      }
+      event?.preventDefault();
+      if (performance.now() < wheelLock.current) return true;
+      wheelLock.current = performance.now() + 900;
+      goTo(placeRef.current + direction);
+      return true;
+    };
+    const wheel = (event: WheelEvent) => {
+      if (!fine.matches || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (Math.abs(event.deltaY) < 4) { event.preventDefault(); return; }
+      move(Math.sign(event.deltaY), event);
+    };
+    const key = (event: KeyboardEvent) => {
+      if ((event.target as Element)?.closest?.("input, textarea, select, dialog")) return;
+      const direction = ["ArrowDown", "PageDown", " "].includes(event.key) ? 1 : ["ArrowUp", "PageUp"].includes(event.key) ? -1 : 0;
+      if (direction) move(direction, event);
+    };
+    el.addEventListener("wheel", wheel, { passive: false });
+    window.addEventListener("keydown", key);
+    return () => { el.removeEventListener("wheel", wheel); window.removeEventListener("keydown", key); cancelAnimationFrame(glide.current); };
+  }, [sheet]);
   const track = (el: HTMLDivElement) => {
     const frames = Array.from(el.children) as HTMLElement[];
     const line = el.scrollTop + el.clientHeight / 2;
@@ -352,7 +408,7 @@ export function Landing() {
       {sheet && <div className={s.sheetInner} style={shade(sheet.section)}>
         {/* The top bar says where you are (see the header); below it, the original kno.plus scroll: one full window per project. */}
         <div className={s.sheetBody} ref={sheetBody} onScroll={event => track(event.currentTarget)}>
-          <section className={s.frame} style={bg(photo(sheet.item))}>
+          <section className={s.frame} data-on={place === 0 ? true : undefined} style={bg(photo(sheet.item))}>
             {sheet.item.children ? <div className={s.detail}>
               <span className={s.eyebrow}>{sheet.section.name}</span>
               <h2>{sheet.item.name}</h2>
@@ -364,7 +420,7 @@ export function Landing() {
               {sheet.item.related && <div className={s.buttons}><a className={s.secondary} href={sheet.item.related.href}>{sheet.item.related.label} ↗</a></div>}
             </div> : detail(sheet.item, sheet.section)}
           </section>
-          {sheet.item.children?.map(child => <section key={child.id} className={s.frame} style={bg(photo(child))}>{detail(child, sheet.section)}</section>)}
+          {sheet.item.children?.map((child, index) => <section key={child.id} className={s.frame} data-on={place === index + 1 ? true : undefined} style={bg(photo(child))}>{detail(child, sheet.section)}</section>)}
         </div>
       </div>}
     </div>
