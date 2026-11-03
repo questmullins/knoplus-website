@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Have We Made It Before? | Knoplus</title>
+  <meta name="description" content="Search past bags by material layers, format, style, gusset, size and fill weight, and get a yes or no with the closest matches. A working example rebuilt with made-up data.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+  <style>
+    .answer { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+    .answer .big { margin: 0; }
+    .family { margin-top: 24px; }
+    .family h3 { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; }
+    .family h3 small { font: 12px var(--font-body); color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .hits { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .hits li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 14px 16px; border-radius: 10px; background: var(--box-2); }
+    .hits b { font-weight: 500; }
+    .hits small { color: var(--muted); }
+    .hits .made { text-align: right; }
+    .hits .made b { color: var(--tone); }
+    .hits mark { background: color-mix(in srgb, var(--tone) 35%, transparent); color: inherit; border-radius: 3px; }
+  </style>
+</head>
+<body data-name="Have we made it before?" data-code="sales-lookup">
+<main>
+  <div class="intro">
+    <span class="eyebrow">Working example · Sales</span>
+    <h1>Have we made it before?</h1>
+    <p>A customer asks for a bag, and sales needs to know if the plant has made one like it, because a proven structure quotes faster and runs with fewer surprises. The answer used to mean asking around. The original tool searched every past job in one place. This one searches 60 made-up ones.</p>
+  </div>
+
+  <div class="layout">
+    <section class="box">
+      <h2>What are you looking for?</h2>
+      <p class="note">Fill in only what you know. Every detail is optional.</p>
+      <label class="field"><span>Layers</span><input id="layers" type="search" list="layerList" placeholder="e.g. soft touch, foil, kraft"></label>
+      <datalist id="layerList"></datalist>
+      <label class="field"><span>Format</span><select id="format"></select></label>
+      <div class="row">
+        <label class="field"><span>Style</span><select id="style"></select></label>
+        <label class="field"><span>Gusset</span><select id="gusset"></select></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Width</span><div class="unit"><input id="w" type="number" step="0.25"><em>in</em></div></label>
+        <label class="field"><span>Height</span><div class="unit"><input id="h" type="number" step="0.25"><em>in</em></div></label>
+        <label class="field"><span>Gusset</span><div class="unit"><input id="g" type="number" step="0.25"><em>in</em></div></label>
+      </div>
+      <div class="field"><span>Size match within</span><div class="seg" id="tol" data-value="1"><button type="button" data-value="0">Exact</button><button type="button" data-value="0.5">±½″</button><button type="button" data-value="1">±1″</button><button type="button" data-value="2">±2″</button></div></div>
+      <div class="row">
+        <label class="field"><span>Fill weight from</span><div class="unit"><input id="lo" type="number" step="0.5" min="0"><em>lb</em></div></label>
+        <label class="field"><span>To</span><div class="unit"><input id="hi" type="number" step="0.5" min="0"><em>lb</em></div></label>
+      </div>
+      <div class="buttons"><button class="btn-2" id="clear" type="button">Clear</button><button class="btn" id="copy" type="button" disabled>Copy the answer</button></div>
+      <p class="status" id="copied" hidden></p>
+      <p class="note" style="margin-top:14px">Try: </p>
+      <div class="pick" id="tries"></div>
+    </section>
+
+    <section class="box">
+      <div id="out"></div>
+    </section>
+  </div>
+</main>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const { $, $$, products, LAYERS, esc, inches, seg, setStatus } = Kit;
+  const tol = seg($('#tol'), run);
+  $('#layerList').innerHTML = [...new Set(LAYERS.flatMap(l => l.split(' / ')))].map(l => `<option value="${l.toLowerCase()}">`).join('');
+
+  // Each choice narrows the others: only formats, styles and gussets that exist together are offered.
+  function options() {
+    const f = $('#format').value, st = $('#style').value, gu = $('#gusset').value;
+    const fill = (el, label, values, keep) => { el.innerHTML = `<option value="">Any ${label}</option>` + [...new Set(values)].sort().map(v => `<option${v === keep ? ' selected' : ''}>${esc(v)}</option>`).join(''); };
+    fill($('#format'), 'format', products.filter(p => (!st || p.style === st) && (!gu || p.gusset === gu)).map(p => p.format), f);
+    fill($('#style'), 'style', products.filter(p => (!f || p.format === f) && (!gu || p.gusset === gu)).map(p => p.style), st);
+    fill($('#gusset'), 'gusset', products.filter(p => (!f || p.format === f) && (!st || p.style === st)).map(p => p.gusset), gu);
+  }
+
+  const num = id => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : null; };
+  function criteria() {
+    return { layers: $('#layers').value.trim().toLowerCase().split(/[,/]+/).map(s => s.trim()).filter(Boolean), format: $('#format').value, style: $('#style').value, gusset: $('#gusset').value,
+      w: num('#w'), h: num('#h'), g: num('#g'), tol: +tol.value, lo: num('#lo'), hi: num('#hi') };
+  }
+  const near = (a, b, t) => b === null || Math.abs(a - b) <= t + 1e-9;
+  function matches(p, c) {
+    return c.layers.every(l => p.layers.toLowerCase().includes(l)) && (!c.format || p.format === c.format) && (!c.style || p.style === c.style) && (!c.gusset || p.gusset === c.gusset)
+      && near(p.w, c.w, c.tol) && near(p.h, c.h, c.tol) && near(p.g, c.g, c.tol) && (c.lo === null || p.weightLb >= c.lo) && (c.hi === null || p.weightLb <= c.hi);
+  }
+  const any = c => c.layers.length || c.format || c.style || c.gusset || c.w !== null || c.h !== null || c.g !== null || c.lo !== null || c.hi !== null;
+  const mark = (text, terms) => terms.reduce((t, term) => t.replace(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'ig'), '<mark>$1</mark>'), esc(text));
+
+  let answer = '';
+  function run() {
+    options();
+    const c = criteria();
+    answer = '';
+    $('#copy').disabled = true;
+    if (!any(c)) {
+      $('#out').innerHTML = `<div class="empty"><div><h3>Have we made it?</h3><p>Try a layer, a format, a size or a weight. Matches are grouped by kind of bag.</p></div></div>`;
+      return;
+    }
+    const hits = products.filter(p => matches(p, c));
+    const made = hits.filter(p => p.madeTimes > 0), runs = made.reduce((a, p) => a + p.madeTimes, 0);
+    const last = made.map(p => p.lastMade).sort().pop();
+    const groups = {};
+    hits.forEach(p => { (groups[`${p.format} · ${p.style}`] = groups[`${p.format} · ${p.style}`] || []).push(p); });
+    const head = made.length ? `<p class="big">Yes</p><p class="note" style="margin:0">${made.length} matching ${made.length === 1 ? 'bag has' : 'bags have'} run ${runs} times, most recently ${last}.</p>`
+      : hits.length ? `<p class="big">Close</p><p class="note" style="margin:0">${hits.length} matching ${hits.length === 1 ? 'bag was' : 'bags were'} quoted or sampled but never run.</p>`
+      : `<p class="big">Not yet</p><p class="note" style="margin:0">Nothing matches every detail. Widen the size match or drop a detail.</p>`;
+    $('#out').innerHTML = `<div class="answer">${head}</div>` + Object.entries(groups).map(([family, list]) => `<div class="family"><h3>${esc(family)}<small>${list.length} ${list.length === 1 ? 'bag' : 'bags'}</small></h3><ul class="hits">${
+      list.sort((a, b) => b.madeTimes - a.madeTimes).map(p => `<li><div><b>${esc(p.brand)}: ${esc(p.name)}</b><br><small>${inches(p.w)} × ${inches(p.h)} × ${inches(p.g)} · ${esc(p.weight)} · ${esc(p.gusset)} · ${esc(p.zipper)}</small><br><small>${mark(p.layers, c.layers)}</small></div>
+        <div class="made">${p.madeTimes ? `<b>Run ${p.madeTimes}×</b><br><small>Last ${p.lastMade}</small>` : '<small>Never run</small>'}<br><small>Filing ${esc(p.filing)}</small></div></li>`).join('')
+    }</ul></div>`).join('');
+    const asked = [c.format, c.style, c.gusset, c.w !== null || c.h !== null ? `${c.w ?? 'any'} × ${c.h ?? 'any'}${c.g !== null ? ' × ' + c.g : ''} in (±${c.tol}″)` : '', c.layers.length ? c.layers.join(' / ') : '', c.lo !== null || c.hi !== null ? `${c.lo ?? 0}–${c.hi ?? 'any'} lb` : ''].filter(Boolean).join(', ');
+    answer = `Have we made it before? ${asked}\n` + (made.length ? `Yes: ${made.length} matching bags, ${runs} runs, most recently ${last}.\n` : hits.length ? `Close: ${hits.length} matching bags sampled, none run.\n` : 'Not yet.\n')
+      + hits.slice(0, 8).map(p => `- ${p.filing}: ${p.brand} ${p.name}, ${p.w} x ${p.h} x ${p.g} in, ${p.weight}, ${p.layers}${p.madeTimes ? `, run ${p.madeTimes}x (last ${p.lastMade})` : ', never run'}`).join('\n');
+    $('#copy').disabled = false;
+  }
+
+  const tries = [
+    ['Soft touch with foil', { layers: 'soft touch, foil' }],
+    ['A 5 lb pinched bottom', { style: 'Pinched Bottom', lo: 4, hi: 6 }],
+    ['Kraft pouches', { layers: 'kraft', format: 'Stand-Up Pouch' }],
+    ['About 10 × 16', { w: 10, h: 16 }],
+  ];
+  tries.forEach(([label, set]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+    b.addEventListener('click', () => { clear(); Object.entries(set).forEach(([k, v]) => { $('#' + k).value = v; }); run(); });
+    $('#tries').append(b);
+  });
+  function clear() { ['#layers', '#w', '#h', '#g', '#lo', '#hi'].forEach(id => { $(id).value = ''; }); ['#format', '#style', '#gusset'].forEach(id => { $(id).value = ''; }); setStatus($('#copied'), ''); }
+  $('#clear').addEventListener('click', () => { clear(); run(); });
+  $('#copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(answer); setStatus($('#copied'), 'Copied. Paste it into the quote or an email.', 'good'); }
+    catch (e) { setStatus($('#copied'), 'Your browser blocked copying. Select the results and copy them instead.', 'bad'); }
+  });
+  document.querySelector('.layout').addEventListener('input', e => { if (e.target.matches('input')) run(); });
+  document.querySelector('.layout').addEventListener('change', e => { if (e.target.matches('select')) run(); });
+  run();
+  $('#tries button').click();
+})();
+</script>
+</body>
+</html>

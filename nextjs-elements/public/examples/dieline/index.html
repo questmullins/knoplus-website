@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mockup Dieline | Knoplus</title>
+  <meta name="description" content="Load a mockup request or type a bag's size and get a flat dieline drawing with panels, seals, folds and the zipper, as an SVG and an Illustrator script. A working example rebuilt with made-up data.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+  <style>.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 12px; color: var(--muted); } .legend i { display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 2px solid; }</style>
+</head>
+<body data-name="Mockup dieline" data-code="mockup-jsx-generator">
+<main>
+  <div class="intro">
+    <span class="eyebrow">Working example · Prepress</span>
+    <h1>Mockup dieline</h1>
+    <p>Sales asks for a mockup, and someone has to draw the bag flat before anything can be printed. The original tool read the request from the database and wrote an Illustrator script that drew it. This one draws the flat layout right here, from a request or from sizes you type.</p>
+  </div>
+
+  <div class="layout">
+    <div class="stack">
+      <section class="box">
+        <h2>Load a request</h2>
+        <label class="field"><span>Mockup request</span><select id="request"></select></label>
+        <p class="status" id="msg" hidden></p>
+      </section>
+      <section class="box">
+        <h2>The bag</h2>
+        <div class="row">
+          <label class="field"><span>Format</span><select id="format"><option>Quad Seal Bag</option><option>Stand-Up Pouch</option></select></label>
+          <label class="field"><span>Style</span><select id="style"></select></label>
+        </div>
+        <div class="row">
+          <label class="field"><span>Width</span><div class="unit"><input id="w" type="number" step="0.125" min="2"><em>in</em></div></label>
+          <label class="field"><span>Height</span><div class="unit"><input id="h" type="number" step="0.125" min="2"><em>in</em></div></label>
+          <label class="field"><span>Gusset</span><div class="unit"><input id="g" type="number" step="0.125" min="0"><em>in</em></div></label>
+        </div>
+        <div class="row">
+          <label class="field"><span>Zipper</span><select id="zipper"><option>Small Zipper</option><option>Pocket Zipper</option><option>No Zipper</option></select></label>
+          <label class="field"><span>Zipper from top</span><div class="unit"><input id="zoff" type="number" step="0.125" min="0" value="1.25"><em>in</em></div></label>
+        </div>
+        <div class="row">
+          <label class="field"><span>Seal width</span><div class="unit"><input id="seal" type="number" step="0.0625" min="0.125" value="0.375"><em>in</em></div></label>
+          <label class="field"><span>Bleed</span><div class="unit"><input id="bleed" type="number" step="0.0625" min="0" value="0.125"><em>in</em></div></label>
+        </div>
+      </section>
+    </div>
+
+    <section class="box sticky">
+      <h2 id="title">Dieline</h2>
+      <p class="note" id="sub"></p>
+      <div class="paper" id="art" style="margin-top:18px;padding:16px"></div>
+      <div class="legend"><span><i style="border-color:#111"></i>Cut</span><span><i style="border-color:#e0457b;border-top-style:dashed"></i>Fold</span><span><i style="border-color:#2a7de1;border-top-style:dashed"></i>Zipper</span><span><i style="border-color:#aaa;border-top-width:6px"></i>Seal</span><span><i style="border-color:#21a179;border-top-style:dotted"></i>Bleed</span></div>
+      <ul class="facts" id="facts"></ul>
+      <div class="buttons">
+        <button class="btn" id="svg" type="button">Download SVG</button>
+        <button class="btn-2" id="jsx" type="button">Download Illustrator script</button>
+      </div>
+      <p class="note" style="margin-top:12px">Both are drawn at true size in inches. This is a simplified layout for mockups, not a production die.</p>
+    </section>
+  </div>
+</main>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const { $, products, esc, fmt, inches, download, setStatus } = Kit;
+  const STYLES = { 'Quad Seal Bag': ['Flat Bottom', 'Pinched Bottom'], 'Stand-Up Pouch': ['K-Seal', 'Angle Plow'] };
+  // Mockup requests: one per product, numbered from 1501 like the original's examples.
+  const requests = products.slice(0, 24).map((p, i) => ({ id: 1501 + i, p }));
+  $('#request').innerHTML = '<option value="">Type sizes by hand…</option>' + requests.map(r => `<option value="${r.id}">Mockup ${r.id}: ${esc(r.p.brand)}, ${esc(r.p.name)} (${esc(r.p.weight)})</option>`).join('');
+  const fillStyles = () => { const cur = $('#style').value; $('#style').innerHTML = STYLES[$('#format').value].map(s => `<option>${s}</option>`).join(''); if (STYLES[$('#format').value].includes(cur)) $('#style').value = cur; };
+
+  function load(r) {
+    const p = r.p;
+    $('#format').value = p.format; fillStyles(); $('#style').value = STYLES[p.format].includes(p.style) ? p.style : STYLES[p.format][0];
+    $('#w').value = p.w; $('#h').value = p.h; $('#g').value = p.g; $('#zipper').value = p.zipper;
+    setStatus($('#msg'), `Loaded mockup ${r.id} for ${p.brand}, requested by ${p.designer}.`, 'good');
+    render();
+  }
+
+  const val = id => Math.max(0, parseFloat($(id).value) || 0);
+  function spec() {
+    return { format: $('#format').value, style: $('#style').value, w: val('#w'), h: val('#h'), g: val('#g'), zipper: $('#zipper').value,
+      zoff: val('#zoff'), seal: val('#seal'), bleed: val('#bleed'), id: $('#request').value };
+  }
+
+  // The flat layout in inches. Quad seal: back half, side gusset, front, side gusset, back half, with the fin seal
+  // where the two back halves meet. Stand-up pouch: front, the bottom gusset folded in half, then back, top to bottom.
+  function layout(s) {
+    const L = { cuts: [], folds: [], seals: [], zip: [], dims: [], labels: [], W: 0, H: 0 };
+    if (s.format === 'Quad Seal Bag') {
+      const fin = s.seal, panels = [['BACK', s.w / 2], ['GUSSET', s.g], ['FRONT', s.w], ['GUSSET', s.g], ['BACK', s.w / 2]];
+      const W = s.w * 2 + s.g * 2 + fin * 2, H = s.h + (s.style === 'Flat Bottom' ? s.g / 2 : 0);
+      L.W = W; L.H = H;
+      L.cuts.push([0, 0, W, H]);
+      L.seals.push([0, 0, fin, H], [W - fin, 0, fin, H], [0, 0, W, s.seal], [0, H - s.seal, W, s.seal]);
+      let x = fin;
+      panels.forEach(([name, pw], i) => {
+        if (i) L.folds.push([x, 0, x, H]);
+        L.labels.push([x + pw / 2, H / 2, name === 'GUSSET' && pw < W / 6 ? 'G' : name]);
+        L.dims.push([x, x + pw, 'h', pw]);
+        x += pw;
+      });
+      L.folds.push([x, 0, x, H]);
+      if (s.style === 'Flat Bottom') L.folds.push([0, H - s.g / 2, W, H - s.g / 2]);
+      if (s.zipper !== 'No Zipper') L.zip.push([0, s.zoff, W, s.zoff]);
+    } else {
+      // Laid on its side, the way the film runs: front, the bottom gusset folded in half, back. The bag's side seals
+      // run along the top and bottom edges here, and its top seals (with the zipper) sit at the two ends.
+      const W = s.h * 2 + s.g, H = s.w;
+      L.W = W; L.H = H;
+      L.cuts.push([0, 0, W, H]);
+      L.seals.push([0, 0, W, s.seal], [0, H - s.seal, W, s.seal], [0, 0, s.seal, H], [W - s.seal, 0, s.seal, H]);
+      L.folds.push([s.h, 0, s.h, H], [s.h + s.g / 2, 0, s.h + s.g / 2, H], [s.h + s.g, 0, s.h + s.g, H]);
+      L.labels.push([s.h / 2, H / 2, 'FRONT'], [s.h + s.g / 4, H / 2, 'G'], [s.h + s.g * 0.75, H / 2, 'G'], [s.h + s.g + s.h / 2, H / 2, 'BACK']);
+      L.dims.push([0, s.h, 'h', s.h], [s.h, s.h + s.g, 'h', s.g], [s.h + s.g, W, 'h', s.h]);
+      if (s.style === 'K-Seal') {
+        // K-seal: angled seals where the gusset meets each side of the bag.
+        const k = Math.min(s.g / 2, s.w / 4);
+        [[s.h, 1], [s.h + s.g, -1]].forEach(([x, dir]) => {
+          L.seals.push(['poly', [[x, 0], [x + dir * k, k], [x + dir * k, s.seal], [x, 0]]]);
+          L.seals.push(['poly', [[x, H], [x + dir * k, H - k], [x + dir * k, H - s.seal], [x, H]]]);
+        });
+      }
+      if (s.zipper !== 'No Zipper') L.zip.push([s.zoff, 0, s.zoff, H], [W - s.zoff, 0, W - s.zoff, H]);
+    }
+    return L;
+  }
+
+  function svg(s) {
+    const L = layout(s), m = Math.max(L.W, L.H) / 40 * 3.2, b = s.bleed, W = L.W + m * 2, H = L.H + m * 2;
+    const X = x => (x + m).toFixed(4), Y = y => (y + m).toFixed(4), F = 'Helvetica, Arial, sans-serif';
+    const u = Math.max(L.W, L.H) / 40, line = u * 0.05; // text and line sizes follow the drawing, so they read at any bag size
+    let o = `<svg xmlns="http://www.w3.org/2000/svg" width="${W.toFixed(3)}in" height="${H.toFixed(3)}in" viewBox="0 0 ${W.toFixed(4)} ${H.toFixed(4)}"><rect width="${W}" height="${H}" fill="#fff"/>`;
+    o += `<g fill="#cfcfcf" fill-opacity=".55">${L.seals.map(r => r[0] === 'poly' ? `<polygon points="${r[1].map(([x, y]) => X(x) + ',' + Y(y)).join(' ')}"/>` : `<rect x="${X(r[0])}" y="${Y(r[1])}" width="${r[2]}" height="${r[3]}"/>`).join('')}</g>`;
+    if (b) o += `<rect x="${X(-b)}" y="${Y(-b)}" width="${(L.W + 2 * b).toFixed(4)}" height="${(L.H + 2 * b).toFixed(4)}" fill="none" stroke="#21a179" stroke-width="${line}" stroke-dasharray="${u * 0.1} ${u * 0.12}"/>`;
+    o += L.cuts.map(r => `<rect x="${X(r[0])}" y="${Y(r[1])}" width="${r[2]}" height="${r[3]}" fill="none" stroke="#111" stroke-width="${line * 1.6}"/>`).join('');
+    o += L.folds.map(f => `<line x1="${X(f[0])}" y1="${Y(f[1])}" x2="${X(f[2])}" y2="${Y(f[3])}" stroke="#e0457b" stroke-width="${line}" stroke-dasharray="${u * 0.4} ${u * 0.2}"/>`).join('');
+    o += L.zip.map(f => `<line x1="${X(f[0])}" y1="${Y(f[1])}" x2="${X(f[2])}" y2="${Y(f[3])}" stroke="#2a7de1" stroke-width="${line * 2}" stroke-dasharray="${u * 0.6} ${u * 0.2}"/>`).join('');
+    const fs = u * 0.9;
+    o += L.labels.map(([x, y, t]) => `<text x="${X(x)}" y="${Y(y)}" font-family="${F}" font-size="${fs}" font-weight="700" text-anchor="middle" fill="#9a9a9a" letter-spacing="${u * 0.1}">${t}</text>`).join('');
+    // Dimensions: each panel across the top, the whole width and height outside the cut.
+    const dim = (x1, y1, x2, y2, label, vertical) => {
+      const tick = u * 0.25;
+      let d = `<line x1="${X(x1)}" y1="${Y(y1)}" x2="${X(x2)}" y2="${Y(y2)}" stroke="#555" stroke-width="${line}"/>`;
+      d += vertical ? `<line x1="${X(x1 - tick)}" y1="${Y(y1)}" x2="${X(x1 + tick)}" y2="${Y(y1)}" stroke="#555" stroke-width="${line}"/><line x1="${X(x2 - tick)}" y1="${Y(y2)}" x2="${X(x2 + tick)}" y2="${Y(y2)}" stroke="#555" stroke-width="${line}"/>`
+        : `<line x1="${X(x1)}" y1="${Y(y1 - tick)}" x2="${X(x1)}" y2="${Y(y1 + tick)}" stroke="#555" stroke-width="${line}"/><line x1="${X(x2)}" y1="${Y(y2 - tick)}" x2="${X(x2)}" y2="${Y(y2 + tick)}" stroke="#555" stroke-width="${line}"/>`;
+      const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, ts = u * 0.6;
+      d += vertical ? `<text transform="translate(${X(cx - u * 0.3)} ${Y(cy)}) rotate(-90)" font-family="${F}" font-size="${ts}" text-anchor="middle" fill="#333">${label}</text>`
+        : `<text x="${X(cx)}" y="${Y(cy - u * 0.3)}" font-family="${F}" font-size="${ts}" text-anchor="middle" fill="#333">${label}</text>`;
+      return d;
+    };
+    L.dims.forEach(([a, z, , v]) => { o += dim(a, -u, z, -u, inches(v)); });
+    o += dim(0, L.H + u * 1.3, L.W, L.H + u * 1.3, `${inches(L.W)}`);
+    o += dim(-u, 0, -u, L.H, inches(L.H), true);
+    o += `<text x="${X(L.W)}" y="${Y(L.H + u * 2.6)}" font-family="${F}" font-size="${u * 0.55}" text-anchor="end" fill="#666">${esc(`${s.id ? 'Mockup ' + s.id + ' · ' : ''}${s.format} · ${s.style} · ${inches(s.w)} × ${inches(s.h)} × ${inches(s.g)} · ${s.zipper}`)}</text>`;
+    return { svg: o + '</svg>', L };
+  }
+
+  function jsx(s) {
+    const { L } = svg(s);
+    return `#target illustrator
+/* Mockup dieline${s.id ? ' for mockup ' + s.id : ''}: ${s.format}, ${s.style}, ${s.w} x ${s.h} x ${s.g} in, ${s.zipper}.
+   Made on kno.plus/examples/dieline. Draws cut, fold, seal and zipper lines on their own layers. Sizes in inches. */
+(function () {
+    var PT = 72, M = 72;
+    var data = ${JSON.stringify({ W: L.W, H: L.H, cuts: L.cuts, folds: L.folds, zip: L.zip, seals: L.seals.filter(r => r[0] !== 'poly') })};
+    var doc = app.documents.add(DocumentColorSpace.CMYK, data.W * PT + 2 * M, data.H * PT + 2 * M);
+    function color(c, m, y, k) { var x = new CMYKColor(); x.cyan = c; x.magenta = m; x.yellow = y; x.black = k; return x; }
+    function layer(name) { var l = doc.layers.add(); l.name = name; return l; }
+    function ln(l, a, col, dash) { var p = l.pathItems.add(); p.setEntirePath([[M + a[0] * PT, doc.height - M - a[1] * PT], [M + a[2] * PT, doc.height - M - a[3] * PT]]); p.filled = false; p.stroked = true; p.strokeColor = col; p.strokeWidth = 0.75; if (dash) p.strokeDashes = dash; return p; }
+    function box(l, r, fill, stroke) { var p = l.pathItems.rectangle(doc.height - M - r[1] * PT, M + r[0] * PT, r[2] * PT, r[3] * PT); p.filled = !!fill; if (fill) { p.fillColor = fill; p.opacity = 40; } p.stroked = !!stroke; if (stroke) { p.strokeColor = stroke; p.strokeWidth = 1; } return p; }
+    var seals = layer("Seals"), i;
+    for (i = 0; i < data.seals.length; i++) box(seals, data.seals[i], color(0, 0, 0, 25));
+    var folds = layer("Folds");
+    for (i = 0; i < data.folds.length; i++) ln(folds, data.folds[i], color(0, 85, 20, 0), [6, 3]);
+    var zip = layer("Zipper");
+    for (i = 0; i < data.zip.length; i++) ln(zip, data.zip[i], color(80, 40, 0, 0), [9, 3]);
+    var cut = layer("Cut");
+    for (i = 0; i < data.cuts.length; i++) box(cut, data.cuts[i], null, color(0, 0, 0, 100));
+})();
+`;
+  }
+
+  let current;
+  function render() {
+    const s = spec();
+    if (!(s.w > 0 && s.h > 0)) return;
+    current = s;
+    const { svg: art, L } = svg(s);
+    $('#art').innerHTML = art.replace(/width="[\d.]+in" height="[\d.]+in"/, 'style="width:100%;height:auto;max-height:70vh"');
+    $('#title').textContent = s.id ? `Mockup ${s.id}` : 'Your dieline';
+    $('#sub').textContent = `${s.format} · ${s.style} · ${inches(s.w)} × ${inches(s.h)} × ${inches(s.g)}`;
+    const area = L.W * L.H;
+    $('#facts').innerHTML = [
+      ['Flat size (web × repeat)', `${inches(L.W)} × ${inches(L.H)}`],
+      ['Film per bag', `${fmt(area, 1)} sq in (${fmt(area / 144, 3)} sq ft)`],
+      ['Bags per 1,000 linear ft', fmt(12000 / L.H, 0)],
+    ].map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join('');
+  }
+
+  $('#format').addEventListener('change', () => { fillStyles(); render(); });
+  $('#request').addEventListener('change', e => { const r = requests.find(x => x.id === +e.target.value); if (r) load(r); else { setStatus($('#msg'), ''); render(); } });
+  document.querySelector('.layout').addEventListener('input', e => { if (e.target.matches('input, #style, #zipper')) render(); });
+  $('#svg').addEventListener('click', () => download(`dieline-${current.id || 'custom'}.svg`, svg(current).svg, 'image/svg+xml'));
+  $('#jsx').addEventListener('click', () => download(`dieline-${current.id || 'custom'}.jsx`, jsx(current)));
+  fillStyles();
+  $('#request').value = '1502';
+  load(requests[1]);
+})();
+</script>
+</body>
+</html>

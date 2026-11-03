@@ -5,8 +5,8 @@ import type { Metric, ServiceItem } from "./services";
 // The three strongest projects in each of three groups: Automation (runs behind the scenes), Interactive tools (what
 // people look at and type into) and Full builds (complete applications, from code to installer). The full list of
 // 42 projects is in git history (commit 50d179b) if any need to come back.
-type Group = "automation" | "tools" | "builds";
-const groupNames: Record<Group, string> = { automation: "Automation", tools: "Interactive tools", builds: "Full builds" };
+type Group = "automation" | "tools" | "builds" | "examples";
+const groupNames: Record<Group, string> = { automation: "Automation", tools: "Interactive tools", builds: "Full builds", examples: "Working examples" };
 
 const project = (group: Group, id: string, name: string, image: string, description: string, tools: string[], outcome?: string | string[]): ServiceItem => ({
   id: `experience--${id}`, name, label: `Experience / ${groupNames[group]} / ${name}`, description, image: `url('/revamp/banners/${image}.webp')`,
@@ -72,6 +72,37 @@ const builds: ServiceItem[] = [
     ["Python", "CustomTkinter", "pandas", "Shopify"], ["Branded reports for any distributor, on demand", "2,321 draft orders pulled in one recorded run"]),
 ];
 
+
+// Working examples: tools built for a packaging manufacturer, rebuilt in public/examples/ to run on made-up data and
+// produce real output. The original (sanitized) code is in the public questmullins/work-examples repo; `code` is
+// the folder each one was rebuilt from.
+const CODE = "https://github.com/questmullins/work-examples/tree/HEAD/";
+const demo = (slug: string, name: string, image: string, description: string, gives: string, code: string): ServiceItem => ({
+  ...project("examples", slug, name, image, description, [gives]), highlightsLabel: "Gives you",
+  href: `/examples/${slug}/`, action: "Try it", related: { href: CODE + code, label: "See the original code ↗" },
+});
+
+const examples: ServiceItem[] = [
+  demo("annotation", "Print annotation builder", "prepress",
+    "Every piece of packaging art goes to the printer with an annotation: the specs, the barcode and every ink on every panel, once typed by hand for each revision. Load a product by the last five digits of its barcode and the finished sheet draws itself.",
+    "Vector art, an Illustrator script or a PDF", "annotation-generator"),
+  demo("barcode", "Barcode maker", "colour",
+    "A panel inside Illustrator that drew a UPC-A as true vector bars, so nobody pasted a barcode from a website again. Type a number; the check digit, magnification and bar width reduction are handled.",
+    "Print-ready SVG or an Illustrator script", "illustrator-barcode-panel"),
+  demo("dieline", "Mockup dieline", "process",
+    "Sales asks for a mockup and someone has to draw the bag flat first. Pick a request or type a size and get the layout with panels, seals, folds and the zipper, dimensioned.",
+    "A true-size SVG or an Illustrator script", "mockup-jsx-generator"),
+  demo("fill", "Fill planner", "consulting",
+    "Sample bags get filled with test bead before real product arrives. Three tools in one: how much bead stands in for a product, a log of fills that looked right, and the bag size that log says a new product needs.",
+    "Bead weight and the right stock bag", "fill-recordings"),
+  demo("made-before", "Have we made it before?", "journey",
+    "A proven structure quotes faster. Search every past bag by layers, format, size and fill weight, and get a yes or no with the closest matches, grouped by kind of bag.",
+    "An answer to paste into a quote", "sales-lookup"),
+  demo("labels", "Press sheet labels", "web-apps",
+    "Approved press sheets are filed for the next run. Find the order line, check the sheet in, and print filing labels with the approved colour standard, one per page.",
+    "Labels for a label printer or a PDF", "press-sheet-label-maker"),
+];
+
 const group = (id: Group, image: string, description: string, children: ServiceItem[], extra: Partial<ServiceItem> = {}): ServiceItem => ({
   id: `experience--${id}`, name: groupNames[id], label: `Experience / ${groupNames[id]}`, description,
   image: `url('/revamp/banners/${image}.webp')`, highlights: children.map(child => child.name), highlightsLabel: "Projects", children, ...extra,
@@ -107,6 +138,9 @@ export const experienceItems: ServiceItem[] = [
   group("builds", "web-apps",
     "Complete applications, from the first screen to the installer, made to be handed over and used by anyone.",
     builds),
+  group("examples", "prepress",
+    "Tools I built for a packaging manufacturer’s prepress, sales and production teams, rebuilt to run on made-up data. Open one and try it: each gives you something real at the end.",
+    examples, { related: { href: "/examples/", label: "All working examples" } }),
   {
     id: "experience--toolkit", name: "Toolkit", label: "Experience / Toolkit", image: "url('/revamp/banners/web-services.webp')",
     description: "Every program, platform and language I’ve built real, everyday systems with. The tools are how the work gets done, not what you’re buying, but here’s what will feel familiar.",

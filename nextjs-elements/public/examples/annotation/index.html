@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Print Annotation Builder | Knoplus</title>
+  <meta name="description" content="Look up a product by the last five digits of its barcode and get the finished print annotation sheet: specs, barcode and every ink by panel, as vector art. A working example rebuilt with made-up data.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+  <style>
+    .colors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .colors textarea { min-height: 170px; font-size: 13px; line-height: 1.5; }
+    @media (max-width: 560px) { .colors { grid-template-columns: 1fr; } }
+    #sheet { padding: 18px; }
+    .dated { grid-template-columns: 1.5fr .8fr 1fr; }
+    @media (max-width: 560px) { .dated { grid-template-columns: 1fr 1fr; } .dated > :first-child { grid-column: 1 / -1; } }
+    @media print { @page { size: 11in 4.6in; margin: 0.2in; } .layout { display: block; } .layout > :first-child, .intro { display: none; } .box { background: none; padding: 0; } #sheet { padding: 0; } }
+  </style>
+</head>
+<body data-name="Print annotation builder" data-code="annotation-generator">
+<main>
+  <div class="intro no-print">
+    <span class="eyebrow">Working example · Prepress</span>
+    <h1>Print annotation builder</h1>
+    <p>Every piece of packaging art goes to the printer with an annotation: the specs, the barcode and every ink on every panel. They used to be typed up by hand for each revision. The original tool pulled the latest revision from the database and drew the annotation straight into Illustrator. This one draws it here.</p>
+  </div>
+
+  <div class="layout wide-left">
+    <div class="stack">
+      <section class="box">
+        <h2>Load a product</h2>
+        <div class="row" style="grid-template-columns:1fr auto;align-items:end">
+          <label class="field"><span>Last 5 of the barcode</span><input id="last5" type="text" inputmode="numeric" maxlength="12" placeholder="e.g. 10213"></label>
+          <button class="btn" id="load" type="button" style="margin-top:16px">Load</button>
+        </div>
+        <p class="status" id="msg" hidden></p>
+        <label class="field"><span>Or pick from the catalog</span><select id="picker"></select></label>
+      </section>
+
+      <section class="box">
+        <h2>Annotation values</h2>
+        <p class="note">Filled in from the record. Change anything; the sheet updates as you type.</p>
+        <div class="row">
+          <label class="field"><span>Brand</span><input id="brand" type="text"></label>
+          <label class="field"><span>Item</span><input id="item" type="text"></label>
+        </div>
+        <div class="row dated">
+          <label class="field"><span>Date</span><input id="date" type="date"></label>
+          <label class="field"><span>Initials</span><input id="initials" type="text" maxlength="4" value="QM"></label>
+          <label class="field"><span>Print method</span><select id="print"><option>Roto</option><option>Flexo</option><option>Digital</option></select></label>
+        </div>
+        <label class="field"><span>Finish</span><input id="finish" type="text"></label>
+        <label class="check"><input id="finishChip" type="checkbox" checked> Show the finish chip</label>
+        <label class="check"><input id="windowChip" type="checkbox"> Add a WINDOW chip (clear window in the film)</label>
+        <label class="check"><input id="hideUnused" type="checkbox" checked> Hide unused ink slots</label>
+      </section>
+
+      <section class="box">
+        <h2>Inks by panel</h2>
+        <p class="note">One per line, up to 10. Pantone names get their swatch colour.</p>
+        <div class="colors" style="margin-top:14px">
+          <label class="field"><span>Front</span><textarea id="front"></textarea></label>
+          <label class="field"><span>Back / bottom</span><textarea id="back"></textarea></label>
+          <label class="field"><span>Side</span><textarea id="side" placeholder="Same as back"></textarea></label>
+        </div>
+      </section>
+    </div>
+
+    <section class="box sticky">
+      <div class="no-print">
+        <h2 id="title">Annotation</h2>
+        <p class="note" id="sub"></p>
+      </div>
+      <div class="paper" id="sheet" style="margin-top:18px"></div>
+      <div class="buttons no-print">
+        <button class="btn" id="svg" type="button">Download SVG</button>
+        <button class="btn-2" id="jsx" type="button">Illustrator script</button>
+        <button class="btn-2" id="printBtn" type="button">Print or save as PDF</button>
+      </div>
+      <p class="note no-print" style="margin-top:12px">The SVG is vector art at true size (11 × 4.25 in). The Illustrator script opens the same art in a new document, on its own layer.</p>
+    </section>
+  </div>
+</main>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const { $, products, upcSvg, SPOT_HEX, esc, download, setStatus, findUpc, inches } = Kit;
+  let product = null;
+
+  $('#picker').innerHTML = '<option value="">Choose a product…</option>' + products.map(p => `<option value="${p.id}">${esc(p.brand)}: ${esc(p.name)} (${esc(p.weight)}) · ends ${p.last5}</option>`).join('');
+
+  function load(p) {
+    product = p;
+    $('#picker').value = p.id;
+    $('#last5').value = p.last5;
+    $('#brand').value = p.brand; $('#item').value = `${p.name} ${p.weight}`;
+    $('#date').value = new Date().toISOString().slice(0, 10);
+    $('#print').value = p.print; $('#finish').value = p.finish;
+    $('#front').value = p.front.join('\n'); $('#back').value = p.back.join('\n'); $('#side').value = '';
+    $('#windowChip').checked = false;
+    setStatus($('#msg'), `Loaded revision ${p.revision} of record ${p.id}, by ${p.designer}.`, 'good');
+    render();
+  }
+
+  const list = id => $(id).value.split(/\n|,/).map(s => s.trim()).filter(Boolean).slice(0, 10);
+  const hex = name => SPOT_HEX[name] || (/^#[0-9a-f]{6}$/i.test(name) ? name : '#ffffff');
+  const lum = h => { const n = parseInt(h.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255; };
+
+  // The sheet, in points (72 per inch): 11 × 4.25 in. Left column: the printer's notice and the shop's block.
+  // Right column: brand and date, print method and barcode, the item's specs, then one row of ink slots per panel.
+  function sheet() {
+    const p = product, W = 792, H = 306, L = 214, F = 'Helvetica, Arial, sans-serif';
+    const t = (x, y, s, text, o = {}) => `<text x="${x}" y="${y}" font-family="${F}" font-size="${s}"${o.bold ? ' font-weight="700"' : ''}${o.anchor ? ` text-anchor="${o.anchor}"` : ''} fill="${o.fill || '#111'}">${esc(text)}</text>`;
+    const line = (x1, y1, x2, y2, w = 0.75) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="${w}"/>`;
+    const date = $('#date').value ? $('#date').value.replace(/^(\d{4})-(\d\d)-(\d\d)$/, '$2-$3-$1') : '';
+    let s = `<svg xmlns="http://www.w3.org/2000/svg" width="11in" height="4.25in" viewBox="0 0 ${W} ${H}">`;
+    s += `<rect width="${W}" height="${H}" fill="#fff"/><rect x="6" y="6" width="${W - 12}" height="${H - 12}" fill="none" stroke="#111" stroke-width="1"/>`;
+    // Left column
+    s += `<rect x="12" y="12" width="${L - 18}" height="160" fill="#111"/>`;
+    s += t(20, 28, 7, 'LIMITATION OF LIABILITY:', { bold: 1, fill: '#fff' });
+    ['Sample proof notice, for demonstration only.', 'Colours on screen and on this proof are not', 'a contract colour standard. Check every', 'barcode, ink and dimension before approval.'].forEach((l, i) => { s += t(20, 40 + i * 9, 6.5, l, { fill: '#ddd' }); });
+    s += t(20, 160, 6.5, 'Approved by: ____________________', { fill: '#ddd' });
+    s += line(L, 12, L, H - 12, 1);
+    s += t(L / 2 + 3, 205, 15, 'Demo Packaging Co.', { bold: 1, anchor: 'middle', fill: '#2b3a67' });
+    ['555.010.0100', '100 EXAMPLE WAY', 'SPRINGFIELD, ILLINOIS 62704'].forEach((l, i) => { s += t(L / 2 + 3, 225 + i * 10, 7, l, { anchor: 'middle', fill: '#2b3a67' }); });
+    s += t(L / 2 + 3, 284, 6, `Record ${p.id} · Rev ${p.revision} · Filing ${p.filing}`, { anchor: 'middle', fill: '#666' });
+    // Right column
+    const x = L + 12, R = W - 16;
+    s += t(x, 26, 8, 'BRAND:', { bold: 1 }) + t(x + 34, 26, 8, $('#brand').value);
+    s += t(R, 26, 8, `DATE: ${date}${$('#initials').value ? ' ' + $('#initials').value.toUpperCase() : ''}`, { bold: 1, anchor: 'end' });
+    s += t(x, 38, 7.5, `ITEM: ${$('#item').value}`);
+    s += line(x, 44, R, 44);
+    s += t(x, 56, 7.5, 'PRINT METHOD:', { bold: 1 }) + t(x + 62, 56, 7.5, $('#print').value);
+    s += t(x, 67, 7.5, 'BARCODE:', { bold: 1 }) + t(x + 42, 67, 7.5, p.upc.replace(/^(\d)(\d{5})(\d{5})(\d)$/, '$1 $2 $3 $4'));
+    // A small, real UPC-A on the sheet, so the number above can be scanned off the proof.
+    const code = upcSvg(p.upc, { x: 0.8, height: 30, ox: 0, oy: 0, digitsOn: false });
+    s += `<g transform="translate(${R - code.width - 2} 48)">${code.svg}</g>`;
+    s += line(x, 84, R - code.width - 10, 84);
+    s += t(x, 96, 7.5, 'ITEM SPECIFICATIONS:', { bold: 1 });
+    s += t(x, 107, 7, `${p.format} · ${p.style}${p.gusset ? ' · ' + p.gusset : ''} · ${p.zipper}`);
+    s += t(x, 117, 7, `Size ${inches(p.w)} W × ${inches(p.h)} H × ${inches(p.g)} G · Fill ${p.weight} · ${p.layers}`);
+    let cx = x;
+    const chip = (label, fill, ink = '#111') => { const w = label.length * 4.4 + 12; s += `<rect x="${cx}" y="123" width="${w}" height="12" rx="6" fill="${fill}"/>` + t(cx + w / 2, 131.5, 6.5, label, { bold: 1, anchor: 'middle', fill: ink }); cx += w + 6; };
+    if ($('#finishChip').checked && $('#finish').value) chip($('#finish').value.toUpperCase(), '#e7e3d6');
+    if ($('#windowChip').checked) chip('WINDOW', '#cfe7f7');
+    s += line(x, 142, R, 142);
+    const banks = [['FRONT', list('#front')], ['BACK & BOTTOM', list('#back')], ['SIDE', list('#side').length ? list('#side') : list('#back')]];
+    const hide = $('#hideUnused').checked;
+    banks.forEach(([name, inks], row) => {
+      const y = 156 + row * 50, sw = (R - x - 9 * 6) / 10;
+      s += t(x, y, 7, `${name} CYLINDERS${row === 2 && !list('#side').length ? ' (same as back)' : ''}:`, { bold: 1 });
+      for (let i = 0; i < 10; i++) {
+        const ink = inks[i]; if (!ink && hide) continue;
+        const bx = x + i * (sw + 6), fill = ink ? hex(ink) : '#fff';
+        s += `<rect x="${bx}" y="${y + 5}" width="${sw}" height="18" fill="${fill}" stroke="#111" stroke-width="0.6"/>`;
+        s += t(bx + 3, y + 12, 5.5, String(i + 1), { fill: ink && lum(fill) < 0.5 ? '#fff' : '#111' });
+        if (ink) s += t(bx + sw / 2, y + 32, 5.6, ink.toUpperCase().slice(0, 14), { anchor: 'middle' });
+      }
+    });
+    return s + '</svg>';
+  }
+
+  function render() {
+    if (!product) return;
+    $('#title').textContent = `${product.brand}: ${product.name}`;
+    $('#sub').textContent = `UPC ${product.upc} · revision ${product.revision} · ${list('#front').length} front inks, ${list('#back').length} back inks`;
+    $('#sheet').innerHTML = sheet();
+  }
+
+  function tryLoad() {
+    const v = $('#last5').value.replace(/\D/g, '');
+    const p = findUpc(v);
+    if (p) load(p); else setStatus($('#msg'), v.length < 5 ? 'Type the last five digits of the barcode.' : 'No artwork revision ends in those digits. Try 10213, 10439 or pick one below.', 'bad');
+  }
+  $('#load').addEventListener('click', tryLoad);
+  $('#last5').addEventListener('keydown', e => { if (e.key === 'Enter') tryLoad(); });
+  $('#picker').addEventListener('change', e => { const p = products.find(x => x.id === +e.target.value); if (p) load(p); });
+  document.querySelector('.layout').addEventListener('input', e => { if (!e.target.closest('#picker, #last5')) render(); });
+  $('#svg').addEventListener('click', () => download(`annotation-${product.upc}-rev${product.revision}.svg`, sheet(), 'image/svg+xml'));
+  $('#jsx').addEventListener('click', () => {
+    const svg = sheet();
+    download(`annotation-${product.upc}-rev${product.revision}.jsx`, `#target illustrator
+/* Print annotation for ${product.brand}: ${product.name}, UPC ${product.upc}, revision ${product.revision}.
+   Made on kno.plus/examples/annotation. Opens the annotation art as a new Illustrator document. */
+(function () {
+    var svg = ${JSON.stringify(svg)};
+    var file = new File(Folder.temp + "/annotation-${product.upc}.svg");
+    file.encoding = "UTF-8"; file.open("w"); file.write(svg); file.close();
+    var doc = app.open(file);
+    doc.layers[0].name = "Annotation";
+})();
+`);
+  });
+  $('#printBtn').addEventListener('click', () => window.print());
+  load(products[1]);
+})();
+</script>
+</body>
+</html>

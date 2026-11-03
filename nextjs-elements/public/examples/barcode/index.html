@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Barcode Maker | Knoplus</title>
+  <meta name="description" content="Type a UPC and get a print-ready UPC-A barcode as vector art, with the check digit worked out, magnification and bar width reduction. A working example rebuilt with made-up data.">
+  <link rel="icon" href="/icons/k-plus.svg" type="image/svg+xml">
+  <script src="/scheme.js"></script>
+  <link rel="stylesheet" href="/examples/kit.css">
+</head>
+<body data-name="Barcode maker" data-code="illustrator-barcode-panel">
+<main>
+  <div class="intro">
+    <span class="eyebrow">Working example · Prepress</span>
+    <h1>Barcode maker</h1>
+    <p>The original was a panel inside Illustrator that drew a UPC-A as vector bars, so nobody had to paste a barcode from a website again. This one does the same in your browser: type a number, set the print settings, and download the art.</p>
+  </div>
+
+  <div class="layout">
+    <div class="stack">
+      <section class="box">
+        <h2>The number</h2>
+        <label class="field"><span>UPC</span><input id="upc" type="text" inputmode="numeric" autocomplete="off" placeholder="11 or 12 digits, or the last 5"></label>
+        <div class="buttons" style="margin-top:12px"><button class="btn-2" id="find" type="button">Find by last 5</button></div>
+        <p class="status" id="msg" hidden></p>
+        <p class="note" style="margin-top:14px">Or try one from the made-up catalog:</p>
+        <div class="pick" id="samples"></div>
+      </section>
+      <section class="box">
+        <h2>Print settings</h2>
+        <div class="row">
+          <label class="field"><span>Magnification</span><div class="unit"><input id="mag" type="number" min="80" max="200" step="5" value="100"><em>%</em></div></label>
+          <label class="field"><span>Bar height</span><div class="unit"><input id="height" type="number" min="25" max="200" step="5" value="100"><em>%</em></div></label>
+        </div>
+        <label class="field"><span>Bar width reduction</span><div class="unit"><input id="bwr" type="number" min="0" step="5" value="25"><em>µm</em></div></label>
+        <p class="note">Ink spreads on press, so each bar is drawn a little thinner than nominal. Your printer gives you this number.</p>
+        <label class="check"><input id="digits" type="checkbox" checked> Print the digits under the bars</label>
+        <label class="check"><input id="white" type="checkbox" checked> Put a white box behind it (for dark artwork)</label>
+      </section>
+    </div>
+
+    <section class="box sticky">
+      <h2 id="title">Your barcode</h2>
+      <p class="note" id="sub">Type a number to start.</p>
+      <div class="paper" style="margin-top:18px;padding:28px;display:grid;place-items:center;min-height:240px" id="preview"></div>
+      <ul class="facts" id="facts"></ul>
+      <div class="buttons">
+        <button class="btn" id="svg" type="button" disabled>Download SVG</button>
+        <button class="btn-2" id="jsx" type="button" disabled>Download Illustrator script</button>
+      </div>
+      <p class="note" style="margin-top:12px">The SVG is drawn in millimetres at true size. The script draws the same bars in 100% black in a new Illustrator document.</p>
+    </section>
+  </div>
+</main>
+
+<script src="/examples/kit.js"></script>
+<script>
+(function () {
+  const { $, products, resolveUpc, upcSvg, encode, setStatus, download, fmt, findUpc, esc } = Kit;
+  const NOMINAL = { x: 0.33, bar: 22.85 };
+  let current = null;
+
+  [products[3], products[17], products[42]].forEach(p => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = `${p.brand}: ${p.name}`;
+    b.addEventListener('click', () => { $('#upc').value = p.upc; render(); });
+    $('#samples').append(b);
+  });
+
+  function settings() {
+    const mag = +$('#mag').value, height = +$('#height').value, bwr = +$('#bwr').value / 1000;
+    const x = NOMINAL.x * mag / 100, bar = NOMINAL.bar * mag / 100 * height / 100;
+    let error = '';
+    if (!(mag >= 80 && mag <= 200)) error = 'Magnification has to be between 80 and 200%.';
+    else if (!(height >= 25 && height <= 200)) error = 'Bar height has to be between 25 and 200%.';
+    else if (!(bwr >= 0 && bwr < x)) error = `Bar width reduction has to be less than one bar (${Math.round(x * 1000)} µm at this size).`;
+    return { mag, height, bwr, x, bar, digits: $('#digits').checked, white: $('#white').checked, error };
+  }
+
+  function art(digits, s) {
+    const pad = 2 * s.x;
+    const sym = upcSvg(digits, { x: s.x, height: s.bar, ox: pad, oy: pad, bwr: s.bwr, digitsOn: s.digits });
+    const w = sym.width + 2 * pad, h = sym.height + 2 * pad;
+    const bg = s.white ? `<rect width="${w.toFixed(3)}" height="${h.toFixed(3)}" fill="#fff"/>` : '';
+    return { w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${w.toFixed(3)}mm" height="${h.toFixed(3)}mm" viewBox="0 0 ${w.toFixed(3)} ${h.toFixed(3)}">${bg}${sym.svg}</svg>` };
+  }
+
+  function render() {
+    const r = resolveUpc($('#upc').value), s = settings();
+    const p = r.digits && products.find(x => x.upc === r.digits);
+    current = null;
+    $('#svg').disabled = $('#jsx').disabled = true;
+    $('#facts').innerHTML = '';
+    if (r.empty) { setStatus($('#msg'), ''); $('#preview').innerHTML = '<span style="color:#888">Nothing to draw yet.</span>'; $('#title').textContent = 'Your barcode'; $('#sub').textContent = 'Type a number to start.'; return; }
+    if (r.error || s.error) { setStatus($('#msg'), r.error || s.error, 'bad'); return; }
+    setStatus($('#msg'), r.note, 'good');
+    current = { digits: r.digits, s, a: art(r.digits, s) };
+    $('#preview').innerHTML = current.a.svg.replace(/width="[^"]+mm" height="[^"]+mm"/, `style="width:min(100%,${Math.max(260, current.a.w * 9)}px);height:auto"`);
+    $('#title').textContent = p ? `${p.brand}: ${p.name}` : 'Your barcode';
+    $('#sub').textContent = p ? `${p.weight} ${p.format.toLowerCase()} · filing ${p.filing}` : 'Not in the catalog, which is fine. Any valid UPC works.';
+    const rows = [
+      ['Number', r.digits.replace(/^(\d)(\d{5})(\d{5})(\d)$/, '$1 $2 $3 $4')],
+      ['Symbol size', `${fmt(current.a.w, 2)} × ${fmt(current.a.h, 2)} mm`],
+      ['Narrow bar (X)', `${fmt(s.x * 1000, 0)} µm`],
+      ['Drawn bar after reduction', `${fmt((s.x - s.bwr) * 1000, 0)} µm`],
+    ];
+    if (s.mag < 90) rows.push(['Heads up', 'Below 90% many scanners struggle']);
+    $('#facts').innerHTML = rows.map(([k, v]) => `<li><span>${esc(k)}</span><b>${esc(v)}</b></li>`).join('');
+    $('#svg').disabled = $('#jsx').disabled = false;
+  }
+
+  function jsx({ digits, s }) {
+    const modules = encode(digits);
+    const tall = i => i < 10 || (i >= 45 && i < 50) || i >= 85;
+    const runs = []; let i = 0;
+    while (i < 95) { if (modules[i] !== '1') { i++; continue; } const st = i, long = tall(i); while (i < 95 && modules[i] === '1' && tall(i) === long) i++; runs.push([st, i - st, long ? 1 : 0]); }
+    return `#target illustrator
+/* UPC-A ${digits}, made on kno.plus/examples/barcode. Magnification ${s.mag}%, bar height ${s.height}%, bar width reduction ${Math.round(s.bwr * 1000)} µm.
+   Draws the bars in 100% K on a layer called "Barcode" in a new document. */
+(function () {
+    var MM = 72 / 25.4, X = ${s.x} * MM, BAR = ${s.bar} * MM, BWR = ${s.bwr} * MM, QUIET = 9 * X;
+    var runs = ${JSON.stringify(runs)}; // [first module, width in modules, guard bar]
+    var doc = app.documents.add(DocumentColorSpace.CMYK, 113 * X + 4 * X, BAR + 16 * X);
+    var layer = doc.layers[0]; layer.name = "Barcode";
+    var k = new CMYKColor(); k.black = 100;
+    var top = doc.height - 2 * X, left = 2 * X;
+    for (var i = 0; i < runs.length; i++) {
+        var r = runs[i], h = BAR + (r[2] ? 5 * X : 0);
+        var bar = layer.pathItems.rectangle(top, left + QUIET + r[0] * X + BWR / 2, r[1] * X - BWR, h);
+        bar.filled = true; bar.fillColor = k; bar.stroked = false;
+    }${s.digits ? `
+    // Digits as printed on a UPC-A: first and last in the quiet zones, two groups of five under the short bars.
+    var SIZE = 9 * X, BASE = top - BAR - 0.25 * X - 0.72 * SIZE;
+    function digit(text, x, size, just) {
+        var t = layer.textFrames.pointText([x, BASE]);
+        t.contents = text;
+        t.textRange.characterAttributes.size = size;
+        t.textRange.characterAttributes.fillColor = k;
+        t.textRange.paragraphAttributes.justification = just;
+        return t;
+    }
+    digit("${digits[0]}", left + QUIET - 1.5 * X, SIZE * 0.75, Justification.RIGHT);
+    var a = digit("${digits.slice(1, 6)}", left + QUIET + 27 * X, SIZE, Justification.CENTER);
+    var b = digit("${digits.slice(6, 11)}", left + QUIET + 67 * X, SIZE, Justification.CENTER);
+    digit("${digits[11]}", left + QUIET + 96.5 * X, SIZE * 0.75, Justification.LEFT);
+    // Squeeze a group that a wide font makes longer than its gap.
+    var groups = [a, b];
+    for (var g = 0; g < 2; g++) if (groups[g].width > 30 * X) groups[g].textRange.characterAttributes.horizontalScale = 100 * 30 * X / groups[g].width;` : ''}
+})();
+`;
+  }
+
+  ['input', 'change'].forEach(ev => document.querySelector('main').addEventListener(ev, e => { if (e.target.matches('input')) render(); }));
+  $('#find').addEventListener('click', () => {
+    const p = findUpc($('#upc').value);
+    if (p) { $('#upc').value = p.upc; render(); } else setStatus($('#msg'), 'No product in the catalog ends in those digits. Try 10213 or one of the examples below.', 'bad');
+  });
+  $('#svg').addEventListener('click', () => current && download(`upc-${current.digits}.svg`, current.a.svg, 'image/svg+xml'));
+  $('#jsx').addEventListener('click', () => current && download(`upc-${current.digits}.jsx`, jsx(current)));
+  $('#upc').value = products[3].upc;
+  render();
+})();
+</script>
+</body>
+</html>
