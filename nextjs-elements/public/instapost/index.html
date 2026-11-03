@@ -52,6 +52,10 @@
               <span class="mode-text"><b>Showcase</b><small>1 to 4 photos of your work, no labels</small></span>
             </button>
           </div>
+          <div class="history-block" id="history-block" hidden>
+            <span class="field-label">Start from a past post</span>
+            <div class="history" id="history"></div>
+          </div>
           <div class="presets-block" data-presets-block hidden>
             <span class="field-label">Or start from a preset</span>
             <div class="presets" data-presets></div>
@@ -62,7 +66,7 @@
         <div class="slide" data-panel="1" data-title="Photos and layout">
           <h2>Add your photos</h2>
           <div class="pool-block" id="pool-block">
-            <span class="field-label">Your photos</span>
+            <span class="field-label">Your photos <button type="button" class="mini-btn" id="clear-photos" hidden>Remove all</button></span>
             <div class="pool" id="pool"></div>
           </div>
           <span class="field-label">Spots on the post</span>
@@ -107,14 +111,17 @@
               <button type="button" data-value="below">Bottom</button>
             </div>
           </div>
-          <div class="field">
-            <span class="field-label">Font</span>
-            <div class="seg seg-wrap font-seg" data-bind="captionFont" data-fonts></div>
-          </div>
           <label class="slider wide">Text size <input type="range" min="36" max="140" step="1" data-bind="captionSize"></label>
           <div class="color-row">
             <span>Text color</span>
             <button type="button" class="color-btn" data-color="captionColor"><i></i><em></em></button>
+          </div>
+          <label class="toggle"><input type="checkbox" data-bind="textShadow"> Drop shadow</label>
+          <label class="toggle"><input type="checkbox" data-bind="textEmboss"> Emboss</label>
+          <label class="toggle"><input type="checkbox" data-bind="customFonts"> Custom fonts</label>
+          <div class="field custom-font">
+            <span class="field-label">Font</span>
+            <div class="seg seg-wrap font-seg" data-bind="captionFont" data-fonts></div>
           </div>
 
           <div class="labels-section" id="labels-section">
@@ -133,7 +140,7 @@
                 <input type="text" maxlength="24" data-bind="labelAfter" aria-label="After label text">
               </div>
               <label class="slider wide">Label size <input type="range" min="18" max="110" step="1" data-bind="labelSize"></label>
-              <div class="field">
+              <div class="field custom-font">
                 <span class="field-label">Label font</span>
                 <div class="seg seg-wrap font-seg" data-bind="labelFont" data-fonts></div>
               </div>
@@ -154,7 +161,7 @@
           </div>
           <p class="note">Saved on this phone, so it's filled in next time.</p>
           <label class="toggle"><input type="checkbox" data-bind="showHandle"> Show handle on the image</label>
-          <div class="field">
+          <div class="field custom-font">
             <span class="field-label">Font <button type="button" class="mini-btn" id="match-font">Match my text</button></span>
             <div class="seg seg-wrap font-seg" data-bind="handleFont" data-fonts></div>
           </div>
@@ -200,6 +207,10 @@
             <div class="frame-options" id="frame-options">
               <div class="frame-swatches" id="frame-swatches" role="radiogroup" aria-label="Frame color"></div>
               <p class="note frame-name" id="frame-name"></p>
+              <div class="color-row">
+                <span>Frame color</span>
+                <button type="button" class="color-btn" data-color="frameTint"><i></i><em></em></button>
+              </div>
               <label class="slider wide">Frame thickness <input type="range" min="8" max="90" step="1" data-bind="frameWidth"></label>
             </div>
           </div>

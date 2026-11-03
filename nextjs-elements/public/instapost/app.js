@@ -23,6 +23,10 @@
     frame: false,
     frameColor: "black",
     frameWidth: 26,
+    frameTint: "",
+    customFonts: false,
+    textShadow: true,
+    textEmboss: true,
     labelStyle: "corner",
     labelBefore: "Before",
     labelAfter: "After",
@@ -64,6 +68,33 @@
     silver: { name: "Silver", s: [41, 37, 41, 40], color: "#bfc2c4" }
   };
   const frameImages = {};
+  // A frame recoloured: its own light and shade (grain, bevels, the corner joins) kept, its colour taken from the
+  // tint, so even a black frame can turn any colour. Made once per frame and colour.
+  const tintCache = new Map();
+  function tintedFrame(id, tint) {
+    const key = `${id}|${tint}`;
+    if (tintCache.has(key)) return tintCache.get(key);
+    const img = frameImage(id);
+    const cv = document.createElement("canvas");
+    cv.width = img.naturalWidth;
+    cv.height = img.naturalHeight;
+    const c = cv.getContext("2d");
+    c.drawImage(img, 0, 0);
+    const data = c.getImageData(0, 0, cv.width, cv.height);
+    const px = data.data;
+    const [tr, tg, tb] = hexToRgb(tint);
+    for (let i = 0; i < px.length; i += 4) {
+      const lum = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255;
+      const f = 0.45 + 0.75 * lum;
+      px[i] = Math.min(255, tr * f);
+      px[i + 1] = Math.min(255, tg * f);
+      px[i + 2] = Math.min(255, tb * f);
+    }
+    c.putImageData(data, 0, 0);
+    if (tintCache.size > 16) tintCache.clear();
+    tintCache.set(key, cv);
+    return cv;
+  }
   function frameImage(id) {
     if (!frameImages[id]) {
       const img = new Image();
@@ -333,6 +364,39 @@
     c.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
   }
 
+  // Photo backgrounds (Quest's own pictures, in backgrounds/). Each loads once; until then its main colour stands in.
+  const bgImages = {};
+  function bgImage(id) {
+    if (!bgImages[id]) {
+      const img = new Image();
+      img.onload = () => {
+        bgCache.clear();
+        paintSwatches();
+        renderPresets();
+        update();
+      };
+      img.src = `backgrounds/${id}.webp`;
+      bgImages[id] = img;
+    }
+    return bgImages[id];
+  }
+  function photoStyle(id, name, base, text, sub, light) {
+    return {
+      name,
+      text,
+      sub,
+      photo: id,
+      pill: light ? "rgba(250,247,242,0.9)" : "rgba(25,20,18,0.82)",
+      placeholder: light ? "rgba(60,50,40,0.1)" : "rgba(255,255,255,0.1)",
+      light,
+      paint(c, w, h) {
+        const img = bgImage(id);
+        if (img.complete && img.naturalWidth) drawCoverImage(c, img, 0, 0, w, h);
+        else fill(c, w, h, base);
+      }
+    };
+  }
+
   const STYLES = {
     eggshell: {
       name: "Eggshell",
@@ -457,6 +521,13 @@
         noise(c, w, h, rng, 12);
       }
     },
+    stone: photoStyle("stone", "Stone", "#c9c7bf", "#34322d", "#5f5b52", true),
+    peach: photoStyle("peach", "Peach", "#f4a780", "#6e2c17", "#8f4a2f", true),
+    barnwood: photoStyle("barnwood", "Barnwood", "#4b3a2e", "#f6ecdc", "#dcc9ad", false),
+    floral: photoStyle("floral", "Floral", "#f1ede3", "#4f4430", "#7f6f4f", true),
+    peonies: photoStyle("peonies", "Peonies", "#3b3328", "#fbf1e4", "#ead2c2", false),
+    iridescent: photoStyle("iridescent", "Iridescent", "#d8d5e6", "#2f2e52", "#5d5b86", true),
+    silk: photoStyle("silk", "Silk", "#ebe5dc", "#463c33", "#776a5d", true),
     custom: {
       name: "Your own",
       get text() { return isLight(state.customBg) ? "#2f2924" : "#f4ede3"; },
@@ -505,7 +576,7 @@
   function background(w, h) {
     const key = state.style === "custom"
       ? `custom|${w}x${h}|${state.customBg}|${state.customTexture}|${textureVersion}`
-      : `${state.style}|${w}x${h}`;
+      : `${state.style}|${w}x${h}|${STYLES[state.style].photo ? Number(bgImage(STYLES[state.style].photo).complete && bgImage(STYLES[state.style].photo).naturalWidth > 0) : 0}`;
     let bg = bgCache.get(key);
     if (!bg) {
       if (bgCache.size > 12) bgCache.clear();
@@ -538,6 +609,12 @@
     return FONTS[key] || FONTS.serif;
   }
 
+  // Every piece of text uses one font until Custom fonts is switched on; then each keeps its own choice.
+  const BASE_FONT = "serif";
+  function fontKey(which) {
+    return state.customFonts ? state[which] : BASE_FONT;
+  }
+
   function fontString(key, size, weight) {
     const f = fontOf(key);
     return `${weight || f.weight} ${Math.round(size * f.scale)}px ${f.family}, ${EMOJI_FONTS}, ${f.fallback}`;
@@ -568,6 +645,33 @@
     else c.rect(x, y, w, h);
   }
 
+  // Text laid on the background: an emboss (a light edge above-left, a dark one below-right) so it looks pressed
+  // into the surface, and a soft drop shadow, each switched on or off in the Text step.
+  function paintText(c, text, x, y, size, maxWidth) {
+    const extra = maxWidth ? [maxWidth] : [];
+    const fill = c.fillStyle;
+    if (state.textEmboss) {
+      const d = Math.max(1, size * 0.022);
+      c.save();
+      c.shadowColor = "transparent";
+      c.fillStyle = "rgba(255,255,255,0.42)";
+      c.fillText(text, x - d, y - d, ...extra);
+      c.fillStyle = "rgba(0,0,0,0.3)";
+      c.fillText(text, x + d, y + d, ...extra);
+      c.restore();
+    }
+    c.save();
+    if (state.textShadow) {
+      c.shadowColor = "rgba(0,0,0,0.32)";
+      c.shadowBlur = size * 0.16;
+      c.shadowOffsetX = size * 0.02;
+      c.shadowOffsetY = size * 0.06;
+    }
+    c.fillStyle = fill;
+    c.fillText(text, x, y, ...extra);
+    c.restore();
+  }
+
   function setSpacing(c, value) {
     if ("letterSpacing" in c) c.letterSpacing = value;
   }
@@ -589,18 +693,19 @@
       return st.text;
     }
     if (key === "customBg") return state.customBg;
+    if (key === "frameTint") return FRAMES[state.frameColor].color;
     return st.text;
   }
 
   function labelText(role) {
     const text = (role === "after" ? state.labelAfter : state.labelBefore).trim();
-    const caps = ["vertical", "corner", "badge"].includes(state.labelStyle) && !fontOf(state.labelFont).script;
+    const caps = ["vertical", "corner", "badge"].includes(state.labelStyle) && !fontOf(fontKey("labelFont")).script;
     return caps ? text.toUpperCase() : text;
   }
 
   function labelSpacing() {
-    if (fontOf(state.labelFont).script) return "0px";
-    return ["vertical", "corner", "badge"].includes(state.labelStyle) ? "0.18em" : `${fontOf(state.labelFont).spacing || 0}em`;
+    if (fontOf(fontKey("labelFont")).script) return "0px";
+    return ["vertical", "corner", "badge"].includes(state.labelStyle) ? "0.18em" : `${fontOf(fontKey("labelFont")).spacing || 0}em`;
   }
 
   // ---------- Layout ----------
@@ -762,18 +867,18 @@
     let bottom = H - P;
 
     const handle = handleText();
-    const hs = state.handleSize * fontOf(state.handleFont).scale;
+    const hs = state.handleSize * fontOf(fontKey("handleFont")).scale;
     if (handle) bottom = H - P * 0.6 - hs * 2.2;
 
     const list = slots();
     const { tree, groups } = buildLayout(list);
-    const ls = state.labelSize * fontOf(state.labelFont).scale;
+    const ls = state.labelSize * fontOf(fontKey("labelFont")).scale;
     const labels = labelsOn() ? state.labelStyle : "none";
 
     const caption = state.caption.trim();
     const size = state.captionSize;
-    c.font = fontString(state.captionFont, size);
-    const lineH = size * (fontOf(state.captionFont).script ? 1.35 : 1.22);
+    c.font = fontString(fontKey("captionFont"), size);
+    const lineH = size * (fontOf(fontKey("captionFont")).script ? 1.35 : 1.22);
     // "Middle" becomes a band between two stacked halves, or a pill over the centre otherwise.
     const band = state.placement === "between" && tree.dir === "col" && tree.children.length === 2;
     const pill = state.placement === "between" && !band;
@@ -837,10 +942,10 @@
     });
 
     if (lines.length) {
-      c.font = fontString(state.captionFont, size);
+      c.font = fontString(fontKey("captionFont"), size);
       c.textAlign = "center";
       c.textBaseline = "middle";
-      setSpacing(c, `${fontOf(state.captionFont).spacing || 0}em`);
+      setSpacing(c, `${fontOf(fontKey("captionFont")).spacing || 0}em`);
       if (pill) {
         const widest = Math.max(...lines.map((l) => c.measureText(l).width));
         const pw = Math.min(area.w * 0.9, widest + size * 1.3);
@@ -858,16 +963,16 @@
         c.restore();
       }
       c.fillStyle = colorFor("captionColor");
-      lines.forEach((line, i) => c.fillText(line, W / 2, capY + lineH * (i + 0.5)));
+      lines.forEach((line, i) => paintText(c, line, W / 2, capY + lineH * (i + 0.5), size));
     }
 
     if (handle) {
-      c.font = fontString(state.handleFont, state.handleSize);
+      c.font = fontString(fontKey("handleFont"), state.handleSize);
       c.textAlign = "center";
       c.textBaseline = "middle";
-      setSpacing(c, fontOf(state.handleFont).script ? "0px" : "0.06em");
+      setSpacing(c, fontOf(fontKey("handleFont")).script ? "0px" : "0.06em");
       c.fillStyle = colorFor("handleColor");
-      c.fillText(handle, W / 2, H - P * 0.6 - hs * 0.8);
+      paintText(c, handle, W / 2, H - P * 0.6 - hs * 0.8, state.handleSize);
     }
     setSpacing(c, "0px");
     c.restore();
@@ -892,9 +997,12 @@
     c.shadowColor = "rgba(30,22,16,0.32)";
     c.shadowBlur = W * 0.012 + f.t * 0.5;
     c.shadowOffsetY = W * 0.004 + f.t * 0.15;
-    c.fillStyle = FRAMES[f.id].color;
+    c.fillStyle = state.frameTint || FRAMES[f.id].color;
     c.fillRect(f.x, f.y, f.w, f.h);
     c.restore();
+    // a plain backing inside the frame, so an empty spot reads as empty rather than as the frame's colour
+    c.fillStyle = "#d9d4ca";
+    c.fillRect(f.photo.x, f.photo.y, f.photo.w, f.photo.h);
   }
 
   // The frame's picture cut in nine: corners as they are, sides stretched, the middle left out.
@@ -915,7 +1023,7 @@
     const iy = [f.y, f.y + f.t, f.y + f.h - f.b, f.y + f.h];
     if (!img.complete || !img.naturalWidth) {
       c.save();
-      c.fillStyle = FRAMES[f.id].color;
+      c.fillStyle = state.frameTint || FRAMES[f.id].color;
       c.beginPath();
       c.rect(ix[0], iy[0], f.w, f.h);
       c.rect(ix[1], iy[1], ix[2] - ix[1], iy[2] - iy[1]);
@@ -925,11 +1033,12 @@
     }
     const [t, r, b, l] = FRAMES[f.id].s;
     const iw = img.naturalWidth, ih = img.naturalHeight;
+    const src = state.frameTint ? tintedFrame(f.id, state.frameTint) : img;
     const sx = [0, l, iw - r, iw], sy = [0, t, ih - b, ih];
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         if (i === 1 && j === 1) continue;
-        c.drawImage(img, sx[i], sy[j], sx[i + 1] - sx[i], sy[j + 1] - sy[j], ix[i], iy[j], ix[i + 1] - ix[i], iy[j + 1] - iy[j]);
+        c.drawImage(src, sx[i], sy[j], sx[i + 1] - sx[i], sy[j + 1] - sy[j], ix[i], iy[j], ix[i + 1] - ix[i], iy[j + 1] - iy[j]);
       }
     }
   }
@@ -976,9 +1085,9 @@
   function drawInnerLabel(c, cell, labels, radius) {
     const text = labelText(cell.slot.role);
     if (!text) return;
-    const ls = state.labelSize * fontOf(state.labelFont).scale;
+    const ls = state.labelSize * fontOf(fontKey("labelFont")).scale;
     c.save();
-    c.font = fontString(state.labelFont, state.labelSize);
+    c.font = fontString(fontKey("labelFont"), state.labelSize);
     setSpacing(c, labelSpacing());
     c.textBaseline = "middle";
     const color = colorFor("labelColor");
@@ -1026,7 +1135,7 @@
     const text = labelText(role);
     if (!text) return;
     c.save();
-    c.font = fontString(state.labelFont, state.labelSize);
+    c.font = fontString(fontKey("labelFont"), state.labelSize);
     setSpacing(c, labelSpacing());
     c.fillStyle = colorFor("labelColor");
     c.textAlign = "center";
@@ -1036,9 +1145,9 @@
       const x = onLeft ? box.x - labelBand / 2 : box.x + box.w + labelBand / 2;
       c.translate(x, box.y + box.h / 2);
       c.rotate(onLeft ? -Math.PI / 2 : Math.PI / 2);
-      c.fillText(text, 0, 0, box.h * 0.95);
+      paintText(c, text, 0, 0, state.labelSize, box.h * 0.95);
     } else {
-      c.fillText(text, box.x + box.w / 2, box.y + box.h + labelBand * 0.53, box.w);
+      paintText(c, text, box.x + box.w / 2, box.y + box.h + labelBand * 0.53, state.labelSize, box.w);
     }
     c.restore();
   }
@@ -1162,6 +1271,26 @@
     photosChanged();
   });
 
+  // Take one photo out of the list (and off the post), or all of them.
+  function removePhoto(photo) {
+    const i = bucketOf(photo);
+    if (i >= 0) buckets[i] = null;
+    pool.splice(pool.indexOf(photo), 1);
+    if (selected === photo) selected = null;
+    haptic();
+    transition(false);
+    photosChanged();
+  }
+
+  $("#clear-photos").addEventListener("click", () => {
+    if (!pool.length || !confirm("Remove all your photos? Your style and text stay.")) return;
+    pool.length = 0;
+    buckets.fill(null);
+    selected = null;
+    transition(false);
+    photosChanged();
+  });
+
   // Tap a photo, then tap a spot to put it there. A photo already in another spot swaps places.
   let selected = null;
 
@@ -1180,6 +1309,14 @@
     const poolEl = $("#pool");
     poolEl.innerHTML = "";
     pool.forEach((photo) => {
+      const item = document.createElement("div");
+      item.className = "pool-item";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "pool-remove";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", "Remove this photo");
+      remove.addEventListener("click", () => removePhoto(photo));
       const b = document.createElement("button");
       b.type = "button";
       b.className = "pool-photo";
@@ -1193,8 +1330,10 @@
         renderTray();
         if (selected) $("#buckets").scrollIntoView({ behavior: "smooth", block: "center" });
       });
-      poolEl.appendChild(b);
+      item.append(b, remove);
+      poolEl.appendChild(item);
     });
+    $("#clear-photos").hidden = !pool.length;
     if (pool.length < POOL_MAX) {
       const add = document.createElement("button");
       add.type = "button";
@@ -1549,6 +1688,7 @@
     $("#texture-upload").hidden = state.customTexture !== "image";
     $("#labels-section").hidden = state.mode !== "ba";
     $("#frame-options").hidden = !state.frame;
+    $$(".custom-font").forEach((el) => { el.hidden = !state.customFonts; });
     $("#rounded-toggle").hidden = state.frame;
     $$("[data-frame]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.frame === state.frameColor)));
     $("#frame-name").textContent = `${FRAMES[state.frameColor].name} frame`;
@@ -1556,7 +1696,7 @@
     $$("[data-color]").forEach((b) => {
       const key = b.dataset.color;
       $("i", b).style.background = colorFor(key);
-      $("em", b).textContent = state[key] ? state[key].toUpperCase() : "Auto";
+      $("em", b).textContent = state[key] ? state[key].toUpperCase() : key === "frameTint" ? "Original" : "Auto";
     });
     renderLayoutPickers();
   }
@@ -1690,7 +1830,7 @@
 
   const SUGGESTED_TEXT = ["#2e2924", "#5e554c", "#ffffff", "#f4ede3", "#c9a36a", "#b76e79", "#d8a7b1", "#8c4a2f", "#7d8b6a", "#2f3d4d", "#6b3644", "#000000"];
   const SUGGESTED_BG = ["#f2ece0", "#e6d9c6", "#f3dcd8", "#efe3ea", "#dfe5d5", "#dde6ee", "#c9b29b", "#6f5646", "#4a2c2a", "#2a2629", "#243241", "#1f2b22"];
-  const COLOR_TITLES = { captionColor: "Text color", handleColor: "Handle color", labelColor: "Label color", customBg: "Background color" };
+  const COLOR_TITLES = { captionColor: "Text color", handleColor: "Handle color", labelColor: "Label color", customBg: "Background color", frameTint: "Frame color" };
   const RECENT_KEY = "kno-instapost-recent-colors";
   const SWATCHES_KEY = "kno-instapost-swatches";
   const MAX_SWATCHES = 30;
@@ -1899,6 +2039,7 @@
     $("#recent-block").hidden = !recent.length;
     swatchButtons($("#recent"), recent);
     $("#color-auto").hidden = key === "customBg";
+    $("#color-auto").textContent = key === "frameTint" ? "Use the frame's own color" : "Use the style's color";
     sheet.hidden = false;
     syncPicker();
   }
@@ -1982,7 +2123,9 @@
   // ---------- Presets ----------
 
   const PRESETS_KEY = "kno-instapost-presets-v1";
-  const STYLE_DOTS = { eggshell: "#f2ece0", moody: "#1e1b1e", spring: "#f5e1e1", summer: "#f8d6b6", autumn: "#7a3f25", winter: "#dfe6ec" };
+  const STYLE_DOTS = { eggshell: "#f2ece0", moody: "#1e1b1e", spring: "#f5e1e1", summer: "#f8d6b6", autumn: "#7a3f25", winter: "#dfe6ec",
+    plaster: "#e7ded1", wood: "#a8754a", stone: "#c9c7bf", peach: "#f4a780", barnwood: "#4b3a2e", floral: "#f1ede3", peonies: "#3b3328",
+    iridescent: "#d8d5e6", silk: "#ebe5dc" };
 
   function loadPresets() {
     try {
@@ -2075,6 +2218,72 @@
     });
   }
 
+  // Past posts: each saved, copied or shared post keeps its look (not its photos) and a small picture of itself,
+  // so a new post can start from it. The newest eight are kept on this phone.
+  const HISTORY_KEY = "kno-instapost-history";
+  const HISTORY_MAX = 8;
+
+  function loadHistory() {
+    try {
+      const list = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+      return Array.isArray(list) ? list.filter((h) => h && h.settings && typeof h.thumb === "string") : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function rememberPost() {
+    const settings = {};
+    PRESET_KEYS.forEach((key) => { settings[key] = state[key]; });
+    const th = document.createElement("canvas");
+    th.height = 220;
+    th.width = Math.round((canvas.width / canvas.height) * 220);
+    th.getContext("2d").drawImage(canvas, 0, 0, th.width, th.height);
+    const same = JSON.stringify(settings);
+    const list = loadHistory().filter((h) => JSON.stringify(h.settings) !== same);
+    list.unshift({ at: Date.now(), settings, thumb: th.toDataURL("image/jpeg", 0.72) });
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, HISTORY_MAX)));
+    } catch {
+      // storage full or off: the post just isn't remembered
+    }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = loadHistory();
+    $("#history-block").hidden = !list.length;
+    const el = $("#history");
+    el.innerHTML = "";
+    list.forEach((h) => {
+      const item = document.createElement("div");
+      item.className = "history-item";
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "history-post";
+      const when = new Date(h.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      b.innerHTML = `<img alt="" src="${h.thumb}"><small>${when}</small>`;
+      b.setAttribute("aria-label", `Start from your post of ${when}`);
+      b.addEventListener("click", () => {
+        haptic();
+        applyPreset({ name: `your post from ${when}`, settings: h.settings });
+      });
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "pool-remove";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", `Forget your post of ${when}`);
+      remove.addEventListener("click", () => {
+        try {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(loadHistory().filter((x) => x.at !== h.at)));
+        } catch {}
+        renderHistory();
+      });
+      item.append(b, remove);
+      el.appendChild(item);
+    });
+  }
+
   function deletePreset(preset) {
     if (!confirm(`Delete the "${preset.name}" preset?`)) return;
     storePresets(loadPresets().filter((p) => p.name !== preset.name));
@@ -2093,7 +2302,7 @@
     syncControls();
     paintSwatches();
     update();
-    toast(`Applied "${preset.name}".`);
+    toast(preset.name.startsWith("your post") ? `Started from ${preset.name}.` : `Applied "${preset.name}".`);
   }
 
   $$("[data-preset-save]").forEach((button) => {
@@ -2163,6 +2372,15 @@
     }
     const filled = (role) => buckets.some((p, i) => p && BUCKETS.ba[i].role === role);
     if (filled("before") && filled("after")) return true;
+    // one photo on its own is a Showcase post
+    if (pool.length === 1) {
+      buckets.fill(null);
+      setState("mode", "showcase");
+      buckets[0] = pool[0];
+      photosChanged();
+      toast("One photo, so this is a Showcase post.");
+      return true;
+    }
     toast(pool.length ? "Place at least one Before and one After photo." : "Choose your before and after photos first.");
     return false;
   }
@@ -2262,8 +2480,12 @@
     const file = exportFile(blob);
     // iOS saves to Photos through the share sheet; everywhere else a download works.
     if (isIOS && canShareFiles(file)) {
-      if (await share(file)) return;
+      if (await share(file)) {
+        rememberPost();
+        return;
+      }
     }
+    rememberPost();
     download(blob);
     toast(isIOS ? "Saved to your Files. Press and hold the image to save it to Photos." : "Image saved.");
   });
@@ -2277,6 +2499,7 @@
       render();
       // Passing a promise keeps the copy inside the tap, which Safari requires.
       await navigator.clipboard.write([new ClipboardItem({ "image/png": toBlob("image/png") })]);
+      rememberPost();
       toast("Copied. Paste it into Instagram or a message.");
     } catch {
       toast("Couldn't copy here. Use Save instead.");
@@ -2288,7 +2511,8 @@
   shareBtn.parentElement.classList.toggle("no-share", shareBtn.hidden);
   shareBtn.addEventListener("click", async () => {
     const blob = exportBlob || await toBlob("image/jpeg", 0.95);
-    if (!(await share(exportFile(blob)))) toast("Sharing didn't work here. Use Save instead.");
+    if (await share(exportFile(blob))) rememberPost();
+    else toast("Sharing didn't work here. Use Save instead.");
   });
 
   // ---------- Toast ----------
@@ -2308,6 +2532,7 @@
   renderTray();
   paintSwatches();
   renderPresets();
+  renderHistory();
   showStep(0);
   update();
 

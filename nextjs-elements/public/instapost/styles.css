@@ -1061,3 +1061,16 @@ textarea:focus, .handle-field:focus-within { outline: 2px solid var(--accent); o
 .frame-swatches button[aria-checked="true"] { outline: 2px solid var(--accent); outline-offset: 3px; }
 .frame-swatches button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .frame-name { margin: 10px 0 8px; text-align: center; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; }
+
+/* Each photo in the list has a small × to take it out */
+.pool-item { position: relative; flex: none; }
+.pool-remove { position: absolute; top: 2px; right: 6px; z-index: 1; width: 24px; height: 24px; padding: 0; border: 2px solid var(--sheet); border-radius: 50%; background: var(--ink); color: var(--sheet); font-size: 14px; line-height: 1; display: grid; place-items: center; }
+
+/* Past posts to start from */
+.history-block { margin: 0 0 18px; }
+.history { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 4px 0 2px; }
+.history::-webkit-scrollbar { display: none; }
+.history-item { position: relative; flex: none; }
+.history-post { display: grid; gap: 4px; justify-items: center; padding: 0; border: 0; background: none; font-size: 11px; color: var(--muted); }
+.history-post img { display: block; height: 104px; width: auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(27, 26, 24, 0.18); }
+.history-item .pool-remove { right: 2px; }
